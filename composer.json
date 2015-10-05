@@ -1,0 +1,13 @@
+{
+    "name": "scribbl/core",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ryan Winchester",
+            "email": "fungku@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel-doctrine/orm": "^1.0"
+    }
+}
