@@ -1,0 +1,5 @@
+suites:
+    main:
+        namespace: Scribbl\CMS
+        psr4_prefix: Scribbl\CMS
+        src_path: app
