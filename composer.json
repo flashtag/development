@@ -8,6 +8,13 @@
         }
     ],
     "require": {
-        "league/fractal": "^0.12.0"
-    }
+        "league/fractal": "^0.12.0",
+        "scribbl/core": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:scribbl/core.git"
+        }
+    ],
 }
