@@ -7,5 +7,7 @@
             "email": "fungku@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "league/fractal": "^0.12.0"
+    }
 }
