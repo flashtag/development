@@ -3,7 +3,7 @@
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class TestTableSeeder extends Seeder
+class TestSeeder extends Seeder
 {
     protected $faker;
 

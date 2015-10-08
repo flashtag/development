@@ -20,7 +20,7 @@ class CreateFieldablesTable extends Migration
             $table->string('value_type');
             $table->text('value');
 
-            $table->foreign('field_id')->references('id')->on('fields')->onDelete('cascade');
+            $table->index(['fieldable_id', 'fieldable_type']);
         });
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Scribbl\Field;
@@ -18,6 +19,9 @@ class FieldsTableSeeder extends Seeder
         Model::reguard();
     }
 
+    /**
+     * @return \Illuminate\Support\Collection
+     */
     private function seedFields()
     {
         return new Collection([
