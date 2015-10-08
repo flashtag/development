@@ -2,9 +2,11 @@
 
 namespace Scribbl;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use McCool\LaravelAutoPresenter\HasPresenter;
+use PostPresenter;
+use Venturecraft\Revisionable\RevisionableTrait;
 
 /**
  * Class Post
@@ -25,8 +27,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Database\Eloquent\Collection $fields
  * @property \Illuminate\Database\Eloquent\Collection $tags
  */
-class Post extends Model
+class Post extends Model implements HasPresenter
 {
+    use RevisionableTrait;
+
     /**
      * The attributes that are not mass assignable.
      *
@@ -50,6 +54,28 @@ class Post extends Model
         'id'           => 'integer',
         'is_published' => 'boolean'
     ];
+
+    /**
+     * Remove old revisions.
+     *
+     * @var bool
+     */
+    protected $revisionCleanup = true;
+
+    /**
+     * Maintain a maximum of 500 changes at any point of time, while cleaning up old revisions.
+     *
+     * @var int
+     */
+    protected $historyLimit = 500;
+
+    /**
+     * @return string
+     */
+    public function getPresenterClass()
+    {
+        return PostPresenter::class;
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -92,23 +118,6 @@ class Post extends Model
     public function addTags($tags)
     {
         return new Collection($this->tags()->saveMany($tags));
-    }
-
-    /**
-     * Whether or not the post should be showing.
-     *
-     * @return bool
-     */
-    public function isShowing()
-    {
-        if (! $this->is_published) {
-            return false;
-        }
-
-        $startShowing = $this->start_showing_at ?: new Carbon('1999-01-01');
-        $stopShowing = $this->stop_showing_at ?: new Carbon('2038-01-01');
-
-        return ($startShowing->isPast() && $stopShowing->isFuture());
     }
 
     /**

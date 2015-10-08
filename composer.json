@@ -8,6 +8,7 @@
         }
     ],
     "require": {
-        "laravel-doctrine/orm": "^1.0"
+        "venturecraft/revisionable": " 1.*",
+        "mccool/laravel-auto-presenter": "~4.1"
     }
 }
