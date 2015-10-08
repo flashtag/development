@@ -148,7 +148,6 @@ return [
         /*
          * Vendor Service Providers...
          */
-        McCool\LaravelAutoPresenter\AutoPresenterServiceProvider::class,
 
     ],
 

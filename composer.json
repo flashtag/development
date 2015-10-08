@@ -6,10 +6,25 @@
     "type": "project",
     "require": {
         "php": ">=5.5.9",
-        "laravel/framework": "5.1.*",
-        "venturecraft/revisionable": " 1.*",
-        "mccool/laravel-auto-presenter": " ~4.1"
+        "scribbl/core": "dev-master",
+        "scribbl/api": "dev-master",
+        "scribbl/admin": "dev-master",
+        "laravel/framework": "5.1.*"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:scribbl/core.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:scribbl/api.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:scribbl/admin.git"
+        }
+    ],
     "require-dev": {
         "fzaninotto/faker": "~1.4",
         "mockery/mockery": "0.9.*",
@@ -17,20 +32,6 @@
         "phpspec/phpspec": "~2.1",
         "laravel/homestead": "^2.1"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:ryanwinchester/scribbl-core"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:ryanwinchester/scribbl-api"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:ryanwinchester/scribbl-admin"
-        }
-    ],
     "autoload": {
         "classmap": [
             "database"
