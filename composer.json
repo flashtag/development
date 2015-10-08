@@ -1,0 +1,11 @@
+{
+    "name": "scribbl/api",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ryan Winchester",
+            "email": "fungku@gmail.com"
+        }
+    ],
+    "require": {}
+}
