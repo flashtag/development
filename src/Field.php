@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Database\Eloquent\Collection $posts
  * @property \Illuminate\Database\Eloquent\Collection $categories
  */
-class Field extends Model
+abstract class Field extends Model
 {
     /**
      * The attributes that are mass assignable.
@@ -24,18 +24,10 @@ class Field extends Model
     protected $fillable = ['value', 'value_type'];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function posts()
+    public function type()
     {
-        return $this->morphedByMany(Post::class, 'fieldable');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
-     */
-    public function categories()
-    {
-        return $this->morphedByMany(Category::class, 'fieldable');
+        return $this->belongsTo(FieldType::class);
     }
 }
