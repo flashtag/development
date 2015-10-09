@@ -98,7 +98,7 @@ class Post extends Model implements HasPresenter
      */
     public function fields()
     {
-        return $this->morphToMany(Field::class, 'fieldable')
+        return $this->morphToMany(PostField::class, 'fieldable')
             ->withPivot('value_type', 'value');
     }
 
