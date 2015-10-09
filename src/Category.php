@@ -27,6 +27,7 @@ class Category extends Model
      */
     public function fields()
     {
-        return $this->morphToMany(Field::class, 'fieldable');
+        return $this->morphToMany(Field::class, 'fieldable')
+            ->withPivot('value');
     }
 }

@@ -5,8 +5,8 @@ namespace Scribbl;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use McCool\LaravelAutoPresenter\HasPresenter;
-use PostPresenter;
 use Venturecraft\Revisionable\RevisionableTrait;
+use Scribbl\Presenters\PostPresenter;
 
 /**
  * Class Post
@@ -98,8 +98,8 @@ class Post extends Model implements HasPresenter
      */
     public function fields()
     {
-        return $this->morphToMany(PostField::class, 'fieldable')
-            ->withPivot('value_type', 'value');
+        return $this->morphToMany(Field::class, 'fieldable')
+            ->withPivot('value');
     }
 
     /**

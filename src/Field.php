@@ -14,14 +14,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Database\Eloquent\Collection $posts
  * @property \Illuminate\Database\Eloquent\Collection $categories
  */
-abstract class Field extends Model
+class Field extends Model
 {
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are protected from mass assignment.
      *
      * @var array
      */
-    protected $fillable = ['value', 'value_type'];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
