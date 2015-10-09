@@ -13,7 +13,7 @@ class ScribblCoreServiceProvider extends ServiceProvider
 
     public function register()
     {
-        foreach ($providers as $provider) {
+        foreach ($this->providers as $provider) {
             $this->app->register($provider);
         }
     }
