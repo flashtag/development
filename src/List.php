@@ -5,18 +5,14 @@ namespace Scribbl;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class FieldType
+ * Class List
  *
  * @property int $id
- * @property string $title
- * @property string $name
- * @property string $description
- * @property string $template
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- * @property \Illuminate\Database\Eloquent\Collection $fields
+ * @property \Illuminate\Database\Eloquent\Collection $posts
  */
-class FieldType extends Model
+class List extends Model
 {
     /**
      * The attributes that are not mass assignable.
@@ -28,8 +24,8 @@ class FieldType extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function fields()
+    public function posts()
     {
-        return $this->hasMany(Field::class);
+        return $this->belongsToMany(Post::class);
     }
 }

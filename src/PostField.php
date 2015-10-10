@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Database\Eloquent\Collection $posts
  * @property \Illuminate\Database\Eloquent\Collection $categories
  */
-class Field extends Model
+class PostField extends Model
 {
     /**
      * The attributes that are protected from mass assignment.
@@ -22,12 +22,4 @@ class Field extends Model
      * @var array
      */
     protected $guarded = ['id', 'created_at', 'updated_at'];
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function type()
-    {
-        return $this->belongsTo(FieldType::class);
-    }
 }

@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFieldsTable extends Migration
+class CreatePostFieldsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,11 +12,11 @@ class CreateFieldsTable extends Migration
      */
     public function up()
     {
-        Schema::create('fields', function (Blueprint $table) {
+        Schema::create('post_fields', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->string('slug');
-            $table->string('template');
+            $table->string('label')->nullable();
+            $table->string('template')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
         });
@@ -29,6 +29,6 @@ class CreateFieldsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('fields');
+        Schema::drop('post_fields');
     }
 }

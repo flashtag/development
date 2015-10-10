@@ -69,6 +69,15 @@ class Post extends Model implements HasPresenter
      */
     protected $historyLimit = 500;
 
+    protected $fieldClasses;
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        //
+    }
+
     /**
      * @return string
      */
@@ -98,7 +107,7 @@ class Post extends Model implements HasPresenter
      */
     public function fields()
     {
-        return $this->morphToMany(Field::class, 'fieldable')
+        return $this->morphToMany(PostField::class, 'fieldable')
             ->withPivot('value');
     }
 
@@ -165,5 +174,49 @@ class Post extends Model implements HasPresenter
             ),
             $whereBetween
         );
+    }
+
+    /**
+     * Update the Post in the database.
+     *
+     * @param array $attributes
+     * @return bool|int
+     */
+    public function update(array $attributes = [])
+    {
+        $this->syncFieldAttributes($attributes);
+        parent::update(array $attributes);
+    }
+
+    /**
+     * Save the Post to the database.
+     *
+     * @param array $options
+     * @return bool
+     */
+    public function save(array $options = [])
+    {
+        $this->syncFieldAttributes();
+        parent::save($options);
+    }
+
+    protected function syncFieldAttributes($attributes = [])
+    {
+        $fields = PostField::all();
+
+        $sync = $fields->reduce(function ($carry, $field) {
+            $name = $field->name;
+            $attribute = $attribute[$name] ?: $this->$name;
+
+            $carry[] = [
+                $field->id => ['value' => $this->$name]
+            ];
+
+            unset($attribute[$name], $this->$name);
+
+            return $carry;
+        }, []);
+
+        dd($sync);
     }
 }
