@@ -17,5 +17,10 @@
             "type": "vcs",
             "url": "git@bitbucket.org:scribbl/core.git"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "Scribbl\\Api\\": "src/"
+        }
+    }
 }
