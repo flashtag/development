@@ -3,7 +3,7 @@
 namespace Scribbl\Api\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Scribbl\Api\Http\Response;
+use Scribbl\Api\Transformers\TransformerManager;
 use Scribbl\Post;
 
 class PostsController extends Controller
@@ -14,18 +14,18 @@ class PostsController extends Controller
     private $post;
 
     /**
-     * @var \Scribbl\Api\Http\Response
+     * @var \Scribbl\Api\Transformers\TransformerManager
      */
-    private $response;
+    private $transformerManager;
 
     /**
      * @param \Scribbl\Post $post
-     * @param \Scribbl\Api\Http\Response $response
+     * @param \Scribbl\Api\Transformers\TransformerManager $transformerManager
      */
-    public function __construct(Post $post, Response $response)
+    public function __construct(Post $post, TransformerManager $transformerManager)
     {
         $this->post = $post;
-        $this->response = $response;
+        $this->transformerManager = $transformerManager;
     }
 
     /**
@@ -37,8 +37,9 @@ class PostsController extends Controller
     public function index(Request $request)
     {
         $posts = $this->post->all();
+        $data = $this->transformerManager($posts);
 
-        return $this->response->collection($posts);
+        return $this->response->collection($data);
     }
 
     /**
@@ -50,8 +51,9 @@ class PostsController extends Controller
     public function show($id)
     {
         $post = $this->post->findOrFail((int) $id);
+        $data = $this->transformerManager($post);
 
-        return $this->response->item($post);
+        return $this->response->item($data);
     }
 
     /**
@@ -63,8 +65,9 @@ class PostsController extends Controller
     public function store(Request $request)
     {
         $post = $this->post->createFromRequest($request);
+        $data = $this->transformerManager($post);
 
-        return $this->response->item($post);
+        return $this->response->item($data);
     }
 
     /**
@@ -78,8 +81,9 @@ class PostsController extends Controller
     {
         $post = $this->post->findOrFail((int) $id);
         $post->updateFromRequest($request);
+        $data = $this->transformerManager($post);
 
-        return $this->response->item($post);
+        return $this->response->item($data);
     }
 
     /**
@@ -92,7 +96,8 @@ class PostsController extends Controller
     {
         $post = $this->post->findOrFail((int) $id);
         $post->delete();
+        $data = $this->transformerManager($post);
 
-        return $this->response->item($post);
+        return $this->response->item($data);
     }
 }
