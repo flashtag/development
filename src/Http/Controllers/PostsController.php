@@ -38,7 +38,7 @@ class PostsController extends Controller
     {
         $posts = $this->post->all();
 
-        return $this->response->collection('Post', $posts);
+        return $this->response->collection($posts);
     }
 
     /**
@@ -51,7 +51,7 @@ class PostsController extends Controller
     {
         $post = $this->post->findOrFail((int) $id);
 
-        return $this->response->item('Post', $post);
+        return $this->response->item($post);
     }
 
     /**
@@ -64,7 +64,7 @@ class PostsController extends Controller
     {
         $post = $this->post->createFromRequest($request);
 
-        return $this->response->item('Post', $post);
+        return $this->response->item($post);
     }
 
     /**
@@ -79,7 +79,7 @@ class PostsController extends Controller
         $post = $this->post->findOrFail((int) $id);
         $post->updateFromRequest($request);
 
-        return $this->response->item('Post', $post);
+        return $this->response->item($post);
     }
 
     /**
@@ -93,6 +93,6 @@ class PostsController extends Controller
         $post = $this->post->findOrFail((int) $id);
         $post->delete();
 
-        return $this->response->item('Post', $post);
+        return $this->response->item($post);
     }
 }
