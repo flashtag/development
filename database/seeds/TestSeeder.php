@@ -2,6 +2,7 @@
 
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class TestSeeder extends Seeder
 {
@@ -10,6 +11,20 @@ class TestSeeder extends Seeder
     public function __construct(Faker $faker)
     {
         $this->faker = $faker::create();
+        $this->truncateTables();
+    }
+
+    /**
+     * Truncate the database tables.
+     */
+    private function truncateTables()
+    {
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \DB::table('categories')->truncate();
+        \DB::table('tags')->truncate();
+        \DB::table('posts')->truncate();
+        \DB::table('post_fields')->truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
     /**
@@ -19,25 +34,81 @@ class TestSeeder extends Seeder
      */
     public function run()
     {
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        \DB::table('categories')->truncate();
-        \DB::table('tags')->truncate();
-        \DB::table('posts')->truncate();
-        \DB::table('fields')->truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        $categories = $this->createCategories();
+        $tags = $this->createTags();
+        $fieldValues = $this->setValuesToFields($this->createFields());
 
-        $categories = factory(\Scribbl\Category::class, 5)->create();
+        $posts = $this->createPosts($categories, $tags, $fieldValues);
+    }
 
-        $tags = factory(\Scribbl\Tag::class, 5)->create();
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    private function createCategories()
+    {
+        return factory(\Scribbl\Category::class, 5)->create();
+    }
 
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    private function createTags()
+    {
+        return factory(\Scribbl\Tag::class, 5)->create();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    private function createFields()
+    {
+        return new Collection([
+            \Scribbl\PostField::create([
+                'name'        => 'pull_quote',
+                'label'       => 'Pull quote',
+                'description' => 'Pull quotes',
+                'template'    => 'string',
+            ]),
+            \Scribbl\PostField::create([
+                'name'        => 'footnotes',
+                'label'       => 'Footnotes',
+                'description' => 'Footnotes',
+                'template'    => 'rich_text',
+            ]),
+        ]);
+    }
+
+    /**
+     * Make an array of field values to sync to posts.
+     *
+     * @param \Illuminate\Support\Collection $fields
+     * @return array
+     */
+    private function setValuesToFields(Collection $fields)
+    {
+        return $fields->reduce(function($carry, $field) {
+            $carry[$field->name] = $this->faker->word;
+            return $carry;
+        }, []);
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection $categories
+     * @param \Illuminate\Support\Collection $tags
+     * @param array $fieldValues
+     * @return \Illuminate\Support\Collection
+     */
+    private function createPosts(Collection $categories, Collection $tags, array $fieldValues)
+    {
         $posts = factory(\Scribbl\Post::class, 10)->create([
             'category_id' => $this->faker->randomElement($categories->lists('id')->toArray())
         ]);
-        $posts->each(function ($post) use ($categories, $tags) {
+
+        return $posts->map(function ($post) use ($categories, $tags, $fieldValues) {
             $post->changeCategoryTo($categories->random());
             $post->addTags($this->faker->randomElements($tags->all(), 2));
+            $post->saveFields($fieldValues);
+            return $post;
         });
-
-        $this->call(FieldsTableSeeder::class);
     }
 }

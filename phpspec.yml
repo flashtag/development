@@ -1,5 +1,16 @@
 suites:
-    main:
+    cms:
         namespace: Scribbl\CMS
         psr4_prefix: Scribbl\CMS
         src_path: app
+        spec_path: tests
+    api:
+        namespace: Scribbl\Api
+        psr4_prefix: Scribbl\Api
+        src_path: vendor/scribbl/api/src
+        spec_path: tests/api
+
+extensions:
+    - PhpSpec\Laravel\Extension\LaravelExtension
+
+formatter.name: pretty

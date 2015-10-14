@@ -144,10 +144,7 @@ return [
         Scribbl\CMS\Providers\AuthServiceProvider::class,
         Scribbl\CMS\Providers\EventServiceProvider::class,
         Scribbl\CMS\Providers\RouteServiceProvider::class,
-
-        /*
-         * Vendor Service Providers...
-         */
+        Scribbl\Providers\ScribblCoreServiceProvider::class,
 
     ],
 

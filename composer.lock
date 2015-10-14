@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "285fafb62cec403e92f089c89a3e1c33",
-    "content-hash": "2a1fb97e6de6a390c59ef80f48a06d7a",
+    "hash": "fbe8d8b6c59c2e5e37c0c0d58af380ce",
+    "content-hash": "fa0f577344334aec8f59c4744c25b65d",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1022,58 +1022,28 @@
             "time": "2015-07-16 15:26:57"
         },
         {
-            "name": "scribbl/admin",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "git@bitbucket.org:scribbl/admin.git",
-                "reference": "035d736678b3962db013f5428608364a24f70a9b"
-            },
-            "require": {
-                "laravel/framework": "5.1.*",
-                "php": ">=5.5.9"
-            },
-            "require-dev": {
-                "fzaninotto/faker": "~1.4",
-                "laravel/homestead": "^2.1",
-                "mockery/mockery": "0.9.*",
-                "phpspec/phpspec": "~2.1",
-                "phpunit/phpunit": "~4.0"
-            },
-            "type": "project",
-            "autoload": {
-                "psr-4": {
-                    "Scribbl\\Admin\\": "app/"
-                }
-            },
-            "autoload-dev": {
-                "classmap": [
-                    "tests/TestCase.php"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Admin Control Panel for Scribbl",
-            "keywords": [
-                "admin",
-                "cms",
-                "scribbl"
-            ],
-            "time": "2015-10-08 03:48:05"
-        },
-        {
             "name": "scribbl/api",
             "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "git@bitbucket.org:scribbl/api.git",
-                "reference": "a0efa073928b577b2bccf416edbd3653315f3c3c"
+            "dist": {
+                "type": "path",
+                "url": "../api/",
+                "reference": "fe1b178fa7506a736596d052ce73bb6c09149feb",
+                "shasum": null
             },
             "require": {
-                "league/fractal": "^0.12.0"
+                "illuminate/routing": "5.1.*",
+                "league/fractal": "^0.12.0",
+                "scribbl/core": "dev-master"
+            },
+            "require-dev": {
+                "phpspec/phpspec": "^2.1"
             },
             "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Scribbl\\Api\\": "src/"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -1082,22 +1052,28 @@
                     "name": "Ryan Winchester",
                     "email": "fungku@gmail.com"
                 }
-            ],
-            "time": "2015-10-08 09:52:16"
+            ]
         },
         {
             "name": "scribbl/core",
             "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "git@bitbucket.org:scribbl/core.git",
-                "reference": "c5077ac423eb17669159301b8ebe5dfe759fec2b"
+            "dist": {
+                "type": "path",
+                "url": "../core/",
+                "reference": "9f599c2dc2530c8856db23d6fd03777044736b33",
+                "shasum": null
             },
             "require": {
+                "illuminate/database": "5.1.*",
                 "mccool/laravel-auto-presenter": "~4.1",
                 "venturecraft/revisionable": " 1.*"
             },
             "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Scribbl\\": "src/"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -1106,8 +1082,7 @@
                     "name": "Ryan Winchester",
                     "email": "fungku@gmail.com"
                 }
-            ],
-            "time": "2015-10-08 03:03:27"
+            ]
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -1957,6 +1932,57 @@
     ],
     "packages-dev": [
         {
+            "name": "benconstable/phpspec-laravel",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/BenConstable/phpspec-laravel.git",
+                "reference": "7632ea322ee3df3d46abb09846381219cf8285b0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/BenConstable/phpspec-laravel/zipball/7632ea322ee3df3d46abb09846381219cf8285b0",
+                "reference": "7632ea322ee3df3d46abb09846381219cf8285b0",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "~5.0",
+                "phpspec/phpspec": "~2.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-laravel-4": "1.x-dev",
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "PhpSpec": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ben Constable",
+                    "email": "ben@benconstable.co.uk",
+                    "homepage": "http://www.benconstable.co.uk"
+                }
+            ],
+            "description": "Test your Laravel applications with PhpSpec",
+            "homepage": "http://github.com/BenConstable/phpspec-laravel",
+            "keywords": [
+                "laravel",
+                "phpspec",
+                "test",
+                "testing"
+            ],
+            "time": "2015-03-15 16:10:03"
+        },
+        {
             "name": "doctrine/instantiator",
             "version": "1.0.5",
             "source": {
@@ -2675,16 +2701,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "4.8.11",
+            "version": "4.8.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "bdd199472410fd7e32751f9c814c7e06f2c21bd5"
+                "reference": "00194eb95989190a73198390ceca081ad3441a7f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/bdd199472410fd7e32751f9c814c7e06f2c21bd5",
-                "reference": "bdd199472410fd7e32751f9c814c7e06f2c21bd5",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/00194eb95989190a73198390ceca081ad3441a7f",
+                "reference": "00194eb95989190a73198390ceca081ad3441a7f",
                 "shasum": ""
             },
             "require": {
@@ -2743,7 +2769,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2015-10-07 10:39:46"
+            "time": "2015-10-12 03:36:47"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -3035,16 +3061,16 @@
         },
         {
             "name": "sebastian/global-state",
-            "version": "1.0.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/global-state.git",
-                "reference": "c7428acdb62ece0a45e6306f1ae85e1c05b09c01"
+                "reference": "bc37d50fea7d017d3d340f230811c9f1d7280af4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/global-state/zipball/c7428acdb62ece0a45e6306f1ae85e1c05b09c01",
-                "reference": "c7428acdb62ece0a45e6306f1ae85e1c05b09c01",
+                "url": "https://api.github.com/repos/sebastianbergmann/global-state/zipball/bc37d50fea7d017d3d340f230811c9f1d7280af4",
+                "reference": "bc37d50fea7d017d3d340f230811c9f1d7280af4",
                 "shasum": ""
             },
             "require": {
@@ -3082,7 +3108,7 @@
             "keywords": [
                 "global state"
             ],
-            "time": "2014-10-06 09:23:50"
+            "time": "2015-10-12 03:26:01"
         },
         {
             "name": "sebastian/recursion-context",
@@ -3226,8 +3252,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "scribbl/core": 20,
-        "scribbl/api": 20,
-        "scribbl/admin": 20
+        "scribbl/api": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
