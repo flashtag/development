@@ -21,9 +21,16 @@ class TransformerManagerSpec extends ObjectBehavior
         $this->shouldHaveType('Scribbl\Api\Transformers\TransformerManager');
     }
 
-    function it_throws_exception_when_no_getTransformerClass_method_and_no_default_transformer_exists(CrappyPost $post)
+    function it_throws_exception_when_no_getTransformerClass_method_and_no_default_transformer_exists_on_item(CrappyPost $post)
     {
         $this->shouldThrow(TransformerNotFound::class)->duringItem($post);
+    }
+
+    function it_throws_exception_when_no_getTransformerClass_method_and_no_default_transformer_exists_on_collection(Collection $collection, CrappyPost $post)
+    {
+        $collection->first()->willReturn($post);
+
+        $this->shouldThrow(TransformerNotFound::class)->duringCollection($collection);
     }
 
     function it_throws_an_exception_when_getTransformerClass_returns_nonexistent_transformer_on_item(NotAsCrappyPost $post)
@@ -48,12 +55,6 @@ class TransformerManagerSpec extends ObjectBehavior
         $this->item($post)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Item');
     }
 
-    function it_makes_an_item_having_default_transformer()
-    {
-        $post = new Post();
-        $this->item($post)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Item');
-    }
-
     function it_makes_a_collection_with_item_having_valid_getTransformerClass_method(Collection $collection, NotAsCrappyPost $post)
     {
         $post->getTransformerClass()->willReturn('\Scribbl\Api\Transformers\PostTransformer');
@@ -62,15 +63,21 @@ class TransformerManagerSpec extends ObjectBehavior
         $this->collection($collection)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Collection');
     }
 
+    function it_makes_an_item_having_default_transformer()
+    {
+        $post = new Post();
+        $this->item($post)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Item');
+    }
+
     function it_makes_a_collection_with_item_having_default_transformer(Collection $collection)
     {
         $post = new Post();
         $collection->first()->willReturn($post);
 
-        class_exists('');
-
         $this->collection($collection)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Collection');
     }
+
+    // TODO: Items with includes... ?
 }
 
 class CrappyPost {}
