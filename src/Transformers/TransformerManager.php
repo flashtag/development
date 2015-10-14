@@ -70,13 +70,28 @@ class TransformerManager
         if (method_exists($model, 'getTransformerClass')) {
             $transformer = $model->getTransformerClass();
         } else {
-            $transformer = "Scribbl\\Api\\Transformers\\".class_basename($model)."Transformer";
+            $transformer = $this->makeTransformerClassFromModelClass(get_class($model));
         }
 
         if (! class_exists($transformer)) {
-            throw new TransformerNotFound(sprintf('%s does not exist.', $transformer));
+            throw new TransformerNotFound(sprintf(
+                '%s does not exist. Have you tried implementing %s::getTransformerClass?',
+                $transformer,
+                get_class($model)
+            ));
         }
 
         return new $transformer();
+    }
+
+    /**
+     * @param string $modelClass
+     * @return string
+     */
+    private function makeTransformerClassFromModelClass($modelClass)
+    {
+        $class = basename(str_replace('\\', '/', $modelClass));
+
+        return sprintf('\Scribbl\Api\Transformers\%sTransformer', $class);
     }
 }
