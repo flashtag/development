@@ -2,7 +2,7 @@
 
 namespace Scribbl\Api\Exceptions;
 
-class TransformerClassNotDefined extends \Exception
+class TransformerNotFound extends \Exception
 {
     //
 }

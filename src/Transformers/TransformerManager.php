@@ -2,65 +2,80 @@
 
 namespace Scribbl\Api\Transformers;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use League\Fractal\Manager;
-use Scribbl\Api\Exceptions\TransformerClassNotDefined;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
+use League\Fractal\Serializer\ArraySerializer;
+use Scribbl\Api\Exceptions\TransformerNotFound;
 
 class TransformerManager
 {
+    /**
+     * The default serializer.
+     *
+     * @var string
+     */
+    protected $serializer = ArraySerializer::class;
+
     /**
      * @var \League\Fractal\Manager
      */
     protected $fractal;
 
     /**
-     * @var \Illuminate\Http\Request
-     */
-    private $request;
-
-    /**
      * @param \League\Fractal\Manager $fractal
-     * @param \Illuminate\Http\Request $request
      */
-    public function __construct(Manager $fractal, Request $request)
+    public function __construct(Manager $fractal)
     {
         $this->fractal = $fractal;
-        $this->request = $request;
     }
 
-    public function collection($models)
+    /**
+     * @param \Illuminate\Support\Collection $models
+     * @param array $includes
+     * @return \League\Fractal\Resource\Collection
+     * @throws \Scribbl\Api\Exceptions\TransformerNotFound
+     */
+    public function collection($models, $includes = [])
     {
+        $this->fractal->parseIncludes($includes);
+        $this->fractal->setSerializer(new $this->serializer());
         $transformer = $this->getTransformer($models->first());
 
-        $this->getResource($models, $transformer);
+        return new Collection($models, $transformer);
     }
 
-    public function item($model)
+    /**
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param array $includes
+     * @return \League\Fractal\Resource\Item
+     * @throws \Scribbl\Api\Exceptions\TransformerNotFound
+     */
+    public function item($model, $includes = [])
     {
+        $this->fractal->parseIncludes($includes);
+        $this->fractal->setSerializer(new $this->serializer());
         $transformer = $this->getTransformer($model);
 
-        $this->getResource($model, $transformer);
-    }
-
-    private function getResource($data, $transformer)
-    {
-        $this->fractal->parseIncludes($this->request->get('include'));
-
-        // TODO: do something with the data and the transformer.
+        return new Item($model, $transformer);
     }
 
     /**
      * @param \Illuminate\Database\Eloquent\Model $model
      * @return \Scribbl\Api\Transformers\Transformer
-     * @throws \Scribbl\Api\Exceptions\TransformerClassNotDefined
+     * @throws \Scribbl\Api\Exceptions\TransformerNotFound
      */
-    private function getTransformer(Model $model)
+    private function getTransformer($model)
     {
-        if (! method_exists($model, 'getTransformerClass')) {
-            throw new TransformerClassNotDefined("No getTransformerClass method found on {$model}");
+        if (method_exists($model, 'getTransformerClass')) {
+            $transformer = $model->getTransformerClass();
+        } else {
+            $transformer = "Scribbl\\Api\\Transformers\\".class_basename($model)."Transformer";
         }
-        $transformer = $model->getTransformerClass();
+
+        if (! class_exists($transformer)) {
+            throw new TransformerNotFound(sprintf('%s does not exist.', $transformer));
+        }
 
         return new $transformer();
     }

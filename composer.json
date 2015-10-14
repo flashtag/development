@@ -18,6 +18,10 @@
             "url": "git@bitbucket.org:scribbl/core.git"
         }
     ],
+    "require-dev": {
+        "phpspec/phpspec": "^2.1",
+        "benconstable/phpspec-laravel": " ~2.0"
+    },
     "autoload": {
         "psr-4": {
             "Scribbl\\Api\\": "src/"

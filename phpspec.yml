@@ -1,0 +1,9 @@
+suites:
+    api:
+        namespace: Scribbl\Api
+        psr4_prefix: Scribbl\Api
+
+extensions:
+    - PhpSpec\Laravel\Extension\LaravelExtension
+
+formatter.name: pretty
