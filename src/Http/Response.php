@@ -43,44 +43,30 @@ class Response
     private $request;
 
     /**
-     * @var \League\Fractal\Manager
-     */
-    private $manager;
-
-    /**
      * @param \Illuminate\Http\Request $request
      * @param \Illuminate\Contracts\Routing\ResponseFactory $response
-     * @param \Scribbl\Api\Transformers\TransformerManager $manager
      */
-    public function __construct(
-        Request $request,
-        ResponseFactory $response,
-        TransformerManager $manager
-    ) {
+    public function __construct(Request $request, ResponseFactory $response)
+    {
         $this->request = $request;
         $this->response = $response;
-        $this->manager = $manager;
     }
 
     /**
-     * @param  \Illuminate\Support\Collection $models
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function collection($models)
-    {
-        $data = $this->manager->collection($models);
-
-        return $this->response->json($data, 200, []);
-    }
-
-    /**
-     * @param  \Illuminate\Database\Eloquent\Model $model
+     * @param  array $data
      * @return \Illuminate\Http\JsonResponse
      */
-    public function item($model)
+    public function collection($data)
     {
-        $data = $this->manager->item($model);
+        return $this->response->json($data);
+    }
 
+    /**
+     * @param  array $data
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function item($data)
+    {
         return $this->response->json($data);
     }
 }

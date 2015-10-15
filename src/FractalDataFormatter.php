@@ -1,14 +1,12 @@
 <?php
 
-namespace Scribbl\Api\Transformers;
+namespace Scribbl\Api;
 
 use League\Fractal\Manager;
-use League\Fractal\Resource\Collection;
-use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\ArraySerializer;
 use Scribbl\Api\Exceptions\TransformerNotFound;
 
-class TransformerManager
+class FractalDataFormatter implements DataFormatter
 {
     /**
      * The default serializer.
@@ -23,41 +21,63 @@ class TransformerManager
     protected $fractal;
 
     /**
-     * @param \League\Fractal\Manager $fractal
+     * @var \Scribbl\Api\FractalFactory
      */
-    public function __construct(Manager $fractal)
+    private $fractalFactory;
+
+    /**
+     * @param \League\Fractal\Manager $fractal
+     * @param \Scribbl\Api\FractalFactory $fractalFactory
+     */
+    public function __construct(Manager $fractal, FractalFactory $fractalFactory)
     {
         $this->fractal = $fractal;
+        $this->fractalFactory = $fractalFactory;
     }
 
     /**
      * @param \Illuminate\Support\Collection $models
+     * @param array $cursor
      * @param array $includes
-     * @return \League\Fractal\Resource\Collection
+     * @return array
      * @throws \Scribbl\Api\Exceptions\TransformerNotFound
      */
-    public function collection($models, $includes = [])
+    public function collection($models, $cursor = [], $includes = [])
     {
-        $this->fractal->parseIncludes($includes);
-        $this->fractal->setSerializer(new $this->serializer());
+        $this->configureTransformer($includes);
         $transformer = $this->getTransformer($models->first());
 
-        return new Collection($models, $transformer);
+        $resource = $this->fractalFactory->collection($models, $transformer);
+        $resource->setCursor($this->fractalFactory->cursor(
+            $cursor['current'],
+            $cursor['previous'],
+            $cursor['next'],
+            $cursor['count']
+        ));
+
+        return $this->fractal->createData($resource)->toArray();
     }
 
     /**
      * @param \Illuminate\Database\Eloquent\Model $model
      * @param array $includes
-     * @return \League\Fractal\Resource\Item
+     * @return array
      * @throws \Scribbl\Api\Exceptions\TransformerNotFound
      */
     public function item($model, $includes = [])
     {
-        $this->fractal->parseIncludes($includes);
-        $this->fractal->setSerializer(new $this->serializer());
+        $this->configureTransformer($includes);
         $transformer = $this->getTransformer($model);
 
-        return new Item($model, $transformer);
+        $resource = $this->fractalFactory->item($model, $transformer);
+
+        return $this->fractal->createData($resource)->toArray();
+    }
+
+    private function configureTransformer($includes)
+    {
+        $this->fractal->parseIncludes($includes);
+        $this->fractal->setSerializer(new $this->serializer());
     }
 
     /**

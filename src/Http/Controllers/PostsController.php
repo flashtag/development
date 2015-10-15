@@ -3,6 +3,8 @@
 namespace Scribbl\Api\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Scribbl\Api\DataFormatter;
+use Scribbl\Api\Http\Response;
 use Scribbl\Api\Transformers\TransformerManager;
 use Scribbl\Post;
 
@@ -14,18 +16,25 @@ class PostsController extends Controller
     private $post;
 
     /**
-     * @var \Scribbl\Api\Transformers\TransformerManager
+     * @var \Scribbl\Api\DataFormatter
      */
-    private $transformer;
+    private $dataFormatter;
+
+    /**
+     * @var \Scribbl\Api\Http\Response
+     */
+    private $response;
 
     /**
      * @param \Scribbl\Post $post
-     * @param \Scribbl\Api\Transformers\TransformerManager $transformer
+     * @param \Scribbl\Api\DataFormatter $dataFormatter
+     * @param \Scribbl\Api\Http\Response $response
      */
-    public function __construct(Post $post, TransformerManager $transformer)
+    public function __construct(Post $post, DataFormatter $dataFormatter, Response $response)
     {
         $this->post = $post;
-        $this->transformer = $transformer;
+        $this->dataFormatter = $dataFormatter;
+        $this->response = $response;
     }
 
     /**
@@ -37,9 +46,28 @@ class PostsController extends Controller
     public function index(Request $request)
     {
         $posts = $this->post->all();
-        $data = $this->transformer->collection($posts, $request->get('include', []));
+        $cursor = $this->buildCursorFromRequest($request);
+        $includes = $request->get('include', []);
+
+        $data = $this->dataFormatter->collection($posts, $cursor, $includes);
 
         return $this->response->collection($data);
+    }
+
+    /**
+     * Build a cursor array from the request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array
+     */
+    private function buildCursorFromRequest(Request $request)
+    {
+        return [
+            'current'  => $request->get('current'),
+            'previous' => $request->get('prev'),
+            'next'     => $request->get('next'),
+            'count'    => $request->get('count', 1000),
+        ];
     }
 
     /**
@@ -52,7 +80,9 @@ class PostsController extends Controller
     public function show(Request $request, $id)
     {
         $post = $this->post->findOrFail($id);
-        $data = $this->transformer->item($post, $request->get('include', []));
+        $includes = $request->get('include', []);
+
+        $data = $this->dataFormatter->item($post, $includes);
 
         return $this->response->item($data);
     }
@@ -65,20 +95,10 @@ class PostsController extends Controller
      */
     public function store(Request $request)
     {
-        $postData = [
-            'title'            => $request->get('title'),
-            'slug'             => str_slug($request->get('title')),
-            'subtitle'         => $request->get('subtitle'),
-            'order'            => $request->get('order'),
-            'category_id'      => $request->get('category_id'),
-            'body'             => $request->get('body'),
-            'is_published'     => $request->get('is_published'),
-            'start_showing_at' => $request->get('start_showing_at'),
-            'stop_showing_at'  => $request->get('stop_showing_at'),
-        ];
-
+        $postData = $this->buildPostFromRequest($request);
         $post = $this->post->create($postData);
-        $data = $this->transformer->item($post);
+
+        $data = $this->dataFormatter->item($post);
 
         return $this->response->item($data);
     }
@@ -92,7 +112,24 @@ class PostsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $postData = [
+        $postData = $this->buildPostFromRequest($request);
+        $post = $this->post->findOrFail((int)$id);
+        $post->update($postData);
+
+        $data = $this->dataFormatter->item($post);
+
+        return $this->response->item($data);
+    }
+
+    /**
+     * Build the post data array from the request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array
+     */
+    private function buildPostFromRequest(Request $request)
+    {
+        return [
             'title'            => $request->get('title'),
             'slug'             => str_slug($request->get('title')),
             'subtitle'         => $request->get('subtitle'),
@@ -103,12 +140,6 @@ class PostsController extends Controller
             'start_showing_at' => $request->get('start_showing_at'),
             'stop_showing_at'  => $request->get('stop_showing_at'),
         ];
-
-        $post = $this->post->findOrFail((int)$id);
-        $post->update($postData);
-        $data = $this->transformer->item($post);
-
-        return $this->response->item($data);
     }
 
     /**
@@ -121,7 +152,8 @@ class PostsController extends Controller
     {
         $post = $this->post->findOrFail((int)$id);
         $post->delete();
-        $data = $this->transformer->item($post);
+
+        $data = $this->dataFormatter->item($post);
 
         return $this->response->item($data);
     }
