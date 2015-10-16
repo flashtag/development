@@ -45,9 +45,16 @@ class PostsController extends Controller
      */
     public function index(Request $request)
     {
-        $posts = $this->post->all();
         $cursor = $this->buildCursorFromRequest($request);
-        $includes = $request->get('include', []);
+        $includes = $this->buildIncludesFromRequest($request);
+
+        // Eager-load includes
+        if (empty($includes)) {
+            $posts = $this->post->get();
+        } else {
+            // TODO: validate includes
+            $posts = $this->post->with($includes)->get();
+        }
 
         $data = $this->dataFormatter->collection($posts, $cursor, $includes);
 
@@ -71,6 +78,23 @@ class PostsController extends Controller
     }
 
     /**
+     * Build includes array from the request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array
+     */
+    private function buildIncludesFromRequest(Request $request)
+    {
+        $includes = explode(',', $request->get('include', ''));
+
+        if (count($includes) === 1 && empty($includes[0])) {
+            return [];
+        }
+
+        return $includes;
+    }
+
+    /**
      * Display the specified post.
      *
      * @param \Illuminate\Http\Request $request
@@ -80,7 +104,7 @@ class PostsController extends Controller
     public function show(Request $request, $id)
     {
         $post = $this->post->findOrFail($id);
-        $includes = $request->get('include', []);
+        $includes = $this->buildIncludesFromRequest($request);
 
         $data = $this->dataFormatter->item($post, $includes);
 

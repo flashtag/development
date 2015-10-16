@@ -11,7 +11,7 @@ class PostTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['category', 'tags', 'fields'];
+    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions'];
 
     /**
      * @param \Scribbl\Post $post
@@ -58,5 +58,17 @@ class PostTransformer extends Transformer
         $category = $post->category;
 
         return $this->item($category, new CategoryTransformer);
+    }
+
+    /**
+     * @param \Scribbl\Post $post
+     * @return \League\Fractal\Resource\Collection
+     * @throws \Exception
+     */
+    public function includeRevisions(Post $post)
+    {
+        $revisions = $post->revisionHistory;
+
+        return $this->collection($revisions, new RevisionTransformer);
     }
 }
