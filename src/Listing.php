@@ -5,14 +5,14 @@ namespace Scribbl;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class List
+ * Class Listing
  *
  * @property int $id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Illuminate\Database\Eloquent\Collection $posts
  */
-class List extends Model
+class Listing extends Model
 {
     /**
      * The attributes that are not mass assignable.

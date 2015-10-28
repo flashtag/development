@@ -26,6 +26,7 @@ use Scribbl\Presenters\PostPresenter;
  * @property \Illuminate\Database\Eloquent\Model $category
  * @property \Illuminate\Database\Eloquent\Collection $fields
  * @property \Illuminate\Database\Eloquent\Collection $tags
+ * @property \Illuminate\Database\Eloquent\Collection $revisionHistory
  */
 class Post extends Model implements HasPresenter
 {
@@ -102,6 +103,14 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function revisions()
+    {
+        return $this->revisionHistory();
+    }
+
+    /**
      * @param \Scribbl\Category $category
      * @return \Illuminate\Database\Eloquent\Model
      */
@@ -164,5 +173,26 @@ class Post extends Model implements HasPresenter
             ),
             $whereBetween
         );
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection|array $fields
+     */
+    public function saveFields($fields)
+    {
+        $postFields = PostField::all();
+
+        $getValue = function($field) use ($fields) {
+            $default = $field->pivot ? $field->pivot->value : null;
+            return isset($fields[$field->name]) ? $fields[$field->name] : $default;
+        };
+
+        $sync = $postFields->reduce(function($carry, $field) use ($getValue) {
+            $carry[$field->id] = ['value' => $getValue($field)];
+            dump($carry);
+            return $carry;
+        }, []);
+
+        $this->fields()->sync($sync);
     }
 }
