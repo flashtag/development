@@ -1,8 +1,8 @@
 <?php
 
-namespace Scribbl\Forms;
+namespace Flashtag\Forms;
 
-use Scribbl\Presenters\PostFormPresenter;
+use Flashtag\Presenters\PostFormPresenter;
 
 class PostForm implements HasPresenter
 {

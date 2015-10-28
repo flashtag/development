@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl;
+namespace Flashtag;
 
 use Illuminate\Database\Eloquent\Model;
 

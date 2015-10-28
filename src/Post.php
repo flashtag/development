@@ -1,12 +1,12 @@
 <?php
 
-namespace Scribbl;
+namespace Flashtag;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use McCool\LaravelAutoPresenter\HasPresenter;
 use Venturecraft\Revisionable\RevisionableTrait;
-use Scribbl\Presenters\PostPresenter;
+use Flashtag\Presenters\PostPresenter;
 
 /**
  * Class Post
@@ -111,7 +111,7 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * @param \Scribbl\Category $category
+     * @param \Flashtag\Category $category
      * @return \Illuminate\Database\Eloquent\Model
      */
     public function changeCategoryTo($category)

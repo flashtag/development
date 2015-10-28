@@ -1,14 +1,14 @@
 <?php
 
-namespace Scribbl\Presenters;
+namespace Flashtag\Presenters;
 
 use McCool\LaravelAutoPresenter\BasePresenter;
-use Scribbl\Forms\PostForm;
+use Flashtag\Forms\PostForm;
 
 class PostFormPresenter extends BasePresenter
 {
     /**
-     * @param \Scribbl\Post $resource
+     * @param \Flashtag\Post $resource
      */
     public function __construct(PostForm $resource)
     {

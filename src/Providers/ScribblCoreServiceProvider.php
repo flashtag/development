@@ -1,11 +1,11 @@
 <?php
 
-namespace Scribbl\Providers;
+namespace Flashtag\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
 
-class ScribblCoreServiceProvider extends ServiceProvider
+class FlashtagCoreServiceProvider extends ServiceProvider
 {
     protected $providers = [
         AutoPresenterServiceProvider::class,
