@@ -1,6 +1,6 @@
 <?php
 
-namespace spec\Scribbl\Api\Transformers;
+namespace spec\Scribbl\Api;
 
 use Illuminate\Database\Eloquent\Collection;
 use League\Fractal\Manager;
@@ -9,7 +9,7 @@ use Prophecy\Argument;
 use Scribbl\Api\Exceptions\TransformerNotFound;
 use Scribbl\Post;
 
-class TransformerManagerSpec extends ObjectBehavior
+class FractalDataFormatterSpec extends ObjectBehavior
 {
     function let(Manager $manager)
     {
@@ -18,7 +18,7 @@ class TransformerManagerSpec extends ObjectBehavior
 
     function it_is_initializable()
     {
-        $this->shouldHaveType('Scribbl\Api\Transformers\TransformerManager');
+        $this->shouldHaveType('Scribbl\Api\FractalDataFormatter');
     }
 
     function it_throws_exception_when_no_getTransformerClass_method_and_no_default_transformer_exists_on_item(CrappyPost $post)
@@ -52,7 +52,7 @@ class TransformerManagerSpec extends ObjectBehavior
     {
         $post->getTransformerClass()->willReturn('\Scribbl\Api\Transformers\PostTransformer');
 
-        $this->item($post)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Item');
+        $this->item($post)->shouldBeArray();
     }
 
     function it_makes_a_collection_with_item_having_valid_getTransformerClass_method(Collection $collection, NotAsCrappyPost $post)
@@ -60,13 +60,13 @@ class TransformerManagerSpec extends ObjectBehavior
         $post->getTransformerClass()->willReturn('\Scribbl\Api\Transformers\PostTransformer');
         $collection->first()->willReturn($post);
 
-        $this->collection($collection)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Collection');
+        $this->collection($collection)->shouldBeArray();
     }
 
     function it_makes_an_item_having_default_transformer()
     {
         $post = new Post();
-        $this->item($post)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Item');
+        $this->item($post)->shouldBeArray();
     }
 
     function it_makes_a_collection_with_item_having_default_transformer(Collection $collection)
@@ -74,7 +74,7 @@ class TransformerManagerSpec extends ObjectBehavior
         $post = new Post();
         $collection->first()->willReturn($post);
 
-        $this->collection($collection)->shouldReturnAnInstanceOf('\League\Fractal\Resource\Collection');
+        $this->collection($collection)->shouldBeArray();
     }
 
     // TODO: Items with includes... ?

@@ -144,7 +144,12 @@ return [
         Scribbl\CMS\Providers\AuthServiceProvider::class,
         Scribbl\CMS\Providers\EventServiceProvider::class,
         Scribbl\CMS\Providers\RouteServiceProvider::class,
+
+        /*
+         * Package Service Providers...
+         */
         Scribbl\Providers\ScribblCoreServiceProvider::class,
+        Scribbl\Api\ScribblApiServiceProvider::class,
 
     ],
 
