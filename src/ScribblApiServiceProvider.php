@@ -2,24 +2,60 @@
 
 namespace Scribbl\Api;
 
+use Dingo\Api\Provider\LaravelServiceProvider;
+use Dingo\Api\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Tymon\JWTAuth\Providers\JWTAuthServiceProvider;
 
 class ScribblApiServiceProvider extends ServiceProvider
 {
+    /**
+     * @var array
+     */
+    protected $versions = ['v1'];
+
+    /**
+     * Bind implementations.
+     */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/../config/api.php', 'api');
+
+        $this->app->register(LaravelServiceProvider::class);
+        $this->app->register(JWTAuthServiceProvider::class);
+
         $this->app->bind(DataFormatter::class, FractalDataFormatter::class);
     }
 
+    /**
+     * Register routes and stuff.
+     */
     public function boot()
     {
-        // Routes
         if (! $this->app->routesAreCached()) {
-            $this->app['router']->group([
-                'prefix'    => 'api',
-                'namespace' => 'Scribbl\Api\Http\Controllers',
-            ], function ($router) {
-                require __DIR__ . '/Http/routes.php';
+            $this->apiRoutes();
+        }
+
+        $this->publishes([
+            __DIR__.'/../config/api.php' => config_path('api.php')
+        ]);
+    }
+
+    /**
+     * Register API routes.
+     */
+    private function apiRoutes()
+    {
+        $api = $this->app->make(Router::class);
+
+        foreach ($this->versions as $version) {
+            $namespace = 'Scribbl\\Api\\Http\\Controllers\\'.strtoupper($version);
+
+            $api->version($version, [
+                'namespace' => $namespace,
+//                'middleware' => 'api.auth'
+            ], function ($api) use ($version) {
+                require __DIR__.'/Http/Routes/'.$version.'.php';
             });
         }
     }

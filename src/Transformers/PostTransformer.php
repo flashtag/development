@@ -28,10 +28,10 @@ class PostTransformer extends Transformer
             'category_id'      => $post->category_id,
             'body'             => $post->body,
             'is_published'     => $post->is_published,
-            'start_showing_at' => $post->start_showing_at,
-            'stop_showing_at'  => $post->stop_showing_at,
-            'created_at'       => $post->created_at,
-            'updated_at'       => $post->updated_at,
+            'start_showing_at' => $post->start_showing_at->getTimestamp(),
+            'stop_showing_at'  => $post->stop_showing_at->getTimestamp(),
+            'created_at'       => $post->created_at->getTimestamp(),
+            'updated_at'       => $post->updated_at->getTimestamp(),
         ];
     }
 
