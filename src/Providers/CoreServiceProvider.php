@@ -5,7 +5,7 @@ namespace Flashtag\Providers;
 use Illuminate\Support\ServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
 
-class FlashtagCoreServiceProvider extends ServiceProvider
+class CoreServiceProvider extends ServiceProvider
 {
     protected $providers = [
         AutoPresenterServiceProvider::class,
