@@ -3,4 +3,5 @@
 /packages/
 Homestead.yaml
 Homestead.json
+Vagrantfile
 .env

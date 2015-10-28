@@ -148,8 +148,8 @@ return [
         /*
          * Package Service Providers...
          */
-        Flashtag\Providers\FlashtagCoreServiceProvider::class,
-        Flashtag\Api\FlashtagApiServiceProvider::class,
+        Flashtag\Providers\CoreServiceProvider::class,
+        Flashtag\Api\ApiServiceProvider::class,
 
     ],
 

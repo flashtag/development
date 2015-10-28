@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f4a5f9f5858a5cc3ee928f6418c51136",
-    "content-hash": "a038352d8498318ca25eddb5092ac7ae",
+    "hash": "bfd2cdda3faef6e1125bc0a3b2048209",
+    "content-hash": "54d16f6bfed92b3c9313d438b408c0c4",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -471,6 +471,129 @@
             "time": "2014-09-09 13:34:57"
         },
         {
+            "name": "filp/whoops",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/filp/whoops.git",
+                "reference": "9a393ceb80f7497b6513feb574638e87048fed55"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/9a393ceb80f7497b6513feb574638e87048fed55",
+                "reference": "9a393ceb80f7497b6513feb574638e87048fed55",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.9.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Whoops": "src/"
+                },
+                "classmap": [
+                    "src/deprecated"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Filipe Dobreira",
+                    "homepage": "https://github.com/filp",
+                    "role": "Developer"
+                }
+            ],
+            "description": "php error handling for cool kids",
+            "homepage": "https://github.com/filp/whoops",
+            "keywords": [
+                "error",
+                "exception",
+                "handling",
+                "library",
+                "silex-provider",
+                "whoops",
+                "zf2"
+            ],
+            "time": "2015-09-27 09:47:06"
+        },
+        {
+            "name": "flashtag/api",
+            "version": "dev-feature-dingo",
+            "dist": {
+                "type": "path",
+                "url": "../api/",
+                "reference": "543c30e6425e6371eeefec4431b726d052570798",
+                "shasum": null
+            },
+            "require": {
+                "dingo/api": "1.0.*@dev",
+                "flashtag/core": "dev-master",
+                "illuminate/routing": "5.1.*",
+                "tymon/jwt-auth": "0.5.*"
+            },
+            "require-dev": {
+                "benconstable/phpspec-laravel": " ~2.0",
+                "phpspec/phpspec": "^2.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Flashtag\\Api\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ryan Winchester",
+                    "email": "fungku@gmail.com"
+                }
+            ]
+        },
+        {
+            "name": "flashtag/core",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../core/",
+                "reference": "9f599c2dc2530c8856db23d6fd03777044736b33",
+                "shasum": null
+            },
+            "require": {
+                "illuminate/database": "5.1.*",
+                "mccool/laravel-auto-presenter": "~4.1",
+                "venturecraft/revisionable": " 1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Flashtag\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ryan Winchester",
+                    "email": "fungku@gmail.com"
+                }
+            ]
+        },
+        {
             "name": "jakub-onderka/php-console-color",
             "version": "0.1",
             "source": {
@@ -621,12 +744,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "10e1d08460866fdb7224f954f99e8a28a35c553f"
+                "reference": "dabea383a68de922f526ec57f1f02f00d7502002"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/10e1d08460866fdb7224f954f99e8a28a35c553f",
-                "reference": "10e1d08460866fdb7224f954f99e8a28a35c553f",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/dabea383a68de922f526ec57f1f02f00d7502002",
+                "reference": "dabea383a68de922f526ec57f1f02f00d7502002",
                 "shasum": ""
             },
             "require": {
@@ -742,7 +865,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2015-10-25 18:28:50"
+            "time": "2015-10-28 15:48:40"
         },
         {
             "name": "league/flysystem",
@@ -750,12 +873,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/flysystem.git",
-                "reference": "f46f18a62f50d85750798d1d2f57fb04e1cdc707"
+                "reference": "0ef45accb83c14579414935bffa50e5d2e1265c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/f46f18a62f50d85750798d1d2f57fb04e1cdc707",
-                "reference": "f46f18a62f50d85750798d1d2f57fb04e1cdc707",
+                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/0ef45accb83c14579414935bffa50e5d2e1265c1",
+                "reference": "0ef45accb83c14579414935bffa50e5d2e1265c1",
                 "shasum": ""
             },
             "require": {
@@ -826,7 +949,7 @@
                 "sftp",
                 "storage"
             ],
-            "time": "2015-10-15 15:44:38"
+            "time": "2015-10-26 07:14:17"
         },
         {
             "name": "league/fractal",
@@ -1527,71 +1650,6 @@
             "time": "2015-07-16 15:26:57"
         },
         {
-            "name": "flashtag/api",
-            "version": "dev-feature-dingo",
-            "dist": {
-                "type": "path",
-                "url": "../api/",
-                "reference": "543c30e6425e6371eeefec4431b726d052570798",
-                "shasum": null
-            },
-            "require": {
-                "dingo/api": "1.0.*@dev",
-                "illuminate/routing": "5.1.*",
-                "flashtag/core": "dev-master",
-                "tymon/jwt-auth": "0.5.*"
-            },
-            "require-dev": {
-                "benconstable/phpspec-laravel": " ~2.0",
-                "phpspec/phpspec": "^2.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Flashtag\\Api\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Ryan Winchester",
-                    "email": "fungku@gmail.com"
-                }
-            ]
-        },
-        {
-            "name": "flashtag/core",
-            "version": "dev-master",
-            "dist": {
-                "type": "path",
-                "url": "../core/",
-                "reference": "9f599c2dc2530c8856db23d6fd03777044736b33",
-                "shasum": null
-            },
-            "require": {
-                "illuminate/database": "5.1.*",
-                "mccool/laravel-auto-presenter": "~4.1",
-                "venturecraft/revisionable": " 1.*"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Flashtag\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Ryan Winchester",
-                    "email": "fungku@gmail.com"
-                }
-            ]
-        },
-        {
             "name": "swiftmailer/swiftmailer",
             "version": "5.x-dev",
             "source": {
@@ -1650,12 +1708,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "5efd632294c8320ea52492db22292ff853a43766"
+                "reference": "5e7f1a818e7ccbdbe0157f061e0fea5577fdb9a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/5efd632294c8320ea52492db22292ff853a43766",
-                "reference": "5efd632294c8320ea52492db22292ff853a43766",
+                "url": "https://api.github.com/repos/symfony/console/zipball/5e7f1a818e7ccbdbe0157f061e0fea5577fdb9a6",
+                "reference": "5e7f1a818e7ccbdbe0157f061e0fea5577fdb9a6",
                 "shasum": ""
             },
             "require": {
@@ -1698,7 +1756,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2015-10-20 14:38:46"
+            "time": "2015-10-28 04:15:55"
         },
         {
             "name": "symfony/css-selector",
@@ -2017,12 +2075,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-kernel.git",
-                "reference": "828e8467c3585f9467e4204fc3ec37e43bba23bd"
+                "reference": "3cea2a8ce47aa643d9980d4ec0496ecc4e167446"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/828e8467c3585f9467e4204fc3ec37e43bba23bd",
-                "reference": "828e8467c3585f9467e4204fc3ec37e43bba23bd",
+                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/3cea2a8ce47aa643d9980d4ec0496ecc4e167446",
+                "reference": "3cea2a8ce47aa643d9980d4ec0496ecc4e167446",
                 "shasum": ""
             },
             "require": {
@@ -2088,7 +2146,7 @@
             ],
             "description": "Symfony HttpKernel Component",
             "homepage": "https://symfony.com",
-            "time": "2015-10-23 14:47:27"
+            "time": "2015-10-28 04:15:55"
         },
         {
             "name": "symfony/process",
@@ -2142,12 +2200,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "7a3c153e5212a3c978f96afa0c287744343e1d76"
+                "reference": "f353e1f588679c3ec987624e6c617646bd01ba38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/7a3c153e5212a3c978f96afa0c287744343e1d76",
-                "reference": "7a3c153e5212a3c978f96afa0c287744343e1d76",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/f353e1f588679c3ec987624e6c617646bd01ba38",
+                "reference": "f353e1f588679c3ec987624e6c617646bd01ba38",
                 "shasum": ""
             },
             "require": {
@@ -2204,7 +2262,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2015-10-18 20:32:44"
+            "time": "2015-10-27 15:38:06"
         },
         {
             "name": "symfony/translation",
@@ -2212,12 +2270,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/translation.git",
-                "reference": "ef299cacc962ef8394f89fa8ba9a90486a607582"
+                "reference": "6ccd9289ec1c71d01a49d83480de3b5293ce30c8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/translation/zipball/ef299cacc962ef8394f89fa8ba9a90486a607582",
-                "reference": "ef299cacc962ef8394f89fa8ba9a90486a607582",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/6ccd9289ec1c71d01a49d83480de3b5293ce30c8",
+                "reference": "6ccd9289ec1c71d01a49d83480de3b5293ce30c8",
                 "shasum": ""
             },
             "require": {
@@ -2264,7 +2322,7 @@
             ],
             "description": "Symfony Translation Component",
             "homepage": "https://symfony.com",
-            "time": "2015-10-11 09:39:48"
+            "time": "2015-10-27 15:38:06"
         },
         {
             "name": "symfony/var-dumper",
@@ -2272,12 +2330,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "31a698cfe5c65b47ea16c4dcc3e0cda62ef6074a"
+                "reference": "eb033050050916b6bfa51be71009ef67b16046c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/31a698cfe5c65b47ea16c4dcc3e0cda62ef6074a",
-                "reference": "31a698cfe5c65b47ea16c4dcc3e0cda62ef6074a",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/eb033050050916b6bfa51be71009ef67b16046c9",
+                "reference": "eb033050050916b6bfa51be71009ef67b16046c9",
                 "shasum": ""
             },
             "require": {
@@ -2320,7 +2378,7 @@
                 "debug",
                 "dump"
             ],
-            "time": "2015-10-19 18:09:55"
+            "time": "2015-10-25 17:17:38"
         },
         {
             "name": "tymon/jwt-auth",
@@ -3704,12 +3762,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "ff7f886a33f5b7a26a94d62f6e14bb9cf0e3bf5d"
+                "reference": "f301c743e1495960f87686c2125bf3fbed9896eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/ff7f886a33f5b7a26a94d62f6e14bb9cf0e3bf5d",
-                "reference": "ff7f886a33f5b7a26a94d62f6e14bb9cf0e3bf5d",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/f301c743e1495960f87686c2125bf3fbed9896eb",
+                "reference": "f301c743e1495960f87686c2125bf3fbed9896eb",
                 "shasum": ""
             },
             "require": {
@@ -3742,7 +3800,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2015-10-12 11:16:35"
+            "time": "2015-10-28 04:32:32"
         }
     ],
     "aliases": [],
