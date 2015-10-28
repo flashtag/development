@@ -7,7 +7,7 @@ use Dingo\Api\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Tymon\JWTAuth\Providers\JWTAuthServiceProvider;
 
-class FlashtagApiServiceProvider extends ServiceProvider
+class ApiServiceProvider extends ServiceProvider
 {
     /**
      * @var array
@@ -23,8 +23,6 @@ class FlashtagApiServiceProvider extends ServiceProvider
 
         $this->app->register(LaravelServiceProvider::class);
         $this->app->register(JWTAuthServiceProvider::class);
-
-        $this->app->bind(DataFormatter::class, FractalDataFormatter::class);
     }
 
     /**
