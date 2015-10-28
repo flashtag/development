@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Providers;
+namespace Flashtag\CMS\Providers;
 
 use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -13,7 +13,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        'Scribbl\CMS\Model' => 'Scribbl\CMS\Policies\ModelPolicy',
+        'Flashtag\CMS\Model' => 'Flashtag\CMS\Policies\ModelPolicy',
     ];
 
     /**

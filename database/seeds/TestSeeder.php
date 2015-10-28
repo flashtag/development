@@ -46,7 +46,7 @@ class TestSeeder extends Seeder
      */
     private function createCategories()
     {
-        return factory(\Scribbl\Category::class, 5)->create();
+        return factory(\Flashtag\Category::class, 5)->create();
     }
 
     /**
@@ -54,7 +54,7 @@ class TestSeeder extends Seeder
      */
     private function createTags()
     {
-        return factory(\Scribbl\Tag::class, 5)->create();
+        return factory(\Flashtag\Tag::class, 5)->create();
     }
 
     /**
@@ -63,13 +63,13 @@ class TestSeeder extends Seeder
     private function createFields()
     {
         return new Collection([
-            \Scribbl\PostField::create([
+            \Flashtag\PostField::create([
                 'name'        => 'pull_quote',
                 'label'       => 'Pull quote',
                 'description' => 'Pull quotes',
                 'template'    => 'string',
             ]),
-            \Scribbl\PostField::create([
+            \Flashtag\PostField::create([
                 'name'        => 'footnotes',
                 'label'       => 'Footnotes',
                 'description' => 'Footnotes',
@@ -100,7 +100,7 @@ class TestSeeder extends Seeder
      */
     private function createPosts(Collection $categories, Collection $tags, array $fieldValues)
     {
-        $posts = factory(\Scribbl\Post::class, 10)->create([
+        $posts = factory(\Flashtag\Post::class, 10)->create([
             'category_id' => $this->faker->randomElement($categories->lists('id')->toArray())
         ]);
 

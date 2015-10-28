@@ -1,13 +1,13 @@
 suites:
     cms:
-        namespace: Scribbl\CMS
-        psr4_prefix: Scribbl\CMS
+        namespace: Flashtag\CMS
+        psr4_prefix: Flashtag\CMS
         src_path: app
         spec_path: tests
     api:
-        namespace: Scribbl\Api
-        psr4_prefix: Scribbl\Api
-        src_path: vendor/scribbl/api/src
+        namespace: Flashtag\Api
+        psr4_prefix: Flashtag\Api
+        src_path: vendor/flashtag/api/src
         spec_path: tests/api
 
 extensions:

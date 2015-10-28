@@ -1,10 +1,10 @@
 <?php
 
-namespace Scribbl\CMS\Http\Controllers;
+namespace Flashtag\CMS\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Scribbl\CMS\Http\Requests;
-use Scribbl\CMS\Http\Controllers\Controller;
+use Flashtag\CMS\Http\Requests;
+use Flashtag\CMS\Http\Controllers\Controller;
 
 class PostsController extends Controller
 {

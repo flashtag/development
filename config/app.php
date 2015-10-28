@@ -140,16 +140,16 @@ return [
         /*
          * Application Service Providers...
          */
-        Scribbl\CMS\Providers\AppServiceProvider::class,
-        Scribbl\CMS\Providers\AuthServiceProvider::class,
-        Scribbl\CMS\Providers\EventServiceProvider::class,
-        Scribbl\CMS\Providers\RouteServiceProvider::class,
+        Flashtag\CMS\Providers\AppServiceProvider::class,
+        Flashtag\CMS\Providers\AuthServiceProvider::class,
+        Flashtag\CMS\Providers\EventServiceProvider::class,
+        Flashtag\CMS\Providers\RouteServiceProvider::class,
 
         /*
          * Package Service Providers...
          */
-        Scribbl\Providers\ScribblCoreServiceProvider::class,
-        Scribbl\Api\ScribblApiServiceProvider::class,
+        Flashtag\Providers\FlashtagCoreServiceProvider::class,
+        Flashtag\Api\FlashtagApiServiceProvider::class,
 
     ],
 

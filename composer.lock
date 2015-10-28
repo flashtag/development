@@ -1527,7 +1527,7 @@
             "time": "2015-07-16 15:26:57"
         },
         {
-            "name": "scribbl/api",
+            "name": "flashtag/api",
             "version": "dev-feature-dingo",
             "dist": {
                 "type": "path",
@@ -1538,7 +1538,7 @@
             "require": {
                 "dingo/api": "1.0.*@dev",
                 "illuminate/routing": "5.1.*",
-                "scribbl/core": "dev-master",
+                "flashtag/core": "dev-master",
                 "tymon/jwt-auth": "0.5.*"
             },
             "require-dev": {
@@ -1548,7 +1548,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Scribbl\\Api\\": "src/"
+                    "Flashtag\\Api\\": "src/"
                 }
             },
             "license": [
@@ -1562,7 +1562,7 @@
             ]
         },
         {
-            "name": "scribbl/core",
+            "name": "flashtag/core",
             "version": "dev-master",
             "dist": {
                 "type": "path",
@@ -1578,7 +1578,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Scribbl\\": "src/"
+                    "Flashtag\\": "src/"
                 }
             },
             "license": [
@@ -3748,8 +3748,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "scribbl/core": 20,
-        "scribbl/api": 20
+        "flashtag/core": 20,
+        "flashtag/api": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Http\Middleware;
+namespace Flashtag\CMS\Http\Middleware;
 
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as BaseVerifier;
 

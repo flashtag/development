@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Providers;
+namespace Flashtag\CMS\Providers;
 
 use Illuminate\Support\ServiceProvider;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Http\Controllers;
+namespace Flashtag\CMS\Http\Controllers;
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;

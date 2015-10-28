@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Http\Requests;
+namespace Flashtag\CMS\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 

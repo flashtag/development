@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Console;
+namespace Flashtag\CMS\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \Scribbl\CMS\Console\Commands\Inspire::class,
+        \Flashtag\CMS\Console\Commands\Inspire::class,
     ];
 
     /**

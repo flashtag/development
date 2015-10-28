@@ -1,7 +1,7 @@
 {
-    "name": "scribbl/scribbl",
-    "description": "Scribbl CMS",
-    "keywords": ["cms", "scribbl"],
+    "name": "flashtag/flashtag",
+    "description": "Flashtag CMS",
+    "keywords": ["cms", "flashtag"],
     "license": "MIT",
     "type": "project",
     "repositories": [
@@ -16,8 +16,8 @@
     ],
     "require": {
         "php": ">=5.5.9",
-        "scribbl/core": "*@dev",
-        "scribbl/api": "*@dev",
+        "flashtag/core": "*@dev",
+        "flashtag/api": "*@dev",
         "laravel/framework": "5.1.*"
     },
     "require-dev": {
@@ -33,7 +33,7 @@
             "database/"
         ],
         "psr-4": {
-            "Scribbl\\CMS\\": "app/"
+            "Flashtag\\CMS\\": "app/"
         }
     },
     "autoload-dev": {

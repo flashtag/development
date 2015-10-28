@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'model' => Scribbl\CMS\User::class,
+    'model' => Flashtag\CMS\User::class,
 
     /*
     |--------------------------------------------------------------------------

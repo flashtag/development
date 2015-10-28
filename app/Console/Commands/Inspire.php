@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Console\Commands;
+namespace Flashtag\CMS\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Inspiring;

@@ -30,7 +30,7 @@ return [
     ],
 
     'stripe' => [
-        'model'  => Scribbl\CMS\User::class,
+        'model'  => Flashtag\CMS\User::class,
         'key'    => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
     ],

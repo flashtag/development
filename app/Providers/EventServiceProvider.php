@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Providers;
+namespace Flashtag\CMS\Providers;
 
 use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -13,8 +13,8 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'Scribbl\CMS\Events\SomeEvent' => [
-            'Scribbl\CMS\Listeners\EventListener',
+        'Flashtag\CMS\Events\SomeEvent' => [
+            'Flashtag\CMS\Listeners\EventListener',
         ],
     ];
 

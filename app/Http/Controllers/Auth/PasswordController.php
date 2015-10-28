@@ -1,8 +1,8 @@
 <?php
 
-namespace Scribbl\CMS\Http\Controllers\Auth;
+namespace Flashtag\CMS\Http\Controllers\Auth;
 
-use Scribbl\CMS\Http\Controllers\Controller;
+use Flashtag\CMS\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 
 class PasswordController extends Controller

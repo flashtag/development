@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Exceptions;
+namespace Flashtag\CMS\Exceptions;
 
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

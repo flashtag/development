@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Jobs;
+namespace Flashtag\CMS\Jobs;
 
 use Illuminate\Bus\Queueable;
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Scribbl\CMS\Http\Controllers;
+namespace Flashtag\CMS\Http\Controllers;
 
-use Scribbl\Category;
-use Scribbl\CMS\Http\Requests;
-use Scribbl\Field;
-use Scribbl\Post;
-use Scribbl\Tag;
+use Flashtag\Category;
+use Flashtag\CMS\Http\Requests;
+use Flashtag\Field;
+use Flashtag\Post;
+use Flashtag\Tag;
 
 class TestController extends Controller
 {

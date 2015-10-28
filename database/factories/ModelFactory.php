@@ -1,6 +1,6 @@
 <?php
 
-$factory->define(Scribbl\Category::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Category::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
@@ -10,7 +10,7 @@ $factory->define(Scribbl\Category::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Scribbl\Tag::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Tag::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
@@ -20,7 +20,7 @@ $factory->define(Scribbl\Tag::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Scribbl\Post::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Post::class, function (Faker\Generator $faker) {
     $title = $faker->sentence(4);
 
     return [
@@ -35,7 +35,7 @@ $factory->define(Scribbl\Post::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Scribbl\Field::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Field::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
@@ -46,7 +46,7 @@ $factory->define(Scribbl\Field::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Scribbl\CMS\User::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\CMS\User::class, function (Faker\Generator $faker) {
     return [
         'name'           => $faker->name,
         'email'          => $faker->email,

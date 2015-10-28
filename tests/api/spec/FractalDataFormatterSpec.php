@@ -1,13 +1,13 @@
 <?php
 
-namespace spec\Scribbl\Api;
+namespace spec\Flashtag\Api;
 
 use Illuminate\Database\Eloquent\Collection;
 use League\Fractal\Manager;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Scribbl\Api\Exceptions\TransformerNotFound;
-use Scribbl\Post;
+use Flashtag\Api\Exceptions\TransformerNotFound;
+use Flashtag\Post;
 
 class FractalDataFormatterSpec extends ObjectBehavior
 {
@@ -18,7 +18,7 @@ class FractalDataFormatterSpec extends ObjectBehavior
 
     function it_is_initializable()
     {
-        $this->shouldHaveType('Scribbl\Api\FractalDataFormatter');
+        $this->shouldHaveType('Flashtag\Api\FractalDataFormatter');
     }
 
     function it_throws_exception_when_no_getTransformerClass_method_and_no_default_transformer_exists_on_item(CrappyPost $post)
@@ -35,14 +35,14 @@ class FractalDataFormatterSpec extends ObjectBehavior
 
     function it_throws_an_exception_when_getTransformerClass_returns_nonexistent_transformer_on_item(NotAsCrappyPost $post)
     {
-        $post->getTransformerClass()->willReturn('\Scribbl\Api\Transformers\NoTransformer');
+        $post->getTransformerClass()->willReturn('\Flashtag\Api\Transformers\NoTransformer');
 
         $this->shouldThrow(TransformerNotFound::class)->duringItem($post);
     }
 
     function it_throws_an_exception_when_getTransformerClass_returns_nonexistent_transformer_on_collection(Collection $collection, NotAsCrappyPost $post)
     {
-        $post->getTransformerClass()->willReturn('\Scribbl\Api\Transformers\NoTransformer');
+        $post->getTransformerClass()->willReturn('\Flashtag\Api\Transformers\NoTransformer');
         $collection->first()->willReturn($post);
 
         $this->shouldThrow(TransformerNotFound::class)->duringCollection($collection);
@@ -50,14 +50,14 @@ class FractalDataFormatterSpec extends ObjectBehavior
 
     function it_makes_an_item_having_valid_getTransformerClass_method(NotAsCrappyPost $post)
     {
-        $post->getTransformerClass()->willReturn('\Scribbl\Api\Transformers\PostTransformer');
+        $post->getTransformerClass()->willReturn('\Flashtag\Api\Transformers\PostTransformer');
 
         $this->item($post)->shouldBeArray();
     }
 
     function it_makes_a_collection_with_item_having_valid_getTransformerClass_method(Collection $collection, NotAsCrappyPost $post)
     {
-        $post->getTransformerClass()->willReturn('\Scribbl\Api\Transformers\PostTransformer');
+        $post->getTransformerClass()->willReturn('\Flashtag\Api\Transformers\PostTransformer');
         $collection->first()->willReturn($post);
 
         $this->collection($collection)->shouldBeArray();

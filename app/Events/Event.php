@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\CMS\Events;
+namespace Flashtag\CMS\Events;
 
 abstract class Event
 {
