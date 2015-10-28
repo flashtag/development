@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\Api\Transformers;
+namespace Flashtag\Api\Transformers;
 
 use Venturecraft\Revisionable\Revision;
 

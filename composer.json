@@ -1,5 +1,5 @@
 {
-    "name": "scribbl/api",
+    "name": "flashtag/api",
     "license": "MIT",
     "authors": [
         {
@@ -10,13 +10,13 @@
     "require": {
         "dingo/api": "1.0.*@dev",
         "illuminate/routing": "5.1.*",
-        "scribbl/core": "dev-master",
+        "flashtag/core": "dev-master",
         "tymon/jwt-auth": "0.5.*"
     },
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@bitbucket.org:scribbl/core.git"
+            "url": "git@bitbucket.org:flashtag/core.git"
         }
     ],
     "require-dev": {
@@ -25,7 +25,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Scribbl\\Api\\": "src/"
+            "Flashtag\\Api\\": "src/"
         }
     }
 }

@@ -1,13 +1,13 @@
 <?php
 
-namespace Scribbl\Api;
+namespace Flashtag\Api;
 
 use Dingo\Api\Provider\LaravelServiceProvider;
 use Dingo\Api\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Tymon\JWTAuth\Providers\JWTAuthServiceProvider;
 
-class ScribblApiServiceProvider extends ServiceProvider
+class FlashtagApiServiceProvider extends ServiceProvider
 {
     /**
      * @var array
@@ -49,7 +49,7 @@ class ScribblApiServiceProvider extends ServiceProvider
         $api = $this->app->make(Router::class);
 
         foreach ($this->versions as $version) {
-            $namespace = 'Scribbl\\Api\\Http\\Controllers\\'.strtoupper($version);
+            $namespace = 'Flashtag\\Api\\Http\\Controllers\\'.strtoupper($version);
 
             $api->version($version, [
                 'namespace' => $namespace,

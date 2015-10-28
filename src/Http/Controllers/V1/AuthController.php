@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\Api\Http\Controllers\V1;
+namespace Flashtag\Api\Http\Controllers\V1;
 
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;

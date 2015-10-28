@@ -1,8 +1,8 @@
 <?php
 
-namespace Scribbl\Api\Transformers;
+namespace Flashtag\Api\Transformers;
 
-use Scribbl\Post;
+use Flashtag\Post;
 
 class PostTransformer extends Transformer
 {
@@ -14,7 +14,7 @@ class PostTransformer extends Transformer
     protected $availableIncludes = ['category', 'tags', 'fields', 'revisions'];
 
     /**
-     * @param \Scribbl\Post $post
+     * @param \Flashtag\Post $post
      * @return array
      */
     public function transform(Post $post)
@@ -36,7 +36,7 @@ class PostTransformer extends Transformer
     }
 
     /**
-     * @param \Scribbl\Post $post
+     * @param \Flashtag\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */
@@ -50,7 +50,7 @@ class PostTransformer extends Transformer
     /**
      * Include Category
      *
-     * @param \Scribbl\Post $post
+     * @param \Flashtag\Post $post
      * @return \League\Fractal\ItemResource
      */
     public function includeCategory(Post $post)
@@ -61,7 +61,7 @@ class PostTransformer extends Transformer
     }
 
     /**
-     * @param \Scribbl\Post $post
+     * @param \Flashtag\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */

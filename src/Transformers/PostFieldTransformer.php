@@ -1,13 +1,13 @@
 <?php
 
-namespace Scribbl\Api\Transformers;
+namespace Flashtag\Api\Transformers;
 
-use Scribbl\PostField;
+use Flashtag\PostField;
 
 class PostFieldTransformer extends Transformer
 {
     /**
-     * @param \Scribbl\PostField $field
+     * @param \Flashtag\PostField $field
      * @return array
      */
     public function transform(PostField $field)

@@ -1,20 +1,20 @@
 <?php
 
-namespace Scribbl\Api\Http\Controllers\V1;
+namespace Flashtag\Api\Http\Controllers\V1;
 
 use Illuminate\Http\Request;
-use Scribbl\Api\Transformers\PostTransformer;
-use Scribbl\Post;
+use Flashtag\Api\Transformers\PostTransformer;
+use Flashtag\Post;
 
 class PostsController extends Controller
 {
     /**
-     * @var \Scribbl\Post
+     * @var \Flashtag\Post
      */
     private $post;
 
     /**
-     * @param \Scribbl\Post $post
+     * @param \Flashtag\Post $post
      */
     public function __construct(Post $post)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\Api\Exceptions;
+namespace Flashtag\Api\Exceptions;
 
 class TransformerNotFound extends \Exception
 {

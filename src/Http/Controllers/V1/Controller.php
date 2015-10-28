@@ -1,6 +1,6 @@
 <?php
 
-namespace Scribbl\Api\Http\Controllers\V1;
+namespace Flashtag\Api\Http\Controllers\V1;
 
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Contracts\Pagination\Paginator;

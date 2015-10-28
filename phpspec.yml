@@ -1,7 +1,7 @@
 suites:
     api:
-        namespace: Scribbl\Api
-        psr4_prefix: Scribbl\Api
+        namespace: Flashtag\Api
+        psr4_prefix: Flashtag\Api
 
 extensions:
     - PhpSpec\Laravel\Extension\LaravelExtension
