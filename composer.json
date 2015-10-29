@@ -13,12 +13,6 @@
         "flashtag/core": "*@dev",
         "tymon/jwt-auth": "0.6.*"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:flashtag/core.git"
-        }
-    ],
     "require-dev": {
         "phpspec/phpspec": "^2.1",
         "benconstable/phpspec-laravel": " ~2.0"

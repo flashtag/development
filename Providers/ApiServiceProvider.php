@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Api;
+namespace Flashtag\Api\Providers;
 
 use Dingo\Api\Routing\Router;
 use Illuminate\Support\ServiceProvider;
