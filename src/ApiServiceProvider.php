@@ -2,10 +2,8 @@
 
 namespace Flashtag\Api;
 
-use Dingo\Api\Provider\LaravelServiceProvider;
 use Dingo\Api\Routing\Router;
 use Illuminate\Support\ServiceProvider;
-use Tymon\JWTAuth\Providers\JWTAuthServiceProvider;
 
 class ApiServiceProvider extends ServiceProvider
 {
@@ -21,8 +19,8 @@ class ApiServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/api.php', 'api');
 
-        $this->app->register(LaravelServiceProvider::class);
-        $this->app->register(JWTAuthServiceProvider::class);
+        $this->app->register(\Dingo\Api\Provider\LaravelServiceProvider::class);
+        $this->app->register(\Tymon\JWTAuth\Providers\LaravelServiceProvider::class);
     }
 
     /**

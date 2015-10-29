@@ -8,10 +8,10 @@
         }
     ],
     "require": {
-        "dingo/api": "1.0.*@dev",
+        "dingo/api": "dev-master@dev",
         "illuminate/routing": "5.1.*",
         "flashtag/core": "*@dev",
-        "tymon/jwt-auth": "0.5.*"
+        "tymon/jwt-auth": "0.6.*"
     },
     "repositories": [
         {
