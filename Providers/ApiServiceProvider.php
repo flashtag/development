@@ -51,7 +51,7 @@ class ApiServiceProvider extends ServiceProvider
                 'namespace' => $namespace,
 //                'middleware' => 'api.auth'
             ], function ($api) use ($version) {
-                require __DIR__.'/Http/Routes/'.$version.'.php';
+                require __DIR__.'/../Http/Routes/'.$version.'.php';
             });
         }
     }
