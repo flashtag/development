@@ -149,7 +149,7 @@ return [
          * Package Service Providers...
          */
         Flashtag\Providers\CoreServiceProvider::class,
-        Flashtag\Api\ApiServiceProvider::class,
+        Flashtag\Api\Providers\ApiServiceProvider::class,
 
     ],
 
