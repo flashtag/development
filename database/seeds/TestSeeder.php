@@ -15,19 +15,6 @@ class TestSeeder extends Seeder
     }
 
     /**
-     * Truncate the database tables.
-     */
-    private function truncateTables()
-    {
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        \DB::table('categories')->truncate();
-        \DB::table('tags')->truncate();
-        \DB::table('posts')->truncate();
-        \DB::table('post_fields')->truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-    }
-
-    /**
      * Run the database seeds.
      *
      * @return void
@@ -39,6 +26,21 @@ class TestSeeder extends Seeder
         $fieldValues = $this->setValuesToFields($this->createFields());
 
         $posts = $this->createPosts($categories, $tags, $fieldValues);
+
+        $users = $this->createUsers();
+    }
+
+    /**
+     * Truncate the database tables.
+     */
+    private function truncateTables()
+    {
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \DB::table('categories')->truncate();
+        \DB::table('tags')->truncate();
+        \DB::table('posts')->truncate();
+        \DB::table('post_fields')->truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
     /**
@@ -110,5 +112,19 @@ class TestSeeder extends Seeder
             $post->saveFields($fieldValues);
             return $post;
         });
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    private function createUsers()
+    {
+        return new Collection([
+            \Flashtag\CMS\User::create([
+                'email' => 'test@test.com',
+                'name' => $this->faker->name,
+                'password' => \Hash::make('password'),
+            ]),
+        ]);
     }
 }

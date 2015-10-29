@@ -530,18 +530,18 @@
         },
         {
             "name": "flashtag/api",
-            "version": "dev-feature-dingo",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "../api/",
-                "reference": "543c30e6425e6371eeefec4431b726d052570798",
+                "reference": "05e3804c13ac36db3ebee7af6503c25aa326e632",
                 "shasum": null
             },
             "require": {
-                "dingo/api": "1.0.*@dev",
-                "flashtag/core": "dev-master",
+                "dingo/api": "dev-master@dev",
+                "flashtag/core": "*@dev",
                 "illuminate/routing": "5.1.*",
-                "tymon/jwt-auth": "0.5.*"
+                "tymon/jwt-auth": "0.6.*"
             },
             "require-dev": {
                 "benconstable/phpspec-laravel": " ~2.0",
@@ -565,11 +565,11 @@
         },
         {
             "name": "flashtag/core",
-            "version": "dev-master",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "../core/",
-                "reference": "9f599c2dc2530c8856db23d6fd03777044736b33",
+                "reference": "ffa53d018e5b5fda052dd041fabba73c84d60e48",
                 "shasum": null
             },
             "require": {
@@ -686,12 +686,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jeremeamia/super_closure.git",
-                "reference": "4709000f1a73b4e8049177d715030ecf14eee3e8"
+                "reference": "2facde63a3f2ae87f71908c557aff7cbe59bc509"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jeremeamia/super_closure/zipball/4709000f1a73b4e8049177d715030ecf14eee3e8",
-                "reference": "4709000f1a73b4e8049177d715030ecf14eee3e8",
+                "url": "https://api.github.com/repos/jeremeamia/super_closure/zipball/2facde63a3f2ae87f71908c557aff7cbe59bc509",
+                "reference": "2facde63a3f2ae87f71908c557aff7cbe59bc509",
                 "shasum": ""
             },
             "require": {
@@ -700,7 +700,7 @@
             },
             "require-dev": {
                 "codeclimate/php-test-reporter": "~0.1.2",
-                "phpunit/phpunit": "~4.0"
+                "phpunit/phpunit": "~4.0|~5.0"
             },
             "type": "library",
             "extra": {
@@ -736,7 +736,7 @@
                 "serialize",
                 "tokenizer"
             ],
-            "time": "2015-08-26 23:17:10"
+            "time": "2015-10-28 19:52:30"
         },
         {
             "name": "laravel/framework",
@@ -744,12 +744,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "dabea383a68de922f526ec57f1f02f00d7502002"
+                "reference": "11d9627c7cd4d12b6e884b87daa7a2f898cf54cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/dabea383a68de922f526ec57f1f02f00d7502002",
-                "reference": "dabea383a68de922f526ec57f1f02f00d7502002",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/11d9627c7cd4d12b6e884b87daa7a2f898cf54cb",
+                "reference": "11d9627c7cd4d12b6e884b87daa7a2f898cf54cb",
                 "shasum": ""
             },
             "require": {
@@ -865,7 +865,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2015-10-28 15:48:40"
+            "time": "2015-10-28 21:58:18"
         },
         {
             "name": "league/flysystem",
@@ -1199,22 +1199,27 @@
         },
         {
             "name": "namshi/jose",
-            "version": "5.0.2",
+            "version": "6.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/namshi/jose.git",
-                "reference": "8c7eba486f74c014ea1d8faedafe5109a31ea95b"
+                "reference": "fd465401723974d76beb7424aeb4964c26b2b435"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/namshi/jose/zipball/8c7eba486f74c014ea1d8faedafe5109a31ea95b",
-                "reference": "8c7eba486f74c014ea1d8faedafe5109a31ea95b",
+                "url": "https://api.github.com/repos/namshi/jose/zipball/fd465401723974d76beb7424aeb4964c26b2b435",
+                "reference": "fd465401723974d76beb7424aeb4964c26b2b435",
                 "shasum": ""
             },
             "require": {
-                "lib-openssl": "*",
-                "php": ">=5.3.3",
-                "phpseclib/phpseclib": "~0.3"
+                "ext-date": "*",
+                "ext-hash": "*",
+                "ext-json": "*",
+                "ext-openssl": "*",
+                "ext-pcre": "*",
+                "ext-spl": "*",
+                "php": ">=5.4.8",
+                "phpseclib/phpseclib": "~2.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "~4.5",
@@ -1245,7 +1250,7 @@
                 "jwt",
                 "token"
             ],
-            "time": "2015-06-29 05:41:44"
+            "time": "2015-10-19 04:53:58"
         },
         {
             "name": "nesbot/carbon",
@@ -1435,54 +1440,40 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "0.3.10",
+            "version": "2.0.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "d15bba1edcc7c89e09cc74c5d961317a8b947bf4"
+                "reference": "96dd14fd6f3b900f0134ff430e6d119a0fa0ffc9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/d15bba1edcc7c89e09cc74c5d961317a8b947bf4",
-                "reference": "d15bba1edcc7c89e09cc74c5d961317a8b947bf4",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/96dd14fd6f3b900f0134ff430e6d119a0fa0ffc9",
+                "reference": "96dd14fd6f3b900f0134ff430e6d119a0fa0ffc9",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.0.0"
+                "php": ">=5.3.3"
             },
             "require-dev": {
                 "phing/phing": "~2.7",
                 "phpunit/phpunit": "~4.0",
                 "sami/sami": "~2.0",
-                "squizlabs/php_codesniffer": "~1.5"
+                "squizlabs/php_codesniffer": "~2.0"
             },
             "suggest": {
                 "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations.",
-                "ext-mcrypt": "Install the Mcrypt extension in order to speed up a wide variety of cryptographic operations.",
-                "pear-pear/PHP_Compat": "Install PHP_Compat to get phpseclib working on PHP < 4.3.3."
+                "ext-libsodium": "SSH2/SFTP can make use of some algorithms provided by the libsodium-php extension.",
+                "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
+                "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "0.3-dev"
+            "autoload": {
+                "psr-4": {
+                    "phpseclib\\": "phpseclib/"
                 }
             },
-            "autoload": {
-                "psr-0": {
-                    "Crypt": "phpseclib/",
-                    "File": "phpseclib/",
-                    "Math": "phpseclib/",
-                    "Net": "phpseclib/",
-                    "System": "phpseclib/"
-                },
-                "files": [
-                    "phpseclib/Crypt/Random.php"
-                ]
-            },
             "notification-url": "https://packagist.org/downloads/",
-            "include-path": [
-                "phpseclib/"
-            ],
             "license": [
                 "MIT"
             ],
@@ -1505,6 +1496,11 @@
                 {
                     "name": "Hans-Jürgen Petrich",
                     "email": "petrich@tronic-media.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Graham Campbell",
+                    "email": "graham@alt-three.com",
                     "role": "Developer"
                 }
             ],
@@ -1529,7 +1525,7 @@
                 "x.509",
                 "x509"
             ],
-            "time": "2015-01-28 21:50:33"
+            "time": "2015-10-22 14:56:07"
         },
         {
             "name": "psr/log",
@@ -2382,36 +2378,37 @@
         },
         {
             "name": "tymon/jwt-auth",
-            "version": "0.5.5",
+            "version": "dev-develop",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tymondesigns/jwt-auth.git",
-                "reference": "eb4abc9bf9d301e3e22f4eaa45a509d6b3100d58"
+                "reference": "ad6f85ab69275530811151b127b4997a217e6792"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/eb4abc9bf9d301e3e22f4eaa45a509d6b3100d58",
-                "reference": "eb4abc9bf9d301e3e22f4eaa45a509d6b3100d58",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/ad6f85ab69275530811151b127b4997a217e6792",
+                "reference": "ad6f85ab69275530811151b127b4997a217e6792",
                 "shasum": ""
             },
             "require": {
-                "illuminate/http": "~5.0",
-                "illuminate/support": "~5.0",
-                "namshi/jose": "5.0.*",
+                "illuminate/http": "5.1.*",
+                "illuminate/support": "5.1.*",
+                "namshi/jose": "6.0.*",
                 "nesbot/carbon": "~1.0",
-                "php": ">=5.4.0"
+                "php": ">=5.5.9"
             },
             "require-dev": {
-                "illuminate/auth": "~5.0",
-                "illuminate/console": "~5.0",
-                "illuminate/database": "~5.0",
+                "cartalyst/sentinel": "2.0.*",
+                "illuminate/auth": "5.1.*",
+                "illuminate/console": "5.1.*",
+                "illuminate/database": "5.1.*",
                 "mockery/mockery": "0.9.*",
                 "phpunit/phpunit": "4.*"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-develop": "0.5-dev"
+                    "dev-develop": "0.6-dev"
                 }
             },
             "autoload": {
@@ -2427,21 +2424,20 @@
                 {
                     "name": "Sean Tymon",
                     "email": "tymon148@gmail.com",
-                    "homepage": "http://tymondesigns.com",
+                    "homepage": "http://tymon.xyz",
                     "role": "Developer"
                 }
             ],
-            "description": "JSON Web Token Authentication for Laravel 4 and 5",
+            "description": "JSON Web Token Authentication for Laravel",
             "homepage": "https://github.com/tymondesigns/jwt-auth",
             "keywords": [
                 "Authentication",
                 "JSON Web Token",
                 "auth",
                 "jwt",
-                "laravel",
-                "tymon"
+                "laravel"
             ],
-            "time": "2015-09-15 21:20:29"
+            "time": "2015-10-28 22:54:35"
         },
         {
             "name": "venturecraft/revisionable",
@@ -3762,12 +3758,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "f301c743e1495960f87686c2125bf3fbed9896eb"
+                "reference": "d542bb62d3d1c2337ab8c35b179c28f7f55e97e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/f301c743e1495960f87686c2125bf3fbed9896eb",
-                "reference": "f301c743e1495960f87686c2125bf3fbed9896eb",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/d542bb62d3d1c2337ab8c35b179c28f7f55e97e6",
+                "reference": "d542bb62d3d1c2337ab8c35b179c28f7f55e97e6",
                 "shasum": ""
             },
             "require": {
@@ -3800,7 +3796,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2015-10-28 04:32:32"
+            "time": "2015-10-28 21:33:57"
         }
     ],
     "aliases": [],
