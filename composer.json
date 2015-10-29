@@ -14,10 +14,12 @@
             "url": "../api"
         }
     ],
+    "replace": {
+        "flashtag/api": "self.version",
+        "flashtag/core": "self.version"
+    },
     "require": {
         "php": ">=5.5.9",
-        "flashtag/core": "*@dev",
-        "flashtag/api": "*@dev",
         "laravel/framework": "5.1.*",
         "filp/whoops": " ~1.0"
     },
