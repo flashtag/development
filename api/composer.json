@@ -1,0 +1,31 @@
+{
+    "name": "flashtag/api",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ryan Winchester",
+            "email": "fungku@gmail.com"
+        }
+    ],
+    "require": {
+        "dingo/api": "dev-master@dev",
+        "illuminate/routing": "5.1.*",
+        "flashtag/core": "*@dev",
+        "tymon/jwt-auth": "0.6.*"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:flashtag/core.git"
+        }
+    ],
+    "require-dev": {
+        "phpspec/phpspec": "^2.1",
+        "benconstable/phpspec-laravel": " ~2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Flashtag\\Api\\": "src/"
+        }
+    }
+}

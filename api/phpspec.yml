@@ -1,0 +1,9 @@
+suites:
+    api:
+        namespace: Flashtag\Api
+        psr4_prefix: Flashtag\Api
+
+extensions:
+    - PhpSpec\Laravel\Extension\LaravelExtension
+
+formatter.name: pretty
