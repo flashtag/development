@@ -33,7 +33,7 @@ class Author extends Model
      */
     public function delete()
     {
-        if (isset($this->attributes['photo'])) {
+        if (! empty($this->photo)) {
             $this->deletePhoto();
         }
 
@@ -48,11 +48,13 @@ class Author extends Model
      */
     public function setPhotoAttribute($value)
     {
-        if ($this->attributes['photo'] == $value) {
+        if ($this->photo == $value) {
             return;
         }
 
-        $this->deletePhoto();
+        if (! empty($this->photo)) {
+            $this->deletePhoto();
+        }
 
         $this->attributes['photo'] = $value;
     }

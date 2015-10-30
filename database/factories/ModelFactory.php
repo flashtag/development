@@ -45,6 +45,15 @@ $factory->define(Flashtag\Core\Field::class, function (Faker\Generator $faker) {
     ];
 });
 
+$factory->define(Flashtag\Core\Author::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->name,
+        'link' => $faker->url,
+        'photo' => $faker->imageUrl(200),
+        'bio' => $faker->paragraph(3),
+    ];
+});
+
 $factory->define(Flashtag\Cms\User::class, function (Faker\Generator $faker) {
     return [
         'name'           => $faker->name,

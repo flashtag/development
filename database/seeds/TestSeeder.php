@@ -25,8 +25,9 @@ class TestSeeder extends Seeder
         $tags = $this->createTags();
         $fields = $this->createFields();
         $fieldValues = $this->setValuesToFields($fields);
+        $authors = $this->createAuthors();
 
-        $posts = $this->createPosts($categories, $tags, $fieldValues);
+        $posts = $this->createPosts($categories, $tags, $authors, $fieldValues);
 
         $users = $this->createUsers();
     }
@@ -115,21 +116,31 @@ class TestSeeder extends Seeder
     }
 
     /**
-     * @param \Illuminate\Support\Collection $categories
-     * @param \Illuminate\Support\Collection $tags
-     * @param array $fieldValues
      * @return \Illuminate\Support\Collection
      */
-    private function createPosts(Collection $categories, Collection $tags, array $fieldValues)
+    private function createAuthors()
     {
-        $posts = factory(\Flashtag\Core\Post::class, 10)->create([
-            'category_id' => $this->faker->randomElement($categories->lists('id')->toArray())
-        ]);
+        return factory(\Flashtag\Core\Author::class, 5)->create();
+    }
 
-        return $posts->map(function ($post) use ($categories, $tags, $fieldValues) {
+    /**
+     * @param \Illuminate\Support\Collection $categories
+     * @param \Illuminate\Support\Collection $tags
+     * @param Collection $authors
+     * @param array $fieldValues
+     * @return Collection
+     */
+    private function createPosts(Collection $categories, Collection $tags, Collection $authors, array $fieldValues)
+    {
+        $posts = factory(\Flashtag\Core\Post::class, 10)->create();
+
+        return $posts->map(function ($post) use ($categories, $tags, $authors, $fieldValues) {
             $post->changeCategoryTo($categories->random());
             $post->addTags($this->faker->randomElements($tags->all(), 2));
             $post->saveFields($fieldValues);
+            $post->author_id = $this->faker->randomElement($authors->lists('id')->toArray());
+            $post->save();
+
             return $post;
         });
     }

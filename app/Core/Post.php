@@ -201,7 +201,6 @@ class Post extends Model implements HasPresenter
 
         $sync = $postFields->reduce(function ($carry, $field) use ($getValue) {
             $carry[$field->id] = ['value' => $getValue($field)];
-            dump($carry);
 
             return $carry;
         }, []);
