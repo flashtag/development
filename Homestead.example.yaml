@@ -14,12 +14,6 @@ keys:
 folders:
     - map: "~/Code/flashtag/cms"
       to: "/home/vagrant/cms"
-    - map: "~/Code/flashtag/core"
-      to: "/home/vagrant/core"
-    - map: "~/Code/flashtag/api"
-      to: "/home/vagrant/api"
-    - map: "~/Code/flashtag/admin"
-      to: "/home/vagrant/admin"
 
 sites:
     - map: app.test

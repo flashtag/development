@@ -40,11 +40,7 @@
         "classmap": [
             "database/"
         ],
-        "psr-4": {
-            "Flashtag\\CMS\\": "app/",
-            "Flashtag\\Api\\": "api/",
-            "Flashtag\\": "core/"
-        }
+        "psr-4": { "Flashtag\\": "app/" }
     },
     "autoload-dev": {
         "classmap": [

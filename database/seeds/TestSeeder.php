@@ -39,7 +39,8 @@ class TestSeeder extends Seeder
         \DB::table('categories')->truncate();
         \DB::table('tags')->truncate();
         \DB::table('posts')->truncate();
-        \DB::table('post_fields')->truncate();
+        \DB::table('fields')->truncate();
+        \DB::table('users')->truncate();
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
@@ -48,7 +49,7 @@ class TestSeeder extends Seeder
      */
     private function createCategories()
     {
-        return factory(\Flashtag\Category::class, 5)->create();
+        return factory(\Flashtag\Core\Category::class, 5)->create();
     }
 
     /**
@@ -56,7 +57,7 @@ class TestSeeder extends Seeder
      */
     private function createTags()
     {
-        return factory(\Flashtag\Tag::class, 5)->create();
+        return factory(\Flashtag\Core\Tag::class, 5)->create();
     }
 
     /**
@@ -65,13 +66,13 @@ class TestSeeder extends Seeder
     private function createFields()
     {
         return new Collection([
-            \Flashtag\PostField::create([
+            \Flashtag\Core\Field::create([
                 'name'        => 'pull_quote',
                 'label'       => 'Pull quote',
                 'description' => 'Pull quotes',
                 'template'    => 'string',
             ]),
-            \Flashtag\PostField::create([
+            \Flashtag\Core\Field::create([
                 'name'        => 'footnotes',
                 'label'       => 'Footnotes',
                 'description' => 'Footnotes',
@@ -102,7 +103,7 @@ class TestSeeder extends Seeder
      */
     private function createPosts(Collection $categories, Collection $tags, array $fieldValues)
     {
-        $posts = factory(\Flashtag\Post::class, 10)->create([
+        $posts = factory(\Flashtag\Core\Post::class, 10)->create([
             'category_id' => $this->faker->randomElement($categories->lists('id')->toArray())
         ]);
 

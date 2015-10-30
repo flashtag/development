@@ -1,6 +1,6 @@
 <?php
 
-$factory->define(Flashtag\Category::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Core\Category::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
@@ -10,7 +10,7 @@ $factory->define(Flashtag\Category::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Flashtag\Tag::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Core\Tag::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
@@ -20,7 +20,7 @@ $factory->define(Flashtag\Tag::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Flashtag\Post::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Core\Post::class, function (Faker\Generator $faker) {
     $title = $faker->sentence(4);
 
     return [
@@ -35,7 +35,7 @@ $factory->define(Flashtag\Post::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Flashtag\Field::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Core\Field::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
