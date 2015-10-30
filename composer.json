@@ -6,12 +6,12 @@
     "type": "project",
     "repositories": [
         {
-            "type": "path",
-            "url": "../core"
+            "type": "vcs",
+            "url": "git@github.com:flashtag/core.git"
         },
         {
-            "type": "path",
-            "url": "../api"
+            "type": "vcs",
+            "url": "git@github.com:flashtag/api.git"
         }
     ],
     "replace": {
