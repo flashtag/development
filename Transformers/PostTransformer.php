@@ -2,7 +2,7 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Post;
+use Flashtag\Core\Post;
 
 class PostTransformer extends Transformer
 {
@@ -14,7 +14,7 @@ class PostTransformer extends Transformer
     protected $availableIncludes = ['category', 'tags', 'fields', 'revisions'];
 
     /**
-     * @param \Flashtag\Post $post
+     * @param \Flashtag\Core\Post $post
      * @return array
      */
     public function transform(Post $post)
@@ -36,7 +36,7 @@ class PostTransformer extends Transformer
     }
 
     /**
-     * @param \Flashtag\Post $post
+     * @param \Flashtag\Core\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */
@@ -44,13 +44,13 @@ class PostTransformer extends Transformer
     {
         $fields = $post->fields;
 
-        return $this->collection($fields, new PostFieldTransformer);
+        return $this->collection($fields, new FieldTransformer);
     }
 
     /**
      * Include Category
      *
-     * @param \Flashtag\Post $post
+     * @param \Flashtag\Core\Post $post
      * @return \League\Fractal\ItemResource
      */
     public function includeCategory(Post $post)
@@ -61,7 +61,7 @@ class PostTransformer extends Transformer
     }
 
     /**
-     * @param \Flashtag\Post $post
+     * @param \Flashtag\Core\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */

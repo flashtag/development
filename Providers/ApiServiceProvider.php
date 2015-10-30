@@ -17,8 +17,6 @@ class ApiServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/api.php', 'api');
-
         $this->app->register(\Dingo\Api\Provider\LaravelServiceProvider::class);
         $this->app->register(\Tymon\JWTAuth\Providers\LaravelServiceProvider::class);
     }
@@ -31,10 +29,6 @@ class ApiServiceProvider extends ServiceProvider
         if (! $this->app->routesAreCached()) {
             $this->apiRoutes();
         }
-
-        $this->publishes([
-            __DIR__.'/../config/api.php' => config_path('api.php')
-        ]);
     }
 
     /**

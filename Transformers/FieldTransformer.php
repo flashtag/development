@@ -2,15 +2,15 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\PostField;
+use Flashtag\Core\Field;
 
 class PostFieldTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\PostField $field
+     * @param \Flashtag\Core\Field $field
      * @return array
      */
-    public function transform(PostField $field)
+    public function transform(Field $field)
     {
         return [
             'label' => $field->label,
