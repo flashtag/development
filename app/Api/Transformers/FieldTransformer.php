@@ -4,7 +4,7 @@ namespace Flashtag\Api\Transformers;
 
 use Flashtag\Core\Field;
 
-class PostFieldTransformer extends Transformer
+class FieldTransformer extends Transformer
 {
     /**
      * @param \Flashtag\Core\Field $field
