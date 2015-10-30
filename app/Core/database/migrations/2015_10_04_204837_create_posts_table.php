@@ -17,12 +17,13 @@ class CreatePostsTable extends Migration
             $table->string('title');
             $table->string('slug');
             $table->string('subtitle')->nullable();
-            $table->integer('order')->unsigned();
             $table->integer('category_id')->unsigned();
             $table->text('body')->nullable();
             $table->boolean('is_published')->default(false);
             $table->timestamp('start_showing_at')->nullable();
             $table->timestamp('stop_showing_at')->nullable();
+            $table->integer('author_id')->unsigned()->nullable();
+            $table->boolean('show_author')->default(false);
             $table->timestamps();
         });
     }

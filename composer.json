@@ -26,7 +26,8 @@
         "dingo/api": "dev-master@dev",
         "tymon/jwt-auth": "0.6.*",
         "mccool/laravel-auto-presenter": "~4.1",
-        "filp/whoops": " ~1.0"
+        "filp/whoops": " ~1.0",
+        "doctrine/dbal": "^2.5"
     },
     "require-dev": {
         "laravel/homestead": "^2.1",

@@ -2,17 +2,16 @@
 
 namespace Flashtag\Core;
 
+use Flashtag\Core\Presenters\PostPresenter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use McCool\LaravelAutoPresenter\HasPresenter;
 use Venturecraft\Revisionable\RevisionableTrait;
-use Flashtag\Presenters\PostPresenter;
 
 /**
  * Class Post
  *
  * @property int $id
- * @property int $order
  * @property int $category_id
  * @property string $title
  * @property string $slug
@@ -24,6 +23,7 @@ use Flashtag\Presenters\PostPresenter;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Illuminate\Database\Eloquent\Model $category
+ * @property \Illuminate\Database\Eloquent\Model $author
  * @property \Illuminate\Database\Eloquent\Collection $fields
  * @property \Illuminate\Database\Eloquent\Collection $tags
  * @property \Illuminate\Database\Eloquent\Collection $revisionHistory
@@ -53,7 +53,9 @@ class Post extends Model implements HasPresenter
      */
     protected $casts = [
         'id'           => 'integer',
-        'is_published' => 'boolean'
+        'category_id'  => 'integer',
+        'is_published' => 'boolean',
+        'show_author'  => 'boolean',
     ];
 
     /**
@@ -76,6 +78,14 @@ class Post extends Model implements HasPresenter
     public function getPresenterClass()
     {
         return PostPresenter::class;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function author()
+    {
+        return $this->belongsTo(Author::class);
     }
 
     /**
@@ -111,7 +121,7 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * @param \Flashtag\Category $category
+     * @param \Flashtag\Core\Category $category
      * @return \Illuminate\Database\Eloquent\Model
      */
     public function changeCategoryTo($category)
@@ -145,6 +155,7 @@ class Post extends Model implements HasPresenter
         static::incrementOrderBetween($current, $order);
 
         $this->order = $order;
+
         return $this->save();
     }
 
@@ -182,14 +193,16 @@ class Post extends Model implements HasPresenter
     {
         $postFields = Field::all();
 
-        $getValue = function($field) use ($fields) {
+        $getValue = function ($field) use ($fields) {
             $default = $field->pivot ? $field->pivot->value : null;
+
             return isset($fields[$field->name]) ? $fields[$field->name] : $default;
         };
 
-        $sync = $postFields->reduce(function($carry, $field) use ($getValue) {
+        $sync = $postFields->reduce(function ($carry, $field) use ($getValue) {
             $carry[$field->id] = ['value' => $getValue($field)];
             dump($carry);
+
             return $carry;
         }, []);
 

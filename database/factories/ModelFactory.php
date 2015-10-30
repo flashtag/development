@@ -25,10 +25,9 @@ $factory->define(Flashtag\Core\Post::class, function (Faker\Generator $faker) {
 
     return [
         'title'            => $title,
-        'slug'             => str_slug($title),
         'subtitle'         => $faker->sentence(4),
+        'slug'             => str_slug($title),
         'body'             => $faker->paragraph(6),
-        'order'            => $faker->unique()->numberBetween(1, 10000),
         'is_published'     => $faker->boolean(80),
         'start_showing_at' => $faker->dateTimeBetween('-1 year'),
         'stop_showing_at'  => $faker->dateTimeBetween('-1 week', '+1 year'),

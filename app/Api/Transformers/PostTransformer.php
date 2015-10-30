@@ -20,14 +20,13 @@ class PostTransformer extends Transformer
     public function transform(Post $post)
     {
         return [
-            'id'               => $post->id,
+            'id'               => (int) $post->id,
             'title'            => $post->title,
             'slug'             => $post->slug,
             'subtitle'         => $post->subtitle,
-            'order'            => $post->order,
-            'category_id'      => $post->category_id,
+            'category_id'      => (int) $post->category_id,
             'body'             => $post->body,
-            'is_published'     => $post->is_published,
+            'is_published'     => (bool) $post->is_published,
             'start_showing_at' => $post->start_showing_at->getTimestamp(),
             'stop_showing_at'  => $post->stop_showing_at->getTimestamp(),
             'created_at'       => $post->created_at->getTimestamp(),

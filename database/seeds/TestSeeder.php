@@ -23,7 +23,8 @@ class TestSeeder extends Seeder
     {
         $categories = $this->createCategories();
         $tags = $this->createTags();
-        $fieldValues = $this->setValuesToFields($this->createFields());
+        $fields = $this->createFields();
+        $fieldValues = $this->setValuesToFields($fields);
 
         $posts = $this->createPosts($categories, $tags, $fieldValues);
 
@@ -73,9 +74,27 @@ class TestSeeder extends Seeder
                 'template'    => 'string',
             ]),
             \Flashtag\Core\Field::create([
+                'name'        => 'copyright',
+                'label'       => 'Copyright',
+                'description' => 'Copyright',
+                'template'    => 'string',
+            ]),
+            \Flashtag\Core\Field::create([
                 'name'        => 'footnotes',
                 'label'       => 'Footnotes',
                 'description' => 'Footnotes',
+                'template'    => 'rich_text',
+            ]),
+            \Flashtag\Core\Field::create([
+                'name'        => 'disclaimer',
+                'label'       => 'Disclaimer',
+                'description' => 'Disclaimer',
+                'template'    => 'rich_text',
+            ]),
+            \Flashtag\Core\Field::create([
+                'name'        => 'teaser',
+                'label'       => 'Teaser',
+                'description' => 'Teaser',
                 'template'    => 'rich_text',
             ]),
         ]);
