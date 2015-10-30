@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag;
+namespace Flashtag\Core;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -99,7 +99,7 @@ class Post extends Model implements HasPresenter
      */
     public function fields()
     {
-        return $this->belongsToMany(PostField::class)->withPivot('value');
+        return $this->belongsToMany(Field::class)->withPivot('value');
     }
 
     /**
@@ -180,7 +180,7 @@ class Post extends Model implements HasPresenter
      */
     public function saveFields($fields)
     {
-        $postFields = PostField::all();
+        $postFields = Field::all();
 
         $getValue = function($field) use ($fields) {
             $default = $field->pivot ? $field->pivot->value : null;

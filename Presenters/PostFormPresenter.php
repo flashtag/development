@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Presenters;
+namespace Flashtag\Core\Presenters;
 
 use McCool\LaravelAutoPresenter\BasePresenter;
 use Flashtag\Forms\PostForm;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag;
+namespace Flashtag\Core;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Database\Eloquent\Collection $posts
  * @property \Illuminate\Database\Eloquent\Collection $categories
  */
-class PostField extends Model
+class Field extends Model
 {
     /**
      * The attributes that are protected from mass assignment.

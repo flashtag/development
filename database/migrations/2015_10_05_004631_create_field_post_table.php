@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePostPostFieldTable extends Migration
+class CreateFieldPostTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,14 +12,14 @@ class CreatePostPostFieldTable extends Migration
      */
     public function up()
     {
-        Schema::create('post_post_field', function (Blueprint $table) {
+        Schema::create('field_post', function (Blueprint $table) {
             $table->integer('post_id')->unsigned();
-            $table->integer('post_field_id')->unsigned();
+            $table->integer('field_id')->unsigned();
             $table->text('value')->nullable();
 
             $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
-            $table->foreign('post_field_id')->references('id')->on('post_fields')->onDelete('cascade');
-            $table->index(['post_field_id', 'post_id']);
+            $table->foreign('field_id')->references('id')->on('fields')->onDelete('cascade');
+            $table->index(['field_id', 'post_id']);
         });
     }
 
@@ -30,6 +30,6 @@ class CreatePostPostFieldTable extends Migration
      */
     public function down()
     {
-        Schema::drop('post_post_field');
+        Schema::drop('field_post');
     }
 }

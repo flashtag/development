@@ -1,8 +1,8 @@
 <?php
 
-namespace Flashtag\Forms;
+namespace Flashtag\Core\Forms;
 
-use Flashtag\Presenters\PostFormPresenter;
+use Flashtag\Core\Presenters\PostFormPresenter;
 
 class PostForm implements HasPresenter
 {

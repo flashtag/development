@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Providers;
+namespace Flashtag\Core\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
