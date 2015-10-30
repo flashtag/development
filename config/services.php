@@ -30,7 +30,7 @@ return [
     ],
 
     'stripe' => [
-        'model'  => Flashtag\CMS\User::class,
+        'model'  => Flashtag\Cms\User::class,
         'key'    => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
     ],

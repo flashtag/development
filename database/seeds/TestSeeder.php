@@ -121,7 +121,7 @@ class TestSeeder extends Seeder
     private function createUsers()
     {
         return new Collection([
-            \Flashtag\CMS\User::create([
+            \Flashtag\Cms\User::create([
                 'email' => 'test@test.com',
                 'name' => $this->faker->name,
                 'password' => \Hash::make('password'),

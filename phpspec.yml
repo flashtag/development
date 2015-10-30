@@ -1,7 +1,7 @@
 suites:
     cms:
-        namespace: Flashtag\CMS
-        psr4_prefix: Flashtag\CMS
+        namespace: Flashtag\Cms
+        psr4_prefix: Flashtag\Cms
         src_path: app
         spec_path: tests
     api:

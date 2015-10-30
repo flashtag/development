@@ -46,7 +46,7 @@ $factory->define(Flashtag\Core\Field::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Flashtag\CMS\User::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Cms\User::class, function (Faker\Generator $faker) {
     return [
         'name'           => $faker->name,
         'email'          => $faker->email,

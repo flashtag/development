@@ -140,10 +140,10 @@ return [
         /*
          * Application Service Providers...
          */
-        Flashtag\CMS\Providers\AppServiceProvider::class,
-        Flashtag\CMS\Providers\AuthServiceProvider::class,
-        Flashtag\CMS\Providers\EventServiceProvider::class,
-        Flashtag\CMS\Providers\RouteServiceProvider::class,
+        Flashtag\Cms\Providers\AppServiceProvider::class,
+        Flashtag\Cms\Providers\AuthServiceProvider::class,
+        Flashtag\Cms\Providers\EventServiceProvider::class,
+        Flashtag\Cms\Providers\RouteServiceProvider::class,
 
         /*
          * Package Service Providers...
