@@ -1,5 +1,5 @@
 {
-    "name": "flashtag/core",
+    "name": "flashtag/cms",
     "license": "MIT",
     "authors": [
         {
@@ -8,13 +8,11 @@
         }
     ],
     "require": {
-        "illuminate/database": "5.1.*",
-        "venturecraft/revisionable": " 1.*",
-        "mccool/laravel-auto-presenter": "~4.1"
+        "laravel/framework": "5.1.*"
     },
     "autoload": {
         "psr-4": {
-            "Flashtag\\Core\\": ""
+            "Flashtag\\Cms\\": ""
         }
     }
 }
