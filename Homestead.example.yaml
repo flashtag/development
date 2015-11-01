@@ -12,12 +12,12 @@ keys:
     - ~/.ssh/id_rsa
 
 folders:
-    - map: "~/Code/flashtag/cms"
-      to: "/home/vagrant/cms"
+    - map: "~/Code/flashtag/flashtag"
+      to: "/home/vagrant/flashtag"
 
 sites:
     - map: app.test
-      to: "/home/vagrant/cms/public"
+      to: "/home/vagrant/flashtag/public"
 
 databases:
     - homestead

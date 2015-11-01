@@ -138,17 +138,14 @@ return [
         Illuminate\View\ViewServiceProvider::class,
 
         /*
-         * Application Service Providers...
+         * Flashtag Service Providers...
          */
+        Flashtag\Admin\Providers\AdminServiceProvider::class,
+        Flashtag\Api\Providers\ApiServiceProvider::class,
+        Flashtag\Client\Providers\RouteServiceProvider::class,
         Flashtag\Cms\Providers\AppServiceProvider::class,
         Flashtag\Cms\Providers\AuthServiceProvider::class,
         Flashtag\Cms\Providers\EventServiceProvider::class,
-
-        /*
-         * Package Service Providers...
-         */
-        Flashtag\Client\Providers\RouteServiceProvider::class,
-        Flashtag\Api\Providers\ApiServiceProvider::class,
 
     ],
 

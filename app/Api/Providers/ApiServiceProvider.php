@@ -19,6 +19,20 @@ class ApiServiceProvider extends ServiceProvider
     {
         $this->app->register(\Dingo\Api\Provider\LaravelServiceProvider::class);
         $this->app->register(\Tymon\JWTAuth\Providers\LaravelServiceProvider::class);
+
+        $this->configOverrides();
+    }
+
+    /**
+     * Set configuration overrides.
+     */
+    private function configOverrides()
+    {
+        $this->app['config']->set('api.auth', [
+            'jwt' => 'Dingo\Api\Auth\Provider\JWT',
+        ]);
+
+        $this->app['config']->set('jwt.blacklist_grace_period', env('JWT_BLACKLIST_GRACE_PERIOD', 60));
     }
 
     /**
@@ -43,7 +57,6 @@ class ApiServiceProvider extends ServiceProvider
 
             $api->version($version, [
                 'namespace' => $namespace,
-//                'middleware' => 'api.auth'
             ], function ($api) use ($version) {
                 require __DIR__.'/../Http/Routes/'.$version.'.php';
             });
