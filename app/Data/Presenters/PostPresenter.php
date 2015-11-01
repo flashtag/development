@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Core\Presenters;
+namespace Flashtag\Data\Presenters;
 
 use Carbon\Carbon;
 use McCool\LaravelAutoPresenter\BasePresenter;

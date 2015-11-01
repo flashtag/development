@@ -1,8 +1,8 @@
 <?php
 
-namespace Flashtag\Core;
+namespace Flashtag\Data;
 
-use Flashtag\Core\Presenters\PostPresenter;
+use Flashtag\Data\Presenters\PostPresenter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use McCool\LaravelAutoPresenter\HasPresenter;
@@ -121,7 +121,7 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * @param \Flashtag\Core\Category $category
+     * @param \Flashtag\Data\Category $category
      * @return \Illuminate\Database\Eloquent\Model
      */
     public function changeCategoryTo($category)

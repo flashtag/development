@@ -1,8 +1,8 @@
 <?php
 
-namespace Flashtag\Cms\Http\Controllers\Auth;
+namespace Flashtag\Client\Http\Controllers\Auth;
 
-use Flashtag\Cms\Http\Controllers\Controller;
+use Flashtag\Client\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 
 class PasswordController extends Controller

@@ -1,6 +1,6 @@
 <?php
 
-$factory->define(Flashtag\Core\Category::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Data\Category::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
@@ -10,7 +10,7 @@ $factory->define(Flashtag\Core\Category::class, function (Faker\Generator $faker
     ];
 });
 
-$factory->define(Flashtag\Core\Tag::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Data\Tag::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
@@ -20,7 +20,7 @@ $factory->define(Flashtag\Core\Tag::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Flashtag\Core\Post::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Data\Post::class, function (Faker\Generator $faker) {
     $title = $faker->sentence(4);
 
     return [
@@ -34,7 +34,7 @@ $factory->define(Flashtag\Core\Post::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Flashtag\Core\Field::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Data\Field::class, function (Faker\Generator $faker) {
     $name = $faker->sentence(4);
 
     return [
@@ -45,7 +45,7 @@ $factory->define(Flashtag\Core\Field::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->define(Flashtag\Core\Author::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Data\Author::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->name,
         'link' => $faker->url,
@@ -54,7 +54,7 @@ $factory->define(Flashtag\Core\Author::class, function (Faker\Generator $faker) 
     ];
 });
 
-$factory->define(Flashtag\Cms\User::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Data\User::class, function (Faker\Generator $faker) {
     return [
         'name'           => $faker->name,
         'email'          => $faker->email,

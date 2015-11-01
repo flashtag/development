@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Cms;
+namespace Flashtag\Data;
 
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;

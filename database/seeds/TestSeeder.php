@@ -51,7 +51,7 @@ class TestSeeder extends Seeder
      */
     private function createCategories()
     {
-        return factory(\Flashtag\Core\Category::class, 5)->create();
+        return factory(\Flashtag\Data\Category::class, 5)->create();
     }
 
     /**
@@ -59,7 +59,7 @@ class TestSeeder extends Seeder
      */
     private function createTags()
     {
-        return factory(\Flashtag\Core\Tag::class, 5)->create();
+        return factory(\Flashtag\Data\Tag::class, 5)->create();
     }
 
     /**
@@ -68,31 +68,31 @@ class TestSeeder extends Seeder
     private function createFields()
     {
         return new Collection([
-            \Flashtag\Core\Field::create([
+            \Flashtag\Data\Field::create([
                 'name'        => 'pull_quote',
                 'label'       => 'Pull quote',
                 'description' => 'Pull quotes',
                 'template'    => 'string',
             ]),
-            \Flashtag\Core\Field::create([
+            \Flashtag\Data\Field::create([
                 'name'        => 'copyright',
                 'label'       => 'Copyright',
                 'description' => 'Copyright',
                 'template'    => 'string',
             ]),
-            \Flashtag\Core\Field::create([
+            \Flashtag\Data\Field::create([
                 'name'        => 'footnotes',
                 'label'       => 'Footnotes',
                 'description' => 'Footnotes',
                 'template'    => 'rich_text',
             ]),
-            \Flashtag\Core\Field::create([
+            \Flashtag\Data\Field::create([
                 'name'        => 'disclaimer',
                 'label'       => 'Disclaimer',
                 'description' => 'Disclaimer',
                 'template'    => 'rich_text',
             ]),
-            \Flashtag\Core\Field::create([
+            \Flashtag\Data\Field::create([
                 'name'        => 'teaser',
                 'label'       => 'Teaser',
                 'description' => 'Teaser',
@@ -120,7 +120,7 @@ class TestSeeder extends Seeder
      */
     private function createAuthors()
     {
-        return factory(\Flashtag\Core\Author::class, 5)->create();
+        return factory(\Flashtag\Data\Author::class, 5)->create();
     }
 
     /**
@@ -132,7 +132,7 @@ class TestSeeder extends Seeder
      */
     private function createPosts(Collection $categories, Collection $tags, Collection $authors, array $fieldValues)
     {
-        $posts = factory(\Flashtag\Core\Post::class, 10)->create();
+        $posts = factory(\Flashtag\Data\Post::class, 10)->create();
 
         return $posts->map(function ($post) use ($categories, $tags, $authors, $fieldValues) {
             $post->changeCategoryTo($categories->random());
@@ -151,7 +151,7 @@ class TestSeeder extends Seeder
     private function createUsers()
     {
         return new Collection([
-            \Flashtag\Cms\User::create([
+            \Flashtag\Data\User::create([
                 'email' => 'test@test.com',
                 'name' => $this->faker->name,
                 'password' => \Hash::make('password'),

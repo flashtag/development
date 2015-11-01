@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Cms\Http\Requests;
+namespace Flashtag\Client\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 

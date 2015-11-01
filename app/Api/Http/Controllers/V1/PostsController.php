@@ -4,17 +4,17 @@ namespace Flashtag\Api\Http\Controllers\V1;
 
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\PostTransformer;
-use Flashtag\Core\Post;
+use Flashtag\Data\Post;
 
 class PostsController extends Controller
 {
     /**
-     * @var \Flashtag\Core\Post
+     * @var \Flashtag\Data\Post
      */
     private $post;
 
     /**
-     * @param \Flashtag\Core\Post $post
+     * @param \Flashtag\Data\Post $post
      */
     public function __construct(Post $post)
     {

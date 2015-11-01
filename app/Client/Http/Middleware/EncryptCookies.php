@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Cms\Http\Middleware;
+namespace Flashtag\Client\Http\Middleware;
 
 use Illuminate\Cookie\Middleware\EncryptCookies as BaseEncrypter;
 

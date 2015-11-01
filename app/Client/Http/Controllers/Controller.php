@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Cms\Http\Controllers;
+namespace Flashtag\Client\Http\Controllers;
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;

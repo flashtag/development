@@ -143,12 +143,11 @@ return [
         Flashtag\Cms\Providers\AppServiceProvider::class,
         Flashtag\Cms\Providers\AuthServiceProvider::class,
         Flashtag\Cms\Providers\EventServiceProvider::class,
-        Flashtag\Cms\Providers\RouteServiceProvider::class,
 
         /*
          * Package Service Providers...
          */
-        Flashtag\Core\Providers\CoreServiceProvider::class,
+        Flashtag\Client\Providers\RouteServiceProvider::class,
         Flashtag\Api\Providers\ApiServiceProvider::class,
 
     ],

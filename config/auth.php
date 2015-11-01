@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'model' => Flashtag\Cms\User::class,
+    'model' => Flashtag\Data\User::class,
 
     /*
     |--------------------------------------------------------------------------

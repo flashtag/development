@@ -1,10 +1,10 @@
 <?php
 
-namespace Flashtag\Cms\Http\Controllers;
+namespace Flashtag\Client\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Flashtag\Cms\Http\Requests;
-use Flashtag\Cms\Http\Controllers\Controller;
+use Flashtag\Client\Http\Requests;
+use Flashtag\Client\Http\Controllers\Controller;
 
 class PostsController extends Controller
 {

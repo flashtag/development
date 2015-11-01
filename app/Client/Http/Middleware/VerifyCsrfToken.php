@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Cms\Http\Middleware;
+namespace Flashtag\Client\Http\Middleware;
 
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as BaseVerifier;
 

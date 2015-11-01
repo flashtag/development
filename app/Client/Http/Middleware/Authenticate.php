@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Cms\Http\Middleware;
+namespace Flashtag\Client\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Auth\Guard;

@@ -1,12 +1,12 @@
 <?php
 
-namespace Flashtag\Cms\Http\Controllers\Auth;
+namespace Flashtag\Client\Http\Controllers\Auth;
 
-use Flashtag\Cms\User;
-use Validator;
-use Flashtag\Cms\Http\Controllers\Controller;
+use Flashtag\Client\Http\Controllers\Controller;
+use Flashtag\Data\User;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Validator;
 
 class AuthController extends Controller
 {
