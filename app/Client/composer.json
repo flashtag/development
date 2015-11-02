@@ -1,0 +1,15 @@
+{
+    "name": "flashtag/client",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ryan Winchester",
+            "email": "fungku@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Flashtag\\Client\\": ""
+        }
+    }
+}
