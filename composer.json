@@ -41,7 +41,8 @@
         "classmap": [
             "database/"
         ],
-        "psr-4": { "Flashtag\\": "app/" }
+        "psr-4": { "Flashtag\\": "app/" },
+        "exclude-from-classmap": ["app/Data/database/"]
     },
     "autoload-dev": {
         "classmap": [

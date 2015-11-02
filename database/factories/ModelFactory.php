@@ -31,6 +31,7 @@ $factory->define(Flashtag\Data\Post::class, function (Faker\Generator $faker) {
         'is_published'     => $faker->boolean(80),
         'start_showing_at' => $faker->dateTimeBetween('-1 year'),
         'stop_showing_at'  => $faker->dateTimeBetween('-1 week', '+1 year'),
+        'order' => 2,
     ];
 });
 

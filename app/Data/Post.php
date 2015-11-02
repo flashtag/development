@@ -16,6 +16,7 @@ use Venturecraft\Revisionable\RevisionableTrait;
  * @property string $title
  * @property string $slug
  * @property string $subtitle
+ * @property int $order
  * @property string $body
  * @property boolean $is_published
  * @property \Carbon\Carbon $start_showing_at

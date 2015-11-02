@@ -15,6 +15,7 @@
     "autoload": {
         "psr-4": {
             "Flashtag\\Cms\\": ""
-        }
+        },
+        "exclude-from-classmap": ["/database/"]
     }
 }

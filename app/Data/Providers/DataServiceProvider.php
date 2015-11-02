@@ -5,10 +5,11 @@ namespace Flashtag\Data\Providers;
 use Illuminate\Support\ServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
 
-class CoreServiceProvider extends ServiceProvider
+class DataServiceProvider extends ServiceProvider
 {
     protected $providers = [
         AutoPresenterServiceProvider::class,
+        EventServiceProvider::class,
     ];
 
     public function register()

@@ -132,7 +132,7 @@ class TestSeeder extends Seeder
      */
     private function createPosts(Collection $categories, Collection $tags, Collection $authors, array $fieldValues)
     {
-        $posts = factory(\Flashtag\Data\Post::class, 10)->create();
+        $posts = factory(\Flashtag\Data\Post::class, 100)->create();
 
         return $posts->map(function ($post) use ($categories, $tags, $authors, $fieldValues) {
             $post->changeCategoryTo($categories->random());
@@ -140,6 +140,8 @@ class TestSeeder extends Seeder
             $post->saveFields($fieldValues);
             $post->author_id = $this->faker->randomElement($authors->lists('id')->toArray());
             $post->save();
+
+            event(new \Flashtag\Data\Events\PostWasCreated($post));
 
             return $post;
         });

@@ -146,6 +146,7 @@ return [
         Flashtag\Cms\Providers\AppServiceProvider::class,
         Flashtag\Cms\Providers\AuthServiceProvider::class,
         Flashtag\Cms\Providers\EventServiceProvider::class,
+        Flashtag\Data\Providers\DataServiceProvider::class,
 
     ],
 
