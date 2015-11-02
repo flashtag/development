@@ -23,12 +23,10 @@ class PostEventListener
      */
     private function insertPostAsFirstInCategory(Post $post)
     {
-        // Increment all posts' orders by 1.
         \DB::table('posts')
             ->where('category_id', $post->category_id)
             ->increment('order');
 
-        // Save this new post as the first.
         $post->order = 1;
         $post->save();
     }

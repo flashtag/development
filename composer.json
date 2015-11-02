@@ -7,16 +7,31 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:flashtag/core.git"
+            "url": "git@github.com:flashtag/admin.git"
         },
         {
             "type": "vcs",
             "url": "git@github.com:flashtag/api.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:flashtag/client.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:flashtag/cms.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:flashtag/data.git"
         }
     ],
     "replace": {
+        "flashtag/admin": "self.version",
         "flashtag/api": "self.version",
-        "flashtag/core": "self.version"
+        "flashtag/client": "self.version",
+        "flashtag/cms": "self.version",
+        "flashtag/data": "self.version"
     },
     "require": {
         "php": ">=5.5.9",
