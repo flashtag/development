@@ -10,8 +10,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- * @property \Illuminate\Database\Eloquent\Model $post
- * @property \Illuminate\Database\Eloquent\Model $category
  */
 class Meta extends Model
 {
@@ -32,16 +30,8 @@ class Meta extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
-    public function post()
+    public function meta()
     {
-        return $this->morphTo(Post::class);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
-     */
-    public function category()
-    {
-        return $this->morphTo(Category::class);
+        return $this->morphTo();
     }
 }

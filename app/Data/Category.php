@@ -30,4 +30,12 @@ class Category extends Model
         return $this->morphToMany(Field::class, 'fieldable')
             ->withPivot('value');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function meta()
+    {
+        return $this->morphOne(Meta::class, 'meta');
+    }
 }

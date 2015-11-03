@@ -25,6 +25,7 @@ use Venturecraft\Revisionable\RevisionableTrait;
  * @property \Carbon\Carbon $updated_at
  * @property \Illuminate\Database\Eloquent\Model $category
  * @property \Illuminate\Database\Eloquent\Model $author
+ * @property \Illuminate\Database\Eloquent\Model $meta
  * @property \Illuminate\Database\Eloquent\Collection $fields
  * @property \Illuminate\Database\Eloquent\Collection $tags
  * @property \Illuminate\Database\Eloquent\Collection $revisionHistory
@@ -114,11 +115,11 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function meta()
     {
-        return $this->morphTo(Meta::class);
+        return $this->morphOne(Meta::class, 'meta');
     }
 
     /**
