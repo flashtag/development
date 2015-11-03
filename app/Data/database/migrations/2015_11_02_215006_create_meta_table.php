@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePostRatingsTable extends Migration
+class CreateMetaTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,12 +12,11 @@ class CreatePostRatingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('post_ratings', function (Blueprint $table) {
+        Schema::create('meta', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('post_id');
-            $table->unsignedInteger('rater_id')->nullable();
-            $table->unsignedSmallInteger('rating');
-            $table->integer('ip')->nullable();
+            $table->string('metable_type');
+            $table->unsignedInteger('metable_id');
+            $table->json('json');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreatePostRatingsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('post_ratings');
+        Schema::drop('meta');
     }
 }

@@ -114,6 +114,14 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
+    public function meta()
+    {
+        return $this->morphTo(Meta::class);
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function revisions()

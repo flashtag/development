@@ -3,6 +3,7 @@
 namespace Flashtag\Data;
 
 use Illuminate\Database\Eloquent\Model;
+use Storage;
 
 /**
  * Class PostRating
@@ -52,6 +53,6 @@ class PostRating extends Model
      */
     private function deletePhoto()
     {
-        return \Storage::delete($this->photo);
+        return Storage::delete($this->photo);
     }
 }
