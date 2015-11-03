@@ -1,5 +1,3 @@
-#!/bin/bash
-
 git subsplit init git@github.com:flashtag/flashtag.git
 git subsplit publish --heads="master" app/Admin:git@github.com:flashtag/admin.git
 git subsplit publish --heads="master" app/Api:git@github.com:flashtag/api.git

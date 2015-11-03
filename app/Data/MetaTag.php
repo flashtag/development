@@ -11,14 +11,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */
-class Meta extends Model
+class MetaTag extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'meta';
+    protected $table = 'meta_tags';
 
     /**
      * The attributes that are not mass assignable.
@@ -30,7 +30,7 @@ class Meta extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
-    public function meta()
+    public function metaTaggable()
     {
         return $this->morphTo();
     }

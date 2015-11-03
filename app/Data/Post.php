@@ -119,7 +119,7 @@ class Post extends Model implements HasPresenter
      */
     public function meta()
     {
-        return $this->morphOne(Meta::class, 'meta');
+        return $this->morphOne(MetaTag::class, 'meta_taggable');
     }
 
     /**
