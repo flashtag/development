@@ -43,6 +43,7 @@ class TestSeeder extends Seeder
         \DB::table('posts')->truncate();
         \DB::table('fields')->truncate();
         \DB::table('users')->truncate();
+        \DB::table('meta_tags')->truncate();
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
@@ -140,6 +141,8 @@ class TestSeeder extends Seeder
             $post->saveFields($fieldValues);
             $post->author_id = $this->faker->randomElement($authors->lists('id')->toArray());
             $post->save();
+
+            $post->meta()->save(factory(\Flashtag\Data\MetaTag::class)->create());
 
             event(new \Flashtag\Data\Events\PostWasCreated($post));
 

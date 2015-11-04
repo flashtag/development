@@ -5,21 +5,17 @@ namespace Flashtag\Data;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Meta
+ * Class MetaTag
  *
  * @property int $id
+ * @property string $url
+ * @property string $description
+ * @property string $image
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */
 class MetaTag extends Model
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'meta_tags';
-
     /**
      * The attributes that are not mass assignable.
      *

@@ -11,7 +11,7 @@ class PostTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions'];
+    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'metadata'];
 
     /**
      * @param \Flashtag\Data\Post $post
@@ -35,6 +35,8 @@ class PostTransformer extends Transformer
     }
 
     /**
+     * Include custom fields.
+     *
      * @param \Flashtag\Data\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
@@ -43,23 +45,25 @@ class PostTransformer extends Transformer
     {
         $fields = $post->fields;
 
-        return $this->collection($fields, new FieldTransformer);
+        return $this->collection($fields, new FieldTransformer());
     }
 
     /**
      * Include Category
      *
      * @param \Flashtag\Data\Post $post
-     * @return \League\Fractal\ItemResource
+     * @return \League\Fractal\Resource\Item
      */
     public function includeCategory(Post $post)
     {
         $category = $post->category;
 
-        return $this->item($category, new CategoryTransformer);
+        return $this->item($category, new CategoryTransformer());
     }
 
     /**
+     * Include revision history.
+     *
      * @param \Flashtag\Data\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
@@ -68,6 +72,19 @@ class PostTransformer extends Transformer
     {
         $revisions = $post->revisionHistory;
 
-        return $this->collection($revisions, new RevisionTransformer);
+        return $this->collection($revisions, new RevisionTransformer());
+    }
+
+    /**
+     * Include meta.
+     *
+     * @param \Flashtag\Data\Post $post
+     * @return \League\Fractal\Resource\Item
+     */
+    public function includeMetadata(Post $post)
+    {
+        $metadata = $post->metadata;
+
+        return $this->item($metadata, new MetaTagTransformer());
     }
 }

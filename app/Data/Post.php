@@ -117,7 +117,7 @@ class Post extends Model implements HasPresenter
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function meta()
+    public function metadata()
     {
         return $this->morphOne(MetaTag::class, 'meta_taggable');
     }

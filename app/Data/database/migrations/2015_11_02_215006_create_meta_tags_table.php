@@ -19,12 +19,6 @@ class CreateMetaTagsTable extends Migration
             $table->string('url')->nullable();
             $table->string('description', 155)->nullable();
             $table->string('image')->nullable();
-            $table->string('twitter_card')->nullable();
-            $table->string('twitter_site')->nullable();
-            $table->string('twitter_creator')->nullable();
-            $table->string('facebook_admins')->nullable();
-            $table->string('facebook_app_id')->nullable();
-            $table->string('facebook_page_id')->nullable();
             $table->timestamps();
         });
     }
