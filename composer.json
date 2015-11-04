@@ -36,7 +36,6 @@
     "require": {
         "php": ">=5.5.9",
         "laravel/framework": "5.1.*",
-        "flashtag/core": "*@dev",
         "venturecraft/revisionable": " 1.*",
         "dingo/api": "dev-master@dev",
         "tymon/jwt-auth": "0.6.*",

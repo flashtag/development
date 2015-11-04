@@ -11,7 +11,7 @@ class PostTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'metadata'];
+    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'meta'];
 
     /**
      * @param \Flashtag\Data\Post $post
@@ -81,10 +81,10 @@ class PostTransformer extends Transformer
      * @param \Flashtag\Data\Post $post
      * @return \League\Fractal\Resource\Item
      */
-    public function includeMetadata(Post $post)
+    public function includeMeta(Post $post)
     {
-        $metadata = $post->metadata;
+        $meta = $post->meta;
 
-        return $this->item($metadata, new MetaTagTransformer());
+        return $this->item($meta, new MetaTagTransformer());
     }
 }
