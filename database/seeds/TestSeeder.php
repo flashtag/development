@@ -142,17 +142,33 @@ class TestSeeder extends Seeder
             $post->author_id = $this->faker->randomElement($authors->lists('id')->toArray());
             $post->save();
 
-            $post->meta()->save(factory(\Flashtag\Data\MetaTag::class)->create());
-
-            $ratings = factory(\Flashtag\Data\PostRating::class, $this->faker->numberBetween(2, 10))->create();
-
-            $ratings->map(function($rating) use ($post) {
-                $post->ratings()->save($rating);
-            });
+            // Additional Relationships
+            $this->addMetaTo($post);
+            $this->addRatingsTo($post);
 
             event(new \Flashtag\Data\Events\PostWasCreated($post));
 
             return $post;
+        });
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Model $model
+     */
+    private function addMetaTo($model)
+    {
+        $model->meta()->save(factory(\Flashtag\Data\MetaTag::class)->create());
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Model $model
+     */
+    private function addRatingsTo($model)
+    {
+        $ratings = factory(\Flashtag\Data\PostRating::class, $this->faker->numberBetween(2, 10))->create();
+
+        $ratings->map(function($rating) use ($model) {
+            $model->ratings()->save($rating);
         });
     }
 

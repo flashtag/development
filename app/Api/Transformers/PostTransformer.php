@@ -11,7 +11,7 @@ class PostTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'meta', 'ratings'];
+    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'meta', 'ratings', 'author'];
 
     /**
      * @param \Flashtag\Data\Post $post
@@ -43,9 +43,7 @@ class PostTransformer extends Transformer
      */
     public function includeFields(Post $post)
     {
-        $fields = $post->fields;
-
-        return $this->collection($fields, new FieldTransformer());
+        return $this->collection($post->fields, new FieldTransformer());
     }
 
     /**
@@ -56,9 +54,7 @@ class PostTransformer extends Transformer
      */
     public function includeCategory(Post $post)
     {
-        $category = $post->category;
-
-        return $this->item($category, new CategoryTransformer());
+        return $this->item($post->category, new CategoryTransformer());
     }
 
     /**
@@ -70,9 +66,7 @@ class PostTransformer extends Transformer
      */
     public function includeTags(Post $post)
     {
-        $tags = $post->tags;
-
-        return $this->collection($tags, new TagTransformer());
+        return $this->collection($post->tags, new TagTransformer());
     }
 
     /**
@@ -84,9 +78,7 @@ class PostTransformer extends Transformer
      */
     public function includeRevisions(Post $post)
     {
-        $revisions = $post->revisionHistory;
-
-        return $this->collection($revisions, new RevisionTransformer());
+        return $this->collection($post->revisionHistory, new RevisionTransformer());
     }
 
     /**
@@ -97,9 +89,7 @@ class PostTransformer extends Transformer
      */
     public function includeMeta(Post $post)
     {
-        $meta = $post->meta;
-
-        return $this->item($meta, new MetaTagTransformer());
+        return $this->item($post->meta, new MetaTagTransformer());
     }
 
     /**
@@ -110,8 +100,17 @@ class PostTransformer extends Transformer
      */
     public function includeRatings(Post $post)
     {
-        $ratings = $post->ratings;
+        return $this->collection($post->ratings, new PostRatingTransformer());
+    }
 
-        return $this->collection($ratings, new PostRatingTransformer());
+    /**
+     * Include author.
+     *
+     * @param Post $post
+     * @return \League\Fractal\Resource\Item
+     */
+    public function includeAuthor(Post $post)
+    {
+        return $this->item($post->author, new AuthorTransformer());
     }
 }
