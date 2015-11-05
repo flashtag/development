@@ -55,10 +55,10 @@ class Post extends Model implements HasPresenter
      * @var array
      */
     protected $casts = [
-        'id'           => 'integer',
-        'category_id'  => 'integer',
+        'id' => 'integer',
+        'category_id' => 'integer',
         'is_published' => 'boolean',
-        'show_author'  => 'boolean',
+        'show_author' => 'boolean',
     ];
 
     /**

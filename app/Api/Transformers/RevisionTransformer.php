@@ -13,7 +13,7 @@ class RevisionTransformer extends Transformer
     public function transform(Revision $revision)
     {
         return [
-            'key'       => $revision->key,
+            'key' => $revision->key,
             'old_value' => $revision->old_value,
             'new_value' => $revision->new_value,
         ];

@@ -11,7 +11,7 @@ class PostTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'meta'];
+    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'meta', 'ratings'];
 
     /**
      * @param \Flashtag\Data\Post $post
@@ -20,17 +20,17 @@ class PostTransformer extends Transformer
     public function transform(Post $post)
     {
         return [
-            'id'               => (int) $post->id,
-            'title'            => $post->title,
-            'slug'             => $post->slug,
-            'subtitle'         => $post->subtitle,
-            'category_id'      => (int) $post->category_id,
-            'body'             => $post->body,
-            'is_published'     => (bool) $post->is_published,
+            'id' => (int) $post->id,
+            'title' => $post->title,
+            'slug' => $post->slug,
+            'subtitle' => $post->subtitle,
+            'category_id' => (int) $post->category_id,
+            'body' => $post->body,
+            'is_published' => (bool) $post->is_published,
             'start_showing_at' => $post->start_showing_at->getTimestamp(),
-            'stop_showing_at'  => $post->stop_showing_at->getTimestamp(),
-            'created_at'       => $post->created_at->getTimestamp(),
-            'updated_at'       => $post->updated_at->getTimestamp(),
+            'stop_showing_at' => $post->stop_showing_at->getTimestamp(),
+            'created_at' => $post->created_at->getTimestamp(),
+            'updated_at' => $post->updated_at->getTimestamp(),
         ];
     }
 
@@ -100,5 +100,18 @@ class PostTransformer extends Transformer
         $meta = $post->meta;
 
         return $this->item($meta, new MetaTagTransformer());
+    }
+
+    /**
+     * Include ratings.
+     *
+     * @param Post $post
+     * @return \League\Fractal\Resource\Collection
+     */
+    public function includeRatings(Post $post)
+    {
+        $ratings = $post->ratings;
+
+        return $this->collection($ratings, new PostRatingTransformer());
     }
 }
