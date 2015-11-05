@@ -16,7 +16,7 @@ class CreatePostRatingsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('post_id');
             $table->unsignedInteger('rater_id')->nullable();
-            $table->unsignedSmallInteger('rating');
+            $table->unsignedSmallInteger('value');
             $table->integer('ip')->nullable();
             $table->timestamps();
         });

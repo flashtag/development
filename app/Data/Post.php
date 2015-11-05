@@ -28,6 +28,7 @@ use Venturecraft\Revisionable\RevisionableTrait;
  * @property \Illuminate\Database\Eloquent\Model $meta
  * @property \Illuminate\Database\Eloquent\Collection $fields
  * @property \Illuminate\Database\Eloquent\Collection $tags
+ * @property \Illuminate\Database\Eloquent\Collection $ratings
  * @property \Illuminate\Database\Eloquent\Collection $revisionHistory
  */
 class Post extends Model implements HasPresenter
@@ -128,6 +129,26 @@ class Post extends Model implements HasPresenter
     public function revisions()
     {
         return $this->revisionHistory();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function ratings()
+    {
+        return $this->hasMany(PostRating::class);
+    }
+
+    /**
+     * Get the average rating.
+     *
+     * @return string
+     */
+    public function getRating()
+    {
+        $ratings = $this->ratings;
+
+        return number_format($ratings->sum('value') / $ratings->count());
     }
 
     /**

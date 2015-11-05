@@ -63,6 +63,13 @@ $factory->define(Flashtag\Data\MetaTag::class, function (Faker\Generator $faker)
     ];
 });
 
+$factory->define(Flashtag\Data\PostRating::class, function (Faker\Generator $faker) {
+    return [
+        'value' => $faker->numberBetween(0, 100),
+        'ip' => $faker->ipv4,
+    ];
+});
+
 $factory->define(Flashtag\Data\User::class, function (Faker\Generator $faker) {
     return [
         'name'           => $faker->name,

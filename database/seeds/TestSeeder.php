@@ -144,6 +144,12 @@ class TestSeeder extends Seeder
 
             $post->meta()->save(factory(\Flashtag\Data\MetaTag::class)->create());
 
+            $ratings = factory(\Flashtag\Data\PostRating::class, $this->faker->numberBetween(1, 10))->create();
+            $ratings->map(function($rating) use ($post) {
+                $post->ratings()->save($rating);
+//                $rating->post()->associate($post);
+            });
+
             event(new \Flashtag\Data\Events\PostWasCreated($post));
 
             return $post;

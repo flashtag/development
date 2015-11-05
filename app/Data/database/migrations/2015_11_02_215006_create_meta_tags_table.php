@@ -14,8 +14,7 @@ class CreateMetaTagsTable extends Migration
     {
         Schema::create('meta_tags', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('meta_taggable_id');
-            $table->string('meta_taggable_type');
+            $table->morphs('meta_taggable');
             $table->string('url')->nullable();
             $table->string('description', 155)->nullable();
             $table->string('image')->nullable();
