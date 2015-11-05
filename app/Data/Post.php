@@ -205,7 +205,7 @@ class Post extends Model implements HasPresenter
             return false;
         }
 
-        static::incrementOrderBetween($current, $order);
+        static::incrementCategoryOrderBetween($this->category_id, $current, $order);
 
         $this->order = $order;
 
@@ -213,13 +213,14 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * Increment all the posts between an old and new order.
+     * Increment all the posts in a category between an old and new order.
      *
+     * @param int $categoryId
      * @param int $old
      * @param int $new
-     * @return mixed
+     * @return int The number of rows affected.
      */
-    public static function incrementOrderBetween($old, $new)
+    public static function incrementCategoryOrderBetween($categoryId, $old, $new)
     {
         if ($new < $old) {
             $increment = '+1';
@@ -231,11 +232,11 @@ class Post extends Model implements HasPresenter
 
         return \DB::update(
             \DB::raw(
-                "UPDATE posts
-                 SET order = order {$increment}
-                 WHERE order BETWEEN ? AND ?"
+                "UPDATE `posts`
+                 SET `order` = `order` {$increment}
+                 WHERE `category_id` = ? AND `order` BETWEEN ? AND ?"
             ),
-            $whereBetween
+            array_merge([$categoryId], $whereBetween)
         );
     }
 }
