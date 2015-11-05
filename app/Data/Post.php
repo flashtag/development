@@ -149,6 +149,28 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * @param \Illuminate\Support\Collection|array $fields
+     */
+    public function saveFields($fields)
+    {
+        $postFields = Field::all();
+
+        $getValue = function ($field) use ($fields) {
+            $default = $field->pivot ? $field->pivot->value : null;
+
+            return isset($fields[$field->name]) ? $fields[$field->name] : $default;
+        };
+
+        $sync = $postFields->reduce(function ($carry, $field) use ($getValue) {
+            $carry[$field->id] = ['value' => $getValue($field)];
+
+            return $carry;
+        }, []);
+
+        $this->fields()->sync($sync);
+    }
+
+    /**
      * Move the post to a new order.
      *
      * @param int $order
@@ -194,27 +216,5 @@ class Post extends Model implements HasPresenter
             ),
             $whereBetween
         );
-    }
-
-    /**
-     * @param \Illuminate\Support\Collection|array $fields
-     */
-    public function saveFields($fields)
-    {
-        $postFields = Field::all();
-
-        $getValue = function ($field) use ($fields) {
-            $default = $field->pivot ? $field->pivot->value : null;
-
-            return isset($fields[$field->name]) ? $fields[$field->name] : $default;
-        };
-
-        $sync = $postFields->reduce(function ($carry, $field) use ($getValue) {
-            $carry[$field->id] = ['value' => $getValue($field)];
-
-            return $carry;
-        }, []);
-
-        $this->fields()->sync($sync);
     }
 }

@@ -62,6 +62,20 @@ class PostTransformer extends Transformer
     }
 
     /**
+     * Include tags.
+     *
+     * @param \Flashtag\Data\Post $post
+     * @return \League\Fractal\Resource\Collection
+     * @throws \Exception
+     */
+    public function includeTags(Post $post)
+    {
+        $tags = $post->tags;
+
+        return $this->collection($tags, new TagTransformer());
+    }
+
+    /**
      * Include revision history.
      *
      * @param \Flashtag\Data\Post $post
