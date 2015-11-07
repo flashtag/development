@@ -1,6 +1,6 @@
-@extends ('flashtag')
+@extends ('master')
 
-@section ('html-props') itemscope itemtype="http://schema.org/Article" @stop
+@section ('html-tag') <html itemscope itemtype="http://schema.org/Article"> @stop
 
 @section ('title') {{ $post->title }} @stop
 
