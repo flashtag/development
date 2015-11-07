@@ -1,6 +1,5 @@
-/vendor/
-/node_modules/
-/packages/
+vendor/
+node_modules/
 
 composer.lock
 Homestead.yaml
