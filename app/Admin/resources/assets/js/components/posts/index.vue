@@ -1,7 +1,7 @@
 <template>
-    <h1>Dashboard</h1>
+    <h1>Posts</h1>
 </template>
 
 <script>
-
+    //
 </script>

@@ -1,16 +1,27 @@
 var Vue = require('vue');
-
+var VueRouter = require('vue-router');
 var rest = require('rest');
 var client = require('./client');
 
-var admin = new Vue({
+Vue.use(VueRouter);
 
-    el: '#admin',
+var router = new VueRouter();
 
-    data: {
-        user: null,
-        token: null,
-        authenticated: false
+router.map({
+    '/': { component: require('./components/dashboard.vue') },
+    '/posts': { component: require('./components/posts/index.vue') }
+});
+
+var Admin = Vue.extend({
+
+    el: '#Admin',
+
+    data: function() {
+        return {
+            user: null,
+            token: null,
+            authenticated: false
+        }
     },
 
     ready: function () {
@@ -56,7 +67,7 @@ var admin = new Vue({
             this.token = localStorage.getItem('jwt-token');
         },
 
-        destroyLogin: function (user) {
+        destroyLogin: function () {
             // Cleanup when token was invalid our user has logged out.
             this.user = null;
             this.token = null;
@@ -68,3 +79,5 @@ var admin = new Vue({
     }
 
 });
+
+router.start(Admin, '#Admin');
