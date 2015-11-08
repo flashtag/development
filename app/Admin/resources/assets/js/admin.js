@@ -2,9 +2,7 @@ var Vue = require('vue');
 var VueRouter = require('vue-router');
 var rest = require('rest');
 var client = require('./client');
-
 Vue.use(VueRouter);
-
 var router = new VueRouter();
 import { mapRoutes } from './routes';
 mapRoutes(router);
