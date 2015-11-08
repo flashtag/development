@@ -1,10 +1,10 @@
 <template>
     <h1>Posts</h1>
-    <p>index</p>
+    <p>edit</p>
 </template>
 
 <script>
-export default {
-    //
-}
+    export default {
+        //
+    }
 </script>

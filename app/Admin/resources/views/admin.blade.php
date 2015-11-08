@@ -5,13 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>@yield('title', 'Home') - Flashtag</title>
+    <title>Flashtag</title>
+    <meta name="description" content="Flashtag is a simple developer-driven CMS.">
 
-    @section('meta')
-        <meta name="description" content="Flashtag is a simple developer-driven CMS.">
-    @show
-
-    <link rel="stylesheet" href="/css/flashtag.css">
+    <link rel="stylesheet" href="/assets/admin/admin.css">
 </head>
 <body>
     <div id="Admin">
@@ -19,5 +16,7 @@
         <router-view></router-view>
         <footer id="Footer"></footer>
     </div>
+
+<script src="/assets/admin/admin.js"></script>
 </body>
 </html>

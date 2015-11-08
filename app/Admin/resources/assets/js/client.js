@@ -1,3 +1,5 @@
+var rest = require('rest');
+
 module.exports = getWrappedClient(rest);
 
 function getWrappedClient(rest) {
@@ -8,9 +10,14 @@ function getWrappedClient(rest) {
     var interceptor = require('rest/interceptor');
     var jwtAuth = require('./interceptors/jwtAuth');
 
-    return rest.wrap(pathPrefix, { prefix: config.api.base_url })
+    var defaultHeaders = {
+        'X-Requested-With': 'rest.js',
+        'Content-Type': 'application/json'
+    };
+
+    return rest.wrap(pathPrefix, { prefix: 'http://app.test/api' })
         .wrap(mime)
-        .wrap(defaultRequest, config.api.defaultRequest)
+        .wrap(defaultRequest, { headers: defaultHeaders})
         .wrap(errorCode, { code: 400 })
         .wrap(jwtAuth);
 }

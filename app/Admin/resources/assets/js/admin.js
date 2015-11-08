@@ -6,15 +6,10 @@ var client = require('./client');
 Vue.use(VueRouter);
 
 var router = new VueRouter();
-
-router.map({
-    '/': { component: require('./components/dashboard.vue') },
-    '/posts': { component: require('./components/posts/index.vue') }
-});
+import { mapRoutes } from './routes';
+mapRoutes(router);
 
 var Admin = Vue.extend({
-
-    el: '#Admin',
 
     data: function() {
         return {
