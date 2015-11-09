@@ -24,8 +24,8 @@ export default {
             }).then(function (response) {
                 self.$set('posts', response.entity.data);
                 successHandler(response.entity.data)
-            }, function (response, status) {
-                if (status == 401 || status == 500) {
+            }, function (response) {
+                if (response.status.code == 401 || response.status.code == 500) {
                     self.$dispatch('userHasLoggedOut')
                 }
             });
@@ -37,7 +37,7 @@ export default {
         data: function (transition) {
             this.fetch(function (data) {
                 transition.next({posts: data})
-            })
+            });
         }
     }
 }
