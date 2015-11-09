@@ -55,12 +55,11 @@
         },
 
         methods: {
-            attempt: function () {
+            attempt: function (e) {
+                e.preventDefault();
                 var self = this;
                 client({
-                    prefix: 'http://app.test/admin',
-                    method: 'POST',
-                    path: 'auth/login',
+                    path: 'auth',
                     entity: this.user
                 }).then(function (response) {
                     self.$dispatch('userHasFetchedToken', response.token);
@@ -75,9 +74,9 @@
 
             getUserData: function () {
                 var self = this;
-                client({ path: '/users/me' }).then(function (response) {
+                client({ path: '/auth/user/me' }).then(function (response) {
                     self.$dispatch('userHasLoggedIn', response.entity.user);
-//                    self.$route.router.go('/');
+                    self.$route.router.go('/');
                 }, function (response) {
                     console.log(response);
                 });

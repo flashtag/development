@@ -43,9 +43,9 @@ var Admin = Vue.extend({
             var token = localStorage.getItem('jwt-token');
             if (token !== null && token !== 'undefined') {
                 var self = this;
-                client({ path: '/users/me' }).then(
+                client({ path: '/auth/user/me' }).then(
                     function (response) {
-                        console.log('hello... is it me youre looking for?');
+                        console.log("hello... is it me you're looking for?");
                         // User has successfully logged in using the token from storage.
                         self.setLogin(response.entity.user);
                         // broadcast an event telling our children that the data

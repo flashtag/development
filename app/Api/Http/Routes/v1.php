@@ -1,6 +1,10 @@
 <?php
 
-$api->post('auth', 'AuthController@authenticate');
+$api->group(['prefix' => 'auth'], function ($api) {
+    $api->post('/', 'AuthController@authenticate');
+    $api->get('user/me', 'AuthController@me');
+});
+
 
 $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
 

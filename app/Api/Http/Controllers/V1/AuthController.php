@@ -22,6 +22,16 @@ class AuthController extends Controller
     }
 
     /**
+     * @param Request $request
+     * @return false|\Tymon\JWTAuth\Contracts\JWTSubject
+     * @throws JWTException
+     */
+    public function me(Request $request)
+    {
+        return $this->jwt->parseToken()->authenticate();
+    }
+
+    /**
      * Authenticate the user to get a token.
      *
      * @param \Illuminate\Http\Request $request
