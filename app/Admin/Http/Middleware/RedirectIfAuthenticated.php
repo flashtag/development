@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Client\Http\Middleware;
+namespace Flashtag\Admin\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Auth\Guard;
@@ -18,7 +18,6 @@ class RedirectIfAuthenticated
      * Create a new filter instance.
      *
      * @param  Guard  $auth
-     * @return void
      */
     public function __construct(Guard $auth)
     {
@@ -35,7 +34,7 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next)
     {
         if ($this->auth->check()) {
-            return redirect('/home');
+            return redirect('/admin');
         }
 
         return $next($request);

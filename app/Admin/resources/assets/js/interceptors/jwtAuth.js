@@ -3,9 +3,7 @@
 
     define(function (require) {
 
-        var interceptor;
-
-        interceptor = require('rest/interceptor');
+        var interceptor = require('rest/interceptor');
 
         /**
          * Authenticates the request using JWT Authentication

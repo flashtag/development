@@ -1,22 +1,9 @@
-<!doctype html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('admin::layout')
 
-    <title>Flashtag</title>
-    <meta name="description" content="Flashtag is a simple developer-driven CMS.">
-
-    <link rel="stylesheet" href="/assets/admin/admin.css">
-</head>
-<body>
+@section('content')
     <div id="Admin">
         <nav id="Main-nav"></nav>
         <router-view></router-view>
         <footer id="Footer"></footer>
     </div>
-
-<script src="/assets/admin/admin.js"></script>
-</body>
-</html>
+@stop

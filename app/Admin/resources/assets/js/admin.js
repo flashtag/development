@@ -7,6 +7,8 @@ var router = new VueRouter();
 import { mapRoutes } from './routes';
 mapRoutes(router);
 
+window.client = client;
+
 var Admin = Vue.extend({
 
     data: function() {
@@ -20,6 +22,7 @@ var Admin = Vue.extend({
     ready: function () {
         this.registerEventListeners();
         this.setLoginStatus();
+        console.log('Lock and load');
     },
 
     methods: {
@@ -38,6 +41,7 @@ var Admin = Vue.extend({
                 var self = this;
                 client({ path: '/users/me' }).then(
                     function (response) {
+                        console.log('hello... is it me youre looking for?');
                         // User has successfully logged in using the token from storage.
                         self.setLogin(response.entity.user);
                         // broadcast an event telling our children that the data
@@ -45,6 +49,7 @@ var Admin = Vue.extend({
                         self.$broadcast('data-loaded');
                     },
                     function (response) {
+                        console.log('destroy all humans');
                         // Login with our token failed, do some cleanup and
                         // redirect if we're on an authenticated route.
                         self.destroyLogin();
