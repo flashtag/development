@@ -11,6 +11,10 @@ window.client = client;
 
 var Admin = Vue.extend({
 
+    components: {
+        'login': require('./components/auth/login.vue')
+    },
+
     data: function() {
         return {
             user: null,
