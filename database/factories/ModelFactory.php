@@ -61,7 +61,7 @@ $factory->define(Flashtag\Data\Author::class, function (Faker\Generator $faker) 
 $factory->define(Flashtag\Data\MetaTag::class, function (Faker\Generator $faker) {
     return [
         'url' => $faker->url,
-        'description' => $faker->paragraph(2),
+        'description' => $faker->sentence(6),
         'image' => $faker->imageUrl(300),
     ];
 });

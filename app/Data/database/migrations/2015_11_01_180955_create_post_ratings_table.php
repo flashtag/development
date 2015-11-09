@@ -14,10 +14,10 @@ class CreatePostRatingsTable extends Migration
     {
         Schema::create('post_ratings', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('post_id');
+            $table->unsignedInteger('post_id')->nullable();
             $table->unsignedInteger('rater_id')->nullable();
             $table->unsignedSmallInteger('value');
-            $table->integer('ip')->nullable();
+            $table->bigInteger('ip')->nullable();
             $table->timestamps();
         });
     }

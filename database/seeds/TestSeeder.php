@@ -11,7 +11,12 @@ class TestSeeder extends Seeder
     public function __construct(Faker $faker)
     {
         $this->faker = $faker::create();
-        $this->truncateTables();
+
+        if (config('database.default') == 'pgsql') {
+            $this->truncatePgsqlTables();
+        } else {
+            $this->truncateMysqlTables();
+        }
     }
 
     /**
@@ -35,7 +40,20 @@ class TestSeeder extends Seeder
     /**
      * Truncate the database tables.
      */
-    private function truncateTables()
+    private function truncatePgsqlTables()
+    {
+        \DB::statement('TRUNCATE TABLE categories CASCADE;');
+        \DB::statement('TRUNCATE TABLE tags CASCADE;');
+        \DB::statement('TRUNCATE TABLE posts CASCADE;');
+        \DB::statement('TRUNCATE TABLE fields CASCADE;');
+        \DB::statement('TRUNCATE TABLE users CASCADE;');
+        \DB::statement('TRUNCATE TABLE meta_tags CASCADE;');
+    }
+
+    /**
+     * Truncate the database tables.
+     */
+    private function truncateMysqlTables()
     {
         \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         \DB::table('categories')->truncate();
