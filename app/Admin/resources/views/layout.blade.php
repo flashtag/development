@@ -7,13 +7,16 @@
 
     <title>Flashtag</title>
     <meta name="description" content="Flashtag is a simple developer-driven CMS.">
+    @yield('meta')
 
     <link rel="stylesheet" href="/assets/admin/admin.css">
+    @yield('styles')
 </head>
 <body>
 
 @yield('content')
 
-<script src="/assets/admin/admin.js"></script>
+@yield('scripts')
+
 </body>
 </html>

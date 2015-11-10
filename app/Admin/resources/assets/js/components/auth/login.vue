@@ -76,7 +76,7 @@
                 var self = this;
                 client({ path: '/auth/user/me' }).then(function (response) {
                     self.$dispatch('userHasLoggedIn', response.entity.user);
-                    self.$route.router.go('/');
+                    self.$route.router.go('/home');
                 }, function (response) {
                     console.log(response);
                 });

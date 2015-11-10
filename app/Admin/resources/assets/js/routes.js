@@ -3,16 +3,31 @@ module.exports = {
     mapRoutes: function (router) {
 
         router.map({
-            '/auth': { component: require('./components/auth/login.vue') },
-            '/home': { component: require('./components/home.vue') },
-            '/posts': { component: require('./components/posts/index.vue') },
-            '/posts/create': { component: require('./components/posts/create.vue') },
-            '/posts/:id': { component: require('./components/posts/edit.vue') }
+            '/auth/login': { component: require('./components/auth/login.vue'), guest: true },
+            '/auth/logout': { component: require('./components/auth/logout.vue'), auth: true },
+            '/home': { component: require('./components/home.vue'), auth: true },
+            '/posts': { component: require('./components/posts/index.vue'), auth: true },
+            '/posts/create': { component: require('./components/posts/create.vue'), auth: true },
+            '/posts/:id': { component: require('./components/posts/edit.vue'), auth: true }
         });
 
         router.alias({
-            '': '/home',
-            '/auth/login': '/auth'
+            '/home': ''
+        });
+
+        router.beforeEach(function (transition) {
+            var token = localStorage.getItem('jwt-token');
+            if (transition.to.auth) {
+                if (!token || token === null) {
+                    transition.redirect('/auth/login')
+                }
+            }
+            if (transition.to.guest) {
+                if (token) {
+                    transition.redirect('/home')
+                }
+            }
+            transition.next()
         });
 
     }

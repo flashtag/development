@@ -31,6 +31,11 @@ class AuthController extends Controller
         return $this->jwt->parseToken()->authenticate();
     }
 
+    public function logout(Request $request)
+    {
+
+    }
+
     /**
      * Authenticate the user to get a token.
      *
