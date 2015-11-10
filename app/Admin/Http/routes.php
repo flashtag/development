@@ -11,8 +11,6 @@ $router->group(['middleware' => 'auth'], function ($router) {
         $user = \Auth::user();
         $view = view('admin::admin', compact('user'));
 
-        return response($view, 200, [
-            'Authorization' => 'Bearer ' . \JWTAuth::fromUser($user)
-        ]);
+        return response($view)->withCookie(cookie('jwt-token', \JWTAuth::fromUser($user), 3600));
     });
 });

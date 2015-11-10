@@ -4,6 +4,7 @@ namespace Flashtag\Admin\Http\Controllers\Auth;
 
 use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Data\User;
+use Illuminate\Cookie\CookieServiceProvider;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Validator;
@@ -38,6 +39,20 @@ class AuthController extends Controller
     public function getLogin()
     {
         return view('admin::auth.login');
+    }
+
+    /**
+     * Log the user out of the application.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getLogout()
+    {
+        \Auth::logout();
+
+        cookie('jwt-token', null, -2628000);
+
+        return redirect(property_exists($this, 'redirectAfterLogout') ? $this->redirectAfterLogout : '/');
     }
 
     /**
