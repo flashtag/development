@@ -15,7 +15,7 @@ function getWrappedClient(rest) {
         'Content-Type': 'application/json'
     };
 
-    return rest.wrap(pathPrefix, { prefix: 'http://app.test/api' })
+    return rest.wrap(pathPrefix, { prefix: '/api' })
         .wrap(mime)
         .wrap(defaultRequest, { headers: defaultHeaders})
         .wrap(errorCode, { code: 400 })
