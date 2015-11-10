@@ -24,11 +24,17 @@ class AuthController extends Controller
     protected $redirectPath = '/admin';
 
     /**
+     * @var string
+     */
+    protected $redirectAfterLogout = '/admin/auth/login';
+
+    /**
      * Create a new authentication controller instance.
      */
     public function __construct()
     {
         $this->middleware('guest', ['except' => 'getLogout']);
+        $this->middleware('csrf', ['except' => 'getLogout']);
     }
 
     /**

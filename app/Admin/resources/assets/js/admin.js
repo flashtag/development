@@ -10,6 +10,9 @@ var Cookies = require('js-cookie');
 
 window.client = client;
 
+Vue.component('nav-component', require('./components/partials/nav.vue'));
+Vue.component('footer-component', require('./components/partials/footer.vue'));
+
 var Admin = Vue.extend({
 
     data: function() {
@@ -28,13 +31,6 @@ var Admin = Vue.extend({
 
     methods: {
 
-        getInitialToken: function () {
-            if (! Cookies.get('jwt-token')) {
-                this.token = document.getElementById('jwt').getAttribute('content');
-                Cookies.set('jwt-token', 'Bearer ' + this.token, {expires: 7, path: ''});
-            }
-        },
-
         registerEventListeners: function () {
             this.$on('userHasLoggedOut', function () {
                 this.destroyLogin()
@@ -51,11 +47,9 @@ var Admin = Vue.extend({
                 client({
                     path: '/auth/user/me'
                 }).then(function (response) {
-                    console.log("login");
                     self.setLogin(response.entity.user);
                     self.$broadcast('data-loaded');
                 }, function (response) {
-                    console.log('logout');
                     self.destroyLogin();
                 });
             }
@@ -72,8 +66,13 @@ var Admin = Vue.extend({
             this.token = null;
             this.authenticated = false;
             Cookies.remove('jwt-token');
-            if (this.$route.auth) {
-                this.$route.router.go('/auth/login');
+            //window.location = '/admin/auth/login';
+        },
+
+        getInitialToken: function () {
+            if (! Cookies.get('jwt-token')) {
+                this.token = document.getElementById('jwt').getAttribute('content');
+                Cookies.set('jwt-token', 'Bearer ' + this.token, {expires: 7, path: ''});
             }
         }
 

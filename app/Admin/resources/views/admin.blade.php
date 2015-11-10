@@ -6,9 +6,15 @@
 
 @section('content')
     <div id="Admin">
-        <nav id="Main-nav"></nav>
-        <router-view></router-view>
-        <footer id="Footer"></footer>
+        <section class="nav-row">
+            <nav-component></nav-component>
+        </section>
+        <section class="container">
+            <router-view></router-view>
+        </section>
+        <section class="footer-row">
+            <footer-component></footer-component>
+        </section>
     </div>
 @stop
 
