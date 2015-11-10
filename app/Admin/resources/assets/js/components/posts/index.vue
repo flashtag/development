@@ -19,8 +19,6 @@
         <li v-bind:class="{ 'disabled': !hasNext() }"><a href="#">&raquo;</a></li>
     </ul>
 
-    <pre>{{ $data | json }}</pre>
-
 </template>
 
 <script>
