@@ -1,6 +1,7 @@
 @extends('admin::layout')
 
 @section('meta')
+    <meta name="user" id="user" content="{{ $user->id }}">
     <meta name="jwt" id="jwt" content="{{ $token }}">
 @stop
 
@@ -10,7 +11,7 @@
             <nav-component></nav-component>
         </section>
         <section class="container">
-            <router-view></router-view>
+            <router-view :current-user="user"></router-view>
         </section>
         <section class="footer-row">
             <footer-component></footer-component>

@@ -5,12 +5,17 @@
         <thead>
             <tr>
                 <th>Title</th>
+                <th>Category</th>
+                <th>Created</th>
                 <th>Published</th>
+                <th class="text-centered">Showing</th>
             </tr>
         </thead>
         <tbody>
             <tr v-for="post in posts">
-                <td>{{ post.title }}</td>
+                <td>{{ post.title }} <span v-if="post.is_locked"><i class="fa fa-lock"></i></span></td>
+                <td>{{ post.category.data.name }}</td>
+                <td>{{ formatTimestamp(post.created_at) }}</td>
                 <td class="published">
                     <div class="switch">
                         <input class="cmn-toggle cmn-toggle-round-sm"
@@ -22,6 +27,10 @@
                         <label for="is_published_{{post.id}}"></label>
                     </div>
                 </td>
+                <td class="text-centered">
+                    <span v-if="isShowing(post)" class="showing"><i class="fa fa-check"></i></span>
+                    <span v-if="!isShowing(post)" class="not-showing"><i class="fa fa-times"></i></span>
+                </td>
             </tr>
         </tbody>
     </table>
@@ -31,12 +40,17 @@
 </template>
 
 <script>
+var moment = require('moment');
+
 export default {
+
+    props: ['current-user'],
 
     data: function () {
         return {
             posts: [],
-            pagination: { links: {} }
+            pagination: { links: {} },
+            users: []
         }
     },
 
@@ -45,11 +59,26 @@ export default {
         fetch: function (successHandler) {
             var self = this;
             client({
-                path: '/posts'
+                path: '/posts?include=category'
             }).then(function (response) {
-                self.$set('posts', response.entity.data);
-                self.$set('pagination', response.entity.meta.pagination);
-                successHandler(response.entity.data)
+                self.posts = response.entity.data;
+                self.pagination = response.entity.meta.pagination;
+                self.fetchUsers();
+                successHandler(response.entity.data);
+            }, function (response) {
+                if (response.status.code == 401 || response.status.code == 500) {
+                    self.$dispatch('userHasLoggedOut')
+                }
+            });
+        },
+
+        fetchUsers: function (successHandler) {
+            var self = this;
+            client({
+                path: '/users'
+            }).then(function (response) {
+                self.users = response.entity.data;
+                // successHandler(response.entity.data);
             }, function (response) {
                 if (response.status.code == 401 || response.status.code == 500) {
                     self.$dispatch('userHasLoggedOut')
@@ -61,7 +90,10 @@ export default {
             client({
                 method: 'PUT',
                 path: '/posts/' + post.id + '/publish',
-                entity: { is_published: post.is_published }
+                entity: {
+                    is_published: post.is_published,
+                    user_id: this.currentUser.id
+                }
             });
         },
 
@@ -78,7 +110,7 @@ export default {
         },
 
         checkLock: function (post, isLocked, e) {
-            if (!isLocked) {
+            if (! isLocked) {
                 return;
             }
 
@@ -95,15 +127,19 @@ export default {
         },
 
         userName: function (userId) {
-            if (!userId) {
+            if (! userId) {
                 return '';
             }
 
-            var user = this.users.filter(function(user) {
+            var user = this.users.filter(function (user) {
                 return user.id == userId;
             })[0];
 
-            return user.first_name + ' ' + user.last_name;
+            return user.name;
+        },
+
+        formatTimestamp: function (timestamp) {
+            return moment.unix(timestamp).format('MMM D, YYYY');
         }
 
     },

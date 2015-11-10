@@ -67,7 +67,6 @@ var Admin = Vue.extend({
             this.token = null;
             this.authenticated = false;
             Cookies.remove('jwt-token');
-            //window.location = '/admin/auth/login';
         },
 
         getInitialToken: function () {

@@ -23,4 +23,6 @@ $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
 //        'except' => ['create', 'edit']
 //    ]);
 
+    $api->resource('users', 'UsersController', ['except' => ['create', 'edit']]);
+
 });

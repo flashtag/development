@@ -148,6 +148,21 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * Lock the article.
+     *
+     * @param int $user_id
+     *
+     * @return bool
+     */
+    public function lock($user_id)
+    {
+        $this->is_locked = true;
+        $this->locked_by_id = $user_id;
+
+        return $this->save();
+    }
+
+    /**
      * Get the average rating.
      *
      * @return string

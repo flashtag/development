@@ -11,6 +11,6 @@ $router->group(['middleware' => 'auth'], function ($router) {
         $user = \Auth::user();
         $token = \JWTAuth::fromUser($user);
 
-        return  view('admin::admin', compact('token'));
+        return  view('admin::admin', compact('user', 'token'));
     });
 });

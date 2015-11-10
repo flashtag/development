@@ -126,8 +126,8 @@ class PostsController extends Controller
      */
     public function publish(PublishRequest $request, $id)
     {
-        $is_published = $request->get('is_published');
-        $user_id = $request->get('user_id');
+        $is_published = $request->json('is_published');
+        $user_id = $request->json('user_id');
 
         $post = $this->post->findOrFail($id);
 
