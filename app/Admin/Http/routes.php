@@ -9,8 +9,8 @@ $router->group(['middleware' => 'auth'], function ($router) {
     // Admin dashboard
     $router->get('/', function () {
         $user = \Auth::user();
-        $view = view('admin::admin', compact('user'));
+        $token = \JWTAuth::fromUser($user);
 
-        return response($view)->withCookie(cookie('jwt-token', \JWTAuth::fromUser($user), 3600));
+        return view('admin::admin', compact('user', 'token'));
     });
 });

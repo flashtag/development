@@ -50,7 +50,7 @@ class AuthController extends Controller
     {
         \Auth::logout();
 
-        cookie('jwt-token', null, -2628000);
+        setcookie('jwt-token', '', 1, '/');
 
         return redirect(property_exists($this, 'redirectAfterLogout') ? $this->redirectAfterLogout : '/');
     }

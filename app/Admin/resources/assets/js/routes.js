@@ -1,3 +1,5 @@
+var Cookies = require('js-cookie');
+
 module.exports = {
 
     mapRoutes: function (router) {
@@ -16,7 +18,7 @@ module.exports = {
         });
 
         router.beforeEach(function (transition) {
-            var token = localStorage.getItem('jwt-token');
+            var token = Cookies.get('jwt-token');
             if (transition.to.auth) {
                 if (!token || token === null) {
                     transition.redirect('/auth/login')

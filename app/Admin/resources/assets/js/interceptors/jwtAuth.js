@@ -1,3 +1,5 @@
+var Cookies = require('js-cookie');
+
 (function (define) {
     'use strict';
 
@@ -17,7 +19,7 @@
             request: function (request, config) {
                 var token, headers;
 
-                token = localStorage.getItem('jwt-token');
+                token = Cookies.get('jwt-token');
                 headers = request.headers || (request.headers = {});
 
                 if ( token !== null && token !== 'undefined') {
@@ -28,13 +30,13 @@
             },
             response: function (response) {
                 if (response.status && response.status.code == 401) {
-                    localStorage.removeItem('jwt-token');
+                    Cookies.remove('jwt-token');
                 }
                 if (response.headers && response.headers.Authorization) {
-                    localStorage.setItem('jwt-token', response.headers.Authorization)
+                    Cookies.set('jwt-token', response.headers.Authorization, { expires: 7, path: '' })
                 }
                 if (response.entity && response.entity.token && response.entity.token.length > 10) {
-                    localStorage.setItem('jwt-token', 'Bearer ' + response.entity.token);
+                    Cookies.set('jwt-token', 'Bearer ' + response.entity.token, { expires: 7, path: '' });
                 }
                 return response;
             }

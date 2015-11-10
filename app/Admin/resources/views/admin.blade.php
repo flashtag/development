@@ -1,5 +1,9 @@
 @extends('admin::layout')
 
+@section('meta')
+    <meta name="jwt" id="jwt" content="{{ $token }}">
+@stop
+
 @section('content')
     <div id="Admin">
         <nav id="Main-nav"></nav>

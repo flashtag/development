@@ -6,6 +6,7 @@ Vue.use(VueRouter);
 var router = new VueRouter();
 import { mapRoutes } from './routes';
 mapRoutes(router);
+var Cookies = require('js-cookie');
 
 window.client = client;
 
@@ -20,11 +21,20 @@ var Admin = Vue.extend({
     },
 
     ready: function () {
+        this.getInitialToken();
         this.registerEventListeners();
         this.setLoginStatus();
     },
 
     methods: {
+
+        getInitialToken: function () {
+            if (! Cookies.get('jwt-token')) {
+                this.token = document.getElementById('jwt').getAttribute('content');
+                Cookies.set('jwt-token', 'Bearer ' + this.token, {expires: 7, path: ''});
+            }
+        },
+
         registerEventListeners: function () {
             this.$on('userHasLoggedOut', function () {
                 this.destroyLogin()
@@ -35,7 +45,7 @@ var Admin = Vue.extend({
         },
 
         setLoginStatus: function () {
-            var token = localStorage.getItem('jwt-token');
+            var token = Cookies.get('jwt-token');
             if (token !== null && token !== 'undefined') {
                 var self = this;
                 client({
@@ -54,14 +64,14 @@ var Admin = Vue.extend({
         setLogin: function (user) {
             this.user = user;
             this.authenticated = true;
-            this.token = localStorage.getItem('jwt-token');
+            this.token = Cookies.get('jwt-token');
         },
 
         destroyLogin: function () {
             this.user = null;
             this.token = null;
             this.authenticated = false;
-            localStorage.removeItem('jwt-token');
+            Cookies.remove('jwt-token');
             if (this.$route.auth) {
                 this.$route.router.go('/auth/login');
             }
