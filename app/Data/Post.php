@@ -140,6 +140,14 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function lockedBy()
+    {
+        return $this->belongsTo(User::class, 'locked_by_id');
+    }
+
+    /**
      * Get the average rating.
      *
      * @return string
@@ -149,6 +157,25 @@ class Post extends Model implements HasPresenter
         $ratings = $this->ratings;
 
         return number_format($ratings->sum('value') / $ratings->count());
+    }
+
+    /**
+     * Publish the post. Or un-publish by passing in false.
+     *
+     * @param bool $published
+     */
+    public function publish($published = true)
+    {
+        $this->is_published = $published;
+        $this->save();
+    }
+
+    /**
+     * Un-publish the post.
+     */
+    public function unpublish()
+    {
+        $this->publish(false);
     }
 
     /**

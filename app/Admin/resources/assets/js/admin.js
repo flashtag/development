@@ -12,6 +12,7 @@ window.client = client;
 
 Vue.component('nav-component', require('./components/partials/nav.vue'));
 Vue.component('footer-component', require('./components/partials/footer.vue'));
+Vue.component('paginator', require('./components/partials/paginator.vue'));
 
 var Admin = Vue.extend({
 

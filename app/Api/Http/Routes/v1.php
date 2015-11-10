@@ -8,9 +8,8 @@ $api->group(['prefix' => 'auth'], function ($api) {
 
 $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
 
-    $api->resource('posts', 'PostsController', [
-        'except' => ['create', 'edit']
-    ]);
+    $api->put('posts/{id}/publish', 'PostsController@publish');
+    $api->resource('posts', 'PostsController', ['except' => ['create', 'edit']]);
 
 //    $api->resource('listings', 'ListingsController', [
 //        'except' => ['create', 'edit']

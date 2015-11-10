@@ -25,6 +25,8 @@ class CreatePostsTable extends Migration
             $table->timestamp('stop_showing_at')->nullable();
             $table->unsignedInteger('author_id')->nullable();
             $table->boolean('show_author')->default(false);
+            $table->boolean('is_locked')->default(false);
+            $table->unsignedInteger('locked_by_id')->nullable();
             $table->timestamps();
         });
     }

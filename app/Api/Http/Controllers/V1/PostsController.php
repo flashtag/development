@@ -2,6 +2,7 @@
 
 namespace Flashtag\Api\Http\Controllers\V1;
 
+use Flashtag\Api\Http\Requests\PublishRequest;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\PostTransformer;
 use Flashtag\Data\Post;
@@ -74,7 +75,7 @@ class PostsController extends Controller
     public function update(Request $request, $id)
     {
         $postData = $this->buildPostFromRequest($request);
-        $post = $this->post->findOrFail((int)$id);
+        $post = $this->post->findOrFail($id);
         $post->update($postData);
 
         return $this->response->item($post, new PostTransformer());
@@ -109,9 +110,35 @@ class PostsController extends Controller
      */
     public function destroy($id)
     {
-        $post = $this->post->findOrFail((int)$id);
+        $post = $this->post->findOrFail($id);
         $post->delete();
 
         return $this->response->item($post, new PostTransformer());
+    }
+
+    /**
+     * Publish or un-publish an article.
+     *
+     * @param PublishRequest $request
+     * @param int            $id
+     *
+     * @return mixed
+     */
+    public function publish(PublishRequest $request, $id)
+    {
+        $is_published = $request->get('is_published');
+        $user_id = $request->get('user_id');
+
+        $post = $this->post->findOrFail($id);
+
+        if ($is_published) {
+            $post->publish();
+            event(new \Flashtag\Data\Events\PostWasPublished($post, $user_id));
+        } else {
+            $post->unpublish();
+            event(new \Flashtag\Data\Events\PostWasUnpublished($post, $user_id));
+        }
+
+        return $post;
     }
 }
