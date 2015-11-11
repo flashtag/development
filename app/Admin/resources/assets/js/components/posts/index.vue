@@ -13,7 +13,7 @@
         </thead>
         <tbody>
             <tr v-for="post in posts">
-                <td>{{ post.title }} <span v-if="post.is_locked"><i class="fa fa-lock"></i></span></td>
+                <td>{{ post.title }} <span v-if="post.is_locked" title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span></td>
                 <td>{{ post.category.data.name }}</td>
                 <td>{{ formatTimestamp(post.created_at) }}</td>
                 <td class="published">
@@ -63,7 +63,6 @@ export default {
             }).then(function (response) {
                 self.posts = response.entity.data;
                 self.pagination = response.entity.meta.pagination;
-                self.fetchUsers();
                 successHandler(response.entity.data);
             }, function (response) {
                 if (response.status.code == 401 || response.status.code == 500) {
@@ -127,7 +126,7 @@ export default {
         },
 
         userName: function (userId) {
-            if (! userId) {
+            if (! userId || ! this.users || !this.users.length) {
                 return '';
             }
 
@@ -146,6 +145,7 @@ export default {
 
     route: {
         data: function (transition) {
+            this.fetchUsers();
             this.fetch(function (data) {
                 transition.next({posts: data})
             });

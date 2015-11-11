@@ -29,6 +29,8 @@ class PostTransformer extends Transformer
             'is_published' => (bool) $post->is_published,
             'start_showing_at' => $post->start_showing_at->getTimestamp(),
             'stop_showing_at' => $post->stop_showing_at->getTimestamp(),
+            'is_locked' => (bool) $post->is_locked,
+            'locked_by_id' => (int) $post->locked_by_id,
             'created_at' => $post->created_at->getTimestamp(),
             'updated_at' => $post->updated_at->getTimestamp(),
         ];

@@ -32,9 +32,9 @@ class TestSeeder extends Seeder
         $fieldValues = $this->setValuesToFields($fields);
         $authors = $this->createAuthors();
 
-        $posts = $this->createPosts($categories, $tags, $authors, $fieldValues);
-
         $users = $this->createUsers();
+
+        $posts = $this->createPosts($categories, $tags, $authors, $users, $fieldValues);
     }
 
     /**
@@ -143,21 +143,26 @@ class TestSeeder extends Seeder
     }
 
     /**
-     * @param \Illuminate\Support\Collection $categories
-     * @param \Illuminate\Support\Collection $tags
+     * @param Collection $categories
+     * @param Collection $tags
      * @param Collection $authors
+     * @param Collection $users
      * @param array $fieldValues
      * @return Collection
      */
-    private function createPosts(Collection $categories, Collection $tags, Collection $authors, array $fieldValues)
+    private function createPosts(Collection $categories, Collection $tags, Collection $authors, Collection $users, array $fieldValues)
     {
         $posts = factory(\Flashtag\Data\Post::class, 100)->create();
 
-        return $posts->map(function ($post) use ($categories, $tags, $authors, $fieldValues) {
+        return $posts->map(function ($post) use ($categories, $tags, $authors, $users, $fieldValues) {
             $post->changeCategoryTo($categories->random());
             $post->addTags($this->faker->randomElements($tags->all(), 2));
             $post->saveFields($fieldValues);
             $post->author_id = $this->faker->randomElement($authors->lists('id')->toArray());
+            if ($this->faker->boolean()) {
+                $post->is_locked = true;
+                $post->locked_by_id = $this->faker->randomElement($users->lists('id')->toArray());
+            }
             $post->save();
 
             // Additional Relationships
@@ -201,6 +206,7 @@ class TestSeeder extends Seeder
                 'name' => $this->faker->name,
                 'password' => \Hash::make('password'),
             ]),
+            factory(\Flashtag\Data\User::class)->create()
         ]);
     }
 }
