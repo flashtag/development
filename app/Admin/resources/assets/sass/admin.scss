@@ -1,4 +1,14 @@
+
+@import "vendor/font-awesome";
 @import "vendor/bootstrap";
+
+@import "pages/posts";
+
+@import "includes/variables";
+@import "includes/utility";
+@import "includes/buttons";
+@import "includes/toggles";
+@import "includes/animations";
 
 .navbar {
   border-radius: 0px;

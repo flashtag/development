@@ -1,7 +1,7 @@
 <template>
     <h1>Posts</h1>
 
-    <table class="table table-striped table-hover">
+    <table class="Posts table table-striped table-hover">
         <thead>
             <tr>
                 <th>Title</th>
@@ -12,7 +12,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="post in posts">
+            <tr v-for="post in posts" class="Post" :class="{ 'Post--unpublished': !post.is_published }">
                 <td>{{ post.title }} <span v-if="post.is_locked" title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span></td>
                 <td>{{ post.category.data.name }}</td>
                 <td>{{ formatTimestamp(post.created_at) }}</td>

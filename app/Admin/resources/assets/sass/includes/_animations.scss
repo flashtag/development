@@ -1,0 +1,26 @@
+// PULSE
+.pulse {
+  background-color: white;
+  animation-name: pulse;
+  animation-duration: 2.0s;
+  animation-timing-function: ease-out;
+  animation-delay: 700ms;
+  animation-iteration-count: 1;
+  animation-fill-mode: none;
+  animation-play-state: running;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: inherit;
+  }
+  20% {
+    background-color: #F7BF65;
+  }
+  60% {
+    background-color: #F7BF65;
+  }
+  100% {
+    background-color: inherit;
+  }
+}
