@@ -1,6 +1,5 @@
 var Vue = require('vue');
 var VueRouter = require('vue-router');
-var rest = require('rest');
 
 Vue.use(VueRouter);
 
