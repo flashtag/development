@@ -9,8 +9,8 @@ module.exports = {
             '/posts/:id': { component: require('../components/posts/edit.vue') }
         });
 
-        router.alias({
-            '/home': ''
+        router.redirect({
+            '/': '/home'
         });
 
     }
