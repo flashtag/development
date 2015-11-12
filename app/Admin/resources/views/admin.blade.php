@@ -7,7 +7,7 @@
 
 @section('content')
     <div id="Admin">
-        
+
     </div>
 @stop
 
