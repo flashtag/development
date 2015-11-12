@@ -18,8 +18,7 @@
 
     <div class="flashtag">
         <!-- You don't have to leave this but it would be nice if you did -->
-        <div class="flashtag__link"><a href="http://flashtag.org">FLASHTAG</a></div>
-        <div class="flashtag__author"><a href="http://ryanwinchester.ca"><i class="fa fa-copyright"></i> Ryan Winchester</a></div>
+        <div class="flashtag__link"><a href="http://flashtag.org" title="&copy; Ryan Winchester">FLASHTAG</a></div>
     </div>
 </template>
 
