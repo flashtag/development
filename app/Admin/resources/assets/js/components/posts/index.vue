@@ -1,6 +1,5 @@
 <template>
-    <h1>Posts</h1>
-
+    <h4>Posts</h4>
     <table class="Posts table table-striped table-hover">
         <thead>
             <tr>

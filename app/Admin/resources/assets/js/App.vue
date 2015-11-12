@@ -1,3 +1,18 @@
+<template>
+    <section class="Main">
+            <div class="Main__menu">
+                <side-nav></side-nav>
+            </div>
+            <div class="Main__container">
+                <top-nav :current-user="user"></top-nav>
+                <div class="Main__content">
+                    <router-view :current-user="user"></router-view>
+                </div>
+            </div>
+    </section>
+</template>
+
+<script>
 var Cookies = require('js-cookie');
 
 export default {
@@ -65,3 +80,4 @@ export default {
     }
 
 }
+</script>

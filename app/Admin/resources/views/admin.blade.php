@@ -7,15 +7,7 @@
 
 @section('content')
     <div id="Admin">
-        <section class="nav-row">
-            <nav-component></nav-component>
-        </section>
-        <section class="container">
-            <router-view :current-user="user"></router-view>
-        </section>
-        <section class="footer-row">
-            <footer-component></footer-component>
-        </section>
+        <admin></admin>
     </div>
 @stop
 

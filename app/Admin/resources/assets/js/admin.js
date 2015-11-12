@@ -13,15 +13,15 @@ window.client = require('./http/client');
 var router = require('./http/router');
 
 // Components
-Vue.component('nav-component', require('./components/partials/nav.vue'));
-Vue.component('footer-component', require('./components/partials/footer.vue'));
+Vue.component('top-nav', require('./components/partials/top-nav.vue'));
+Vue.component('side-nav', require('./components/partials/side-nav.vue'));
 Vue.component('paginator', require('./components/partials/paginator.vue'));
 
 // Directives
 Vue.directive('select', require('./directives/select'));
 
 // App
-var Admin = Vue.extend(require('./App'));
+var Admin = Vue.extend(require('./App.vue'));
 
 // Start
 router.start(Admin, '#Admin');

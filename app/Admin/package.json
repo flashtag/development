@@ -17,6 +17,7 @@
     "vue": "^1.0.7",
     "vue-hot-reload-api": "^1.2.0",
     "vue-router": "^0.7.5",
+    "vue-strap": "^0.1.2",
     "vueify-insert-css": "^1.0.0"
   }
 }

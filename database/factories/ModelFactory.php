@@ -1,7 +1,7 @@
 <?php
 
 $factory->define(Flashtag\Data\Category::class, function (Faker\Generator $faker) {
-    $name = $faker->sentence(4);
+    $name = implode(' ', $faker->words(2));
 
     return [
         'name' => $name,

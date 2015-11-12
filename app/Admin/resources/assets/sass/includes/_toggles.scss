@@ -1,3 +1,5 @@
+$toggle-on: $rolf-green;
+
 // --------------------------------------------------------------------------
 // CSS TOGGLE
 // - http://callmenick.com/post/css-toggle-switch-examples
@@ -121,7 +123,7 @@ input.cmn-toggle-round-sm + label:after {
   transition: margin 0.4s;
 }
 input.cmn-toggle-round-sm:checked + label:before {
-  background-color: $rolf-green;
+  background-color: $toggle-on;
 }
 input.cmn-toggle-round-sm:checked + label:after {
   margin-left: 20px;
@@ -154,7 +156,7 @@ input.cmn-toggle-yes-no + label:before {
   border-radius: 4px;
 }
 input.cmn-toggle-yes-no + label:after {
-  background-color: $rolf-green;
+  background-color: $toggle-on;
   content: attr(data-on);
   transition: transform 0.5s;
   transform: rotateY(180deg);

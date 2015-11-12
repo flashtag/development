@@ -1,0 +1,22 @@
+
+.Top-nav {
+  @include make-md-column-offset(2);
+
+  //background-color: #fff;
+
+  &.navbar {
+    border-radius: 0px;
+  }
+
+  &.navbar-inverse {
+    .navbar-brand,
+    .navbar-nav > li > a {
+      //color: #fff;
+    }
+  }
+
+  .container-fluid {
+    padding-left: 55px;
+    padding-right: 55px;
+  }
+}
