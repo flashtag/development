@@ -1,17 +1,41 @@
 <template>
-    <h4>Posts</h4>
+    <ol class="breadcrumb">
+        <li><a href="#">Home</a></li>
+        <li class="active">Posts</li>
+    </ol>
+
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" v-model="titleFilter" placeholder="Filter by title..." class="form-control">
+            </div>
+            <div class="col-md-6">
+                <select v-model="categoryFilter" id="category" class="form-control">
+                    <option value="" selected>Filter by category...</option>
+                    <option v-for="category in categories" :value="category.name">
+                        {{ category.name }}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <table class="Posts table table-striped table-hover">
         <thead>
             <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Created</th>
-                <th>Published</th>
-                <th class="text-centered">Showing</th>
+                <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('category.data.name')">Category <i :class="orderIcon('category.data.name')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
+                <th class="text-centered"><a>Showing</a></th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for="post in posts" class="Post" :class="{ 'Post--unpublished': !post.is_published }">
+            <tr v-for="post in posts
+                    | filterBy titleFilter in 'title'
+                    | filterBy categoryFilter in 'category.data.name'
+                    | orderBy sortKey sortDir"
+                class="Post" :class="{ 'Post--unpublished': !post.is_published }">
                 <td>{{ post.title }} <span v-if="post.is_locked" title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span></td>
                 <td>{{ post.category.data.name }}</td>
                 <td>{{ formatTimestamp(post.created_at) }}</td>
@@ -49,7 +73,12 @@ export default {
         return {
             posts: [],
             pagination: { links: {} },
-            users: []
+            categories: [],
+            users: [],
+            titleFilter: null,
+            categoryFilter: null,
+            sortKey: null,
+            sortDir: -1
         }
     },
 
@@ -58,7 +87,7 @@ export default {
         fetch: function (successHandler) {
             var self = this;
             client({
-                path: '/posts?include=category'
+                path: '/posts?include=category&orderBy=updated_at|desc'
             }).then(function (response) {
                 self.posts = response.entity.data;
                 self.pagination = response.entity.meta.pagination;
@@ -76,6 +105,20 @@ export default {
                 path: '/users'
             }).then(function (response) {
                 self.users = response.entity.data;
+                // successHandler(response.entity.data);
+            }, function (response) {
+                if (response.status.code == 401 || response.status.code == 500) {
+                    self.$dispatch('userHasLoggedOut')
+                }
+            });
+        },
+
+        fetchCategories: function () {
+            var self = this;
+            client({
+                path: '/categories'
+            }).then(function (response) {
+                self.categories = response.entity.data;
                 // successHandler(response.entity.data);
             }, function (response) {
                 if (response.status.code == 401 || response.status.code == 500) {
@@ -138,6 +181,23 @@ export default {
 
         formatTimestamp: function (timestamp) {
             return moment.unix(timestamp).format('MMM D, YYYY');
+        },
+
+        sortBy: function (key) {
+            if (this.sortKey == key) {
+                this.sortDir = this.sortDir * -1;
+            } else {
+                this.sortKey = key;
+                this.sortDir = 1;
+            }
+        },
+
+        orderIcon: function (key) {
+            if (key == this.sortKey) {
+                return !!this.sortDir ? 'fa fa-sort-asc' : 'fa fa-sort-desc'
+            }
+
+            return 'fa fa-unsorted';
         }
 
     },
@@ -145,6 +205,7 @@ export default {
     route: {
         data: function (transition) {
             this.fetchUsers();
+            this.fetchCategories();
             this.fetch(function (data) {
                 transition.next({posts: data})
             });

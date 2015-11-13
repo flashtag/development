@@ -1,7 +1,7 @@
 <?php
 
 $factory->define(Flashtag\Data\Category::class, function (Faker\Generator $faker) {
-    $name = implode(' ', $faker->words(2));
+    $name = $faker->company;
 
     return [
         'name' => $name,
@@ -11,7 +11,7 @@ $factory->define(Flashtag\Data\Category::class, function (Faker\Generator $faker
 });
 
 $factory->define(Flashtag\Data\Tag::class, function (Faker\Generator $faker) {
-    $name = $faker->sentence(4);
+    $name = $faker->company;
 
     return [
         'name' => $name,
@@ -21,7 +21,7 @@ $factory->define(Flashtag\Data\Tag::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(Flashtag\Data\Post::class, function (Faker\Generator $faker) {
-    $title = $faker->sentence(4);
+    $title = $faker->catchPhrase;
 
     return [
         'title' => $title,
@@ -75,7 +75,7 @@ $factory->define(Flashtag\Data\PostRating::class, function (Faker\Generator $fak
 
 $factory->define(Flashtag\Data\User::class, function (Faker\Generator $faker) {
     return [
-        'name' => $faker->name,
+        'name' => $faker->firstName.' '.$faker->lastName,
         'email' => $faker->email,
         'password' => bcrypt(str_random(10)),
         'remember_token' => str_random(10),

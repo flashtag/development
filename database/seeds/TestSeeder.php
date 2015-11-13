@@ -70,7 +70,23 @@ class TestSeeder extends Seeder
      */
     private function createCategories()
     {
-        return factory(\Flashtag\Data\Category::class, 5)->create();
+        return new Collection([
+            factory(\Flashtag\Data\Category::class)->create([
+                'name' => 'Hardware'
+            ]),
+            factory(\Flashtag\Data\Category::class)->create([
+                'name' => 'Software'
+            ]),
+            factory(\Flashtag\Data\Category::class)->create([
+                'name' => 'Gaming'
+            ]),
+            factory(\Flashtag\Data\Category::class)->create([
+                'name' => 'Peripherals'
+            ]),
+            factory(\Flashtag\Data\Category::class)->create([
+                'name' => 'Miscellaneous'
+            ]),
+        ]);
     }
 
     /**
