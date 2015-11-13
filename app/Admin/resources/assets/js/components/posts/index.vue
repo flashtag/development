@@ -202,6 +202,14 @@ export default {
 
     },
 
+    computed: {
+
+        currentUserName: function () {
+            return !! this.currentUser ? this.currentUser.name : '';
+        }
+
+    },
+
     route: {
         data: function (transition) {
             this.fetchUsers();
