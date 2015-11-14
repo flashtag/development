@@ -38,7 +38,7 @@
                 class="Post" :class="{ 'Post--unpublished': !post.is_published }">
 
                 <td>
-                    <a v-link="'posts/'+post.id" @click="checkLock(post, $event)">{{ post.title }}</a>
+                    <a href="#!/posts/{{ post.id }}" @click.prevent="goToPost(post)">{{ post.title }}</a>
                     <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
                           title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
                 </td>
@@ -160,21 +160,23 @@
                 return (start <= now && now <= end);
             },
 
+            goToPost: function (post) {
+                if (this.checkLock(post)) {
+                    this.$route.router.go({ path: '/posts/'+post.id });
+                }
+            },
+
             checkLock: function (post, e) {
                 if (! post.is_locked) {
                     return true;
                 }
 
-                var unlock = confirm(
+                return confirm(
                     "The post is locked by "+this.userName(post.locked_by_id)+". " +
                     "Do you want to unlock it and proceed?" +
                     "\r\n\r\n" +
                     "If you proceed and they are still editing the post, you may overwrite each other's work."
                 );
-
-                if (! unlock) {
-                    e.preventDefault();
-                }
             },
 
             userName: function (userId) {
