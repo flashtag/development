@@ -38,7 +38,7 @@
                 class="Post" :class="{ 'Post--unpublished': !post.is_published }">
 
                 <td>
-                    <a v-link="{ path: '/posts/'+post.id }" @click="checkLock(post, $event)">{{ post.title }}</a>
+                    <a v-link="'posts/'+post.id" @click="checkLock(post, $event)">{{ post.title }}</a>
                     <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
                           title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
                 </td>
@@ -174,8 +174,6 @@
 
                 if (! unlock) {
                     e.preventDefault();
-                    e.stopPropagation();
-                    return false;
                 }
             },
 
