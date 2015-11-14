@@ -5,6 +5,20 @@
     label.showing {
         float: right;
     }
+    .select2-selection {
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: inset 0 -1px 0 #ddd !important;
+    }
+    .select2-selection:focus {
+        box-shadow: inset 0 -2px 0 #00718e !important;
+        outline: 0 !important;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #00718e;
+        color: #fff;
+    }
 </style>
 
 <template>
@@ -57,16 +71,16 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="category">Category</label>
-                            <select v-model="post.category" name="category" id="category" class="form-control">
+                            <select v-model="post.category.data.id" name="category" id="category" class="form-control">
                                 <option value="" disabled selected>Select a category...</option>
-                                <option v-for="category in allCategories" value="category.id">{{ category.name }}</option>
+                                <option v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group form-tags">
                             <label for="tags">Tags</label>
-                            <select v-model="post.tags" name="tags" id="tags" multiple="multiple" class="form-control">
+                            <select v-model="post.tags.data" name="tags" id="tags" multiple="multiple" class="form-control">
                                 <option v-for="tag in allTags" value="tag.id">{{ tag.name }}</option>
                             </select>
                         </div>
@@ -102,10 +116,6 @@
                             <input type="number" v-model="post.order" name="order" id="order" class="form-control" number>
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="teaser">Teaser</label>
-                    <textarea v-model="post.teaser" name="teaser" id="teaser" class="form-control wysiwyg">{{ teaser }}</textarea>
                 </div>
                 <div class="form-group">
                     <label for="body">Body</label>
@@ -159,7 +169,9 @@
 </template>
 
 <script>
+    var $ = require('jquery');
     var moment = require ('moment');
+    var select2 = require('select2');
 
     export default {
 
@@ -205,6 +217,7 @@
                     if  (self.post.stop_showing_at) {
                         self.post.stop_showing_at = moment.unix(self.post.stop_showing_at).format('YYYY-MM-DD');
                     }
+                    self.initSelect2();
                     successHandler(response.entity.data);
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {

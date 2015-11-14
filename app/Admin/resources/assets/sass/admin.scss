@@ -1,6 +1,7 @@
 @import "variables";
 
 @import "vendor/font-awesome";
+@import "vendor/select2";
 @import "vendor/bootstrap";
 
 @import "pages/posts";
@@ -14,7 +15,3 @@
 @import "includes/toggles";
 @import "includes/animations";
 @import "includes/layout";
-
-body {
-  //background-color: $gray-lighter;
-}
