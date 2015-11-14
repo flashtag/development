@@ -35,7 +35,7 @@
         computed: {
 
             userName: function () {
-                return !! this.currentUser ? this.currentUser.name : '';
+                return this.currentUser ? this.currentUser.name : '';
             }
 
         }

@@ -4,7 +4,7 @@
         <li class="active">Posts</li>
     </ol>
 
-    <div class="form-group">
+    <div class="filters">
         <div class="row">
             <div class="col-md-6">
                 <input type="text" v-model="titleFilter" placeholder="Filter by title..." class="form-control">
@@ -36,9 +36,17 @@
                     | filterBy categoryFilter in 'category.data.name'
                     | orderBy sortKey sortDir"
                 class="Post" :class="{ 'Post--unpublished': !post.is_published }">
-                <td>{{ post.title }} <span v-if="post.is_locked" title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span></td>
+
+                <td>
+                    <a v-link="{ path: '/posts/'+post.id }" @click="checkLock(post, $event)">{{ post.title }}</a>
+                    <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
+                          title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
+                </td>
+
                 <td>{{ post.category.data.name }}</td>
+
                 <td>{{ formatTimestamp(post.created_at) }}</td>
+
                 <td class="published">
                     <div class="switch">
                         <input class="cmn-toggle cmn-toggle-round-sm"
@@ -50,10 +58,12 @@
                         <label for="is_published_{{post.id}}"></label>
                     </div>
                 </td>
+
                 <td class="text-centered">
                     <span v-if="isShowing(post)" class="showing"><i class="fa fa-check"></i></span>
                     <span v-if="!isShowing(post)" class="not-showing"><i class="fa fa-times"></i></span>
                 </td>
+
             </tr>
         </tbody>
     </table>
@@ -63,161 +73,164 @@
 </template>
 
 <script>
-var moment = require('moment');
+    var moment = require('moment');
 
-export default {
+    export default {
 
-    props: ['current-user'],
+        props: ['current-user'],
 
-    data: function () {
-        return {
-            posts: [],
-            pagination: { links: {} },
-            categories: [],
-            users: [],
-            titleFilter: null,
-            categoryFilter: null,
-            sortKey: null,
-            sortDir: -1
-        }
-    },
+        data: function () {
+            return {
+                posts: [],
+                pagination: { links: {} },
+                categories: [],
+                users: [],
+                titleFilter: null,
+                categoryFilter: null,
+                sortKey: null,
+                sortDir: -1
+            }
+        },
 
-    methods: {
+        methods: {
 
-        fetch: function (successHandler) {
-            var self = this;
-            client({
-                path: '/posts?include=category&orderBy=updated_at|desc'
-            }).then(function (response) {
-                self.posts = response.entity.data;
-                self.pagination = response.entity.meta.pagination;
-                successHandler(response.entity.data);
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut')
+            fetch: function (successHandler) {
+                var self = this;
+                client({
+                    path: '/posts?include=category&orderBy=updated_at|desc'
+                }).then(function (response) {
+                    self.posts = response.entity.data;
+                    self.pagination = response.entity.meta.pagination;
+                    successHandler(response.entity.data);
+                }, function (response) {
+                    if (response.status.code == 401 || response.status.code == 500) {
+                        self.$dispatch('userHasLoggedOut')
+                    }
+                });
+            },
+
+            fetchUsers: function (successHandler) {
+                var self = this;
+                client({
+                    path: '/users'
+                }).then(function (response) {
+                    self.users = response.entity.data;
+                    // successHandler(response.entity.data);
+                }, function (response) {
+                    if (response.status.code == 401 || response.status.code == 500) {
+                        self.$dispatch('userHasLoggedOut')
+                    }
+                });
+            },
+
+            fetchCategories: function () {
+                var self = this;
+                client({
+                    path: '/categories'
+                }).then(function (response) {
+                    self.categories = response.entity.data;
+                    // successHandler(response.entity.data);
+                }, function (response) {
+                    if (response.status.code == 401 || response.status.code == 500) {
+                        self.$dispatch('userHasLoggedOut')
+                    }
+                });
+            },
+
+            publish: function (post) {
+                client({
+                    method: 'PUT',
+                    path: '/posts/' + post.id + '/publish',
+                    entity: {
+                        is_published: post.is_published,
+                        user_id: this.currentUser.id
+                    }
+                });
+            },
+
+            isShowing: function (post) {
+                if (! post.is_published) {
+                    return false;
                 }
-            });
-        },
 
-        fetchUsers: function (successHandler) {
-            var self = this;
-            client({
-                path: '/users'
-            }).then(function (response) {
-                self.users = response.entity.data;
-                // successHandler(response.entity.data);
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut')
+                var start = !!post.publish_start ? moment(post.publish_start, "YYYY-MM-DD HH:mm:ss") : moment("1980-01-01", "YYYY-MM-DD");
+                var end   = !!post.publish_end   ? moment(post.publish_end, "YYYY-MM-DD HH:mm:ss")   : moment("2033-01-19", "YYYY-MM-DD");
+                var now = moment();
+
+                return (start <= now && now <= end);
+            },
+
+            checkLock: function (post, e) {
+                if (! post.is_locked) {
+                    return true;
                 }
-            });
-        },
 
-        fetchCategories: function () {
-            var self = this;
-            client({
-                path: '/categories'
-            }).then(function (response) {
-                self.categories = response.entity.data;
-                // successHandler(response.entity.data);
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut')
+                var unlock = confirm(
+                    "The post is locked by "+this.userName(post.locked_by_id)+". " +
+                    "Do you want to unlock it and proceed?" +
+                    "\r\n\r\n" +
+                    "If you proceed and they are still editing the post, you may overwrite each other's work."
+                );
+
+                if (! unlock) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
                 }
-            });
-        },
+            },
 
-        publish: function (post) {
-            client({
-                method: 'PUT',
-                path: '/posts/' + post.id + '/publish',
-                entity: {
-                    is_published: post.is_published,
-                    user_id: this.currentUser.id
+            userName: function (userId) {
+                if (! userId || ! this.users || !this.users.length) {
+                    return '';
                 }
-            });
-        },
 
-        isShowing: function (post) {
-            if (! post.is_published) {
-                return false;
+                var user = this.users.filter(function (user) {
+                    return user.id == userId;
+                })[0];
+
+                return user.name;
+            },
+
+            formatTimestamp: function (timestamp) {
+                return moment.unix(timestamp).format('MMM D, YYYY');
+            },
+
+            sortBy: function (key) {
+                if (this.sortKey == key) {
+                    this.sortDir = this.sortDir * -1;
+                } else {
+                    this.sortKey = key;
+                    this.sortDir = 1;
+                }
+            },
+
+            orderIcon: function (key) {
+                if (key == this.sortKey) {
+                    return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc'
+                }
+
+                return 'fa fa-unsorted';
             }
 
-            var start = !!post.publish_start ? moment(post.publish_start, "YYYY-MM-DD HH:mm:ss") : moment("1980-01-01", "YYYY-MM-DD");
-            var end   = !!post.publish_end   ? moment(post.publish_end, "YYYY-MM-DD HH:mm:ss")   : moment("2033-01-19", "YYYY-MM-DD");
-            var now = moment();
-
-            return (start <= now && now <= end);
         },
 
-        checkLock: function (post, isLocked, e) {
-            if (! isLocked) {
-                return;
+        computed: {
+
+            currentUserName: function () {
+                return this.currentUser ? this.currentUser.name : '';
             }
 
-            var unlock = confirm(
-                "The post is locked by "+this.userName(post.locked_by_id)+". " +
-                "Do you want to unlock it and proceed?" +
-                "\r\n\r\n" +
-                "If you proceed and they are still editing the post, you may overwrite each other's work."
-            );
-
-            if (!unlock) {
-                e.preventDefault();
-            }
         },
 
-        userName: function (userId) {
-            if (! userId || ! this.users || !this.users.length) {
-                return '';
+        route: {
+            data: function (transition) {
+                this.fetchUsers();
+                this.fetchCategories();
+                this.fetch(function (data) {
+                    transition.next({posts: data})
+                });
             }
-
-            var user = this.users.filter(function (user) {
-                return user.id == userId;
-            })[0];
-
-            return user.name;
-        },
-
-        formatTimestamp: function (timestamp) {
-            return moment.unix(timestamp).format('MMM D, YYYY');
-        },
-
-        sortBy: function (key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function (key) {
-            if (key == this.sortKey) {
-                return !!this.sortDir ? 'fa fa-sort-asc' : 'fa fa-sort-desc'
-            }
-
-            return 'fa fa-unsorted';
         }
 
-    },
-
-    computed: {
-
-        currentUserName: function () {
-            return !! this.currentUser ? this.currentUser.name : '';
-        }
-
-    },
-
-    route: {
-        data: function (transition) {
-            this.fetchUsers();
-            this.fetchCategories();
-            this.fetch(function (data) {
-                transition.next({posts: data})
-            });
-        }
     }
-}
 </script>
