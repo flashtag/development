@@ -14,7 +14,7 @@
                 <i class="fa fa-newspaper-o"></i> Posts
             </a>
             <a href="#" class="list-group-item" v-link="{ path: '/post-fields', activeClass: 'active' }">
-                <i class="fa fa-sticky-note-o"></i> Post fields
+                <i class="fa fa-th-list"></i> Post fields
             </a>
             <a href="#" class="list-group-item" v-link="{ path: '/categories', activeClass: 'active' }">
                 <i class="fa fa-columns"></i> Categories
