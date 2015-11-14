@@ -12,5 +12,6 @@
 @stop
 
 @section('scripts')
+    <script src="/assets/admin/vendor.js"></script>
     <script src="/assets/admin/admin.js"></script>
 @stop

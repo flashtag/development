@@ -4,11 +4,13 @@
 @import "vendor/select2";
 @import "vendor/bootstrap";
 
-@import "pages/posts";
+@import "pages/posts/index";
+@import "pages/posts/edit";
 
 @import "partials/top-nav";
 @import "partials/side-nav";
 @import "partials/main";
+@import "partials/tags-field";
 
 @import "includes/utility";
 @import "includes/buttons";

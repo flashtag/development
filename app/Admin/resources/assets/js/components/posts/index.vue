@@ -101,6 +101,7 @@
                 }).then(function (response) {
                     self.posts = response.entity.data;
                     self.pagination = response.entity.meta.pagination;
+                    self.initTooltips();
                     successHandler(response.entity.data);
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
@@ -210,7 +211,13 @@
                 }
 
                 return 'fa fa-unsorted';
-            }
+            },
+
+            initTooltips: function () {
+                this.$nextTick(function() {
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
+            },
 
         },
 

@@ -1,0 +1,21 @@
+.Posts {
+
+  .Post {
+    a {
+      color: #666;
+    }
+  }
+
+  .Post--unpublished {
+    color: #bbb;
+    a {
+      color: #bbb;
+    }
+  }
+
+}
+
+.filters {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}

@@ -5,20 +5,6 @@
     label.showing {
         float: right;
     }
-    .select2-selection {
-        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
-        border: none !important;
-        border-radius: 0 !important;
-        box-shadow: inset 0 -1px 0 #ddd !important;
-    }
-    .select2-selection:focus {
-        box-shadow: inset 0 -2px 0 #00718e !important;
-        outline: 0 !important;
-    }
-    .select2-container--default .select2-results__option--highlighted[aria-selected] {
-        background-color: #00718e;
-        color: #fff;
-    }
 </style>
 
 <template>
@@ -28,7 +14,7 @@
         <li class="active">{{ post.title }}</li>
     </ol>
 
-    <form>
+    <form class="Post">
 
         <section class="info row" style="margin-bottom: 20px;">
             <div class="col-md-6 clearfix">
@@ -45,11 +31,11 @@
             </div>
         </section>
 
-        <div class="panel panel-default" :class="{ 'border-green': is_showing, 'border-red': !is_showing }">
+        <div class="panel panel-default" :class="{ 'border-green': isShowing, 'border-red': !isShowing }">
             <div class="panel-heading">
                 POST
-                <label class="showing label" :class="{ 'label-success': is_showing, 'label-danger': !is_showing }">
-                    {{ is_showing ? 'Will show on website' : 'Will not show on website' }}
+                <label class="showing label" :class="{ 'label-success': isShowing, 'label-danger': !isShowing }">
+                    {{ isShowing ? 'Will show on website' : 'Will not show on website' }}
                 </label>
             </div>
             <div class="panel-body">
@@ -71,7 +57,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="category">Category</label>
-                            <select v-model="post.category.data.id" name="category" id="category" class="form-control">
+                            <select v-model="post.category.id" name="category" id="category" class="form-control">
                                 <option value="" disabled selected>Select a category...</option>
                                 <option v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
                             </select>
@@ -80,8 +66,8 @@
                     <div class="col-md-6">
                         <div class="form-group form-tags">
                             <label for="tags">Tags</label>
-                            <select v-model="post.tags.data" name="tags" id="tags" multiple="multiple" class="form-control">
-                                <option v-for="tag in allTags" value="tag.id">{{ tag.name }}</option>
+                            <select v-model="post.tags" name="tags" id="tags" multiple="multiple" class="form-control">
+                                <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
                             </select>
                         </div>
                     </div>
@@ -127,7 +113,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">CUSTOM FIELDS</div>
             <div class="panel-body">
-                <div class="form-group" v-for="field in post.fields.data">
+                <div class="form-group" v-for="field in post.fields">
                     <label for="i">{{ field.name }}</label>
                     <input type="text" v-model="field[i]" name="i" id="i" class="form-control">
                 </div>
@@ -139,11 +125,11 @@
             <div class="panel-body">
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <input type="text" v-model="post.meta.data.description" name="description" id="description" class="form-control">
+                    <input type="text" v-model="post.meta.description" name="description" id="description" class="form-control">
                 </div>
                 <div class="form-group">
                     <label for="url">Canonical Link</label>
-                    <input type="text" v-model="post.meta.data.url" name="url" id="url" class="form-control">
+                    <input type="text" v-model="post.meta.url" name="url" id="url" class="form-control">
                 </div>
             </div>
         </div>
@@ -169,9 +155,7 @@
 </template>
 
 <script>
-    var $ = require('jquery');
     var moment = require ('moment');
-    var select2 = require('select2');
 
     export default {
 
@@ -179,13 +163,23 @@
 
         data: function() {
             return {
-                post: {},
+                post: {
+                    category: {},
+                    tags: [],
+                    fields: [],
+                    meta: {}
+                },
+                selectedTags: [],
                 allCategories: [],
                 allTags: [],
                 revisions: [],
                 fields: [],
                 closed: false
             }
+        },
+
+        ready: function () {
+
         },
 
         computed: {
@@ -211,6 +205,13 @@
                     path: '/posts/'+ this.$route.params.post_id +'?include=category,tags,fields,meta'
                 }).then(function (response) {
                     self.post = response.entity.data;
+                    self.post.category = self.post.category.data;
+                    self.post.fields = self.post.fields.data;
+                    self.post.meta = self.post.meta.data;
+                    self.post.tags = self.post.tags.data.reduce(function (ids, tag) {
+                        ids.push(tag.id);
+                        return ids;
+                    }, []);
                     if  (self.post.start_showing_at) {
                         self.post.start_showing_at = moment.unix(self.post.start_showing_at).format('YYYY-MM-DD');
                     }
@@ -245,7 +246,10 @@
                 client({
                     path: '/tags'
                 }).then(function (response) {
-                    self.allTags = response.entity.data;
+                    self.allTags = response.entity.data.map(function (tag) {
+                        tag.text = tag.name;
+                        return tag;
+                    });
                     // successHandler(response.entity.data);
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
@@ -319,11 +323,13 @@
              */
             initSelect2: function() {
                 var self = this;
-                $('#tags').select2();
+                setTimeout(function() {
+                    $('#tags').select2();
+                    $('.form-tags select').on('change', function () {
+                        self.post.tags = $(this).val();
+                    });
+                }.bind(this), 50); // this sucks
 
-                $('.form-tags select').on('change',function() {
-                    self.tags = $(this).val();
-                });
             },
 
             /**
@@ -461,7 +467,7 @@
                 this.fetchTags();
                 this.fetchCategories();
                 this.fetch(function (data) {
-                    transition.next({posts: data})
+                    transition.next({post: data});
                 });
             }
         }
