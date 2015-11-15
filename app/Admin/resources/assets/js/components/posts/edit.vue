@@ -1,12 +1,3 @@
-<style>
-    .action-buttons {
-        float: right;
-    }
-    label.showing {
-        float: right;
-    }
-</style>
-
 <template>
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
@@ -26,7 +17,7 @@
                 <div class="action-buttons">
                     <button class="btn btn-primary" @click="save"><i class="fa fa-save"></i> Save</button>
                     <button class="btn btn-danger"  @click="delete"><i class="fa fa-trash"></i> Delete</button>
-                    <button class="btn btn-default" @click="close"><i class="fa fa-close"></i> Close</button>
+                    <button v-link="'/posts'" class="btn btn-default"><i class="fa fa-close"></i> Close</button>
                 </div>
             </div>
         </section>
@@ -169,17 +160,11 @@
                     fields: [],
                     meta: {}
                 },
-                selectedTags: [],
                 allCategories: [],
                 allTags: [],
                 revisions: [],
-                fields: [],
-                closed: false
+                fields: []
             }
-        },
-
-        ready: function () {
-
         },
 
         computed: {
@@ -218,8 +203,9 @@
                     if  (self.post.stop_showing_at) {
                         self.post.stop_showing_at = moment.unix(self.post.stop_showing_at).format('YYYY-MM-DD');
                     }
+                    self.lock();
                     self.initSelect2();
-                    successHandler(response.entity.data);
+                    successHandler(self.post);
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')
@@ -251,6 +237,86 @@
                         return tag;
                     });
                     // successHandler(response.entity.data);
+                }, function (response) {
+                    if (response.status.code == 401 || response.status.code == 500) {
+                        self.$dispatch('userHasLoggedOut')
+                    }
+                });
+            },
+
+            /**
+             * Save the post.
+             *
+             * @param e
+             */
+            save: function(e) {
+                e.preventDefault();
+
+                console.log([
+                    this.start_showing_at,
+                    this.stop_showing_at
+                ]);
+
+                client({
+                    method: 'PUT',
+                    path: '/posts/'+self.post.id,
+                    entity: self.post
+                }).then(function (response) {
+                    self.notify('success', 'Saved successfully.');
+                }, function (response) {
+                    if (response.status.code == 401 || response.status.code == 500) {
+                        self.$dispatch('userHasLoggedOut')
+                    }
+                });
+            },
+
+            saveAndClose: function() {
+                setTimeout(this.close, 2000);
+            },
+
+            delete: function(e) {
+                e.preventDefault();
+
+                var confirmed = confirm("Are you sure you want to delete this? This will permanently delete this post and its revision history.");
+
+                if (confirmed) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: '/api/posts/' + this.id,
+                        success: function(data) {
+                            window.location = "/admin/posts";
+                        }
+                    });
+                }
+            },
+
+            lock: function() {
+                var self = this;
+                client({
+                    method: 'PATCH',
+                    path: '/posts/'+self.post.id+'/lock',
+                    entity: { user_id: self.currentUser.id }
+                }).then(function (response) {
+                    self.post.is_locked = true;
+                    window.onbeforeunload = function (e) {
+                        self.unlock();
+                    };
+                }, function (response) {
+                    if (response.status.code == 401 || response.status.code == 500) {
+                        self.$dispatch('userHasLoggedOut')
+                    }
+                });
+            },
+
+            unlock: function (done) {
+                var self = this;
+                client({
+                    method: 'PATCH',
+                    path: '/posts/'+self.post.id+'/unlock',
+                    entity: { user_id: self.currentUser.id }
+                }).then(function (response) {
+                    self.post.is_locked = false;
+                    done();
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')
@@ -332,108 +398,6 @@
 
             },
 
-            /**
-             * Save the post.
-             *
-             * @param e
-             */
-            save: function(e) {
-                e.preventDefault();
-
-                console.log([
-                    this.start_showing_at,
-                    this.stop_showing_at
-                ]);
-
-                $.ajax({
-                    type: "PUT",
-                    url: '/api/posts/' + this.id,
-                    data: JSON.stringify({
-                        title         : this.title,
-                        subtitle      : this.subtitle,
-                        category_id   : this.category,
-                        list_position : this.list_position,
-                        is_published  : this.is_published,
-                        teaser        : this.teaser,
-                        body          : this.body,
-                        pull_quote    : this.pull_quote,
-                        footnotes     : this.footnotes,
-                        author_info   : this.author_info,
-                        copyright     : this.copyright,
-                        start_showing_at : this.start_showing_at,
-                        stop_showing_at   : this.stop_showing_at
-                    }),
-                    context: this,
-                    success: function (data) {
-                        this.notify('success', 'Saved <i><b>' + data.title + '</b></i>.');
-                    },
-                    dataType: "json"
-                });
-            },
-
-            saveAndClose: function() {
-                setTimeout(this.close, 2000);
-            },
-
-            delete: function(e) {
-                e.preventDefault();
-
-                var confirmed = confirm("Are you sure you want to delete this? This will permanently delete this post and its revision history.");
-
-                if (confirmed) {
-                    $.ajax({
-                        type: "DELETE",
-                        url: '/api/posts/' + this.id,
-                        success: function(data) {
-                            window.location = "/admin/posts";
-                        }
-                    });
-                }
-            },
-
-            /**
-             * Close and unlock the post.
-             */
-            close: function(e) {
-                e.preventDefault();
-                this.closed = true;
-                this.unlock(function() {
-                    window.location = "/admin/posts";
-                });
-            },
-
-            lock: function() {
-                var self = this;
-
-                $.ajax({
-                    type: "PUT",
-                    url: '/api/posts/' + this.id + '/lock',
-                    data: JSON.stringify({ user_id: this.userId }),
-                    context: this,
-                    success: function (data) {
-                        window.onbeforeunload = function (e) {
-                            if (! self.closed) {
-                                self.unlock();
-                            }
-                        };
-                    },
-                    dataType: "json"
-                });
-            },
-
-            unlock: function(done) {
-                $.ajax({
-                    type: "PUT",
-                    url: '/api/posts/' + this.id + '/unlock',
-                    data: JSON.stringify({ user_id: this.userId }),
-                    context: this,
-                    success: function (data) {
-                        done();
-                    },
-                    dataType: "json"
-                });
-            },
-
             notify: function (type, message) {
                 var icon = '';
                 if (type == 'success') {
@@ -466,8 +430,14 @@
             data: function (transition) {
                 this.fetchTags();
                 this.fetchCategories();
-                this.fetch(function (data) {
-                    transition.next({post: data});
+                this.fetch(function (post) {
+                    this.lock();
+                    transition.next({post: post});
+                }.bind(this));
+            },
+            deactivate: function (transition) {
+                this.unlock(function () {
+                    transition.next();
                 });
             }
         }

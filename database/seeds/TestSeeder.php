@@ -168,7 +168,15 @@ class TestSeeder extends Seeder
      */
     private function createPosts(Collection $categories, Collection $tags, Collection $authors, Collection $users, array $fieldValues)
     {
-        $posts = factory(\Flashtag\Data\Post::class, 100)->create();
+        $ipsum = <<<IPSUM
+<p>Pancetta strip steak deserunt swine pig commodo andouille ut drumstick.  Eiusmod andouille shoulder proident quis sint occaecat eu ut.  Eu qui bresaola, brisket in nulla mollit quis.  Proident qui tenderloin strip steak cupim velit.  Nostrud alcatra tail sunt, shoulder tempor exercitation duis bacon tri-tip picanha sausage sed meatloaf pancetta.</p>
+<p>Anim kevin sunt pancetta, velit tenderloin sirloin adipisicing in in consequat short loin sed.  Ball tip landjaeger prosciutto, bresaola tri-tip swine t-bone turducken cupidatat tempor.  Veniam quis magna ullamco.  Nulla doner eiusmod shoulder landjaeger commodo dolore tri-tip eu andouille pastrami in id.  Tri-tip shoulder flank in ham.  Sausage hamburger aute jerky esse.  Nostrud aliquip sunt exercitation, irure flank do brisket tri-tip shoulder ground round ball tip.</p>
+<p>Tenderloin short ribs tongue prosciutto leberkas biltong, reprehenderit capicola est sunt enim fugiat dolore nisi.  Picanha tenderloin pig ut.  In kielbasa pariatur id short loin et do.  Kielbasa proident meatloaf aliquip, swine short ribs sed id beef short loin veniam.  Proident frankfurter pancetta, ham hock adipisicing cupidatat nisi et pork chop strip steak kevin.  Fatback tail est in ground round.</p>
+IPSUM;
+
+        $posts = factory(\Flashtag\Data\Post::class, 100)->create([
+            'body' => $ipsum
+        ]);
 
         return $posts->map(function ($post) use ($categories, $tags, $authors, $users, $fieldValues) {
             $post->changeCategoryTo($categories->random());

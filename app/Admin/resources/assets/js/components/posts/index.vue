@@ -140,7 +140,7 @@
 
             publish: function (post) {
                 client({
-                    method: 'PUT',
+                    method: 'PATCH',
                     path: '/posts/' + post.id + '/publish',
                     entity: {
                         is_published: post.is_published,

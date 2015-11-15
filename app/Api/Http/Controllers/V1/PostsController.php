@@ -141,4 +141,32 @@ class PostsController extends Controller
 
         return $post;
     }
+
+    /**
+     * Lock a post.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param                          $id
+     * @return mixed
+     */
+    public function lock(Request $request, $id)
+    {
+        $post = $this->post->findOrFail($id);
+        $user_id = $request->json('user_id');
+
+        $post->lock($user_id) ? 'ok' : 'fail';
+    }
+
+    /**
+     * Unlock a post.
+     * 
+     * @param $id
+     */
+    public function unlock($id)
+    {
+        $post = $this->post->findOrNew($id);
+        $post->is_locked = false;
+        $post->locked_by_id = null;
+        $post->save();
+    }
 }

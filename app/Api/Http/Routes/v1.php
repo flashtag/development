@@ -8,7 +8,9 @@ $api->group(['prefix' => 'auth'], function ($api) {
 
 $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
 
-    $api->put('posts/{id}/publish', 'PostsController@publish');
+    $api->patch('posts/{id}/publish', 'PostsController@publish');
+    $api->patch('posts/{id}/lock', 'PostsController@lock');
+    $api->patch('posts/{id}/unlock', 'PostsController@unlock');
     $api->resource('posts', 'PostsController', ['except' => ['create', 'edit']]);
 
     $api->resource('tags', 'TagsController', ['except' => ['create', 'edit']]);
