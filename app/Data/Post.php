@@ -148,7 +148,7 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * Lock the article.
+     * Lock the post.
      *
      * @param int $user_id
      *
@@ -158,6 +158,20 @@ class Post extends Model implements HasPresenter
     {
         $this->is_locked = true;
         $this->locked_by_id = $user_id;
+
+        return $this->save();
+    }
+
+    /**
+     * Unlock the post.
+     *
+     * @param int $user_id
+     * @return bool
+     */
+    public function unlock($user_id = null)
+    {
+        $this->is_locked = false;
+        $this->locked_by_id = null;
 
         return $this->save();
     }

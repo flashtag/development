@@ -32,7 +32,6 @@ class PostsController extends Controller
     {
         $count = $request->get('count', 100);
         $posts = $this->post->paginate($count);
-
         $this->appendPaginationLinks($posts, $request);
 
         return $this->response->paginator($posts, new PostTransformer());
@@ -61,6 +60,7 @@ class PostsController extends Controller
     {
         $postData = $this->buildPostFromRequest($request);
         $post = $this->post->create($postData);
+        $this->syncRelationships($post, $request);
 
         return $this->response->item($post, new PostTransformer());
     }
@@ -77,6 +77,7 @@ class PostsController extends Controller
         $postData = $this->buildPostFromRequest($request);
         $post = $this->post->findOrFail($id);
         $post->update($postData);
+        $this->syncRelationships($post, $request);
 
         return $this->response->item($post, new PostTransformer());
     }
@@ -90,15 +91,15 @@ class PostsController extends Controller
     private function buildPostFromRequest(Request $request)
     {
         return [
-            'title'            => $request->get('title'),
-            'slug'             => str_slug($request->get('title')),
-            'subtitle'         => $request->get('subtitle'),
-            'order'            => $request->get('order'),
-            'category_id'      => $request->get('category_id'),
-            'body'             => $request->get('body'),
-            'is_published'     => $request->get('is_published'),
+            'title' => $request->get('title'),
+            'slug' => str_slug($request->get('title')),
+            'subtitle' => $request->get('subtitle'),
+            'order' => $request->get('order'),
+            'category_id' => $request->get('category_id'),
+            'body' => $request->get('body'),
+            'is_published' => $request->get('is_published'),
             'start_showing_at' => $request->get('start_showing_at'),
-            'stop_showing_at'  => $request->get('stop_showing_at'),
+            'stop_showing_at' => $request->get('stop_showing_at'),
         ];
     }
 
@@ -159,14 +160,34 @@ class PostsController extends Controller
 
     /**
      * Unlock a post.
-     * 
+     *
      * @param $id
      */
     public function unlock($id)
     {
         $post = $this->post->findOrNew($id);
-        $post->is_locked = false;
-        $post->locked_by_id = null;
-        $post->save();
+        $post->unlock();
+    }
+
+    private function syncRelationships($post, $request)
+    {
+        $this->updateTags($post, $request->json('tags'));
+        $this->updateFields($post, $request->json('fields'));
+        $this->updateMeta($post, $request->json('meta'));
+    }
+
+    private function updateTags($post, $tags = [])
+    {
+        $post->tags()->sync($tags);
+    }
+
+    private function updateFields($post, $fields = [])
+    {
+        // TODO: Sync post fields with pivot data
+    }
+
+    private function updateMeta($post, $meta = null)
+    {
+        // TODO: Save meta...
     }
 }

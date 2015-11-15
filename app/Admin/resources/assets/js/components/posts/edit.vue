@@ -15,8 +15,8 @@
             </div>
             <div class="col-md-6 clearfix">
                 <div class="action-buttons">
-                    <button class="btn btn-primary" @click="save"><i class="fa fa-save"></i> Save</button>
-                    <button class="btn btn-danger"  @click="delete"><i class="fa fa-trash"></i> Delete</button>
+                    <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                    <button v-link="'/posts'" @click="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
                     <button v-link="'/posts'" class="btn btn-default"><i class="fa fa-close"></i> Close</button>
                 </div>
             </div>
@@ -249,17 +249,11 @@
              *
              * @param e
              */
-            save: function(e) {
-                e.preventDefault();
-
-                console.log([
-                    this.start_showing_at,
-                    this.stop_showing_at
-                ]);
-
+            save: function() {
+                var self = this;
                 client({
                     method: 'PUT',
-                    path: '/posts/'+self.post.id,
+                    path: '/posts/'+this.post.id,
                     entity: self.post
                 }).then(function (response) {
                     self.notify('success', 'Saved successfully.');
@@ -274,18 +268,16 @@
                 setTimeout(this.close, 2000);
             },
 
-            delete: function(e) {
-                e.preventDefault();
-
-                var confirmed = confirm("Are you sure you want to delete this? This will permanently delete this post and its revision history.");
+            delete: function() {
+                var confirmed = confirm(
+                    "Are you sure you want to delete this? " +
+                    "This will permanently delete this post and its revision history."
+                );
 
                 if (confirmed) {
-                    $.ajax({
-                        type: "DELETE",
-                        url: '/api/posts/' + this.id,
-                        success: function(data) {
-                            window.location = "/admin/posts";
-                        }
+                    client({
+                        method: 'DELETE',
+                        path: '/posts/' + this.post.id
                     });
                 }
             },
