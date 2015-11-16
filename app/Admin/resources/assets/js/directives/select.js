@@ -1,6 +1,3 @@
-var $ = require('jquery');
-var select2 = require('select2');
-
 export default {
 
     twoWay: true,
@@ -14,7 +11,7 @@ export default {
         $(this.el).select2({
             data: this.params.options
         }).on('change', function () {
-            self.set(this.value);
+            self.set($(this).val());
         });
     },
 

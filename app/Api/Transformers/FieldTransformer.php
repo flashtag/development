@@ -16,6 +16,8 @@ class FieldTransformer extends Transformer
             'label' => $field->label,
             'name' => $field->name,
             'value' => $field->pivot->value,
+            'description' => $field->description,
+            'template' => $field->template,
         ];
     }
 }

@@ -57,7 +57,8 @@
                     <div class="col-md-6">
                         <div class="form-group form-tags">
                             <label for="tags">Tags</label>
-                            <select v-model="post.tags" name="tags" id="tags" multiple="multiple" class="form-control">
+                            <select v-model="post.tags" name="tags" id="tags" multiple class="form-control"
+                                    v-select="post.tags">
                                 <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
                             </select>
                         </div>
@@ -105,8 +106,7 @@
             <div class="panel-heading">CUSTOM FIELDS</div>
             <div class="panel-body">
                 <div class="form-group" v-for="field in post.fields">
-                    <label for="i">{{ field.name }}</label>
-                    <input type="text" v-model="field[i]" name="i" id="i" class="form-control">
+                    <component :is="getTemplate(field)" :label="field.label" :name="field.name" :value="field.value"></component>
                 </div>
             </div>
         </div>
@@ -126,23 +126,6 @@
         </div>
 
     </form>
-
-    <!--<div class="modal fade" id="revisions" tabindex="-1" role="dialog">-->
-        <!--<div class="modal-dialog modal-lg">-->
-            <!--<div class="modal-content">-->
-                <!--<div class="modal-header">-->
-                    <!--<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
-                    <!--<h4 class="modal-title"><i class="fa fa-history"></i> History</h4>-->
-                <!--</div>-->
-                <!--<div class="modal-body">-->
-                    <!--<revisions wait-for="clicked-history" post="{{ $data }}"></revisions>-->
-                <!--</div>-->
-                <!--<div class="modal-footer">-->
-                    <!--<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-    <!--</div>-->
 </template>
 
 <script>
@@ -152,18 +135,22 @@
 
         props: ['current-user'],
 
+        components: {
+            string: require('../fields/templates/string.vue'),
+            rich_text: require('../fields/templates/rich_text.vue')
+        },
+
         data: function() {
             return {
                 post: {
                     category: {},
                     tags: [],
                     fields: [],
+                    revisions: [],
                     meta: {}
                 },
                 allCategories: [],
-                allTags: [],
-                revisions: [],
-                fields: []
+                allTags: []
             }
         },
 
@@ -204,12 +191,9 @@
                         self.post.stop_showing_at = moment.unix(self.post.stop_showing_at).format('YYYY-MM-DD');
                     }
                     self.lock();
-                    self.initSelect2();
                     successHandler(self.post);
                 }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                    self.checkResponseStatus(response);
                 });
             },
 
@@ -219,11 +203,8 @@
                     path: '/categories'
                 }).then(function (response) {
                     self.allCategories = response.entity.data;
-                    // successHandler(response.entity.data);
                 }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                    self.checkResponseStatus(response);
                 });
             },
 
@@ -236,18 +217,13 @@
                         tag.text = tag.name;
                         return tag;
                     });
-                    // successHandler(response.entity.data);
                 }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                    self.checkResponseStatus(response);
                 });
             },
 
             /**
              * Save the post.
-             *
-             * @param e
              */
             save: function() {
                 var self = this;
@@ -258,14 +234,8 @@
                 }).then(function (response) {
                     self.notify('success', 'Saved successfully.');
                 }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                    self.checkResponseStatus(response);
                 });
-            },
-
-            saveAndClose: function() {
-                setTimeout(this.close, 2000);
             },
 
             delete: function() {
@@ -273,7 +243,6 @@
                     "Are you sure you want to delete this? " +
                     "This will permanently delete this post and its revision history."
                 );
-
                 if (confirmed) {
                     client({
                         method: 'DELETE',
@@ -294,9 +263,7 @@
                         self.unlock();
                     };
                 }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                    self.checkResponseStatus(response);
                 });
             },
 
@@ -310,112 +277,36 @@
                     self.post.is_locked = false;
                     done();
                 }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                    self.checkResponseStatus(response);
                 });
-            },
-
-            /**
-             * Initialize the redactor WYSIWYG text editor plugin.
-             *
-             * @param element
-             * @param html
-             */
-            initWYSIWYG: function(element, html) {
-                var that = this;
-
-                $('.wysiwyg[name=' + element + ']').redactor({
-                    plugins         : ['video', 'imagemanager', 'table', 'fullscreen'],
-                    imageManagerJson: '/api/wysiwyg/images',
-                    imageUpload     : '/api/wysiwyg/upload/post',
-                    codemirror      : true,
-                    formattingAdd   : [{
-                        tag: 'sup',
-                        title: 'Superscript'
-                    }],
-                    // Set the text to the editor on init
-                    initCallback: function() {
-                        if (html) {
-                            this.code.set(html);
-                        }
-                        //this.$toolbar.css('opacity', 0);
-                    },
-                    // Set the editor text back to the element on change
-                    changeCallback: function() {
-                        that[element] = this.code.get();
-                    },
-                    focusCallback: function(e) {
-                        //this.$toolbar.css('opacity', 1);
-                    },
-                    blurCallback: function(e) {
-                        //this.$toolbar.css('opacity', 0);
-                    },
-                    keyupCallback: function(e) {
-                        // Close fullscreen on "Esc"
-                        if (e.keyCode == 27 && this.fullscreen.isOpen) {
-                            this.fullscreen.disable();
-                        }
-                    },
-                    codeKeydownCallback: function(e)
-                    {
-                        // Close fullscreen on "Esc"
-                        if (e.keyCode == 27 && this.fullscreen.isOpen) {
-                            this.fullscreen.disable();
-                        }
-                    }
-                });
-
-                // CodeMirror syntax highlighting on all text areas
-                $('textarea.wysiwyg').each(function(index, elem){
-                    CodeMirror.fromTextArea(elem, {
-                        lineWrapping: true,
-                        theme: "material",
-                        mode : "htmlmixed"
-                    });
-                });
-            },
-
-            /**
-             * Initialize the select2 plugin.
-             */
-            initSelect2: function() {
-                var self = this;
-                setTimeout(function() {
-                    $('#tags').select2();
-                    $('.form-tags select').on('change', function () {
-                        self.post.tags = $(this).val();
-                    });
-                }.bind(this), 50); // this sucks
-
             },
 
             notify: function (type, message) {
-                var icon = '';
                 if (type == 'success') {
-                    icon = "fa fa-thumbs-o-up";
+                    var icon = "fa fa-thumbs-o-up";
                 } else if (type == 'warning') {
-                    icon = "fa fa-warning";
+                    var icon = "fa fa-warning";
                 }
-
                 $.notify({
-                    // options
                     icon: icon,
                     message: message
-                },{
-                    // settings
+                }, {
                     type: type,
                     delay: 3000,
                     offset: { x: 20, y: 70 }
                 });
             },
 
-            onExternalUnlock: function(data) {
-                console.log(data);
-                if (data.post.id == this.id) {
-                    alert("This post was unlocked by "+data.user.first_name);
+            getTemplate: function (field) {
+                return field ? field.template : '';
+            },
+
+            checkResponseStatus: function (response) {
+                if (response.status.code == 401 || response.status.code == 500) {
+                    this.$dispatch('userHasLoggedOut')
                 }
             }
+
         },
 
         route: {
