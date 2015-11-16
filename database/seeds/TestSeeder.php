@@ -26,8 +26,8 @@ class TestSeeder extends Seeder
      */
     public function run()
     {
-        $categories = $this->createCategories();
         $tags = $this->createTags();
+        $categories = $this->createCategories($tags);
         $fields = $this->createFields();
         $fieldValues = $this->setValuesToFields($fields);
         $authors = $this->createAuthors();
@@ -68,9 +68,9 @@ class TestSeeder extends Seeder
     /**
      * @return \Illuminate\Support\Collection
      */
-    private function createCategories()
+    private function createCategories($tags)
     {
-        return new Collection([
+        $categories = new Collection([
             factory(\Flashtag\Data\Category::class)->create([
                 'name' => 'Hardware'
             ]),
@@ -87,6 +87,12 @@ class TestSeeder extends Seeder
                 'name' => 'Miscellaneous'
             ]),
         ]);
+
+        $categories->each(function ($category) use ($tags) {
+            $category->tags()->sync($this->faker->randomElements($tags->lists('id')->toArray(), 2));
+        });
+
+        return $categories;
     }
 
     /**
@@ -94,7 +100,29 @@ class TestSeeder extends Seeder
      */
     private function createTags()
     {
-        return factory(\Flashtag\Data\Tag::class, 5)->create();
+        return new Collection([
+            factory(\Flashtag\Data\Tag::class)->create([
+                'name' => 'html'
+            ]),
+            factory(\Flashtag\Data\Tag::class)->create([
+                'name' => 'php'
+            ]),
+            factory(\Flashtag\Data\Tag::class)->create([
+                'name' => 'haskell'
+            ]),
+            factory(\Flashtag\Data\Tag::class)->create([
+                'name' => 'javascript'
+            ]),
+            factory(\Flashtag\Data\Tag::class)->create([
+                'name' => 'ruby'
+            ]),
+            factory(\Flashtag\Data\Tag::class)->create([
+                'name' => 'python'
+            ]),
+            factory(\Flashtag\Data\Tag::class)->create([
+                'name' => 'scala'
+            ]),
+        ]);
     }
 
     /**

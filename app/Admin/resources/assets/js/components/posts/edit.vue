@@ -106,7 +106,11 @@
             <div class="panel-heading">CUSTOM FIELDS</div>
             <div class="panel-body">
                 <div class="form-group" v-for="field in allFields">
-                    <component :is="getTemplate(field)" :label="field.label" :name="field.name" :value="getFieldValue(field.name)"></component>
+                    <component :is="getTemplate(field)"
+                               :label="field.label"
+                               :name="field.name"
+                               :value="getFieldValue(field.name)">
+                    </component>
                 </div>
             </div>
         </div>
@@ -312,9 +316,14 @@
             },
 
             getFieldValue: function (fieldName) {
-                return this.post.fields.filter(function (field) {
+                if (! fieldName.length > 0) {
+                   return '';
+                }
+                var matchedField = this.post.fields.filter(function (field) {
                     return field.name == fieldName;
-                })[0].value;
+                })[0];
+
+                return matchedField ? matchedField.value : '';
             },
 
             getTemplate: function (field) {

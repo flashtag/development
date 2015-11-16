@@ -19,12 +19,14 @@
         <thead>
             <tr>
                 <th><a href="#" @click.prevent="sortBy('name')">Name <i :class="orderIcon('name')"></i></a></th>
+                <th><a>Tags</a></th>
             </tr>
         </thead>
         <tbody>
             <tr v-for="category in categories | filterBy nameFilter | orderBy sortKey sortDir"
                 class="Category">
                 <td><a v-link="'/categories/'+category.id">{{ category.name }}</a></td>
+                <td><span v-for="tag in category.tags.data" class="tag label label-default">{{ tag.name }}</span></td>
             </tr>
         </tbody>
     </table>
@@ -55,7 +57,7 @@
             fetch: function (successHandler) {
                 var self = this;
                 client({
-                    path: '/categories'
+                    path: '/categories?include=tags'
                 }).then(function (response) {
                     self.categories = response.entity.data;
                     self.pagination = response.entity.meta.pagination;
