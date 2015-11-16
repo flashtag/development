@@ -4,6 +4,10 @@
         <li class="active">Posts</li>
     </ol>
 
+    <div class="create-button">
+        <button v-link="'/posts/create'" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</button>
+    </div>
+
     <div class="filters">
         <div class="row">
             <div class="col-md-6">

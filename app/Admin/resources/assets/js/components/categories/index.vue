@@ -9,6 +9,9 @@
             <div class="col-md-6">
                 <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
             </div>
+            <div class="create-button col-md-6">
+                <button v-link="'/categories/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
+            </div>
         </div>
     </div>
 

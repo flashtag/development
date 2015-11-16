@@ -1,7 +1,7 @@
 <template>
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
-        <li class="active">Tags</li>
+        <li class="active">Users</li>
     </ol>
 
     <div class="filters">
@@ -10,21 +10,23 @@
                 <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
             </div>
             <div class="create-button col-md-6">
-                <button v-link="'/tags/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
+                <button v-link="'/users/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
             </div>
         </div>
     </div>
 
-    <table class="Tags table table-striped table-hover">
+    <table class="Users table table-striped table-hover">
         <thead>
             <tr>
                 <th><a href="#" @click.prevent="sortBy('name')">Name <i :class="orderIcon('name')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('email')">Email <i :class="orderIcon('email')"></i></a></th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for="tag in tags | filterBy nameFilter | orderBy sortKey sortDir"
-                class="Tag">
-                <td><a v-link="'/tags/'+tag.id">{{ tag.name }}</a></td>
+            <tr v-for="user in users | filterBy nameFilter | orderBy sortKey sortDir"
+                class="User">
+                <td><a v-link="'/users/'+user.id">{{ user.name }}</a></td>
+                <td>{{ user.email }}</td>
             </tr>
         </tbody>
     </table>
@@ -42,7 +44,7 @@
 
         data: function () {
             return {
-                tags: [],
+                users: [],
                 pagination: { links: {} },
                 nameFilter: null,
                 sortKey: null,
@@ -55,9 +57,9 @@
             fetch: function (successHandler) {
                 var self = this;
                 client({
-                    path: '/tags'
+                    path: '/users'
                 }).then(function (response) {
-                    self.tags = response.entity.data;
+                    self.users = response.entity.data;
                     self.pagination = response.entity.meta.pagination;
                     successHandler(response.entity.data);
                 }, function (response) {
@@ -89,7 +91,7 @@
         route: {
             data: function (transition) {
                 this.fetch(function (data) {
-                    transition.next({tags: data})
+                    transition.next({users: data})
                 });
             }
         }

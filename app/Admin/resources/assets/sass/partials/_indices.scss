@@ -1,0 +1,8 @@
+
+.create-button {
+  @include clearfix;
+
+  button {
+    float: right;
+  }
+}

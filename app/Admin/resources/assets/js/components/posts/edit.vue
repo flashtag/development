@@ -105,8 +105,8 @@
         <div class="panel panel-default">
             <div class="panel-heading">CUSTOM FIELDS</div>
             <div class="panel-body">
-                <div class="form-group" v-for="field in post.fields">
-                    <component :is="getTemplate(field)" :label="field.label" :name="field.name" :value="field.value"></component>
+                <div class="form-group" v-for="field in allFields">
+                    <component :is="getTemplate(field)" :label="field.label" :name="field.name" :value="getFieldValue(field.name)"></component>
                 </div>
             </div>
         </div>
@@ -150,7 +150,8 @@
                     meta: {}
                 },
                 allCategories: [],
-                allTags: []
+                allTags: [],
+                allFields: []
             }
         },
 
@@ -217,6 +218,17 @@
                         tag.text = tag.name;
                         return tag;
                     });
+                }, function (response) {
+                    self.checkResponseStatus(response);
+                });
+            },
+
+            fetchFields: function () {
+                var self = this;
+                client({
+                    path: '/fields'
+                }).then(function (response) {
+                    self.allFields = response.entity.data;
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });
@@ -299,6 +311,12 @@
                 });
             },
 
+            getFieldValue: function (fieldName) {
+                return this.post.fields.filter(function (field) {
+                    return field.name == fieldName;
+                })[0].value;
+            },
+
             getTemplate: function (field) {
                 return field ? field.template : '';
             },
@@ -314,6 +332,7 @@
         route: {
             data: function (transition) {
 //                CKEDITOR.replaceClass = 'rich-editor';
+                this.fetchFields();
                 this.fetchTags();
                 this.fetchCategories();
                 this.fetch(function (post) {
