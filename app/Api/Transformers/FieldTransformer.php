@@ -13,9 +13,10 @@ class FieldTransformer extends Transformer
     public function transform(Field $field)
     {
         return [
+            'id' => (int) $field->id,
             'label' => $field->label,
             'name' => $field->name,
-            'value' => $field->pivot->value,
+            'value' => isset($field->pivot) ? $field->pivot->value : null,
             'description' => $field->description,
             'template' => $field->template,
         ];

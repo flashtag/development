@@ -89,15 +89,9 @@ class CategoriesController extends Controller
     private function buildCategoryFromRequest(Request $request)
     {
         return [
-            'title'            => $request->get('title'),
-            'slug'             => str_slug($request->get('title')),
-            'subtitle'         => $request->get('subtitle'),
-            'order'            => $request->get('order'),
-            'category_id'      => $request->get('category_id'),
-            'body'             => $request->get('body'),
-            'is_published'     => $request->get('is_published'),
-            'start_showing_at' => $request->get('start_showing_at'),
-            'stop_showing_at'  => $request->get('stop_showing_at'),
+            'name' => $request->get('name'),
+            'slug' => str_slug($request->get('name')),
+            'description' => $request->get('description'),
         ];
     }
 

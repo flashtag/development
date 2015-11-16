@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     /**
+     * Fields protected from mass-assignment.
+     *
+     * @var array
+     */
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function posts()

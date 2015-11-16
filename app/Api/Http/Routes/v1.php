@@ -17,6 +17,8 @@ $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
 
     $api->resource('categories', 'CategoriesController', ['except' => ['create', 'edit']]);
 
+    $api->resource('fields', 'FieldsController', ['except' => ['create', 'edit']]);
+
     $api->resource('users', 'UsersController', ['except' => ['create', 'edit']]);
 
 });

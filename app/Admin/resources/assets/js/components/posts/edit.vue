@@ -97,7 +97,7 @@
                 </div>
                 <div class="form-group">
                     <label for="body">Body</label>
-                    <textarea v-model="post.body" name="body" id="body" class="form-control wysiwyg" rows="10">{{ body }}</textarea>
+                    <textarea v-model="post.body" name="body" id="body" class="form-control rich-editor" rows="10"></textarea>
                 </div>
             </div>
         </div>
@@ -136,8 +136,8 @@
         props: ['current-user'],
 
         components: {
-            string: require('../fields/templates/string.vue'),
-            rich_text: require('../fields/templates/rich_text.vue')
+            string: require('../post-fields/templates/string.vue'),
+            rich_text: require('../post-fields/templates/rich_text.vue')
         },
 
         data: function() {
@@ -252,19 +252,21 @@
             },
 
             lock: function() {
-                var self = this;
-                client({
-                    method: 'PATCH',
-                    path: '/posts/'+self.post.id+'/lock',
-                    entity: { user_id: self.currentUser.id }
-                }).then(function (response) {
-                    self.post.is_locked = true;
-                    window.onbeforeunload = function (e) {
-                        self.unlock();
-                    };
-                }, function (response) {
-                    self.checkResponseStatus(response);
-                });
+                if (! this.post.is_locked) {
+                    var self = this;
+                    client({
+                        method: 'PATCH',
+                        path: '/posts/' + self.post.id + '/lock',
+                        entity: {user_id: self.currentUser.id}
+                    }).then(function (response) {
+                        self.post.is_locked = true;
+                        window.onbeforeunload = function (e) {
+                            self.unlock();
+                        };
+                    }, function (response) {
+                        self.checkResponseStatus(response);
+                    });
+                }
             },
 
             unlock: function (done) {
@@ -311,6 +313,7 @@
 
         route: {
             data: function (transition) {
+//                CKEDITOR.replaceClass = 'rich-editor';
                 this.fetchTags();
                 this.fetchCategories();
                 this.fetch(function (post) {

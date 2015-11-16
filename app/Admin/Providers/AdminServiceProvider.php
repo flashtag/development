@@ -2,6 +2,7 @@
 
 namespace Flashtag\Admin\Providers;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 class AdminServiceProvider extends ServiceProvider
@@ -11,12 +12,12 @@ class AdminServiceProvider extends ServiceProvider
         //
     }
 
-    public function boot()
+    public function boot(Router $router)
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'admin');
 
         if (! $this->app->routesAreCached()) {
-            $this->app['router']->group([
+            $router->group([
                 'prefix' => 'admin',
                 'namespace' => 'Flashtag\Admin\Http\Controllers'
             ], function ($router) {
