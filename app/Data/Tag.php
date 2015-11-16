@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Tag extends Model
 {
     /**
+     * Properties guarded from mass assignment.
+     *
+     * @var array
+     */
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
     public function categories()
