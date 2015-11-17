@@ -318,19 +318,19 @@
             },
 
             notify: function (type, message) {
-                if (type == 'success') {
-                    var icon = "fa fa-thumbs-o-up";
-                } else if (type == 'warning') {
-                    var icon = "fa fa-warning";
-                }
-                $.notify({
-                    icon: icon,
-                    message: message
-                }, {
-                    type: type,
-                    delay: 3000,
-                    offset: { x: 20, y: 70 }
-                });
+//                if (type == 'success') {
+//                    var icon = "fa fa-thumbs-o-up";
+//                } else if (type == 'warning') {
+//                    var icon = "fa fa-warning";
+//                }
+//                $.notify({
+//                    icon: icon,
+//                    message: message
+//                }, {
+//                    type: type,
+//                    delay: 3000,
+//                    offset: { x: 20, y: 70 }
+//                });
             },
 
             getFieldValue: function (fieldName) {
