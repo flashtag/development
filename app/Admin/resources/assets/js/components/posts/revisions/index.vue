@@ -32,7 +32,7 @@
                 <td>by <em>{{ who(revision.user_id) }}</em></td>
                 <td class="action-button"><a v-if="shouldDiff(revision.key)"
                        v-link="'/posts/'+post.id+'/revisions/'+revision.id"
-                       class="btn btn-primary btn-sm">see diff</a></td>
+                       class="btn btn-primary btn-sm">View</a></td>
             </tr>
             </tbody>
         </table>
