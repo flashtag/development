@@ -24,11 +24,38 @@
 
         <div class="panel panel-default" :class="{ 'border-green': isShowing, 'border-red': !isShowing }">
             <div class="panel-heading">
-                POST
+                PUBLISHING
                 <label class="showing label" :class="{ 'label-success': isShowing, 'label-danger': !isShowing }">
                     {{ isShowing ? 'Will show on website' : 'Will not show on website' }}
                 </label>
             </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group switch-wrapper">
+                            <div class="publish-switch">
+                                <label for="is_published">Published</label>
+                                <div class="switch">
+                                    <input v-model="post.is_published" name="is_published" id="is_published" class="cmn-toggle cmn-toggle-round-md" type="checkbox">
+                                    <label for="is_published"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="start_showing_at">Start showing</label>
+                        <input type="date" v-model="post.start_showing_at" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="stop_showing_at">Stop showing</label>
+                        <input type="date" v-model="post.stop_showing_at" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default" >
+            <div class="panel-heading">POST</div>
             <div class="panel-body">
                 <div class="row">
                     <div class="col-md-6">
@@ -61,37 +88,6 @@
                                     v-select="post.tags">
                                 <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
                             </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group switch-wrapper">
-                                    <div class="publish-switch">
-                                        <label for="is_published">Published</label>
-                                        <div class="switch">
-                                            <input v-model="post.is_published" name="is_published" id="is_published" class="cmn-toggle cmn-toggle-round-md" type="checkbox">
-                                            <label for="is_published"></label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-5">
-                                <label for="start_showing_at">Start showing</label>
-                                <input type="date" v-model="post.start_showing_at" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
-                            </div>
-                            <div class="col-md-5">
-                                <label for="stop_showing_at">Stop showing</label>
-                                <input type="date" v-model="post.stop_showing_at" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="order">Order in category</label>
-                            <input type="number" v-model="post.order" name="order" id="order" class="form-control" number>
                         </div>
                     </div>
                 </div>
@@ -286,17 +282,19 @@
             },
 
             unlock: function (done) {
-                var self = this;
-                client({
-                    method: 'PATCH',
-                    path: '/posts/'+self.post.id+'/unlock',
-                    entity: { user_id: self.currentUser.id }
-                }).then(function (response) {
-                    self.post.is_locked = false;
-                    done();
-                }, function (response) {
-                    self.checkResponseStatus(response);
-                });
+                if (this.post.is_locked) {
+                    var self = this;
+                    client({
+                        method: 'PATCH',
+                        path: '/posts/' + self.post.id + '/unlock',
+                        entity: {user_id: self.currentUser.id}
+                    }).then(function (response) {
+                        self.post.is_locked = false;
+                        done();
+                    }, function (response) {
+                        self.checkResponseStatus(response);
+                    });
+                }
             },
 
             notify: function (type, message) {
