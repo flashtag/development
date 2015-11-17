@@ -5,7 +5,7 @@ $toggle-on: $rolf-green;
 // - http://callmenick.com/post/css-toggle-switch-examples
 // --------------------------------------------------------------------------
 .cmn-toggle {
-  position: absolute;
+  position: absolute !important;
   margin-left: -9999px;
   visibility: hidden;
 }
