@@ -195,10 +195,10 @@
                         return ids;
                     }, []);
                     if  (self.post.start_showing_at) {
-                        self.post.start_showing_at = moment.unix(self.post.start_showing_at).format('YYYY-MM-DD');
+                        self.post.start_showing_at = moment.utc(self.post.start_showing_at, 'X').format('YYYY-MM-DD');
                     }
                     if  (self.post.stop_showing_at) {
-                        self.post.stop_showing_at = moment.unix(self.post.stop_showing_at).format('YYYY-MM-DD');
+                        self.post.stop_showing_at = moment.utc(self.post.stop_showing_at, 'X').format('YYYY-MM-DD');
                     }
                     self.lock();
                     successHandler(self.post);

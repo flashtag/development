@@ -142,7 +142,7 @@
             },
 
             when: function (timestamp) {
-                return moment.unix(timestamp).format('h:mm a on MMM D, YYYY');
+                return moment.utc(timestamp, 'X').format('h:mm a on MMM D, YYYY');
             },
 
             replaceAll: function (str, find, replace) {
