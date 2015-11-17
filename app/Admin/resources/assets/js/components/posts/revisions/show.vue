@@ -65,7 +65,6 @@
                 );
                 differ.diff_cleanupSemantic(diffs);
                 var diff = he.decode(differ.diff_prettyHtml(diffs));
-//                diff = this.replaceAll(diff, '<br>', '');
 
                 return this.replaceAll(diff, ['<br>', '¶'], '');
             }
@@ -117,7 +116,7 @@
                     entity[this.revision.key] = this.revision.new_value;
                     client({
                         method: 'PATCH',
-                        path: '/posts/' + this.$route.params.post_id,
+                        path: '/posts/' + this.$route.params.post_id + '/property',
                         entity: entity
                     }).then(function (response) {
                         // success
@@ -145,6 +144,10 @@
                 return moment.utc(timestamp, 'X').format('h:mm a on MMM D, YYYY');
             },
 
+            canRestore: function () {
+                return this.post[this.revision.key] != this.revision.new_value;
+            },
+
             replaceAll: function (str, find, replace) {
                 if (! find instanceof Array) {
                     find = [find];
@@ -153,10 +156,6 @@
                 return find.reduce(function (s, search) {
                     return s.replace(new RegExp(search, 'g'), replace);
                 }, str);
-            },
-
-            canRestore: function () {
-                return this.post[this.revision.key] != this.revision.new_value;
             },
 
             checkResponseStatus: function (response) {

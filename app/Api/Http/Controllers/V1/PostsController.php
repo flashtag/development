@@ -82,6 +82,15 @@ class PostsController extends Controller
         return $this->response->item($post, new PostTransformer());
     }
 
+    public function property(Request $request, $id)
+    {
+        $post = $this->post->findOrFail($id);
+        $property = $request->all();
+        $post->update($property);
+
+        return $this->response->item($post, new PostTransformer());
+    }
+
     /**
      * Build the post data array from the request.
      *
