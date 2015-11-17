@@ -10,6 +10,8 @@ module.exports = {
             '/posts': { component: require('../components/posts/index.vue') },
             '/posts/create': { component: require('../components/posts/create.vue') },
             '/posts/:post_id': { component: require('../components/posts/edit.vue') },
+            '/posts/:post_id/revisions': { component: require('../components/posts/revisions/index.vue') },
+            '/posts/:post_id/revisions/:revision_id': { component: require('../components/posts/revisions/show.vue') },
 
             // POST FIELDS
             '/post-fields': { component: require('../components/post-fields/index.vue') },

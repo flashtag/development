@@ -5,11 +5,11 @@
         <li class="active">{{ post.title }}</li>
     </ol>
 
-    <form class="Post">
+    <form class="Post EditForm">
 
         <section class="info row">
             <div class="col-md-6 clearfix">
-                <a href="/admin/posts/{{ $route.params.post_id }}/history" @click.prevent>
+                <a v-link="'/posts/'+$route.params.post_id+'/revisions'">
                     <i class="fa fa-history"></i> Revision history
                 </a>
             </div>

@@ -5,7 +5,7 @@
         <li class="active">{{ author.name }}</li>
     </ol>
 
-    <form class="Author">
+    <form class="Author EditForm">
 
         <section class="info row">
             <div class="col-md-6 col-md-offset-6 clearfix">

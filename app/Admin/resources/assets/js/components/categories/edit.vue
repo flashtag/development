@@ -5,7 +5,7 @@
         <li class="active">{{ category.name }}</li>
     </ol>
 
-    <form class="Category">
+    <form class="Category EditForm">
 
         <section class="info row">
             <div class="col-md-6 col-md-offset-6 clearfix">

@@ -5,7 +5,7 @@
         <li class="active">{{ field.label }}</li>
     </ol>
 
-    <form class="PostField">
+    <form class="PostField EditForm">
 
         <section class="info row">
             <div class="col-md-6 col-md-offset-6 clearfix">

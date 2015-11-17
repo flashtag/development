@@ -5,7 +5,7 @@
         <li class="active">{{ tag.name }}</li>
     </ol>
 
-    <form class="Tag">
+    <form class="Tag EditForm">
 
         <section class="info row">
             <div class="col-md-6 col-md-offset-6 clearfix">

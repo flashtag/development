@@ -6,7 +6,9 @@
   "dependencies": {
     "babel-runtime": "^5.8.25",
     "bootstrap-sass": "^3.3.5",
+    "diff-match-patch": "^1.0.0",
     "font-awesome": "^4.4.0",
+    "he": "^0.5.0",
     "jquery": "^2.1.4",
     "jquery.mousewheel": "^3.1.9",
     "js-cookie": "^2.0.4",
