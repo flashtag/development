@@ -95,6 +95,13 @@
                     <label for="body">Body</label>
                     <textarea v-model="post.body" name="body" id="body" class="form-control rich-editor" rows="10"></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="author">Author</label>
+                    <select v-select="post.author_id" id="author" name="author">
+                        <option value="" disabled selected>Select an author...</option>
+                        <option v-for="author in allAuthors" value="{{ author.id }}">{{ author.name }}</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -151,7 +158,8 @@
                 },
                 allCategories: [],
                 allTags: [],
-                allFields: []
+                allFields: [],
+                allAuthors: []
             }
         },
 
@@ -175,12 +183,13 @@
             fetch: function (successHandler) {
                 var self = this;
                 client({
-                    path: '/posts/'+ this.$route.params.post_id +'?include=category,tags,fields,meta'
+                    path: '/posts/'+ this.$route.params.post_id +'?include=category,tags,fields,meta,author'
                 }).then(function (response) {
                     self.post = response.entity.data;
                     self.post.category = self.post.category.data;
                     self.post.fields = self.post.fields.data;
                     self.post.meta = self.post.meta.data;
+                    self.post.author = self.post.author.data;
                     self.post.tags = self.post.tags.data.reduce(function (ids, tag) {
                         ids.push(tag.id);
                         return ids;
@@ -229,6 +238,17 @@
                     path: '/fields'
                 }).then(function (response) {
                     self.allFields = response.entity.data;
+                }, function (response) {
+                    self.checkResponseStatus(response);
+                });
+            },
+
+            fetchAuthors: function () {
+                var self = this;
+                client({
+                    path: '/authors'
+                }).then(function (response) {
+                    self.allAuthors = response.entity.data;
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });
@@ -342,6 +362,7 @@
                 this.fetchFields();
                 this.fetchTags();
                 this.fetchCategories();
+                this.fetchAuthors();
                 this.fetch(function (post) {
                     this.lock();
                     transition.next({post: post});

@@ -25,6 +25,7 @@ class PostTransformer extends Transformer
             'slug' => $post->slug,
             'subtitle' => $post->subtitle,
             'category_id' => (int) $post->category_id,
+            'author_id' => (int) $post->author_id,
             'order' => (int) $post->order,
             'body' => $post->body,
             'is_published' => (bool) $post->is_published,
