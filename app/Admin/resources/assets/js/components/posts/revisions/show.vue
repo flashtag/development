@@ -23,7 +23,7 @@
         </div>
         <div class="panel-body">{{{ content }}}</div>
         <div class="panel-footer">
-            <button class="btn btn-warning" :class="{ 'disabled': canRestore }" @click.prevent="restore">
+            <button class="btn btn-warning" :class="{ 'disabled': !canRestore() }" @click.prevent="restore">
                 <i class="fa fa-repeat"></i> Restore this revision
             </button>
         </div>
