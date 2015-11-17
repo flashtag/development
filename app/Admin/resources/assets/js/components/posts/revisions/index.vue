@@ -20,7 +20,7 @@
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading">Revisions</div>
+        <div class="panel-heading">Revision History</div>
         <table class="Revisions table table-hover">
             <tbody>
             <tr v-for="revision in post.revisions.data
