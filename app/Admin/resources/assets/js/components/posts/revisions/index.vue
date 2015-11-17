@@ -28,7 +28,7 @@
                     | orderBy 'created_at' -1"
                 class="Revision">
                 <td>{{{ what(revision) }}}</td>
-                <td>on {{ when(revision.created_at) }}</td>
+                <td>at {{ when(revision.created_at) }}</td>
                 <td>by <em>{{ who(revision.user_id) }}</em></td>
                 <td class="action-button"><a v-if="shouldDiff(revision.key)"
                        v-link="'/posts/'+post.id+'/revisions/'+revision.id"
