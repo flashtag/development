@@ -6,7 +6,7 @@ Follow the progress or vote on features on [our trello board](https://trello.com
 
 #### dev instructions
 
- - clone all the flashtag repos to a common parent dir
+ - clone all the flashtag repo
  
  - composer install
  
