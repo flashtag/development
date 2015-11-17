@@ -73,7 +73,7 @@ class Post extends Model implements HasPresenter
      *
      * @var array
      */
-    protected $dontKeepRevisionOf = ['is_locked', 'locked_by_id'];
+    protected $dontKeepRevisionOf = ['slug', 'is_locked', 'locked_by_id'];
 
     /**
      * Maintain a maximum of 500 changes at any point of time, while cleaning up old revisions.

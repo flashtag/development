@@ -3,11 +3,11 @@
         <li><a v-link="'/home'">Home</a></li>
         <li><a v-link="'/posts'">Posts</a></li>
         <li><a v-link="'/posts/'+post.id">{{ post.title }}</a></li>
-        <li><a v-link="'/posts/'+post.id+'/revisions'">Revision History</a></li>
+        <li><a v-link="'/posts/'+post.id+'/revisions'">Revisions</a></li>
         <li class="active">{{ revision.id }}</li>
     </ol>
 
-    <div class="panel panel-default">
+    <div class="Revision panel panel-default">
         <div class="panel-heading">Revision</div>
         <div class="panel-body">{{{ diff }}}</div>
         <div class="panel-footer">
@@ -69,6 +69,21 @@
                     path: '/posts/'+ this.$route.params.post_id
                 }).then(function (response) {
                     self.post = response.entity.data;
+                }, function (response) {
+                    self.checkResponseStatus(response);
+                });
+            },
+
+            restore: function () {
+                var self = this;
+                var entity = {};
+                entity[this.revision.key] = this.revision.new_value;
+                client({
+                    method: 'PATCH',
+                    path: '/posts/'+ this.$route.params.post_id,
+                    entity: entity
+                }).then(function (response) {
+                    // success
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });

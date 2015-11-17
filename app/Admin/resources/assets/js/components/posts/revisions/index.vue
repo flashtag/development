@@ -3,19 +3,36 @@
         <li><a href="#">Home</a></li>
         <li><a v-link="'/posts'">Posts</a></li>
         <li><a v-link="'/posts/'+post.id">{{ post.title }}</a></li>
-        <li class="active">Revision History</li>
+        <li class="active">Revisions</li>
     </ol>
+
+    <div class="filters">
+        <div class="row">
+            <div class="col-md-6">
+                <select v-model="fieldFilter" id="field" class="form-control">
+                    <option value="" selected>Filter by field...</option>
+                    <option v-for="field in keys" :value="$key">
+                        {{ field }}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
 
     <div class="panel panel-default">
         <div class="panel-heading">Revisions</div>
-        <table class="Posts table table-hover">
+        <table class="Revisions table table-hover">
             <tbody>
             <tr v-for="revision in post.revisions.data
-                    | filterBy titleFilter in 'title'
+                    | filterBy fieldFilter in 'key'
                     | orderBy 'created_at' -1"
                 class="Revision">
-                <td><a v-link="'/posts/'+post.id+'/revisions/'+revision.id"><strong>{{ revision.key }}</strong> changed by <em>{{ userName(revision.user_id) }}</em></a></td>
-                <td>{{ formatTimestamp(revision.created_at) }}</td>
+                <td>{{{ what(revision) }}}</td>
+                <td>on {{ when(revision.created_at) }}</td>
+                <td>by <em>{{ who(revision.user_id) }}</em></td>
+                <td class="action-button"><a v-if="shouldDiff(revision.key)"
+                       v-link="'/posts/'+post.id+'/revisions/'+revision.id"
+                       class="btn btn-primary btn-sm">see diff</a></td>
             </tr>
             </tbody>
         </table>
@@ -33,12 +50,22 @@
         data: function () {
             return {
                 post: { revisions: { data: [] } },
+                keys : {
+                    title: 'Title',
+                    subtitle: 'Subtitle',
+                    body: 'Body',
+                    category_id: 'Category',
+                    author_id: 'Author',
+                    start_showing_at: 'Start showing',
+                    stop_showing_at: 'Stop showing',
+                    order: 'Order'
+                },
+                diffKeys: ['body'],
                 pagination: { links: {} },
                 users: [],
-                titleFilter: null,
-                categoryFilter: null,
-                sortKey: null,
-                sortDir: -1
+                categories: [],
+                authors: [],
+                fieldFilter: null
             }
         },
 
@@ -85,7 +112,20 @@
                 });
             },
 
-            userName: function (userId) {
+            fetchAuthors: function () {
+                var self = this;
+                client({
+                    path: '/authors'
+                }).then(function (response) {
+                    self.authors = response.entity.data;
+                }, function (response) {
+                    if (response.status.code == 401 || response.status.code == 500) {
+                        self.$dispatch('userHasLoggedOut')
+                    }
+                });
+            },
+
+            who: function (userId) {
                 if (! userId || ! this.users || !this.users.length) {
                     return 'a script';
                 }
@@ -97,32 +137,45 @@
                 return user.name;
             },
 
-            formatTimestamp: function (timestamp) {
+            when: function (timestamp) {
                 return moment.unix(timestamp).format('h:mm a on MMM D, YYYY');
             },
 
-            sortBy: function (key) {
-                if (this.sortKey == key) {
-                    this.sortDir = this.sortDir * -1;
-                } else {
-                    this.sortKey = key;
-                    this.sortDir = 1;
+            shouldDiff: function (key) {
+                return !!~this.diffKeys.indexOf(key);
+            },
+
+            what: function (revision) {
+                var what = this.keys[revision.key];
+
+                if (revision.key == 'is_published') {
+                    what = revision.new_value ? 'Published' : 'Unpublished';
+                    return '<strong>'+what+'</strong>';
                 }
-            },
-
-            orderIcon: function (key) {
-                if (key == this.sortKey) {
-                    return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc'
+                if (!!~this.diffKeys.indexOf(revision.key)) {
+                    return '<strong>'+what+'</strong> was edited';
+                }
+                if (revision.key == 'category_id') {
+                    return '<strong>'+what+'</strong> changed to <strong>' + this.categoryName(revision.new_value) + '</strong>';
+                }
+                if (revision.key == 'author_id') {
+                    return '<strong>'+what+'</strong> changed to <strong>' + this.authorName(revision.new_value) + '</strong>';
                 }
 
-                return 'fa fa-unsorted';
+                return '<strong>'+what+'</strong> changed to <strong>' + revision.new_value + '</strong>';
             },
 
-            initTooltips: function () {
-                this.$nextTick(function() {
-                    $('[data-toggle="tooltip"]').tooltip();
-                });
+            categoryName: function (id) {
+                return this.categories.filter(function (category) {
+                    return id == category.id;
+                })[0].name;
             },
+
+            authorName: function (id) {
+                return this.authors.filter(function (author) {
+                    return id == author.id;
+                })[0].name;
+            }
 
         },
 
@@ -137,6 +190,8 @@
         route: {
             data: function (transition) {
                 this.fetchUsers();
+                this.fetchCategories();
+                this.fetchAuthors();
                 this.fetch(function (data) {
                     transition.next({post: data})
                 });
