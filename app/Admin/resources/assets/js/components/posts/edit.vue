@@ -7,7 +7,7 @@
 
     <form class="Post">
 
-        <section class="info row" style="margin-bottom: 20px;">
+        <section class="info row">
             <div class="col-md-6 clearfix">
                 <a href="/admin/posts/{{ $route.params.post_id }}/history" @click.prevent>
                     <i class="fa fa-history"></i> Revision history

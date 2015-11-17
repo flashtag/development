@@ -7,7 +7,7 @@
 
     <form class="Author">
 
-        <section class="info row" style="margin-bottom: 20px;">
+        <section class="info row">
             <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
                     <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
