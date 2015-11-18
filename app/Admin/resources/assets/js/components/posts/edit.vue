@@ -16,7 +16,7 @@
             <div class="col-md-6 clearfix">
                 <div class="action-buttons">
                     <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <button v-link="'/posts'" @click="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                    <button @click.prevent="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
                     <button v-link="'/posts'" class="btn btn-default"><i class="fa fa-close"></i> Close</button>
                 </div>
             </div>
@@ -105,7 +105,7 @@
             </div>
         </div>
 
-        <div class="panel panel-default">
+        <div v-if="allFields && allFields.length > 0" class="panel panel-default">
             <div class="panel-heading">CUSTOM FIELDS</div>
             <div class="panel-body">
                 <div class="form-group" v-for="field in allFields">
@@ -137,6 +137,7 @@
 
 <script>
     var moment = require ('moment');
+    var swal = require('sweetalert');
 
     export default {
 
@@ -159,7 +160,8 @@
                 allCategories: [],
                 allTags: [],
                 allFields: [],
-                allAuthors: []
+                allAuthors: [],
+                deleted: false
             }
         },
 
@@ -271,16 +273,32 @@
             },
 
             delete: function() {
-                var confirmed = confirm(
-                    "Are you sure you want to delete this? " +
-                    "This will permanently delete this post and its revision history."
-                );
-                if (confirmed) {
+                var self = this;
+                swal({
+                    title: "Are you sure?",
+                    text: "You will not be able to recover this post and all of its revision history!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it!",
+                    closeOnConfirm: false
+                }, function () {
                     client({
                         method: 'DELETE',
-                        path: '/posts/' + this.post.id
+                        path: '/posts/' + self.post.id
+                    }).then(function () {
+                        swal({
+                            title: "Deleted!",
+                            text: self.post.title + " was deleted!",
+                            type: "success"
+                        }, function () {
+                            self.deleted = true;
+                            self.$route.router.go('/posts');
+                        });
+                    }, function () {
+                        swal("Oops", "We couldn't connect to the server!", "error");
                     });
-                }
+                });
             },
 
             lock: function() {
@@ -302,7 +320,7 @@
             },
 
             unlock: function (done) {
-                if (this.post.is_locked) {
+                if (this.post.is_locked && !this.deleted) {
                     var self = this;
                     client({
                         method: 'PATCH',
@@ -314,23 +332,25 @@
                     }, function (response) {
                         self.checkResponseStatus(response);
                     });
+                } else {
+                    done();
                 }
             },
 
             notify: function (type, message) {
-//                if (type == 'success') {
-//                    var icon = "fa fa-thumbs-o-up";
-//                } else if (type == 'warning') {
-//                    var icon = "fa fa-warning";
-//                }
-//                $.notify({
-//                    icon: icon,
-//                    message: message
-//                }, {
-//                    type: type,
-//                    delay: 3000,
-//                    offset: { x: 20, y: 70 }
-//                });
+                if (type == 'success') {
+                    var icon = "fa fa-thumbs-o-up";
+                } else if (type == 'warning') {
+                    var icon = "fa fa-warning";
+                }
+                $.notify({
+                    icon: icon,
+                    message: message
+                }, {
+                    type: type,
+                    delay: 3000,
+                    offset: { x: 20, y: 70 }
+                });
             },
 
             getFieldValue: function (fieldName) {

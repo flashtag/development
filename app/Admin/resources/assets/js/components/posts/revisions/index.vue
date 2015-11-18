@@ -21,7 +21,8 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">Revision History</div>
-        <table class="Revisions table table-hover">
+        <div class="panel-body" v-if="!post.revisions.data.length > 0"><h6>No revions</h6></div>
+        <table v-else class="Revisions table table-hover">
             <tbody>
             <tr v-for="revision in post.revisions.data
                     | filterBy fieldFilter in 'key'

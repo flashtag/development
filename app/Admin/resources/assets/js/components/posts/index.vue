@@ -166,22 +166,22 @@
             },
 
             goToPost: function (post) {
-                if (this.checkLock(post)) {
-                    this.$route.router.go({ path: '/posts/'+post.id });
-                }
-            },
-
-            checkLock: function (post, e) {
                 if (! post.is_locked) {
-                    return true;
+                    this.$route.router.go({ path: '/posts/'+post.id });
+                } else {
+                    swal({
+                        title: "Are you sure?",
+                        text: "The post is locked by "+this.userName(post.locked_by_id)+". " +
+                            "If you proceed and they are still editing the post, you may overwrite each other's work.",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Yes, unlock it!",
+                        cancelButtonText: "Nevermind"
+                    }, function () {
+                        this.$route.router.go({ path: '/posts/'+post.id });
+                    }.bind(this));
                 }
-
-                return confirm(
-                    "The post is locked by "+this.userName(post.locked_by_id)+". " +
-                    "Do you want to unlock it and proceed?" +
-                    "\r\n\r\n" +
-                    "If you proceed and they are still editing the post, you may overwrite each other's work."
-                );
             },
 
             userName: function (userId) {
