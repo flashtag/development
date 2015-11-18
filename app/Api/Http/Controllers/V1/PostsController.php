@@ -82,6 +82,13 @@ class PostsController extends Controller
         return $this->response->item($post, new PostTransformer());
     }
 
+    /**
+     * Update a single property of the post. (useful for restoring a revision)
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Dingo\Api\Http\Response
+     */
     public function property(Request $request, $id)
     {
         $post = $this->post->findOrFail($id);
