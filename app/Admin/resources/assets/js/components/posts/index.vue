@@ -197,7 +197,7 @@
             },
 
             formatTimestamp: function (timestamp) {
-                return moment.utc(timestamp, 'X').format('MMM D, YYYY');
+                return moment.unix(timestamp).format('MMM D, YYYY');
             },
 
             sortBy: function (key) {
