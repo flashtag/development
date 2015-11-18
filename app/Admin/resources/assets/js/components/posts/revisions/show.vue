@@ -34,6 +34,7 @@
     var DiffMatchPatch = require('diff-match-patch');
     var he = require('he');
     var moment = require('moment');
+    var swal = require('sweetalert');
 
     export default {
 
@@ -112,19 +113,38 @@
             restore: function () {
                 if (this.canRestore()) {
                     var self = this;
-                    var entity = {};
-                    entity[this.revision.key] = this.revision.new_value;
-                    client({
-                        method: 'PATCH',
-                        path: '/posts/' + this.$route.params.post_id + '/property',
-                        entity: entity
-                    }).then(function (response) {
-                        // success
-                    }, function (response) {
-                        self.checkResponseStatus(response);
+                    swal({
+                        title: 'For reals?',
+                        text: 'This will restore the content to this state.',
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#DD6B55',
+                        confirmButtonText: 'Yes, restore!',
+                        closeOnConfirm: false,
+                        showLoaderOnConfirm: true
+                    }, function () {
+                        var entity = {};
+                        entity[self.revision.key] = self.revision.new_value;
+                        client({
+                            method: 'PATCH',
+                            path: '/posts/' + self.$route.params.post_id + '/property',
+                            entity: entity
+                        }).then(function (response) {
+                            swal({
+                                html: true,
+                                title: 'Great success!',
+                                text: '<strong>' + self.post.title + '</strong> was restored to this state!',
+                                type: 'success'
+                            }, function () {
+                                self.$route.router.go('/posts/' + self.post.id);
+                            });
+                        }, function (response) {
+                            swal("Oops", "We couldn't connect to the server!", "error");
+                            self.checkResponseStatus(response);
+                        });
                     });
                 } else {
-                    alert("There is no difference between this and the current value.");
+                    swal("Well, actually...", "There is no difference between this revision and the current state.", "info");
                 }
             },
 

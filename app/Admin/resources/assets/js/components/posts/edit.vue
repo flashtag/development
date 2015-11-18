@@ -275,22 +275,24 @@
             delete: function() {
                 var self = this;
                 swal({
-                    title: "Are you sure?",
-                    text: "You will not be able to recover this post and all of its revision history!",
-                    type: "warning",
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this post and all of its revision history!',
+                    type: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Yes, delete it!",
-                    closeOnConfirm: false
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, delete it!',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
                 }, function () {
                     client({
                         method: 'DELETE',
                         path: '/posts/' + self.post.id
                     }).then(function () {
                         swal({
-                            title: "Deleted!",
-                            text: self.post.title + " was deleted!",
-                            type: "success"
+                            html: true,
+                            title: 'Deleted!',
+                            text: '<strong>' + self.post.title + '</strong> was deleted!',
+                            type: 'success'
                         }, function () {
                             self.deleted = true;
                             self.$route.router.go('/posts');

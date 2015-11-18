@@ -170,8 +170,9 @@
                     this.$route.router.go({ path: '/posts/'+post.id });
                 } else {
                     swal({
+                        html: true,
                         title: "Are you sure?",
-                        text: "The post is locked by "+this.userName(post.locked_by_id)+". " +
+                        text: "The post is locked by <strong>"+this.userName(post.locked_by_id)+"</strong>. "+
                             "If you proceed and they are still editing the post, you may overwrite each other's work.",
                         type: "warning",
                         showCancelButton: true,
