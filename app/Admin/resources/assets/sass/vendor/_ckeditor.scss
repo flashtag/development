@@ -1,0 +1,32 @@
+
+.cke {
+  border-top: none !important;
+  border-bottom: 1px solid #ddd;
+  //box-shadow: inset 0 -1px 0 #ddd !important;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+}
+.cke_focus {
+  border-bottom: 2px solid #00718e !important;
+  margin-bottom: -1px !important;
+  //box-shadow: inset 0 -2px 0 #00718e !important;
+}
+
+.cke_top {
+  border: 1px solid $gray-lighter !important;
+}
+
+// BUTTONS
+a.cke_button_off:hover,
+a.cke_button_off:focus,
+a.cke_button_off:active,
+a.cke_button_disabled:hover,
+a.cke_button_disabled:focus,
+a.cke_button_disabled:active {
+  background-image: none !important;
+}
+
+// DROPDOWNS
+.cke_combo_off a.cke_combo_button:hover,
+.cke_combo_off a.cke_combo_button:focus {
+  background-image: none !important;
+}

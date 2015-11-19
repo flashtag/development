@@ -6,7 +6,7 @@ export default {
         this.vm.$nextTick(this.setupEditor.bind(this));
     },
 
-    setUpEditor: function () {
+    setupEditor: function () {
         var self = this;
         CKEDITOR.replace(this.el.id);
         CKEDITOR.instances[this.el.id].on('change', function () {

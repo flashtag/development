@@ -93,7 +93,7 @@
                 </div>
                 <div class="form-group">
                     <label for="body">Body</label>
-                    <textarea name="body" id="body" class="form-control rich-editor" rows="10"
+                    <textarea name="body" id="body" class="form-control rich-editor"
                               v-if="post.body" v-rich-editor="post.body">
                     </textarea>
                 </div>
