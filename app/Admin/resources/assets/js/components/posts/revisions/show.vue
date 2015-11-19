@@ -191,7 +191,7 @@
                 this.fetchPost();
                 this.fetchUsers();
                 this.fetch(function (data) {
-                    transition.next({revision: data})
+                    transition.next({revision: data});
                 });
             }
         }

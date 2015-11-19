@@ -12,6 +12,7 @@
 @stop
 
 @section('scripts')
+    <script>window.CKEDITOR_BASEPATH = '/assets/admin/vendor/ckeditor/';</script>
     <script src="/assets/admin/vendor.js"></script>
     <script src="/assets/admin/admin.js"></script>
 @stop

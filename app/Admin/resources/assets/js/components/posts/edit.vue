@@ -138,6 +138,7 @@
 <script>
     var moment = require ('moment');
     var swal = require('sweetalert');
+    var util = require('../../util');
 
     export default {
 
@@ -187,23 +188,27 @@
                 client({
                     path: '/posts/'+ this.$route.params.post_id +'?include=category,tags,fields,meta,author'
                 }).then(function (response) {
-                    self.post = response.entity.data;
-                    self.post.category = self.post.category.data;
-                    self.post.fields = self.post.fields.data;
-                    self.post.meta = self.post.meta.data;
-                    self.post.author = self.post.author.data;
-                    self.post.tags = self.post.tags.data.reduce(function (ids, tag) {
+                    var post = response.entity.data;
+                    post.body = util.replaceAll(post.body, '\n', '');
+                    post.category = post.category.data;
+                    post.fields = post.fields.data;
+                    post.meta = post.meta.data;
+                    post.author = post.author.data;
+                    post.tags = post.tags.data.reduce(function (ids, tag) {
                         ids.push(tag.id);
                         return ids;
                     }, []);
-                    if  (self.post.start_showing_at) {
-                        self.post.start_showing_at = moment.utc(self.post.start_showing_at, 'X').format('YYYY-MM-DD');
+                    if  (post.start_showing_at) {
+                        post.start_showing_at = moment.utc(post.start_showing_at, 'X').format('YYYY-MM-DD');
                     }
-                    if  (self.post.stop_showing_at) {
-                        self.post.stop_showing_at = moment.utc(self.post.stop_showing_at, 'X').format('YYYY-MM-DD');
+                    if  (post.stop_showing_at) {
+                        post.stop_showing_at = moment.utc(post.stop_showing_at, 'X').format('YYYY-MM-DD');
                     }
-                    self.lock();
-                    successHandler(self.post);
+                    successHandler(post);
+                    CKEDITOR.instances.body.setData(post.body);
+                    CKEDITOR.instances['body'].on('change', function () {
+                        console.log("changed");
+                    });
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });
@@ -380,16 +385,17 @@
 
         route: {
             data: function (transition) {
-//                CKEDITOR.replaceClass = 'rich-editor';
+                CKEDITOR.replaceClass = 'rich-editor';
                 this.fetchFields();
                 this.fetchTags();
                 this.fetchCategories();
                 this.fetchAuthors();
                 this.fetch(function (post) {
-                    this.lock();
                     transition.next({post: post});
+                    this.lock();
                 }.bind(this));
             },
+
             deactivate: function (transition) {
                 this.unlock(function () {
                     transition.next();

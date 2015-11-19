@@ -172,7 +172,7 @@
                     swal({
                         html: true,
                         title: "Are you sure?",
-                        text: "The post is locked by <strong>"+this.userName(post.locked_by_id)+"</strong>. "+
+                        text: "The post is currently opened by <strong>"+this.userName(post.locked_by_id)+"</strong>. "+
                             "If you proceed and they are still editing the post, you may overwrite each other's work.",
                         type: "warning",
                         showCancelButton: true,
@@ -236,10 +236,12 @@
 
         route: {
             data: function (transition) {
+                var self = this;
                 this.fetchUsers();
                 this.fetchCategories();
                 this.fetch(function (data) {
-                    transition.next({posts: data})
+                    transition.next({posts: data});
+                    self.initTooltips();
                 });
             }
         }
