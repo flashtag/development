@@ -94,7 +94,7 @@
                 <div class="form-group">
                     <label for="body">Body</label>
                     <textarea name="body" id="body" class="form-control rich-editor" rows="10"
-                              v-rich-editor="post.body" :content="post.body">
+                              v-if="post.body" v-rich-editor="post.body" :content="post.body">
                     </textarea>
                 </div>
                 <div class="form-group">
