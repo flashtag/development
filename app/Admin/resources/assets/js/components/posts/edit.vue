@@ -93,7 +93,9 @@
                 </div>
                 <div class="form-group">
                     <label for="body">Body</label>
-                    <textarea v-model="post.body" name="body" id="body" class="form-control rich-editor" rows="10"></textarea>
+                    <textarea name="body" id="body" class="form-control rich-editor" rows="10"
+                              v-rich-editor="post.body" :content="post.body">
+                    </textarea>
                 </div>
                 <div class="form-group">
                     <label for="author">Author</label>
@@ -205,10 +207,6 @@
                         post.stop_showing_at = moment.utc(post.stop_showing_at, 'X').format('YYYY-MM-DD');
                     }
                     successHandler(post);
-                    CKEDITOR.instances.body.setData(post.body);
-                    CKEDITOR.instances['body'].on('change', function () {
-                        console.log("changed");
-                    });
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });
@@ -385,7 +383,6 @@
 
         route: {
             data: function (transition) {
-                CKEDITOR.replaceClass = 'rich-editor';
                 this.fetchFields();
                 this.fetchTags();
                 this.fetchCategories();

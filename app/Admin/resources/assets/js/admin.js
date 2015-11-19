@@ -19,6 +19,7 @@ Vue.component('paginator', require('./components/partials/paginator.vue'));
 
 // Directives
 Vue.directive('select', require('./directives/select'));
+Vue.directive('rich-editor', require('./directives/rich-editor'));
 
 // App
 var Admin = Vue.extend(require('./App.vue'));
