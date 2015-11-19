@@ -10,7 +10,7 @@
         <section class="info row">
             <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
-                    <button v-link="'/categories'" @click="save" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
+                    <button @click.prevent="save" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
                     <button v-link="'/categories'" class="btn btn-default"><i class="fa fa-close"></i> Cancel</button>
                 </div>
             </div>
@@ -55,13 +55,12 @@
              */
             save: function() {
                 var self = this;
-                console.log(this.category);
                 client({
                     method: 'POST',
                     path: '/categories',
                     entity: this.category
                 }).then(function (response) {
-                    // success
+                    self.$route.router.go('/categories');
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')

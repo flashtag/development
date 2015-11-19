@@ -6,21 +6,22 @@ For licensing, see LICENSE.md or http://ckeditor.com/license
 body
 {
 	/* Font */
-	font-family: sans-serif, Arial, Verdana, "Trebuchet MS";
-	font-size: 12px;
+	/*font-family: sans-serif, Arial, Verdana, "Trebuchet MS";*/
+	font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 13px;
 
 	/* Text color */
-	color: #333;
+	color: #666;
 
 	/* Remove the background color to make it transparent */
-	background-color: #fff;
+	/*background-color: #fff;*/
 
 	margin: 20px;
 }
 
 .cke_editable
 {
-	font-size: 13px;
+	font-size: 15px;
 	line-height: 1.6;
 }
 

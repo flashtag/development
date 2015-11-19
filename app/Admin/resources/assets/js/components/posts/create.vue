@@ -10,7 +10,7 @@
         <section class="info row">
             <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
-                    <button v-link="'/posts'" @click="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                    <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
                     <button v-link="'/posts'" class="btn btn-default"><i class="fa fa-close"></i> Cancel</button>
                 </div>
             </div>
@@ -213,7 +213,7 @@
                     path: '/posts',
                     entity: self.post
                 }).then(function (response) {
-                    // success
+                    self.$route.router.go('/posts');
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });

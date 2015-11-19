@@ -43,11 +43,15 @@
                         </div>
                     </div>
                     <div class="col-md-5">
-                        <label for="start_showing_at">Start showing</label>
+                        <label for="start_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show until this date.">
+                            Start showing
+                        </label>
                         <input type="date" v-model="post.start_showing_at" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
                     </div>
                     <div class="col-md-5">
-                        <label for="stop_showing_at">Stop showing</label>
+                        <label for="stop_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show after this date.">
+                            Stop showing
+                        </label>
                         <input type="date" v-model="post.stop_showing_at" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
                     </div>
                 </div>
@@ -377,6 +381,12 @@
                 if (response.status.code == 401 || response.status.code == 500) {
                     this.$dispatch('userHasLoggedOut')
                 }
+            },
+
+            initTooltips: function () {
+                this.$nextTick(function() {
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
             }
 
         },
@@ -390,6 +400,7 @@
                 this.fetch(function (post) {
                     transition.next({post: post});
                     this.lock();
+                    this.initTooltips();
                 }.bind(this));
             },
 

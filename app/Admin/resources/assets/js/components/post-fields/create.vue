@@ -10,7 +10,7 @@
         <section class="info row">
             <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
-                    <button v-link="'/post-fields'" @click="save" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
+                    <button @click.prevent="save" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
                     <button v-link="'/post-fields'" class="btn btn-default"><i class="fa fa-close"></i> Cancel</button>
                 </div>
             </div>
@@ -33,8 +33,10 @@
                 </div>
                 <div class="form-group">
                     <label for="template">Template</label>
-                    <select v-model="field.template" name="template" id="template" class="form-control"
-                            v-select="field.template" :options="templates"></select>
+                    <select v-model="field.template" name="template" id="template" class="form-control">
+                        <option value="" disabled selected>Select a template...</option>
+                        <option v-for="template in templates" value="{{ template.id }}">{{ template.text }}</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -70,7 +72,6 @@
              */
             save: function() {
                 var self = this;
-                console.log(this.field);
                 client({
                     method: 'POST',
                     path: '/fields',

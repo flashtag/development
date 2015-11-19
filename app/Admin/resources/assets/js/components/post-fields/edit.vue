@@ -32,6 +32,13 @@
                     <label for="description">Description</label>
                     <input type="text" v-model="field.description" name="description" id="description" class="form-control">
                 </div>
+                <div class="form-group">
+                    <label for="template">Template</label>
+                    <select v-model="field.template" name="template" id="template" class="form-control">
+                        <option value="" disabled selected>Select a template...</option>
+                        <option v-for="template in templates" value="{{ template.id }}">{{ template.text }}</option>
+                    </select>
+                </div>
             </div>
         </div>
     </form>
@@ -52,7 +59,11 @@
                     name: '',
                     description: '',
                     template: ''
-                }
+                },
+                templates: [
+                    { id: 'string', text: 'String' },
+                    { id: 'rich_text', text: 'Rich Text' }
+                ]
             }
         },
 
