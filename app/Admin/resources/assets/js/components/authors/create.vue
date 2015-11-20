@@ -25,7 +25,7 @@
                 </div>
                 <div class="form-group">
                     <label for="bio">Bio</label>
-                    <input type="text" v-model="author.bio" name="bio" id="bio" class="form-control">
+                    <textarea name="bio" id="bio" class="form-control rich-editor" v-rich-editor="author.bio"></textarea>
                 </div>
             </div>
         </div>

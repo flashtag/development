@@ -108,6 +108,13 @@
                         <option v-for="author in allAuthors" value="{{ author.id }}">{{ author.name }}</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="show_author">Show author?</label>
+                    <div class="switch">
+                        <input id="show_author" class="cmn-toggle cmn-toggle-yes-no" type="checkbox" v-model="post.show_author">
+                        <label for="show_author" data-on="Yes" data-off="No"></label>
+                    </div>
+                </div>
             </div>
         </div>
 
