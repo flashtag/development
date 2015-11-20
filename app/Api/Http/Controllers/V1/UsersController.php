@@ -2,6 +2,7 @@
 
 namespace Flashtag\Api\Http\Controllers\V1;
 
+use Flashtag\Api\Http\Requests\CreateUserRequest;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\UserTransformer;
 use Flashtag\Data\User;
@@ -53,13 +54,16 @@ class UsersController extends Controller
     /**
      * Store a newly created user in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Flashtag\Api\Http\Requests\CreateUserRequest $request
      * @return \Dingo\Api\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateUserRequest $request)
     {
-        $userData = $this->buildUserFromRequest($request);
-        $user = $this->user->create($userData);
+        $user = User::create([
+            'email' => $request->get('email'),
+            'name' => $request->get('name'),
+            'password' => $request->get('password'),
+        ]);
 
         return $this->response->item($user, new UserTransformer());
     }
@@ -91,6 +95,7 @@ class UsersController extends Controller
         return [
             'email' => $request->get('email'),
             'name' => $request->get('name'),
+            'password' => $request->get('password'),
 //            'role' => $request->get('role'),
         ];
     }
