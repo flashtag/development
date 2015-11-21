@@ -1,5 +1,4 @@
 export default {
-
     twoWay: true,
 
     bind: function () {

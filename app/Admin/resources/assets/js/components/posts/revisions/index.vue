@@ -42,7 +42,7 @@
 </template>
 
 <script>
-    var moment = require('moment');
+    import moment from 'moment';
 
     export default {
 
@@ -151,8 +151,7 @@
                 var what = this.keys[revision.key];
 
                 if (revision.key == 'is_published') {
-                    what = revision.new_value ? 'Published' : 'Unpublished';
-                    return '<strong>'+what+'</strong>';
+                    return '<strong>'+(revision.new_value > 0 ? 'Published' : 'Unpublished')+'</strong>';
                 }
                 if (!!~this.diffKeys.indexOf(revision.key)) {
                     return '<strong>'+what+'</strong> was edited';
@@ -162,6 +161,9 @@
                 }
                 if (revision.key == 'author_id') {
                     return '<strong>'+what+'</strong> changed to <strong>' + this.authorName(revision.new_value) + '</strong>';
+                }
+                if (revision.key == 'show_author') {
+                    return '<strong>'+what+'</strong> changed to <strong>' + (revision.new_value > 0 ? 'Yes' : 'No') + '</strong>';
                 }
 
                 return '<strong>'+what+'</strong> changed to <strong>' + revision.new_value + '</strong>';

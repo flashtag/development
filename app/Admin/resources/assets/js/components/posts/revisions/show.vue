@@ -31,10 +31,10 @@
 </template>
 
 <script>
-    var DiffMatchPatch = require('diff-match-patch');
-    var he = require('he');
-    var moment = require('moment');
-    var swal = require('sweetalert');
+    import DiffMatchPatch from 'diff-match-patch';
+    import he from 'he';
+    import moment from 'moment';
+    import swal from 'sweetalert';
 
     export default {
 

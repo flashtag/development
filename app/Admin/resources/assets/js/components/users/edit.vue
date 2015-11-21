@@ -37,8 +37,7 @@
 </template>
 
 <script>
-    var moment = require ('moment');
-    var swal = require('sweetalert');
+    import swal from 'sweetalert';
 
     export default {
 

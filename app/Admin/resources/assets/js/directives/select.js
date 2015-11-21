@@ -1,8 +1,5 @@
 export default {
-
     twoWay: true,
-
-    priority: 1000,
 
     params: ['options'],
 

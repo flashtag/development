@@ -17,7 +17,7 @@
         </section>
 
         <div class="panel panel-default">
-            <div class="panel-heading">Category</div>
+            <div class="panel-heading">POST FIELD</div>
             <div class="panel-body">
                 <div class="form-group">
                     <label for="label">Label</label>
@@ -44,8 +44,6 @@
 </template>
 
 <script>
-    var moment = require ('moment');
-
     export default {
 
         props: ['current-user'],

@@ -38,8 +38,6 @@
 </template>
 
 <script>
-    var moment = require('moment');
-
     export default {
 
         props: ['current-user'],

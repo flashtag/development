@@ -1,7 +1,8 @@
-var Vue = require('vue');
-var VueRouter = require('vue-router');
+import Vue from 'vue';
+import Router from 'vue-router';
+import Admin from './App.vue'
 
-Vue.use(VueRouter);
+Vue.use(Router);
 
 // Develop
 Vue.config.debug = true;
@@ -20,9 +21,6 @@ Vue.component('paginator', require('./components/partials/paginator.vue'));
 // Directives
 Vue.directive('select', require('./directives/select'));
 Vue.directive('rich-editor', require('./directives/rich-editor'));
-
-// App
-var Admin = Vue.extend(require('./App.vue'));
 
 // Start
 router.start(Admin, '#Admin');

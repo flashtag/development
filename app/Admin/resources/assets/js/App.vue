@@ -16,7 +16,7 @@
 </template>
 
 <script>
-var Cookies = require('js-cookie');
+import Cookies from 'js-cookie';
 
 export default {
 

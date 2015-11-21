@@ -103,7 +103,7 @@
                 </div>
                 <div class="form-group">
                     <label for="author">Author</label>
-                    <select v-select="post.author_id" v-model="post.author_id" id="author" name="author">
+                    <select v-select="post.author_id" id="author" name="author" :options="allAuthors">
                         <option value="" disabled selected>Select an author...</option>
                         <option v-for="author in allAuthors" value="{{ author.id }}">{{ author.name }}</option>
                     </select>
@@ -148,9 +148,8 @@
 </template>
 
 <script>
-    var moment = require ('moment');
-    var swal = require('sweetalert');
-    var util = require('../../util');
+    import moment from 'moment';
+    import swal from 'sweetalert';
 
     export default {
 
