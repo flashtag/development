@@ -33,11 +33,12 @@
             </ul>
         @endif
         <div class="panel panel-default">
-            <div class="panel-heading"><i class="fa fa-key"></i> SIGN IN</div>
+            <div class="panel-heading"><i class="fa fa-key"></i> RESET PASSWORD</div>
             <div class="panel-body">
                 <div class="login-form">
-                    <form class="form-horizontal" role="form" action="/admin/auth/login" method="POST">
+                    <form class="form-horizontal" role="form" method="POST" action="/admin/password/reset">
                         {!! csrf_field() !!}
+                        <input type="hidden" name="token" value="{{ $token }}">
 
                         <div class="form-group">
                             <input type="email" name="email" placeholder="Email" class="form-control" value="{{ old('email') }}">
@@ -47,12 +48,14 @@
                             <input type="password" name="password" placeholder="Password" class="form-control">
                         </div>
 
+                        <div class="form-group">
+                            <input type="password" name="password_confirmation" placeholder="Confirm Password" class="form-control">
+                        </div>
+
                         <div class="form-group buttons">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fa fa-btn fa-sign-in"></i> Login
+                                <i class="fa fa-btn fa-sign-in"></i> Reset password
                             </button>
-
-                            <a href="/admin/password/email" class="btn btn-link">Forgot Your Password?</a>
                         </div>
                     </form>
                 </div>

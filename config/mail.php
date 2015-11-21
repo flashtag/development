@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'from' => ['address' => null, 'name' => null],
+    'from' => ['address' => 'donotreply@flashtag.org', 'name' => 'Flashtag Administration'],
 
     /*
     |--------------------------------------------------------------------------

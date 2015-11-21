@@ -112,6 +112,8 @@ class PostsController extends Controller
             'subtitle' => $request->get('subtitle'),
             'order' => $request->get('order'),
             'category_id' => $request->get('category_id'),
+            'author_id' => $request->get('author_id'),
+            'show_author' => $request->get('show_author'),
             'body' => $request->get('body'),
             'is_published' => $request->get('is_published'),
             'start_showing_at' => $request->get('start_showing_at'),
@@ -188,7 +190,7 @@ class PostsController extends Controller
     private function syncRelationships($post, $request)
     {
         $this->updateTags($post, $request->json('tags'));
-        $this->updateFields($post, $request->json('fields'));
+        $this->updateFields($post, collect($request->json('fields')));
         $this->updateMeta($post, $request->json('meta'));
     }
 
@@ -199,11 +201,14 @@ class PostsController extends Controller
 
     private function updateFields($post, $fields = [])
     {
-        // TODO: Sync post fields with pivot data
+        $post->fields()->sync($fields->keyBy('id')->map(function ($field) {
+            array_forget($field, ['id', 'name', 'label']);
+            return $field;
+        })->toArray());
     }
 
     private function updateMeta($post, $meta = null)
     {
-        // TODO: Save meta...
+        $post->meta->update($meta);
     }
 }

@@ -62,7 +62,7 @@ class UsersController extends Controller
         $user = User::create([
             'email' => $request->get('email'),
             'name' => $request->get('name'),
-            'password' => $request->get('password'),
+            'password' => bcrypt($request->get('password')),
         ]);
 
         return $this->response->item($user, new UserTransformer());
@@ -95,7 +95,6 @@ class UsersController extends Controller
         return [
             'email' => $request->get('email'),
             'name' => $request->get('name'),
-            'password' => $request->get('password'),
 //            'role' => $request->get('role'),
         ];
     }

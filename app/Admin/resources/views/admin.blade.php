@@ -3,6 +3,7 @@
 @section('meta')
     <meta name="user" id="user" content="{{ $user->id }}">
     <meta name="jwt" id="jwt" content="{{ $token }}">
+    <meta name="csrf" id="csrf" content="{{ csrf_token() }}">
 @stop
 
 @section('content')

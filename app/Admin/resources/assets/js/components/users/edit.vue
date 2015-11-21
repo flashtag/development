@@ -29,12 +29,16 @@
                     <input type="text" v-model="user.email" name="email" id="email" class="form-control">
                 </div>
             </div>
+            <div class="panel-footer">
+                <a href="#" class="btn btn-default" @click.prevent="passwordReset"><i class="fa fa-envelope"></i> Send password reset</a>
+            </div>
         </div>
     </form>
 </template>
 
 <script>
     var moment = require ('moment');
+    var swal = require('sweetalert');
 
     export default {
 
@@ -88,6 +92,27 @@
                         path: '/users/' + this.user.id
                     });
                 }
+            },
+
+            passwordReset: function () {
+                swal({
+                    title: 'Heads up!',
+                    text: 'This will email a unique password reset link to this user that will expire in <b>one hour</b>.',
+                    type: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Send link',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true,
+                    html: true
+                }, function () {
+                    var data = {
+                        email: this.user.email,
+                        _token: document.getElementById('csrf').getAttribute('content')
+                    };
+                    $.post('/admin/password/email', data, function(response) {
+                        swal("Sent!", "The password reset link has been emailed!", "success");
+                    });
+                }.bind(this));
             },
 
             notify: function (type, message) {

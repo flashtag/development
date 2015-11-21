@@ -153,7 +153,7 @@ class TestSeeder extends Seeder
                 'name'        => 'disclaimer',
                 'label'       => 'Disclaimer',
                 'description' => 'Disclaimer',
-                'template'    => 'rich_text',
+                'template'    => 'string',
             ]),
             \Flashtag\Data\Field::create([
                 'name'        => 'teaser',

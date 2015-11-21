@@ -57,6 +57,7 @@
                     body: 'Body',
                     category_id: 'Category',
                     author_id: 'Author',
+                    show_author: 'Show author',
                     start_showing_at: 'Start showing',
                     stop_showing_at: 'Stop showing',
                     order: 'Order'

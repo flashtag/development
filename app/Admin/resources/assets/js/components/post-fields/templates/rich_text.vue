@@ -1,12 +1,14 @@
 <template>
-    <label for="{{ name }}">{{ label }}</label>
-    <textarea name="{{ name }}" id="{{ name }}" class="form-control rich-editor" v-if="value" v-rich-editor="value"></textarea>
+    <label for="{{ field.name }}">{{ field.label }}</label>
+    <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control rich-editor" v-rich-editor="field.value"></textarea>
 </template>
 
 <script>
     export default {
 
-        props: ['label', 'name', 'value']
+        props: {
+            field: Object
+        }
 
     }
 </script>

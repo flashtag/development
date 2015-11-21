@@ -103,7 +103,7 @@
                 </div>
                 <div class="form-group">
                     <label for="author">Author</label>
-                    <select v-select="post.author_id" id="author" name="author">
+                    <select v-select="post.author_id" v-model="post.author_id" id="author" name="author">
                         <option value="" disabled selected>Select an author...</option>
                         <option v-for="author in allAuthors" value="{{ author.id }}">{{ author.name }}</option>
                     </select>
@@ -121,11 +121,10 @@
         <div v-if="allFields && allFields.length > 0" class="panel panel-default">
             <div class="panel-heading">CUSTOM FIELDS</div>
             <div class="panel-body">
-                <div class="form-group" v-for="field in allFields">
-                    <component :is="getTemplate(field)"
-                               :label="field.label"
-                               :name="field.name"
-                               :value="getFieldValue(field.name)">
+                <div  v-for="field in allFields" class="form-group">
+                    <component v-if="fieldValues"
+                               :is="field.template"
+                               :field.sync="fieldValues[field.name]">
                     </component>
                 </div>
             </div>
@@ -171,6 +170,7 @@
                     revisions: [],
                     meta: {}
                 },
+                fieldValues: null,
                 allCategories: [],
                 allTags: [],
                 allFields: [],
@@ -202,7 +202,6 @@
                     path: '/posts/'+ this.$route.params.post_id +'?include=category,tags,fields,meta,author'
                 }).then(function (response) {
                     var post = response.entity.data;
-                    post.body = util.replaceAll(post.body, '\n', '');
                     post.category = post.category.data;
                     post.fields = post.fields.data;
                     post.meta = post.meta.data;
@@ -275,6 +274,7 @@
              */
             save: function() {
                 var self = this;
+                this.post.fields = this.fieldValues;
                 client({
                     method: 'PUT',
                     path: '/posts/'+this.post.id,
@@ -369,6 +369,19 @@
                 });
             },
 
+            mapFieldValues: function () {
+                var self = this;
+                this.fieldValues = this.allFields.reduce(function (fields, field) {
+                    fields[field.name] = {
+                        id: field.id,
+                        name: field.name,
+                        label: field.label,
+                        value: self.getFieldValue(field.name)
+                    };
+                    return fields;
+                }, {});
+            },
+
             getFieldValue: function (fieldName) {
                 if (! fieldName.length > 0) {
                    return '';
@@ -378,10 +391,6 @@
                 })[0];
 
                 return matchedField ? matchedField.value : '';
-            },
-
-            getTemplate: function (field) {
-                return field ? field.template : '';
             },
 
             checkResponseStatus: function (response) {
@@ -406,6 +415,7 @@
                 this.fetchAuthors();
                 this.fetch(function (post) {
                     transition.next({post: post});
+                    this.mapFieldValues();
                     this.lock();
                     this.initTooltips();
                 }.bind(this));

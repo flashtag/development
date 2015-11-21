@@ -42,7 +42,8 @@
         "mccool/laravel-auto-presenter": "~4.1",
         "filp/whoops": " ~1.0",
         "doctrine/dbal": "^2.5",
-        "fzaninotto/faker": "~1.4"
+        "fzaninotto/faker": "~1.4",
+        "guzzlehttp/guzzle": "^6.1"
     },
     "require-dev": {
         "laravel/homestead": "^2.1",

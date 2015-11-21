@@ -6,7 +6,10 @@
             <div class="Main__container">
                 <top-nav :current-user="user"></top-nav>
                 <div class="Main__content">
-                    <router-view :current-user="user"></router-view>
+                    <router-view
+                            :current-user="user"
+                            keep-alive
+                    ></router-view>
                 </div>
             </div>
     </section>
