@@ -18,11 +18,42 @@
 
         <div class="panel panel-default" :class="{ 'border-green': isShowing, 'border-red': !isShowing }">
             <div class="panel-heading">
-                POST
+                PUBLISHING
                 <label class="showing label" :class="{ 'label-success': isShowing, 'label-danger': !isShowing }">
                     {{ isShowing ? 'Will show on website' : 'Will not show on website' }}
                 </label>
             </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group switch-wrapper">
+                            <div class="publish-switch">
+                                <label for="is_published">Published</label>
+                                <div class="switch">
+                                    <input v-model="post.is_published" name="is_published" id="is_published" class="cmn-toggle cmn-toggle-round-md" type="checkbox">
+                                    <label for="is_published"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="start_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show until this date.">
+                            Start showing
+                        </label>
+                        <input type="date" v-model="post.start_showing_at" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="stop_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show after this date.">
+                            Stop showing
+                        </label>
+                        <input type="date" v-model="post.stop_showing_at" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default" >
+            <div class="panel-heading">POST</div>
             <div class="panel-body">
                 <div class="row">
                     <div class="col-md-6">
@@ -58,40 +89,25 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group switch-wrapper">
-                                    <div class="publish-switch">
-                                        <label for="is_published">Published</label>
-                                        <div class="switch">
-                                            <input v-model="post.is_published" name="is_published" id="is_published" class="cmn-toggle cmn-toggle-round-md" type="checkbox">
-                                            <label for="is_published"></label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-5">
-                                <label for="start_showing_at">Start showing</label>
-                                <input type="date" v-model="post.start_showing_at" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
-                            </div>
-                            <div class="col-md-5">
-                                <label for="stop_showing_at">Stop showing</label>
-                                <input type="date" v-model="post.stop_showing_at" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="order">Order in category</label>
-                            <input type="number" v-model="post.order" name="order" id="order" class="form-control" number>
-                        </div>
-                    </div>
-                </div>
                 <div class="form-group">
                     <label for="body">Body</label>
-                    <textarea v-model="post.body" name="body" id="body" class="form-control rich-editor" rows="10"></textarea>
+                    <textarea name="body" id="body" class="form-control rich-editor"
+                              v-if="post.body" v-rich-editor="post.body">
+                    </textarea>
+                </div>
+                <div class="form-group">
+                    <label for="author">Author</label>
+                    <select v-select="post.author_id" id="author" name="author" :options="allAuthors">
+                        <option value="" disabled selected>Select an author...</option>
+                        <option v-for="author in allAuthors" value="{{ author.id }}">{{ author.name }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="show_author">Show author?</label>
+                    <div class="switch">
+                        <input id="show_author" class="cmn-toggle cmn-toggle-yes-no" type="checkbox" v-model="post.show_author">
+                        <label for="show_author" data-on="Yes" data-off="No"></label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -100,7 +116,10 @@
             <div class="panel-heading">CUSTOM FIELDS</div>
             <div class="panel-body">
                 <div class="form-group" v-for="field in allFields">
-                    <component :is="getTemplate(field)" :label="field.label" :name="field.name" :value="field.value"></component>
+                    <component
+                            :is="field.template"
+                            :field.sync="field">
+                    </component>
                 </div>
             </div>
         </div>
@@ -145,7 +164,8 @@
                 },
                 allCategories: [],
                 allTags: [],
-                allFields: []
+                allFields: [],
+                allAuthors: []
             }
         },
 
@@ -203,6 +223,17 @@
                 });
             },
 
+            fetchAuthors: function () {
+                var self = this;
+                client({
+                    path: '/authors'
+                }).then(function (response) {
+                    self.allAuthors = response.entity.data;
+                }, function (response) {
+                    self.checkResponseStatus(response);
+                });
+            },
+
             /**
              * Save the post.
              */
@@ -233,9 +264,9 @@
 
         route: {
             data: function (transition) {
-//                CKEDITOR.replaceClass = 'rich-editor';
                 this.fetchTags();
                 this.fetchFields();
+                this.fetchAuthors();
                 this.fetchCategories(function (categories) {
                     transition.next({allCategories: categories});
                 });

@@ -11,7 +11,7 @@ class CategoryTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['tags', 'meta'];
+    protected $availableIncludes = ['posts', 'tags', 'meta'];
 
     /**
      * @param \Flashtag\Data\Category $category
@@ -27,6 +27,18 @@ class CategoryTransformer extends Transformer
             'created_at' => $category->created_at->getTimestamp(),
             'updated_at' => $category->updated_at->getTimestamp(),
         ];
+    }
+
+    /**
+     * Include posts.
+     *
+     * @param \Flashtag\Data\Category $category
+     * @return \League\Fractal\Resource\Collection
+     * @throws \Exception
+     */
+    public function includePosts(Category $category)
+    {
+        return $this->collection($category->posts, new PostTransformer());
     }
 
     /**
