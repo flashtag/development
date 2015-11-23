@@ -98,7 +98,9 @@
                     path: '/posts/' + post.id + '/reorder',
                     entity: { order: post.order }
                 }).then(function () {
-                    self.notify('success', 'Saved post order.');
+                    setTimeout(function () {
+                        self.notify('success', 'Saved post order.');
+                    }, 1000);
                 }, function () {
                     // fail
                 });
