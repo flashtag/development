@@ -31,6 +31,24 @@
                     <label for="description">Description</label>
                     <input type="text" v-model="category.description" name="description" id="description" class="form-control">
                 </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="order_by">Order posts in category by</label>
+                            <select v-model="category.order_by" name="order_by" id="order_by" class="form-control">
+                                <option v-for="option in orderOptions" value="{{ option.id }}">{{ option.text }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="order_dir">Order posts in category direction</label>
+                            <select v-model="category.order_dir" name="order_dir" id="order_dir" class="form-control">
+                                <option v-for="direction in orderDirections" value="{{ direction.id }}">{{ direction.text }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
@@ -46,8 +64,19 @@
                 category: {
                     id: '',
                     name: '',
-                    description: ''
-                }
+                    description: '',
+                    order_by: 'order',
+                    order_dir: 'asc'
+                },
+                orderOptions: [
+                    { id: 'order', text: 'Order' },
+                    { id: 'created_at', text: 'Created' },
+                    { id: 'updated_at', text: 'Updated' }
+                ],
+                orderDirections: [
+                    { id: 'asc', text: 'Ascending' },
+                    { id: 'desc', text: 'Descending' }
+                ]
             }
         },
 

@@ -24,6 +24,8 @@ class CategoryTransformer extends Transformer
             'name' => $category->name,
             'slug' => $category->slug,
             'description' => $category->description,
+            'order_by' => $category->order_by,
+            'order_dir' => $category->order_dir,
             'created_at' => $category->created_at->getTimestamp(),
             'updated_at' => $category->updated_at->getTimestamp(),
         ];

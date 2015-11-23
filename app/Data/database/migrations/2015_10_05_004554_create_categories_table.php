@@ -17,6 +17,8 @@ class CreateCategoriesTable extends Migration
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
+            $table->string('order_by')->default('order');
+            $table->string('order_dir')->default('asc');
             $table->timestamps();
         });
     }
