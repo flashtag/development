@@ -2,17 +2,12 @@
     .order {
         width: 40px;
     }
-    .re-order {
-        color: #666;
-    }
 </style>
 
 <template>
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <a href="#expand" @click.prevent="opened = !opened" class="re-order">Re-order posts <span class="caret"></span></a>
-        </div>
-        <table v-show="opened" class="CategoryPosts table table-striped table-hover">
+        <div class="panel-heading">Re-order posts</div>
+        <table class="CategoryPosts table table-striped table-hover">
             <tbody>
             <tr v-for="post in posts | orderBy 'order'" class="CategoryPosts__item">
                 <td class="order">
@@ -36,12 +31,6 @@
     export default {
 
         props: ['current-user', 'category-id', 'posts'],
-
-        data: function () {
-            return {
-                opened: false
-            }
-        },
 
         methods: {
 
