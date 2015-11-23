@@ -8,3 +8,7 @@
 a:focus {
   outline: none;
 }
+
+.btn-link, .btn-link:hover {
+  color: $brand-primary;
+}

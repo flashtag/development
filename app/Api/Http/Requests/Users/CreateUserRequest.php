@@ -1,6 +1,8 @@
 <?php
 
-namespace Flashtag\Api\Http\Requests;
+namespace Flashtag\Api\Http\Requests\Users;
+
+use Flashtag\Api\Http\Requests\Request;
 
 class CreateUserRequest extends Request
 {

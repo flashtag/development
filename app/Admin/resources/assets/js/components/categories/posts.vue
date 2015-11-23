@@ -1,7 +1,6 @@
 <style>
     .order {
-        display: inline-block;
-        width: 60px;
+        width: 40px;
     }
 </style>
 
@@ -9,16 +8,30 @@
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
         <li><a v-link="'/categories'">Categories</a></li>
-        <li><a v-link="'/categories/'+category.id">{{ category.name }}</a></li>
-        <li class="active">Posts</li>
+        <li><a v-link="'/categories/'+$route.params.category_id">{{ category.name }}</a></li>
+        <li class="active">Reorder Posts</li>
     </ol>
 
-    <ul class="CategoryPosts list-unstyled">
-        <li v-for="post in category.posts.data | orderBy 'order'" class="CategoryPosts__item">
-            <span class="order">{{ post.order }}</span>
-            <span class="title">{{ post.title }}</span>
-        </li>
-    </ul>
+    <div class="panel panel-default">
+        <div class="panel-heading">Reorder posts in {{ category.name }}</div>
+        <table class="CategoryPosts table table-striped table-hover">
+            <tbody>
+            <tr v-for="post in category.posts.data | orderBy 'order'" class="CategoryPosts__item">
+                <td class="order">
+                    <input class="post__order"
+                           type="number"
+                           value="{{ post.order }}"
+                           @keyup.enter="blur"
+                           @focusout="reorder(post, $event)"
+                           number>
+                </td>
+                <td class="title">{{ post.title }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
 </template>
 
 <script>
@@ -28,7 +41,8 @@
 
         data: function () {
             return {
-                categories: null
+                category: { posts: [] },
+                posts: []
             }
         },
 
@@ -45,6 +59,87 @@
                         self.$dispatch('userHasLoggedOut')
                     }
                 });
+            },
+
+            /**
+             * Reorder the posts' list_positions
+             * @param post
+             * @param e
+             */
+            reorder: function(post, e) {
+                var self = this;
+
+                var new_position = parseInt(e.target.value);
+                // If the position is not a number, we are done here.
+                if (isNaN(new_position)) {
+                    e.target.value = post.order;
+                    return;
+                }
+
+                var max = self.category.posts.data.reduce(function(max, post) {
+                    return (post.order > max) ? post.order : max;
+                }, 0);
+
+                new_position = (new_position > 0) ? new_position : 1;
+                new_position = (new_position > max) ? max : new_position;
+
+                // If the position is not different, we are done here.
+                if (new_position === post.order) {
+                    e.target.value = post.order;
+                    return;
+                }
+
+                // Shift all the posts' between the new list position and old list position up or down by one.
+                // If we are moving the list position to a lower number, the other numbers should shift up by one,
+                // but if we are moving the list position to a higher number the others should shift down by one.
+                var increment = (new_position < post.order) ? +1 : -1;
+                var between = (new_position < post.order) ? [new_position, post.order] : [post.order, new_position];
+
+                this.category.posts.data = this.category.posts.data.map(function (post) {
+                    var p = post.order;
+                    if (p >= between[0] && p <= between[1]) {
+                        post.order += increment;
+                    }
+                    return post;
+                });
+
+                // Save the new position on the current post.
+                post.order = new_position;
+
+                // Persist the new order
+                this.save(post);
+
+                setTimeout(function() {
+                    this.scrollTo($(e.target).closest('tr'));
+                }.bind(this), 0);
+            },
+
+            /**
+             * Save the post's position to the database.
+             * @param post
+             */
+            save: function (post) {
+                client({
+                    method: "PATCH",
+                    path: '/posts/' + post.id + '/reorder',
+                    entity: { order: post.order }
+                });
+            },
+
+            scrollTo: function(target) {
+                $('html,body').animate({
+                    scrollTop: target.offset().top - 280
+                }, 700);
+
+                target.addClass("pulse").delay(4000).queue(function () {
+                    $(this).removeClass("pulse").dequeue();
+                });
+
+                return false;
+            },
+
+            blur: function(e) {
+                e.target.blur();
             }
 
         },

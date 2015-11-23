@@ -2,7 +2,7 @@
 
 namespace Flashtag\Api\Http\Controllers\V1;
 
-use Flashtag\Api\Http\Requests\CreateUserRequest;
+use Flashtag\Api\Http\Requests\Users\CreateUserRequest;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\UserTransformer;
 use Flashtag\Data\User;

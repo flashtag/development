@@ -1,6 +1,8 @@
 <?php
 
-namespace Flashtag\Api\Http\Requests;
+namespace Flashtag\Api\Http\Requests\Posts;
+
+use Flashtag\Api\Http\Requests\Request;
 
 class PublishRequest extends Request
 {

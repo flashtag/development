@@ -2,7 +2,8 @@
 
 namespace Flashtag\Api\Http\Controllers\V1;
 
-use Flashtag\Api\Http\Requests\PublishRequest;
+use Flashtag\Api\Http\Requests\Posts\PublishRequest;
+use Flashtag\Api\Http\Requests\Posts\ReorderRequest;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\PostTransformer;
 use Flashtag\Data\Post;
@@ -185,6 +186,14 @@ class PostsController extends Controller
     {
         $post = $this->post->findOrNew($id);
         $post->unlock();
+    }
+
+    public function reorder(ReorderRequest $request, $id)
+    {
+        $post = $this->post->findOrFail($id);
+        $post->reorder($request->json('order'));
+
+        return $this->response->item($post, new PostTransformer());
     }
 
     private function syncRelationships($post, $request)

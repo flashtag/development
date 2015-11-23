@@ -9,7 +9,7 @@
 
         <section class="info row">
             <div class="col-md-6">
-                <a v-link="'/categories/'+category.id+'/posts'"><i class="fa fa-file-text"></i> Re-order Posts</a>
+                <a v-link="'/categories/'+category.id+'/posts'" class="btn btn-link"><i class="fa fa-reorder"></i> Re-order Posts</a>
             </div>
             <div class="col-md-6 clearfix">
                 <div class="action-buttons">

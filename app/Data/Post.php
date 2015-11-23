@@ -293,13 +293,13 @@ class Post extends Model implements HasPresenter
             $whereBetween = [$old, $new];
         }
 
-        return \DB::update(
-            \DB::raw(
-                "UPDATE `posts`
-                 SET `order` = `order` {$increment}
-                 WHERE `category_id` = ? AND `order` BETWEEN ? AND ?"
-            ),
-            array_merge([$categoryId], $whereBetween)
+        $query = sprintf(
+            'UPDATE posts
+             SET "order" = "order" %s
+             WHERE category_id = ? AND "order" BETWEEN ? AND ?',
+            $increment
         );
+
+        return \DB::update(\DB::raw($query), array_merge([$categoryId], $whereBetween));
     }
 }

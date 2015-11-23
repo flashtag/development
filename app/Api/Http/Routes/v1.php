@@ -13,6 +13,7 @@ $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
     $api->patch('posts/{id}/lock', 'PostsController@lock');
     $api->patch('posts/{id}/unlock', 'PostsController@unlock');
     $api->patch('posts/{id}/property', 'PostsController@property');
+    $api->patch('posts/{id}/reorder', 'PostsController@reorder');
     $api->resource('posts', 'PostsController', ['except' => ['create', 'edit']]);
 
     // TAGS

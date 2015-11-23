@@ -9,7 +9,7 @@
 
         <section class="info row">
             <div class="col-md-6 clearfix">
-                <a v-link="'/posts/'+$route.params.post_id+'/revisions'">
+                <a v-link="'/posts/'+$route.params.post_id+'/revisions'" class="btn btn-link">
                     <i class="fa fa-history"></i> Revision history
                 </a>
             </div>
