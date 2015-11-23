@@ -9,7 +9,7 @@
 
         <section class="info row">
             <div class="col-md-6">
-                <a v-link="'/categories/'+category.id+'/posts'" class="btn btn-link"><i class="fa fa-reorder"></i> Re-order Posts</a>
+                <!--<a v-link="'/categories/'+category.id+'/posts'" class="btn btn-link"><i class="fa fa-reorder"></i> Re-order Posts</a>-->
             </div>
             <div class="col-md-6 clearfix">
                 <div class="action-buttons">
@@ -52,12 +52,18 @@
             </div>
         </div>
     </form>
+
+    <category-posts :category-id="$route.params.category_id" :posts="category.posts.data"></category-posts>
 </template>
 
 <script>
     export default {
 
         props: ['current-user'],
+
+        components: {
+            'category-posts': require('./category-posts.vue')
+        },
 
         data: function() {
             return {
@@ -85,7 +91,7 @@
             fetch: function (successHandler) {
                 var self = this;
                 client({
-                    path: '/categories/'+ this.$route.params.category_id
+                    path: '/categories/'+ this.$route.params.category_id + '?include=posts'
                 }).then(function (response) {
                     self.category = response.entity.data;
                     successHandler(self.category);

@@ -22,7 +22,6 @@ module.exports = {
             '/categories': { component: require('../components/categories/index.vue') },
             '/categories/create': { component: require('../components/categories/create.vue') },
             '/categories/:category_id': { component: require('../components/categories/edit.vue') },
-            '/categories/:category_id/posts': { component: require('../components/categories/posts.vue') },
 
             // TAGS
             '/tags': { component: require('../components/tags/index.vue') },

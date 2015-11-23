@@ -2,21 +2,19 @@
     .order {
         width: 40px;
     }
+    .re-order {
+        color: #666;
+    }
 </style>
 
 <template>
-    <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
-        <li><a v-link="'/categories'">Categories</a></li>
-        <li><a v-link="'/categories/'+$route.params.category_id">{{ category.name }}</a></li>
-        <li class="active">Reorder Posts</li>
-    </ol>
-
     <div class="panel panel-default">
-        <div class="panel-heading">Reorder posts in {{ category.name }}</div>
-        <table class="CategoryPosts table table-striped table-hover">
+        <div class="panel-heading">
+            <a href="#expand" @click.prevent="opened = !opened" class="re-order">Re-order posts <span class="caret"></span></a>
+        </div>
+        <table v-show="opened" class="CategoryPosts table table-striped table-hover">
             <tbody>
-            <tr v-for="post in category.posts.data | orderBy 'order'" class="CategoryPosts__item">
+            <tr v-for="post in posts | orderBy 'order'" class="CategoryPosts__item">
                 <td class="order">
                     <input class="post__order"
                            type="number"
@@ -37,29 +35,15 @@
 <script>
     export default {
 
-        props: ['current-user'],
+        props: ['current-user', 'category-id', 'posts'],
 
         data: function () {
             return {
-                category: { posts: [] },
-                posts: []
+                opened: false
             }
         },
 
         methods: {
-
-            fetch: function (successHandler) {
-                var self = this;
-                client({
-                    path: '/categories/' + this.$route.params.category_id + '/?include=posts:order(order)'
-                }).then(function (response) {
-                    successHandler(response.entity.data);
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
-                });
-            },
 
             /**
              * Reorder the posts' list_positions
@@ -76,7 +60,7 @@
                     return;
                 }
 
-                var max = self.category.posts.data.reduce(function(max, post) {
+                var max = self.posts.reduce(function(max, post) {
                     return (post.order > max) ? post.order : max;
                 }, 0);
 
@@ -95,7 +79,7 @@
                 var increment = (new_position < post.order) ? +1 : -1;
                 var between = (new_position < post.order) ? [new_position, post.order] : [post.order, new_position];
 
-                this.category.posts.data = this.category.posts.data.map(function (post) {
+                this.posts = this.posts.map(function (post) {
                     var p = post.order;
                     if (p >= between[0] && p <= between[1]) {
                         post.order += increment;
@@ -142,14 +126,6 @@
                 e.target.blur();
             }
 
-        },
-
-        route: {
-            data: function (transition) {
-                this.fetch(function (data) {
-                    transition.next({category: data});
-                });
-            }
         }
 
     }
