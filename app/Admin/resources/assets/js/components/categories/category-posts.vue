@@ -100,7 +100,7 @@
                 }).then(function () {
                     setTimeout(function () {
                         self.notify('success', 'Saved post order.');
-                    }, 1000);
+                    }, 1800);
                 }, function () {
                     // fail
                 });
