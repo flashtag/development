@@ -27,9 +27,29 @@
                     <label for="name">Name</label>
                     <input type="text" v-model="category.name" name="name" id="name" class="form-control">
                 </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="category">Parent category</label>
+                            <select v-model="category.parent_id" name="category" id="category" class="form-control">
+                                <option value="" disabled selected>None</option>
+                                <option v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group form-tags">
+                            <label for="tags">Tags</label>
+                            <select v-if="category.tags" v-model="category.tags" name="tags" id="tags" multiple class="form-control"
+                                    v-select="category.tags">
+                                <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <input type="text" v-model="category.description" name="description" id="description" class="form-control">
+                    <textarea v-if="category.description" v-rich-editor="category.description" name="description" id="description" class="form-control"></textarea>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
@@ -53,7 +73,7 @@
         </div>
     </form>
 
-    <category-posts :category-id="$route.params.category_id" :posts="category.posts.data"></category-posts>
+    <category-posts v-if="category.posts" :category-id="$route.params.category_id" :posts="category.posts.data"></category-posts>
 </template>
 
 <script>
@@ -74,8 +94,10 @@
                     order_by: 'order',
                     order_dir: 'asc'
                 },
+                allTags: [],
+                allCategories: [],
                 orderOptions: [
-                    { id: 'order', text: 'Order' },
+                    { id: 'order', text: 'Order (manual)' },
                     { id: 'created_at', text: 'Created' },
                     { id: 'updated_at', text: 'Updated' }
                 ],
@@ -91,10 +113,39 @@
             fetch: function (successHandler) {
                 var self = this;
                 client({
-                    path: '/categories/'+ this.$route.params.category_id + '?include=posts'
+                    path: '/categories/'+ this.$route.params.category_id + '?include=posts,tags'
                 }).then(function (response) {
-                    self.category = response.entity.data;
-                    successHandler(self.category);
+                    var category = response.entity.data;
+                    category.tags = category.tags.data.reduce(function (ids, tag) {
+                        ids.push(tag.id);
+                        return ids;
+                    }, []);
+                    successHandler(category);
+                }, function (response) {
+                    self.checkResponseStatus(response);
+                });
+            },
+
+            fetchCategories: function () {
+                var self = this;
+                client({
+                    path: '/categories'
+                }).then(function (response) {
+                    self.allCategories = response.entity.data;
+                }, function (response) {
+                    self.checkResponseStatus(response);
+                });
+            },
+
+            fetchTags: function () {
+                var self = this;
+                client({
+                    path: '/tags'
+                }).then(function (response) {
+                    self.allTags = response.entity.data.map(function (tag) {
+                        tag.text = tag.name;
+                        return tag;
+                    });
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });
@@ -152,6 +203,8 @@
 
         route: {
             data: function (transition) {
+                this.fetchCategories();
+                this.fetchTags();
                 this.fetch(function (category) {
                     transition.next({category: category});
                 }.bind(this));

@@ -114,7 +114,6 @@
                 client({
                     path: '/posts?include=category&orderBy=updated_at|desc'
                 }).then(function (response) {
-                    self.posts = response.entity.data;
                     self.pagination = response.entity.meta.pagination;
                     successHandler(response.entity.data);
                 }, function (response) {
@@ -268,7 +267,7 @@
                 var increment = (new_position < post.order) ? +1 : -1;
                 var between = (new_position < post.order) ? [new_position, post.order] : [post.order, new_position];
 
-                this.posts = this.posts.map(function (post) {
+                this.posts = this.posts.filter().map(function (post) {
                     var p = post.order;
                     if (p >= between[0] && p <= between[1]) {
                         post.order += increment;

@@ -21,6 +21,7 @@ class CategoryTransformer extends Transformer
     {
         return [
             'id' => (int) $category->id,
+            'parent_id' => $category->parent_id,
             'name' => $category->name,
             'slug' => $category->slug,
             'description' => $category->description,
