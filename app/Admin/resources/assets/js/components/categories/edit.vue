@@ -32,8 +32,8 @@
                         <div class="form-group">
                             <label for="category">Parent category</label>
                             <select v-model="category.parent_id" name="category" id="category" class="form-control">
-                                <option value="" disabled selected>None</option>
-                                <option v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
+                                <option :value="null" selected>None</option>
+                                <option v-if="allCategories" v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
                             </select>
                         </div>
                     </div>
