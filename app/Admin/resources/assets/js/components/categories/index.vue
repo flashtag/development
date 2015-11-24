@@ -19,7 +19,7 @@
         <thead>
             <tr>
                 <th><a href="#" @click.prevent="sortBy('name')">Name <i :class="orderIcon('name')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('category.parent.data.name')">Parent <i :class="orderIcon('category.parent.data.name')"></i></a></th>
+                <th><a>Parent</a></th>
                 <th><a>Tags</a></th>
             </tr>
         </thead>
@@ -27,7 +27,7 @@
             <tr v-for="category in categories | filterBy nameFilter | orderBy sortKey sortDir"
                 class="Category">
                 <td><a v-link="'/categories/'+category.id">{{ category.name }}</a></td>
-                <td>{{ category.parent.data.name }}</td>
+                <td>{{ getParent(category) }}</td>
                 <td><span v-for="tag in category.tags.data" class="tag label label-default">{{ tag.name }}</span></td>
             </tr>
         </tbody>
@@ -84,6 +84,14 @@
                 }
 
                 return 'fa fa-unsorted';
+            },
+
+            getParent: function (category) {
+                if (category.parent) {
+                    return category.parent.data.name;
+                }
+
+                return '';
             }
 
         },
