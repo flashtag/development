@@ -7,25 +7,29 @@
         <li class="active">{{ revision.id }}</li>
     </ol>
 
-    <div class="Revision panel panel-default">
-        <div class="panel-heading">
-            <div class="row">
-            <div class="col-md-6">
-                <strong>{{ who(revision.user_id) }}</strong> &mdash; <em>{{ when(revision.created_at) }}</em>
-            </div>
-            <div class="col-md-6 clearfix">
-                <div class="view-buttons">
-                    <button class="btn btn-sm" :class="{ 'active': !viewDiff }" @click.prevent="viewDiff = false">Content</button>
-                    <button class="btn btn-sm" :class="{ 'active': viewDiff }" @click.prevent="viewDiff = true">Changes</button>
+    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
+    <div v-if="!$loadingRouteData">
+
+        <div class="Revision panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                <div class="col-md-6">
+                    <strong>{{ who(revision.user_id) }}</strong> &mdash; <em>{{ when(revision.created_at) }}</em>
+                </div>
+                <div class="col-md-6 clearfix">
+                    <div class="view-buttons">
+                        <button class="btn btn-sm" :class="{ 'active': !viewDiff }" @click.prevent="viewDiff = false">Content</button>
+                        <button class="btn btn-sm" :class="{ 'active': viewDiff }" @click.prevent="viewDiff = true">Changes</button>
+                    </div>
+                </div>
                 </div>
             </div>
+            <div class="panel-body">{{{ content }}}</div>
+            <div class="panel-footer">
+                <button class="btn btn-warning" :class="{ 'disabled': !canRestore() }" @click.prevent="restore">
+                    <i class="fa fa-repeat"></i> Restore this revision
+                </button>
             </div>
-        </div>
-        <div class="panel-body">{{{ content }}}</div>
-        <div class="panel-footer">
-            <button class="btn btn-warning" :class="{ 'disabled': !canRestore() }" @click.prevent="restore">
-                <i class="fa fa-repeat"></i> Restore this revision
-            </button>
         </div>
     </div>
 </template>
@@ -74,13 +78,12 @@
 
         methods: {
 
-            fetch: function (successHandler) {
+            fetch: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/revisions/'+ this.$route.params.revision_id
                 }).then(function (response) {
                     self.revision = response.entity.data;
-                    successHandler(self.revision);
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });
@@ -88,7 +91,7 @@
 
             fetchPost: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/posts/'+ this.$route.params.post_id
                 }).then(function (response) {
                     self.post = response.entity.data;
@@ -99,7 +102,7 @@
 
             fetchUsers: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/users'
                 }).then(function (response) {
                     self.users = response.entity.data;
@@ -188,11 +191,10 @@
 
         route: {
             data: function (transition) {
-                this.fetchPost();
-                this.fetchUsers();
-                this.fetch(function (data) {
-                    transition.next({revision: data});
-                });
+                this.fetch()
+                    .then(this.fetchPost)
+                    .then(this.fetchUsers)
+                    .then(transition.next);
             }
         }
 

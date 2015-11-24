@@ -17,12 +17,10 @@ var Cookies = require('js-cookie');
          */
         return interceptor({
             request: function (request, config) {
-                var token, headers;
+                var token = Cookies.get('jwt-token');
+                var headers = request.headers || (request.headers = {});
 
-                token = Cookies.get('jwt-token');
-                headers = request.headers || (request.headers = {});
-
-                if ( token !== null && token !== 'undefined') {
+                if (token !== null && token !== 'undefined') {
                     headers.Authorization = token;
                 }
 
@@ -38,6 +36,7 @@ var Cookies = require('js-cookie');
                 if (response.entity && response.entity.token && response.entity.token.length > 10) {
                     Cookies.set('jwt-token', 'Bearer ' + response.entity.token, { expires: 7, path: '' });
                 }
+
                 return response;
             }
         });

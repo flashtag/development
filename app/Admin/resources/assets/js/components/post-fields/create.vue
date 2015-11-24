@@ -75,7 +75,7 @@
                     path: '/fields',
                     entity: this.field
                 }).then(function (response) {
-                    // success
+                    self.$route.router.go('/post-fields');
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')

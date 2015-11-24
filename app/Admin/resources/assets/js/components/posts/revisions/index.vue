@@ -6,39 +6,42 @@
         <li class="active">Revisions</li>
     </ol>
 
-    <div class="filters">
-        <div class="row">
-            <div class="col-md-6">
-                <select v-model="fieldFilter" id="field" class="form-control">
-                    <option value="" selected>Filter by field...</option>
-                    <option v-for="field in keys" :value="$key">
-                        {{ field }}
-                    </option>
-                </select>
+    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
+    <div v-if="!$loadingRouteData">
+
+        <div class="filters">
+            <div class="row">
+                <div class="col-md-6">
+                    <select v-model="fieldFilter" id="field" class="form-control">
+                        <option value="" selected>Filter by field...</option>
+                        <option v-for="field in keys" :value="$key">
+                            {{ field }}
+                        </option>
+                    </select>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">Revision History</div>
-        <div class="panel-body" v-if="!post.revisions.data.length > 0"><h6>No revions</h6></div>
-        <table v-else class="Revisions table table-hover">
-            <tbody>
-            <tr v-for="revision in post.revisions.data
-                    | filterBy fieldFilter in 'key'
-                    | orderBy 'created_at' -1"
-                class="Revision">
-                <td>{{{ what(revision) }}}</td>
-                <td>at {{ when(revision.created_at) }}</td>
-                <td>by <em>{{ who(revision.user_id) }}</em></td>
-                <td class="action-button"><a v-if="shouldDiff(revision.key)"
-                       v-link="'/posts/'+post.id+'/revisions/'+revision.id"
-                       class="btn btn-primary btn-sm">View</a></td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="panel panel-default">
+            <div class="panel-heading">Revision History</div>
+            <div class="panel-body" v-if="!post.revisions.data.length > 0"><h6>No revions</h6></div>
+            <table v-else class="Revisions table table-hover">
+                <tbody>
+                <tr v-for="revision in post.revisions.data
+                        | filterBy fieldFilter in 'key'
+                        | orderBy 'created_at' -1"
+                    class="Revision">
+                    <td>{{{ what(revision) }}}</td>
+                    <td>at {{ when(revision.created_at) }}</td>
+                    <td>by <em>{{ who(revision.user_id) }}</em></td>
+                    <td class="action-button"><a v-if="shouldDiff(revision.key)"
+                           v-link="'/posts/'+post.id+'/revisions/'+revision.id"
+                           class="btn btn-primary btn-sm">View</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-
 </template>
 
 <script>
@@ -73,13 +76,12 @@
 
         methods: {
 
-            fetch: function (successHandler) {
+            fetch: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/posts/' + this.$route.params.post_id + '?include=revisions'
                 }).then(function (response) {
                     self.post = response.entity.data;
-                    successHandler(response.entity.data);
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')
@@ -89,11 +91,10 @@
 
             fetchUsers: function (successHandler) {
                 var self = this;
-                client({
+                return client({
                     path: '/users'
                 }).then(function (response) {
                     self.users = response.entity.data;
-                    // successHandler(response.entity.data);
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')
@@ -103,7 +104,7 @@
 
             fetchCategories: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/categories'
                 }).then(function (response) {
                     self.categories = response.entity.data;
@@ -116,7 +117,7 @@
 
             fetchAuthors: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/authors'
                 }).then(function (response) {
                     self.authors = response.entity.data;
@@ -193,12 +194,11 @@
 
         route: {
             data: function (transition) {
-                this.fetchUsers();
-                this.fetchCategories();
-                this.fetchAuthors();
-                this.fetch(function (data) {
-                    transition.next({post: data})
-                });
+                this.fetch()
+                    .then(this.fetchUsers)
+                    .then(this.fetchCategories)
+                    .then(this.fetchAuthors)
+                    .then(transition.next);
             }
         }
 

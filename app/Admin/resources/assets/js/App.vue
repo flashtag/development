@@ -8,7 +8,6 @@
                 <div class="Main__content">
                     <router-view
                             :current-user="user"
-                            keep-alive
                     ></router-view>
                 </div>
             </div>

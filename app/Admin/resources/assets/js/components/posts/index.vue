@@ -4,86 +4,89 @@
         <li class="active">Posts</li>
     </ol>
 
-    <div class="create-button">
-        <button v-link="'/posts/create'" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</button>
-    </div>
+    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
+    <div v-if="!$loadingRouteData">
 
-    <div class="filters">
-        <div class="row">
-            <div class="col-md-6">
-                <input type="text" v-model="titleFilter" placeholder="Filter by title..." class="form-control">
-            </div>
-            <div class="col-md-6">
-                <select v-model="categoryFilter" id="category" class="form-control">
-                    <option value="" selected>Filter by category...</option>
-                    <option v-for="category in categories" :value="category.name">
-                        {{ category.name }}
-                    </option>
-                </select>
+        <div class="create-button">
+            <button v-link="'/posts/create'" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</button>
+        </div>
+
+        <div class="filters">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" v-model="titleFilter" placeholder="Filter by title..." class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <select v-model="categoryFilter" id="category" class="form-control">
+                        <option value="" selected>Filter by category...</option>
+                        <option v-for="category in categories" :value="category.name">
+                            {{ category.name }}
+                        </option>
+                    </select>
+                </div>
             </div>
         </div>
+
+        <table class="Posts table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th v-if="categoryFilter"><a href="#" @click.prevent="sortBy('order')">Order <i :class="orderIcon('order')"></i></a></th>
+                    <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
+                    <th><a href="#" @click.prevent="sortBy('category.data.name')">Category <i :class="orderIcon('category.data.name')"></i></a></th>
+                    <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
+                    <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
+                    <th class="text-centered"><a>Showing</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="post in posts
+                        | filterBy titleFilter in 'title'
+                        | filterBy categoryFilter in 'category.data.name'
+                        | orderBy sortKey sortDir"
+                    class="Post" :class="{ 'Post--unpublished': !post.is_published }">
+
+                    <td v-if="categoryFilter" class="order">
+                        <input class="post__order"
+                               type="number"
+                               value="{{ post.order }}"
+                               @keyup.enter="blur"
+                               @focusout="reorder(post, $event)"
+                               number>
+                    </td>
+
+                    <td>
+                        <a href="#!/posts/{{ post.id }}" @click.prevent="goToPost(post)">{{ post.title }}</a>
+                        <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
+                              title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
+                    </td>
+
+                    <td>{{ post.category.data.name }}</td>
+
+                    <td>{{ formatTimestamp(post.created_at) }}</td>
+
+                    <td class="published">
+                        <div class="switch">
+                            <input class="cmn-toggle cmn-toggle-round-sm"
+                                   id="is_published_{{post.id}}"
+                                   type="checkbox"
+                                   name="is_published"
+                                   v-model="post.is_published"
+                                   @change="publish(post, $event)">
+                            <label for="is_published_{{post.id}}"></label>
+                        </div>
+                    </td>
+
+                    <td class="text-centered">
+                        <span v-if="isShowing(post)" class="showing"><i class="fa fa-check"></i></span>
+                        <span v-if="!isShowing(post)" class="not-showing"><i class="fa fa-times"></i></span>
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+
+        <paginator :pagination="pagination"></paginator>
     </div>
-
-    <table class="Posts table table-striped table-hover">
-        <thead>
-            <tr>
-                <th v-if="categoryFilter"><a href="#" @click.prevent="sortBy('order')">Order <i :class="orderIcon('order')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('category.data.name')">Category <i :class="orderIcon('category.data.name')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
-                <th class="text-centered"><a>Showing</a></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="post in posts
-                    | filterBy titleFilter in 'title'
-                    | filterBy categoryFilter in 'category.data.name'
-                    | orderBy sortKey sortDir"
-                class="Post" :class="{ 'Post--unpublished': !post.is_published }">
-
-                <td v-if="categoryFilter" class="order">
-                    <input class="post__order"
-                           type="number"
-                           value="{{ post.order }}"
-                           @keyup.enter="blur"
-                           @focusout="reorder(post, $event)"
-                           number>
-                </td>
-
-                <td>
-                    <a href="#!/posts/{{ post.id }}" @click.prevent="goToPost(post)">{{ post.title }}</a>
-                    <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
-                          title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
-                </td>
-
-                <td>{{ post.category.data.name }}</td>
-
-                <td>{{ formatTimestamp(post.created_at) }}</td>
-
-                <td class="published">
-                    <div class="switch">
-                        <input class="cmn-toggle cmn-toggle-round-sm"
-                               id="is_published_{{post.id}}"
-                               type="checkbox"
-                               name="is_published"
-                               v-model="post.is_published"
-                               @change="publish(post, $event)">
-                        <label for="is_published_{{post.id}}"></label>
-                    </div>
-                </td>
-
-                <td class="text-centered">
-                    <span v-if="isShowing(post)" class="showing"><i class="fa fa-check"></i></span>
-                    <span v-if="!isShowing(post)" class="not-showing"><i class="fa fa-times"></i></span>
-                </td>
-
-            </tr>
-        </tbody>
-    </table>
-
-    <paginator :pagination="pagination"></paginator>
-
 </template>
 
 <script>
@@ -111,11 +114,11 @@
 
             fetch: function (successHandler) {
                 var self = this;
-                client({
+                return client({
                     path: '/posts?include=category&orderBy=updated_at|desc'
                 }).then(function (response) {
                     self.pagination = response.entity.meta.pagination;
-                    successHandler(response.entity.data);
+                    self.posts = response.entity.data;
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')
@@ -125,7 +128,7 @@
 
             fetchUsers: function (successHandler) {
                 var self = this;
-                client({
+                return client({
                     path: '/users'
                 }).then(function (response) {
                     self.users = response.entity.data;
@@ -139,7 +142,7 @@
 
             fetchCategories: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/categories'
                 }).then(function (response) {
                     self.categories = response.entity.data;
@@ -152,7 +155,7 @@
             },
 
             publish: function (post) {
-                client({
+                return client({
                     method: 'PATCH',
                     path: '/posts/' + post.id + '/publish',
                     entity: {
@@ -297,7 +300,7 @@
              * @param post
              */
             saveOrder: function (post) {
-                client({
+                return client({
                     method: "PATCH",
                     path: '/posts/' + post.id + '/reorder',
                     entity: { order: post.order }
@@ -332,13 +335,11 @@
 
         route: {
             data: function (transition) {
-                var self = this;
-                this.fetchUsers();
-                this.fetchCategories();
-                this.fetch(function (data) {
-                    transition.next({posts: data});
-                    self.initTooltips();
-                });
+                this.fetch()
+                    .then(this.fetchCategories)
+                    .then(this.fetchUsers)
+                    .then(this.initTooltips)
+                    .then(transition.next);
             }
         }
 

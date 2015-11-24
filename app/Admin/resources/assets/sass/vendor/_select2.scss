@@ -18,9 +18,13 @@
   color: #fff;
 }
 
-.select2-container .select2-selection--single .select2-selection__rendered {
-  padding-left: 0px;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #666;
+.select2-container .select2-selection--single {
+  height: 37px;
+
+  .select2-selection__rendered {
+    padding-left: 0px;
+    font-size: 16px;
+    line-height: 37px;
+    color: #666;
+  }
 }

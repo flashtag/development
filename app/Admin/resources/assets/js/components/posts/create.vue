@@ -5,140 +5,144 @@
         <li class="active">Create</li>
     </ol>
 
-    <form class="Post">
+    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
+    <div v-if="!$loadingRouteData">
 
-        <section class="info row">
-            <div class="col-md-6 col-md-offset-6 clearfix">
-                <div class="action-buttons">
-                    <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <button v-link="'/posts'" class="btn btn-default"><i class="fa fa-close"></i> Cancel</button>
+        <form class="Post">
+
+            <section class="info row">
+                <div class="col-md-6 col-md-offset-6 clearfix">
+                    <div class="action-buttons">
+                        <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                        <button v-link="'/posts'" class="btn btn-default"><i class="fa fa-close"></i> Cancel</button>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <div class="panel panel-default" :class="{ 'border-green': isShowing, 'border-red': !isShowing }">
-            <div class="panel-heading">
-                PUBLISHING
-                <label class="showing label" :class="{ 'label-success': isShowing, 'label-danger': !isShowing }">
-                    {{ isShowing ? 'Will show on website' : 'Will not show on website' }}
-                </label>
-            </div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-2">
-                        <div class="form-group switch-wrapper">
-                            <div class="publish-switch">
-                                <label for="is_published">Published</label>
-                                <div class="switch">
-                                    <input v-model="post.is_published" name="is_published" id="is_published" class="cmn-toggle cmn-toggle-round-md" type="checkbox">
-                                    <label for="is_published"></label>
+            <div class="panel panel-default" :class="{ 'border-green': isShowing, 'border-red': !isShowing }">
+                <div class="panel-heading">
+                    PUBLISHING
+                    <label class="showing label" :class="{ 'label-success': isShowing, 'label-danger': !isShowing }">
+                        {{ isShowing ? 'Will show on website' : 'Will not show on website' }}
+                    </label>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group switch-wrapper">
+                                <div class="publish-switch">
+                                    <label for="is_published">Published</label>
+                                    <div class="switch">
+                                        <input v-model="post.is_published" name="is_published" id="is_published" class="cmn-toggle cmn-toggle-round-md" type="checkbox">
+                                        <label for="is_published"></label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-5">
-                        <label for="start_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show until this date.">
-                            Start showing
-                        </label>
-                        <input type="date" v-model="post.start_showing_at" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
-                    </div>
-                    <div class="col-md-5">
-                        <label for="stop_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show after this date.">
-                            Stop showing
-                        </label>
-                        <input type="date" v-model="post.stop_showing_at" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="panel panel-default" >
-            <div class="panel-heading">POST</div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="title">Title</label>
-                            <input type="text" v-model="post.title" name="title" id="title" class="form-control">
+                        <div class="col-md-5">
+                            <label for="start_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show until this date.">
+                                Start showing
+                            </label>
+                            <input type="date" v-model="post.start_showing_at" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="subtitle">Subtitle</label>
-                            <input type="text" v-model="post.subtitle" name="subtitle" id="subtitle" class="form-control">
+                        <div class="col-md-5">
+                            <label for="stop_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show after this date.">
+                                Stop showing
+                            </label>
+                            <input type="date" v-model="post.stop_showing_at" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="category">Category</label>
-                            <select v-model="post.category.id" name="category" id="category" class="form-control">
-                                <option value="" disabled selected>Select a category...</option>
-                                <option v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
-                            </select>
+            </div>
+
+            <div class="panel panel-default" >
+                <div class="panel-heading">POST</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="title">Title</label>
+                                <input type="text" v-model="post.title" name="title" id="title" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="subtitle">Subtitle</label>
+                                <input type="text" v-model="post.subtitle" name="subtitle" id="subtitle" class="form-control">
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group form-tags">
-                            <label for="tags">Tags</label>
-                            <select v-model="post.tags" name="tags" id="tags" multiple class="form-control"
-                                    v-select="post.tags">
-                                <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
-                            </select>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select v-model="post.category.id" name="category" id="category" class="form-control">
+                                    <option value="" disabled selected>Select a category...</option>
+                                    <option v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group form-tags">
+                                <label for="tags">Tags</label>
+                                <select v-model="post.tags" name="tags" id="tags" multiple class="form-control"
+                                        v-select="post.tags">
+                                    <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="body">Body</label>
+                        <textarea name="body" id="body" class="form-control rich-editor"
+                                  v-if="post.body" v-rich-editor="post.body">
+                        </textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="author">Author</label>
+                        <select v-select="post.author_id" id="author" name="author" :options="allAuthors">
+                            <option value="" disabled selected>Select an author...</option>
+                            <option v-for="author in allAuthors" value="{{ author.id }}">{{ author.name }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="show_author">Show author?</label>
+                        <div class="switch">
+                            <input id="show_author" class="cmn-toggle cmn-toggle-yes-no" type="checkbox" v-model="post.show_author">
+                            <label for="show_author" data-on="Yes" data-off="No"></label>
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="body">Body</label>
-                    <textarea name="body" id="body" class="form-control rich-editor"
-                              v-if="post.body" v-rich-editor="post.body">
-                    </textarea>
-                </div>
-                <div class="form-group">
-                    <label for="author">Author</label>
-                    <select v-select="post.author_id" id="author" name="author" :options="allAuthors">
-                        <option value="" disabled selected>Select an author...</option>
-                        <option v-for="author in allAuthors" value="{{ author.id }}">{{ author.name }}</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="show_author">Show author?</label>
-                    <div class="switch">
-                        <input id="show_author" class="cmn-toggle cmn-toggle-yes-no" type="checkbox" v-model="post.show_author">
-                        <label for="show_author" data-on="Yes" data-off="No"></label>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">CUSTOM FIELDS</div>
+                <div class="panel-body">
+                    <div class="form-group" v-for="field in allFields">
+                        <component
+                                :is="field.template"
+                                :field.sync="field">
+                        </component>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="panel panel-default">
-            <div class="panel-heading">CUSTOM FIELDS</div>
-            <div class="panel-body">
-                <div class="form-group" v-for="field in allFields">
-                    <component
-                            :is="field.template"
-                            :field.sync="field">
-                    </component>
+            <div class="panel panel-default">
+                <div class="panel-heading">META</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" v-model="post.meta.description" name="description" id="description" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="url">Canonical Link</label>
+                        <input type="text" v-model="post.meta.url" name="url" id="url" class="form-control">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="panel panel-default">
-            <div class="panel-heading">META</div>
-            <div class="panel-body">
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <input type="text" v-model="post.meta.description" name="description" id="description" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="url">Canonical Link</label>
-                    <input type="text" v-model="post.meta.url" name="url" id="url" class="form-control">
-                </div>
-            </div>
-        </div>
-
-    </form>
+        </form>
+    </div>
 </template>
 
 <script>
