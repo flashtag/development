@@ -12,5 +12,16 @@ var elixir = require('laravel-elixir');
  */
 
 elixir(function(mix) {
-    mix.sass('app.scss');
+    // Admin
+    mix
+        .sass('admin/admin.scss', 'resources/assets/build/admin/admin.css')
+        .browserify('admin.js', 'resources/assets/build/admin/admin.js')
+        .scripts([
+            '../../../app/Admin/node_modules/jquery/dist/jquery.js',
+            '../../../app/Admin/node_modules/jquery.mousewheel/jquery.mousewheel.js',
+            '../../../app/Admin/node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
+            '../../../app/Admin/node_modules/select2/dist/js/select2.js',
+            '../../../app/Admin/node_modules/bootstrap-notify/bootstrap-notify.js',
+            '../../../app/Admin/public/vendor/ckeditor/ckeditor.js'
+        ], 'resources/assets/build/admin/vendor.js');
 });

@@ -248,7 +248,11 @@
                     return;
                 }
 
-                var max = self.posts.reduce(function(max, post) {
+                var affectedPosts = self.posts.filter(function (p) {
+                    return p.category.data.id == post.category.data.id;
+                });
+
+                var max = affectedPosts.reduce(function(max, post) {
                     return (post.order > max) ? post.order : max;
                 }, 0);
 
@@ -267,7 +271,7 @@
                 var increment = (new_position < post.order) ? +1 : -1;
                 var between = (new_position < post.order) ? [new_position, post.order] : [post.order, new_position];
 
-                this.posts = this.posts.filter().map(function (post) {
+                this.posts = affectedPosts.map(function (post) {
                     var p = post.order;
                     if (p >= between[0] && p <= between[1]) {
                         post.order += increment;
