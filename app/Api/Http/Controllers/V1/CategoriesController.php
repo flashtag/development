@@ -91,7 +91,10 @@ class CategoriesController extends Controller
         return [
             'name' => $request->get('name'),
             'slug' => str_slug($request->get('name')),
+            'parent_id' => $request->get('parent_id'),
             'description' => $request->get('description'),
+            'order_by' => $request->get('order_by'),
+            'order_dir' => $request->get('order_dir'),
         ];
     }
 

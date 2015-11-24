@@ -156,7 +156,6 @@
              */
             save: function() {
                 var self = this;
-                console.log(this.category);
                 client({
                     method: 'PUT',
                     path: '/categories/'+this.category.id,

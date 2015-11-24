@@ -11,7 +11,7 @@ class CategoryTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['posts', 'tags', 'meta'];
+    protected $availableIncludes = ['parent', 'posts', 'tags', 'meta'];
 
     /**
      * @param \Flashtag\Data\Category $category
@@ -21,7 +21,7 @@ class CategoryTransformer extends Transformer
     {
         return [
             'id' => (int) $category->id,
-            'parent_id' => $category->parent_id,
+            'parent_id' => (int) $category->parent_id,
             'name' => $category->name,
             'slug' => $category->slug,
             'description' => $category->description,
@@ -30,6 +30,23 @@ class CategoryTransformer extends Transformer
             'created_at' => $category->created_at->getTimestamp(),
             'updated_at' => $category->updated_at->getTimestamp(),
         ];
+    }
+
+    /**
+     * Include parent.
+     *
+     * @param \Flashtag\Data\Category $category
+     * @return \League\Fractal\Resource\Item
+     */
+    public function includeParent(Category $category)
+    {
+        $parent = $category->parent;
+
+        if (is_null($parent)) {
+            return null;
+        }
+
+        return $this->item($parent, new CategoryTransformer());
     }
 
     /**
