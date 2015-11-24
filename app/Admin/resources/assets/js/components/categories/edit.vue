@@ -73,7 +73,7 @@
         </div>
     </form>
 
-    <category-posts v-if="category.posts" :category-id="$route.params.category_id" :posts="category.posts.data"></category-posts>
+    <category-posts v-if="showCategoryPosts" :category-id="$route.params.category_id" :posts="category.posts.data"></category-posts>
 </template>
 
 <script>
@@ -106,6 +106,14 @@
                     { id: 'desc', text: 'Descending' }
                 ]
             }
+        },
+
+        computed: {
+
+            showCategoryPosts: function () {
+                return this.category.order_by == 'order';
+            }
+
         },
 
         methods: {
