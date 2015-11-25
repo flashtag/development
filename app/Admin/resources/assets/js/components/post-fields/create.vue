@@ -5,42 +5,46 @@
         <li class="active">Create</li>
     </ol>
 
-    <form class="Category">
+    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
+    <div v-if="!$loadingRouteData">
 
-        <section class="info row">
-            <div class="col-md-6 col-md-offset-6 clearfix">
-                <div class="action-buttons">
-                    <button @click.prevent="save" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
-                    <button v-link="'/post-fields'" class="btn btn-default"><i class="fa fa-close"></i> Cancel</button>
+        <form class="Category">
+
+            <section class="info row">
+                <div class="col-md-6 col-md-offset-6 clearfix">
+                    <div class="action-buttons">
+                        <button @click.prevent="save" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
+                        <button v-link="'/post-fields'" class="btn btn-default"><i class="fa fa-close"></i> Cancel</button>
+                    </div>
+                </div>
+            </section>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">POST FIELD</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="label">Label</label>
+                        <input type="text" v-model="field.label" label="label" id="label" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" v-model="field.name" name="name" id="name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" v-model="field.description" name="description" id="description" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="template">Template</label>
+                        <select v-model="field.template" name="template" id="template" class="form-control">
+                            <option value="" disabled selected>Select a template...</option>
+                            <option v-for="template in templates" value="{{ template.id }}">{{ template.text }}</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </section>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">POST FIELD</div>
-            <div class="panel-body">
-                <div class="form-group">
-                    <label for="label">Label</label>
-                    <input type="text" v-model="field.label" label="label" id="label" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" v-model="field.name" name="name" id="name" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <input type="text" v-model="field.description" name="description" id="description" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="template">Template</label>
-                    <select v-model="field.template" name="template" id="template" class="form-control">
-                        <option value="" disabled selected>Select a template...</option>
-                        <option v-for="template in templates" value="{{ template.id }}">{{ template.text }}</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </template>
 
 <script>
@@ -70,7 +74,7 @@
              */
             save: function() {
                 var self = this;
-                client({
+                return client({
                     method: 'POST',
                     path: '/fields',
                     entity: this.field

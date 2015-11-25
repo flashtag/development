@@ -5,78 +5,84 @@
         <li class="active">{{ category.name }}</li>
     </ol>
 
-    <form class="Category EditForm">
+    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
+    <div v-if="!$loadingRouteData">
 
-        <section class="info row">
-            <div class="col-md-6">
-                <!--<a v-link="'/categories/'+category.id+'/posts'" class="btn btn-link"><i class="fa fa-reorder"></i> Re-order Posts</a>-->
-            </div>
-            <div class="col-md-6 clearfix">
-                <div class="action-buttons">
-                    <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <button v-link="'/categories'" @click="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
-                    <button v-link="'/categories'" class="btn btn-default"><i class="fa fa-close"></i> Close</button>
-                </div>
-            </div>
-        </section>
+        <form class="Category EditForm">
 
-        <div class="panel panel-default">
-            <div class="panel-heading">Category</div>
-            <div class="panel-body">
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" v-model="category.name" name="name" id="name" class="form-control">
+            <section class="info row">
+                <div class="col-md-6">
+                    <!--<a v-link="'/categories/'+category.id+'/posts'" class="btn btn-link"><i class="fa fa-reorder"></i> Re-order Posts</a>-->
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="category">Parent category</label>
-                            <select v-model="category.parent_id" name="category" id="category" class="form-control">
-                                <option :value="null" selected>None</option>
-                                <option v-if="allCategories" v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group form-tags">
-                            <label for="tags">Tags</label>
-                            <select v-if="category.tags" v-model="category.tags" name="tags" id="tags" multiple class="form-control"
-                                    v-select="category.tags">
-                                <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
-                            </select>
-                        </div>
+                <div class="col-md-6 clearfix">
+                    <div class="action-buttons">
+                        <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                        <button @click.prevent="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                        <button v-link="'/categories'" class="btn btn-default"><i class="fa fa-close"></i> Close</button>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea v-if="category.description" v-rich-editor="category.description" name="description" id="description" class="form-control"></textarea>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="order_by">Order posts in category by</label>
-                            <select v-model="category.order_by" name="order_by" id="order_by" class="form-control">
-                                <option v-for="option in orderOptions" value="{{ option.id }}">{{ option.text }}</option>
-                            </select>
+            </section>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">Category</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" v-model="category.name" name="name" id="name" class="form-control">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="category">Parent category</label>
+                                <select v-model="category.parent_id" name="category" id="category" class="form-control">
+                                    <option :value="null" selected>None</option>
+                                    <option v-if="allCategories" v-for="category in allCategories" :value="category.id">{{ category.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group form-tags">
+                                <label for="tags">Tags</label>
+                                <select v-if="category.tags" v-model="category.tags" name="tags" id="tags" multiple class="form-control"
+                                        v-select="category.tags">
+                                    <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="order_dir">Order posts in category direction</label>
-                            <select v-model="category.order_dir" name="order_dir" id="order_dir" class="form-control">
-                                <option v-for="direction in orderDirections" value="{{ direction.id }}">{{ direction.text }}</option>
-                            </select>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea v-if="category.description" v-rich-editor="category.description" name="description" id="description" class="form-control"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="order_by">Order posts in category by</label>
+                                <select v-model="category.order_by" name="order_by" id="order_by" class="form-control">
+                                    <option v-for="option in orderOptions" value="{{ option.id }}">{{ option.text }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="order_dir">Order posts in category direction</label>
+                                <select v-model="category.order_dir" name="order_dir" id="order_dir" class="form-control">
+                                    <option v-for="direction in orderDirections" value="{{ direction.id }}">{{ direction.text }}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </form>
+        </form>
 
-    <category-posts v-if="showCategoryPosts" :category-id="$route.params.category_id" :posts="category.posts.data"></category-posts>
+        <category-posts v-if="showCategoryPosts" :category-id="$route.params.category_id" :posts="category.posts.data"></category-posts>
+    </div>
 </template>
 
 <script>
+    import swal from 'sweetalert';
+
     export default {
 
         props: ['current-user'],
@@ -118,17 +124,16 @@
 
         methods: {
 
-            fetch: function (successHandler) {
+            fetch: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/categories/'+ this.$route.params.category_id + '?include=posts,tags'
                 }).then(function (response) {
-                    var category = response.entity.data;
-                    category.tags = category.tags.data.reduce(function (ids, tag) {
+                    self.category = response.entity.data;
+                    self.category.tags = self.category.tags.data.reduce(function (ids, tag) {
                         ids.push(tag.id);
                         return ids;
                     }, []);
-                    successHandler(category);
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });
@@ -136,7 +141,7 @@
 
             fetchCategories: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/categories'
                 }).then(function (response) {
                     self.allCategories = response.entity.data;
@@ -147,7 +152,7 @@
 
             fetchTags: function () {
                 var self = this;
-                client({
+                return client({
                     path: '/tags'
                 }).then(function (response) {
                     self.allTags = response.entity.data.map(function (tag) {
@@ -164,7 +169,7 @@
              */
             save: function() {
                 var self = this;
-                client({
+                return client({
                     method: 'PUT',
                     path: '/categories/'+this.category.id,
                     entity: this.category
@@ -176,12 +181,33 @@
             },
 
             delete: function() {
-                if (confirm("Are you sure you want to delete this? ")) {
+                var self = this;
+                swal({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this category!',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, delete it!',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
                     client({
                         method: 'DELETE',
-                        path: '/categories/' + this.category.id
+                        path: '/categories/' + self.category.id
+                    }).then(function () {
+                        swal({
+                            html: true,
+                            title: 'Deleted!',
+                            text: '<strong>' + self.category.name + '</strong> was deleted!',
+                            type: 'success'
+                        }, function () {
+                            self.$route.router.go('/categories');
+                        });
+                    }, function () {
+                        swal("Oops", "We couldn't connect to the server!", "error");
                     });
-                }
+                });
             },
 
             notify: function (type, message) {
@@ -210,11 +236,10 @@
 
         route: {
             data: function (transition) {
-                this.fetchCategories();
-                this.fetchTags();
-                this.fetch(function (category) {
-                    transition.next({category: category});
-                }.bind(this));
+                this.fetch()
+                    .then(this.fetchCategories)
+                    .then(this.fetchTags)
+                    .then(transition.next);
             }
         }
 

@@ -73,6 +73,10 @@ class Author extends Model
      */
     private function deletePhoto()
     {
+        if (! \Storage::exists($this->photo)) {
+            return false;
+        }
+
         return \Storage::delete($this->photo);
     }
 }

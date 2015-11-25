@@ -11,7 +11,7 @@
             <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
                     <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <button v-link="'/tags'" @click="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                    <button @click.prevent="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
                     <button v-link="'/tags'" class="btn btn-default"><i class="fa fa-close"></i> Close</button>
                 </div>
             </div>
@@ -34,6 +34,8 @@
 </template>
 
 <script>
+    import swal from 'sweetalert';
+
     export default {
 
         props: ['current-user'],
@@ -80,12 +82,34 @@
             },
 
             delete: function() {
-                if (confirm("Are you sure you want to delete this? ")) {
+                var self = this;
+                swal({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this tag!',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, delete it!',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
                     client({
                         method: 'DELETE',
-                        path: '/tags/' + this.tag.id
+                        path: '/tags/' + self.tag.id
+                    }).then(function () {
+                        swal({
+                            html: true,
+                            title: 'Deleted!',
+                            text: '<strong>' + self.tag.name + '</strong> was deleted!',
+                            type: 'success'
+                        }, function () {
+                            self.deleted = true;
+                            self.$route.router.go('/tags');
+                        });
+                    }, function () {
+                        swal("Oops", "We couldn't connect to the server!", "error");
                     });
-                }
+                });
             },
 
             notify: function (type, message) {

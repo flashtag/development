@@ -11,7 +11,7 @@
             <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
                     <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <button v-link="'/users'" @click="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                    <button @click.prevent="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
                     <button v-link="'/users'" class="btn btn-default"><i class="fa fa-close"></i> Close</button>
                 </div>
             </div>
@@ -85,12 +85,34 @@
             },
 
             delete: function() {
-                if (confirm("Are you sure you want to delete this? ")) {
+                var self = this;
+                swal({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this user!',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, say good-bye!',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
                     client({
                         method: 'DELETE',
-                        path: '/users/' + this.user.id
+                        path: '/users/' + self.user.id
+                    }).then(function () {
+                        swal({
+                            html: true,
+                            title: 'Deleted!',
+                            text: '<strong>' + self.user.name + '</strong> was deleted!',
+                            type: 'success'
+                        }, function () {
+                            self.deleted = true;
+                            self.$route.router.go('/users');
+                        });
+                    }, function () {
+                        swal("Oops", "We couldn't connect to the server!", "error");
                     });
-                }
+                });
             },
 
             passwordReset: function () {

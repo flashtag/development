@@ -337,7 +337,7 @@
                 }
             },
 
-            unlock: function (done) {
+            unlock: function () {
                 if (this.post.is_locked && !this.deleted) {
                     var self = this;
                     return client({
@@ -346,12 +346,11 @@
                         entity: {user_id: self.currentUser.id}
                     }).then(function (response) {
                         self.post.is_locked = false;
-                        done();
                     }, function (response) {
                         self.checkResponseStatus(response);
                     });
                 } else {
-                    done();
+                    return new Promise();
                 }
             },
 
@@ -417,15 +416,13 @@
                     .then(this.fetchCategories)
                     .then(this.fetchAuthors)
                     .then(this.mapFieldValues)
-                    .then(this.lock)
                     .then(transition.next)
-                    .then(this.initTooltips);
+                    .then(this.initTooltips)
+                    .then(this.lock);
             },
 
             deactivate: function (transition) {
-                this.unlock(function () {
-                    transition.next();
-                });
+                this.unlock().then(transition.next);
             }
         }
 
