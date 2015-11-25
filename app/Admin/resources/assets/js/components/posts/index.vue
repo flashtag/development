@@ -338,8 +338,8 @@
                 this.fetch()
                     .then(this.fetchCategories)
                     .then(this.fetchUsers)
-                    .then(this.initTooltips)
-                    .then(transition.next);
+                    .then(transition.next)
+                    .then(this.initTooltips);
             }
         }
 
