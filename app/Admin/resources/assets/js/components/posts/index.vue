@@ -14,10 +14,10 @@
         <div class="filters">
             <div class="row">
                 <div class="col-md-6">
-                    <input type="text" v-model="titleFilter" placeholder="Filter by title..." class="form-control">
+                    <input type="text" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
                 </div>
                 <div class="col-md-6">
-                    <select v-model="categoryFilter" id="category" class="form-control">
+                    <select v-model="categoryFilter" @change="changeFilter" id="category" class="form-control">
                         <option value="" selected>Filter by category...</option>
                         <option v-for="category in categories" :value="category.name">
                             {{ category.name }}
@@ -293,6 +293,10 @@
                 setTimeout(function() {
                     this.scrollTo($(e.target).closest('tr'));
                 }.bind(this), 0);
+            },
+
+            changeFilter: function () {
+                this.initTooltips();
             },
 
             /**
