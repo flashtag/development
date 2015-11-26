@@ -27,6 +27,7 @@ class CreatePostsTable extends Migration
             $table->boolean('show_author')->default(false);
             $table->boolean('is_locked')->default(false);
             $table->unsignedInteger('locked_by_id')->nullable();
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

@@ -14,6 +14,8 @@ $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
     $api->patch('posts/{id}/unlock', 'PostsController@unlock');
     $api->patch('posts/{id}/property', 'PostsController@property');
     $api->patch('posts/{id}/reorder', 'PostsController@reorder');
+    $api->post('posts/{id}/image', 'PostsController@addImage');
+    $api->delete('posts/{id}/image', 'PostsController@deleteImage');
     $api->resource('posts', 'PostsController', ['except' => ['create', 'edit']]);
 
     // TAGS

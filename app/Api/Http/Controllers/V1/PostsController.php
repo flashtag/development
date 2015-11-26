@@ -188,10 +188,37 @@ class PostsController extends Controller
         $post->unlock();
     }
 
+    /**
+     * @param \Flashtag\Api\Http\Requests\Posts\ReorderRequest $request
+     * @param int                                              $id
+     * @return \Dingo\Api\Http\Response
+     */
     public function reorder(ReorderRequest $request, $id)
     {
         $post = $this->post->findOrFail($id);
         $post->reorder($request->json('order'));
+
+        return $this->response->item($post, new PostTransformer());
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param int                      $id
+     * @return \Dingo\Api\Http\Response
+     */
+    public function addImage(Request $request, $id)
+    {
+        $post = $this->post->findOrFail($id);
+        $image = $request->file('image');
+        $post->addImage($image);
+
+        return $this->response->item($post, new PostTransformer());
+    }
+
+    public function deleteImage(Request $request, $id)
+    {
+        $post = $this->post->findOrFail($id);
+        $post->removeImage();
 
         return $this->response->item($post, new PostTransformer());
     }

@@ -122,9 +122,13 @@
             </div>
 
             <div class="panel panel-default">
-                <div class="panel-heading">Media</div>
+                <div class="panel-heading">Image</div>
                 <div class="panel-body">
-                    <media-input :media="post.media"></media-input>
+                    <image-input
+                            path="/img/uploads/posts/"
+                            :image="post.image"
+                            :to="'/posts/'+$route.params.post_id+'/image'">
+                    </image-input>
                 </div>
             </div>
 
@@ -169,7 +173,7 @@
         components: {
             string: require('../post-fields/templates/string.vue'),
             rich_text: require('../post-fields/templates/rich_text.vue'),
-            'media-input': require('../partials/media-input.vue')
+            'image-input': require('../partials/image-input.vue')
         },
 
         data: function() {
@@ -347,7 +351,7 @@
                 }
             },
 
-            unlock: function () {
+            unlock: function (done) {
                 if (this.post.is_locked && !this.deleted) {
                     var self = this;
                     return client({
@@ -356,11 +360,12 @@
                         entity: {user_id: self.currentUser.id}
                     }).then(function (response) {
                         self.post.is_locked = false;
+                        done();
                     }, function (response) {
                         self.checkResponseStatus(response);
                     });
                 } else {
-                    return new Promise();
+                    done();
                 }
             },
 
@@ -432,7 +437,9 @@
             },
 
             deactivate: function (transition) {
-                this.unlock().then(transition.next);
+                this.unlock(function () {
+                    transition.next();
+                });
             }
         }
 

@@ -34,6 +34,7 @@ class PostTransformer extends Transformer
             'stop_showing_at' => $post->stop_showing_at->getTimestamp(),
             'is_locked' => (bool) $post->is_locked,
             'locked_by_id' => (int) $post->locked_by_id,
+            'image' => $post->image,
             'created_at' => $post->created_at->getTimestamp(),
             'updated_at' => $post->updated_at->getTimestamp(),
         ];

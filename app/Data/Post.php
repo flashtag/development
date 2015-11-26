@@ -6,6 +6,7 @@ use Flashtag\Data\Presenters\PostPresenter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use McCool\LaravelAutoPresenter\HasPresenter;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Venturecraft\Revisionable\RevisionableTrait;
 
 /**
@@ -19,6 +20,7 @@ use Venturecraft\Revisionable\RevisionableTrait;
  * @property int $order
  * @property string $body
  * @property boolean $is_published
+ * @property string $image
  * @property \Carbon\Carbon $start_showing_at
  * @property \Carbon\Carbon $stop_showing_at
  * @property \Carbon\Carbon $created_at
@@ -136,14 +138,6 @@ class Post extends Model implements HasPresenter
     public function revisions()
     {
         return $this->revisionHistory();
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
-     */
-    public function media()
-    {
-        return $this->morphOne(Media::class, 'media_attachable');
     }
 
     /**
@@ -309,5 +303,26 @@ class Post extends Model implements HasPresenter
         );
 
         return \DB::update(\DB::raw($query), array_merge([$categoryId], $whereBetween));
+    }
+
+    public function addImage(UploadedFile $image)
+    {
+        $name = $image->getClientOriginalName();
+        $image->move(public_path('img/uploads/posts'), $name);
+        $this->image = $name;
+
+        $this->save();
+    }
+
+    public function removeImage()
+    {
+        $img = public_path('img/uploads/posts/'.$this->image);
+
+        if (\Storage::exists($img)) {
+            \Storage::delete($img);
+        }
+
+        $this->image = null;
+        $this->save();
     }
 }

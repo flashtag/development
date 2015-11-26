@@ -98,6 +98,11 @@ class CategoriesController extends Controller
         ];
     }
 
+    public function addImage(Request $request, $id)
+    {
+
+    }
+
     /**
      * Remove the specified category from storage.
      *

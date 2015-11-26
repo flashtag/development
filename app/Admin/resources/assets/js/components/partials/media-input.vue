@@ -6,11 +6,13 @@
             <option v-for="type in mediaTypes" :value="type.id">{{ type.text }}</option>
         </select>
     </div>
-    <div v-show="showDropzone" class="form-group">
-        <label>Image</label>
-        <div id="dropzone-image" class="dropzone">
-            <div class="fallback">
-                <input name="file" type="file" />
+    <div v-show="showDropzone">
+        <div class="form-group">
+            <label>Image</label>
+            <div id="dropzone-image" class="dropzone">
+                <div class="fallback">
+                    <input name="image" type="file" />
+                </div>
             </div>
         </div>
     </div>
@@ -22,10 +24,11 @@
 
 <script>
     import Dropzone from 'dropzone';
+    import Cookies from 'js-cookie';
 
     export default {
 
-        props: ['media'],
+        props: ['media', 'to'],
 
         data: function () {
             return {
@@ -55,14 +58,15 @@
             },
 
             initDropzone: function () {
-                this.dropzone = new Dropzone('#dropzone-image', { url: "/file/post" });
-                this.dropzone.on("maxfilesexceeded", function(file) { this.removeFile(file); });
-                Dropzone.options.dropzoneImage = {
-                    paramName: "url",
+                this.dropzone = new Dropzone('#dropzone-image', {
+                    url: "/api" + this.to,
+                    paramName: "image",
                     maxFiles: 1,
                     maxFilesize: 1.5,
-                    uploadMultiple: false
-                };
+                    uploadMultiple: false,
+                    headers: { "Authorization": Cookies.get('jwt-token') }
+                });
+                this.dropzone.on("maxfilesexceeded", function(file) { this.removeFile(file); });
                 if (this.media.url && this.media.url.length > 0) {
                     this.showExistingImage();
                 }

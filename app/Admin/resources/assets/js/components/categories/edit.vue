@@ -60,7 +60,10 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Media</div>
                 <div class="panel-body">
-                    <media-input :media="category.media"></media-input>
+                    <media-input
+                            :media="category.media"
+                            :to="'/categories/'+$route.params.category_id+'/image'">
+                    </media-input>
                 </div>
             </div>
 
