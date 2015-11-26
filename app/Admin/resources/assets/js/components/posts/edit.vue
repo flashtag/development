@@ -121,6 +121,13 @@
                 </div>
             </div>
 
+            <div class="panel panel-default">
+                <div class="panel-heading">Media</div>
+                <div class="panel-body">
+                    <media-input :media="post.media"></media-input>
+                </div>
+            </div>
+
             <div v-if="allFields && allFields.length > 0" class="panel panel-default">
                 <div class="panel-heading">CUSTOM FIELDS</div>
                 <div class="panel-body">
@@ -161,7 +168,8 @@
 
         components: {
             string: require('../post-fields/templates/string.vue'),
-            rich_text: require('../post-fields/templates/rich_text.vue')
+            rich_text: require('../post-fields/templates/rich_text.vue'),
+            'media-input': require('../partials/media-input.vue')
         },
 
         data: function() {
@@ -171,7 +179,8 @@
                     tags: [],
                     fields: [],
                     revisions: [],
-                    meta: {}
+                    meta: {},
+                    media: { type: '' }
                 },
                 fieldValues: null,
                 allCategories: [],
@@ -202,13 +211,14 @@
             fetch: function () {
                 var self = this;
                 return client({
-                    path: '/posts/'+ this.$route.params.post_id +'?include=category,tags,fields,meta,author'
+                    path: '/posts/'+ this.$route.params.post_id +'?include=category,tags,fields,meta,author,media'
                 }).then(function (response) {
                     self.post = response.entity.data;
                     self.post.category = self.post.category.data;
                     self.post.fields = self.post.fields.data;
                     self.post.meta = self.post.meta.data;
                     self.post.author = self.post.author.data;
+                    self.post.media = self.post.media ? self.post.media.data : {};
                     self.post.tags = self.post.tags.data.reduce(function (ids, tag) {
                         ids.push(tag.id);
                         return ids;

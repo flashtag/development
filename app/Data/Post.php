@@ -139,6 +139,14 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function media()
+    {
+        return $this->morphOne(Media::class, 'media_attachable');
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function ratings()

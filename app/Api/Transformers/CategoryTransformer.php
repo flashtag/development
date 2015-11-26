@@ -11,7 +11,7 @@ class CategoryTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['parent', 'posts', 'tags', 'meta'];
+    protected $availableIncludes = ['parent', 'posts', 'tags', 'meta', 'media'];
 
     /**
      * @param \Flashtag\Data\Category $category
@@ -82,5 +82,22 @@ class CategoryTransformer extends Transformer
     public function includeMeta(Category $category)
     {
         return $this->item($category->meta, new MetaTagTransformer());
+    }
+
+    /**
+     * Include media.
+     *
+     * @param \Flashtag\Data\Category $category
+     * @return \League\Fractal\Resource\Item
+     */
+    public function includeMedia(Category $category)
+    {
+        $media = $category->media;
+
+        if (is_null($media)) {
+            return null;
+        }
+
+        return $this->item($media, new MediaTransformer());
     }
 }

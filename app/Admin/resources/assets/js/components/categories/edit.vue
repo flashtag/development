@@ -54,6 +54,19 @@
                         <label for="description">Description</label>
                         <textarea v-if="category.description" v-rich-editor="category.description" name="description" id="description" class="form-control"></textarea>
                     </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">Media</div>
+                <div class="panel-body">
+                    <media-input :media="category.media"></media-input>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">Post Ordering</div>
+                <div class="panel-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -88,7 +101,8 @@
         props: ['current-user'],
 
         components: {
-            'category-posts': require('./category-posts.vue')
+            'category-posts': require('./category-posts.vue'),
+            'media-input': require('../partials/media-input.vue')
         },
 
         data: function() {
@@ -98,7 +112,8 @@
                     name: '',
                     description: '',
                     order_by: 'order',
-                    order_dir: 'asc'
+                    order_dir: 'asc',
+                    media: {}
                 },
                 allTags: [],
                 allCategories: [],
@@ -127,13 +142,14 @@
             fetch: function () {
                 var self = this;
                 return client({
-                    path: '/categories/'+ this.$route.params.category_id + '?include=posts,tags'
+                    path: '/categories/'+ this.$route.params.category_id + '?include=posts,tags,media'
                 }).then(function (response) {
                     self.category = response.entity.data;
                     self.category.tags = self.category.tags.data.reduce(function (ids, tag) {
                         ids.push(tag.id);
                         return ids;
                     }, []);
+                    self.category.media = self.category.media ? self.category.media.data : {};
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });

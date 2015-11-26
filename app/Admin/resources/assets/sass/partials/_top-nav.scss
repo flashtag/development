@@ -1,8 +1,6 @@
 
 .Top-nav {
-  @include make-md-column-offset(2);
-
-  //background-color: #fff;
+  z-index: 1040;
 
   &.navbar {
     border-radius: 0px;
@@ -16,7 +14,7 @@
   }
 
   .container-fluid {
-    padding-left: 55px;
+    //padding-left: 55px;
     padding-right: 55px;
   }
 }

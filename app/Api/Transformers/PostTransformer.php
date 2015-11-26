@@ -11,7 +11,7 @@ class PostTransformer extends Transformer
      *
      * @var array
      */
-    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'meta', 'ratings', 'author'];
+    protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'meta', 'ratings', 'author', 'media'];
 
     /**
      * @param \Flashtag\Data\Post $post
@@ -117,5 +117,22 @@ class PostTransformer extends Transformer
     public function includeAuthor(Post $post)
     {
         return $this->item($post->author, new AuthorTransformer());
+    }
+
+    /**
+     * Include media.
+     *
+     * @param \Flashtag\Data\Post $post
+     * @return \League\Fractal\Resource\Item
+     */
+    public function includeMedia(Post $post)
+    {
+        $media = $post->media;
+
+        if (is_null($media)) {
+            return null;
+        }
+
+        return $this->item($media, new MediaTransformer());
     }
 }

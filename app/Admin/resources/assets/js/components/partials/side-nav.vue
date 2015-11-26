@@ -1,11 +1,5 @@
 <template>
     <div class="Side-nav panel">
-        <!-- Default panel contents -->
-        <div class="panel-heading">Admin Menu</div>
-        <div class="panel-body">
-
-        </div>
-
         <div class="list-group">
             <a href="#" class="list-group-item" v-link="{ path: '/home', activeClass: 'active' }">
                 <i class="fa fa-home"></i> Home
