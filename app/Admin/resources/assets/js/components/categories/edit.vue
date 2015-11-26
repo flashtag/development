@@ -61,8 +61,10 @@
                 <div class="panel-heading">Media</div>
                 <div class="panel-body">
                     <media-input
-                            :media="category.media"
-                            :to="'/categories/'+$route.params.category_id+'/image'">
+                            :type.sync="category.media.type"
+                            :url.sync="category.media.url"
+                            image-path="/img/uploads/categories/"
+                            :image-upload="'/categories/'+$route.params.category_id+'/image'">
                     </media-input>
                 </div>
             </div>
@@ -116,7 +118,7 @@
                     description: '',
                     order_by: 'order',
                     order_dir: 'asc',
-                    media: {}
+                    media: { type: null }
                 },
                 allTags: [],
                 allCategories: [],
@@ -153,6 +155,7 @@
                         return ids;
                     }, []);
                     self.category.media = self.category.media ? self.category.media.data : {};
+                    console.log(self.category.media.type);
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });

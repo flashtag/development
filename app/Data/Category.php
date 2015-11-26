@@ -61,4 +61,28 @@ class Category extends Model
     {
         return $this->morphOne(Media::class, 'media_attachable');
     }
+
+    /**
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     */
+    public function addImage($image)
+    {
+        $name = $image->getClientOriginalName();
+        $image->move(public_path('img/uploads/categories'), $name);
+
+        $media = $this->media;
+        $media = $media ?: new Media();
+        $media->type = 'image';
+        $media->url = $name;
+//        $media->save();
+
+        $this->media()->save($media);
+
+        $this->save();
+    }
+
+    public function removeImage()
+    {
+        // TODO
+    }
 }

@@ -121,17 +121,6 @@
                 </div>
             </div>
 
-            <div class="panel panel-default">
-                <div class="panel-heading">Image</div>
-                <div class="panel-body">
-                    <image-input
-                            path="/img/uploads/posts/"
-                            :image="post.image"
-                            :to="'/posts/'+$route.params.post_id+'/image'">
-                    </image-input>
-                </div>
-            </div>
-
             <div v-if="allFields && allFields.length > 0" class="panel panel-default">
                 <div class="panel-heading">CUSTOM FIELDS</div>
                 <div class="panel-body">
@@ -141,6 +130,17 @@
                                    :field.sync="fieldValues[field.name]">
                         </component>
                     </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">Image</div>
+                <div class="panel-body">
+                    <dropzone
+                            path="/img/uploads/posts/"
+                            :image="post.image"
+                            :to="'/posts/'+$route.params.post_id+'/image'">
+                    </dropzone>
                 </div>
             </div>
 
@@ -173,7 +173,7 @@
         components: {
             string: require('../post-fields/templates/string.vue'),
             rich_text: require('../post-fields/templates/rich_text.vue'),
-            'image-input': require('../partials/image-input.vue')
+            dropzone: require('../partials/dropzone.vue')
         },
 
         data: function() {

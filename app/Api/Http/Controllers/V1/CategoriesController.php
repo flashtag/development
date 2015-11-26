@@ -100,7 +100,19 @@ class CategoriesController extends Controller
 
     public function addImage(Request $request, $id)
     {
+        $category = $this->category->findOrFail($id);
+        $image = $request->file('image');
+        $category->addImage($image);
 
+        return $this->response->item($category, new CategoryTransformer());
+    }
+
+    public function deleteImage($id)
+    {
+        $category = $this->category->findOrFail($id);
+        $category->removeImage();
+
+        return $this->response->item($category, new CategoryTransformer());
     }
 
     /**

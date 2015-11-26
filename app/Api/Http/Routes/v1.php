@@ -22,6 +22,8 @@ $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
     $api->resource('tags', 'TagsController', ['except' => ['create', 'edit']]);
 
     // CATEGORIES
+    $api->post('categories/{id}/image', 'CategoriesController@addImage');
+    $api->delete('categories/{id}/image', 'CategoriesController@deleteImage');
     $api->resource('categories', 'CategoriesController', ['except' => ['create', 'edit']]);
 
     // POST FIELDS

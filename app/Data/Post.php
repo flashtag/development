@@ -305,7 +305,10 @@ class Post extends Model implements HasPresenter
         return \DB::update(\DB::raw($query), array_merge([$categoryId], $whereBetween));
     }
 
-    public function addImage(UploadedFile $image)
+    /**
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     */
+    public function addImage($image)
     {
         $name = $image->getClientOriginalName();
         $image->move(public_path('img/uploads/posts'), $name);
@@ -316,7 +319,7 @@ class Post extends Model implements HasPresenter
 
     public function removeImage()
     {
-        $img = public_path('img/uploads/posts/'.$this->image);
+        $img = '/public/img/uploads/posts/'.$this->image;
 
         if (\Storage::exists($img)) {
             \Storage::delete($img);

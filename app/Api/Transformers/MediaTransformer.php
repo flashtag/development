@@ -7,17 +7,17 @@ use Flashtag\Data\Media;
 class MediaTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\Media $field
+     * @param \Flashtag\Data\Media $media
      * @return array
      */
-    public function transform(Media $field)
+    public function transform(Media $media)
     {
         return [
-            'id' => (int) $field->id,
-            'url' => $field->url,
-            'type' => $field->type,
-            'created_at' => $field->created_at->getTimeStamp(),
-            'updated_at' => $field->updated_at->getTimeStamp(),
+            'id' => (int) $media->id,
+            'url' => $media->url,
+            'type' => $media->type,
+            'created_at' => $media->created_at->getTimeStamp(),
+            'updated_at' => $media->updated_at->getTimeStamp(),
         ];
     }
 }
