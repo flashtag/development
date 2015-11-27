@@ -74,7 +74,6 @@ class Category extends Model
         $media = $media ?: new Media();
         $media->type = 'image';
         $media->url = $name;
-//        $media->save();
 
         $this->media()->save($media);
 
@@ -84,5 +83,27 @@ class Category extends Model
     public function removeImage()
     {
         // TODO
+    }
+
+    /**
+     * @param string $type
+     * @param string $url
+     */
+    public function updateMedia($type = null, $url = null)
+    {
+        $media = $this->media ?: new Media();
+
+        $media->type = $type;
+        $media->url = $url;
+
+        $this->media()->save($media);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasMedia()
+    {
+        return !empty($this->media) && !empty($this->media->type);
     }
 }

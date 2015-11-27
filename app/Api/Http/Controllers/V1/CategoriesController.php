@@ -2,6 +2,7 @@
 
 namespace Flashtag\Api\Http\Controllers\V1;
 
+use Flashtag\Data\Media;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\CategoryTransformer;
 use Flashtag\Data\Category;
@@ -76,6 +77,7 @@ class CategoriesController extends Controller
         $categoryData = $this->buildCategoryFromRequest($request);
         $category = $this->category->findOrFail($id);
         $category->update($categoryData);
+        $this->syncMediaRelationshipFromRequest($category, $request);
 
         return $this->response->item($category, new CategoryTransformer());
     }
@@ -96,6 +98,14 @@ class CategoriesController extends Controller
             'order_by' => $request->get('order_by'),
             'order_dir' => $request->get('order_dir'),
         ];
+    }
+
+    private function syncMediaRelationshipFromRequest($category, $request)
+    {
+            $type = isset($request->get('media')['type']) ? $request->get('media')['type'] : null;
+            $url = isset($request->get('media')['url']) ? $request->get('media')['url'] : null;
+
+            $category->updateMedia($type, $url);
     }
 
     public function addImage(Request $request, $id)

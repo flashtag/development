@@ -92,12 +92,10 @@ class CategoryTransformer extends Transformer
      */
     public function includeMedia(Category $category)
     {
-        $media = $category->media;
-
-        if (is_null($media)) {
+        if (! $category->hasMedia()) {
             return null;
         }
 
-        return $this->item($media, new MediaTransformer());
+        return $this->item($category->media, new MediaTransformer());
     }
 }

@@ -63,6 +63,7 @@
                     show_author: 'Show author',
                     start_showing_at: 'Start showing',
                     stop_showing_at: 'Stop showing',
+                    image: 'Image',
                     order: 'Order'
                 },
                 diffKeys: ['body'],

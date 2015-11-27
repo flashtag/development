@@ -15,8 +15,8 @@ class CreateMediaTable extends Migration
         Schema::create('media', function (Blueprint $table) {
             $table->increments('id');
             $table->morphs('media_attachable');
-            $table->string('url');
-            $table->string('type');
+            $table->string('url')->nullable();
+            $table->string('type')->nullable();
             $table->timestamps();
         });
     }

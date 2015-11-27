@@ -155,7 +155,6 @@
                         return ids;
                     }, []);
                     self.category.media = self.category.media ? self.category.media.data : {};
-                    console.log(self.category.media.type);
                 }, function (response) {
                     self.checkResponseStatus(response);
                 });
