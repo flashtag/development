@@ -198,7 +198,7 @@ IPSUM;
         ]);
 
         return $posts->map(function ($post) use ($categories, $tags, $authors, $users, $fieldValues) {
-            $post->disableRevisionField(['category_id', 'author_id', 'order']);
+            $post->disableRevisionField(['category_id', 'author_id', 'show_author', 'order']);
             $post->changeCategoryTo($categories->random());
             $post->addTags($this->faker->randomElements($tags->all(), 2));
             $post->saveFields($fieldValues);
