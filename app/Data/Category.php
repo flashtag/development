@@ -104,6 +104,8 @@ class Category extends Model
      */
     public function hasMedia()
     {
+        $this->media;
+        
         return !empty($this->media) && !empty($this->media->type);
     }
 }
