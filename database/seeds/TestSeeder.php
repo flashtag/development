@@ -84,6 +84,9 @@ class TestSeeder extends Seeder
                 'name' => 'Peripherals'
             ]),
             factory(\Flashtag\Data\Category::class)->create([
+                'name' => 'Accessories'
+            ]),
+            factory(\Flashtag\Data\Category::class)->create([
                 'name' => 'Miscellaneous'
             ]),
         ]);

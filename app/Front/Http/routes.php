@@ -6,5 +6,6 @@ Route::get('categories', 'TestController@categories');
 Route::get('tags', 'TestController@tags');
 
 Route::get('/', function () {
-    return view('welcome');
+    $categories = \Flashtag\Data\Category::all();
+    return view('front::creative.home', compact('categories'));
 });
