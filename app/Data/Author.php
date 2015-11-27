@@ -79,4 +79,10 @@ class Author extends Model
 
         return \Storage::delete($this->photo);
     }
+
+    public static function getBySlug($author_slug)
+    {
+        return static::where('slug', $author_slug)
+            ->firstOrFail();
+    }
 }

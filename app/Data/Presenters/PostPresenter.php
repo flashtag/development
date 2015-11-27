@@ -4,12 +4,12 @@ namespace Flashtag\Data\Presenters;
 
 use Carbon\Carbon;
 use McCool\LaravelAutoPresenter\BasePresenter;
-use Flashtag\Post;
+use Flashtag\Data\Post;
 
 class PostPresenter extends BasePresenter
 {
     /**
-     * @param \Flashtag\Post $resource
+     * @param \Flashtag\Data\Post $resource
      */
     public function __construct(Post $resource)
     {
@@ -29,5 +29,12 @@ class PostPresenter extends BasePresenter
         $stopShowing = $this->wrappedObject->stop_showing_at ?: new Carbon('2038-01-01');
 
         return ($startShowing->isPast() && $stopShowing->isFuture());
+    }
+
+    public function publishedOn()
+    {
+        $date = $this->wrappedObject->start_showing_at ?: $this->wrappedObject->created_at;
+
+        return $date->format("F j, Y");
     }
 }

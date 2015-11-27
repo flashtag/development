@@ -19,13 +19,13 @@
                 <h2 class="section-heading">We've got what you need!</h2>
                 <hr class="light">
                 <p class="text-faded">Start Bootstrap has everything you need to get your new website up and running in no time! All of the templates and themes on Start Bootstrap are open source, free to download, and easy to use. No strings attached!</p>
-                <a href="#" class="btn btn-default btn-xl">Get Started!</a>
+                <a href="/about" class="btn btn-default btn-xl">Learn More!</a>
             </div>
         </div>
     </div>
 </section>
 
-<section id="services">
+<section id="features">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">
@@ -68,13 +68,13 @@
     </div>
 </section>
 
-<section class="no-padding" id="portfolio">
+<section class="no-padding" id="posts">
     <div class="container-fluid">
         <div class="row no-gutter">
 
             @foreach ($categories as $i => $category)
             <div class="col-lg-4 col-sm-6">
-                <a href="#" class="portfolio-box">
+                <a href="/{{ $category->slug }}" class="portfolio-box">
                     <img src="/assets/front/creative/img/portfolio/{{$i+1}}.jpg" class="img-responsive" alt="">
                     <div class="portfolio-box-caption">
                         <div class="portfolio-box-caption-content">
@@ -82,7 +82,7 @@
                                 {{ $category->name }}
                             </div>
                             <div class="project-name">
-                                Project Name
+                                View posts
                             </div>
                         </div>
                     </div>

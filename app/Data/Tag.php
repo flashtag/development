@@ -28,4 +28,10 @@ class Tag extends Model
     {
         return $this->morphedByMany(Post::class, 'taggable');
     }
+
+    public static function getBySlug($tag_slug)
+    {
+        return static::where('slug', $tag_slug)
+            ->firstOrFail();
+    }
 }

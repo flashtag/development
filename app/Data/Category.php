@@ -101,4 +101,9 @@ class Category extends Model
         
         return !empty($this->media) && !empty($this->media->type);
     }
+
+    public static function getBySlug($category_slug)
+    {
+        return static::where('slug', $category_slug)->firstOrFail();
+    }
 }

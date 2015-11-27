@@ -2,11 +2,11 @@
 
 namespace Flashtag\Data;
 
+use Carbon\Carbon;
 use Flashtag\Data\Presenters\PostPresenter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use McCool\LaravelAutoPresenter\HasPresenter;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Venturecraft\Revisionable\RevisionableTrait;
 
 /**
@@ -327,5 +327,44 @@ class Post extends Model implements HasPresenter
 
         $this->image = null;
         $this->save();
+    }
+
+    /**
+     * @param int|null $count
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getLatest($count = null)
+    {
+        $now = new Carbon();
+
+        $query = static::with('author', 'category')
+            ->where('is_published', true)
+            ->where('start_showing_at', '<', $now)
+            ->where('stop_showing_at', '>', $now)
+            ->orderBy('start_showing_at', 'DESC')
+            ->orderBy('created_at', 'DESC');
+
+        if ($count) {
+            return $query->take($count)->get();
+        }
+
+        return $query->get();
+    }
+
+    public static function getBySlug($post_slug)
+    {
+        return static::with('author', 'category')
+            ->where('slug', $post_slug)
+            ->firstOrFail();
+    }
+
+    public static function getBySlugInCategory($post_slug, $category_slug)
+    {
+        $category = Category::getBySlug($category_slug);
+
+        return static::with('author', 'category')
+            ->where('slug', $post_slug)
+            ->where('category_id', $category->id)
+            ->firstOrFail();
     }
 }
