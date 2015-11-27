@@ -70,14 +70,7 @@ class Category extends Model
         $name = $image->getClientOriginalName();
         $image->move(public_path('img/uploads/categories'), $name);
 
-        $media = $this->media;
-        $media = $media ?: new Media();
-        $media->type = 'image';
-        $media->url = $name;
-
-        $this->media()->save($media);
-
-        $this->save();
+        $this->updateMedia('image', $name);
     }
 
     public function removeImage()

@@ -1,5 +1,5 @@
 {
-    "name": "flashtag/client",
+    "name": "flashtag/front",
     "license": "MIT",
     "authors": [
         {
@@ -9,7 +9,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Flashtag\\Client\\": ""
+            "Flashtag\\Front\\": ""
         }
     }
 }

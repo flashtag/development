@@ -15,7 +15,7 @@
         },
         {
             "type": "vcs",
-            "url": "git@github.com:flashtag/client.git"
+            "url": "git@github.com:flashtag/front.git"
         },
         {
             "type": "vcs",
@@ -29,9 +29,9 @@
     "replace": {
         "flashtag/admin": "self.version",
         "flashtag/api": "self.version",
-        "flashtag/client": "self.version",
+        "flashtag/front": "self.version",
         "flashtag/cms": "self.version",
-        "flashtag/data": "self.version"
+        "flashtag/content": "self.version"
     },
     "require": {
         "php": ">=5.5.9",

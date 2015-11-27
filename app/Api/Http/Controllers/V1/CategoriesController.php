@@ -2,7 +2,6 @@
 
 namespace Flashtag\Api\Http\Controllers\V1;
 
-use Flashtag\Data\Media;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\CategoryTransformer;
 use Flashtag\Data\Category;
@@ -23,8 +22,6 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Display a listing of the categories.
-     *
      * @param \Illuminate\Http\Request $request
      * @return \Dingo\Api\Http\Response
      */
@@ -39,8 +36,6 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Display the specified category.
-     *
      * @param int $id
      * @return \Dingo\Api\Http\Response
      */
@@ -52,8 +47,6 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Store a newly created category in storage.
-     *
      * @param  \Illuminate\Http\Request $request
      * @return \Dingo\Api\Http\Response
      */
@@ -66,8 +59,6 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Update the specified category in storage.
-     *
      * @param  \Illuminate\Http\Request $request
      * @param  int $id
      * @return \Dingo\Api\Http\Response
@@ -83,8 +74,6 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Build the category data array from the request.
-     *
      * @param \Illuminate\Http\Request $request
      * @return array
      */
@@ -100,14 +89,23 @@ class CategoriesController extends Controller
         ];
     }
 
+    /**
+     * @param \Flashtag\Data\Category $category
+     * @param \Illuminate\Http\Request $request
+     */
     private function syncMediaRelationshipFromRequest($category, $request)
     {
-            $type = isset($request->get('media')['type']) ? $request->get('media')['type'] : null;
-            $url = isset($request->get('media')['url']) ? $request->get('media')['url'] : null;
+        $type = isset($request->get('media')['type']) ? $request->get('media')['type'] : null;
+        $url = isset($request->get('media')['url']) ? $request->get('media')['url'] : null;
 
-            $category->updateMedia($type, $url);
+        $category->updateMedia($type, $url);
     }
 
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param int                      $id
+     * @return \Dingo\Api\Http\Response
+     */
     public function addImage(Request $request, $id)
     {
         $category = $this->category->findOrFail($id);
@@ -117,6 +115,10 @@ class CategoriesController extends Controller
         return $this->response->item($category, new CategoryTransformer());
     }
 
+    /**
+     * @param int $id
+     * @return \Dingo\Api\Http\Response
+     */
     public function deleteImage($id)
     {
         $category = $this->category->findOrFail($id);
@@ -126,8 +128,6 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Remove the specified category from storage.
-     *
      * @param  int $id
      * @return \Dingo\Api\Http\Response
      */

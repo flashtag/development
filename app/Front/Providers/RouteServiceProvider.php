@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Client\Providers;
+namespace Flashtag\Front\Providers;
 
 use Illuminate\Routing\Router;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;

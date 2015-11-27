@@ -1,8 +1,8 @@
 <?php
 
-namespace Flashtag\Client\Http\Controllers\Auth;
+namespace Flashtag\Front\Http\Controllers\Auth;
 
-use Flashtag\Client\Http\Controllers\Controller;
+use Flashtag\Front\Http\Controllers\Controller;
 use Flashtag\Data\User;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;

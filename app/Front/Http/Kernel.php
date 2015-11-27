@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Client\Http;
+namespace Flashtag\Front\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -13,11 +13,11 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
-        \Flashtag\Client\Http\Middleware\EncryptCookies::class,
+        \Flashtag\Front\Http\Middleware\EncryptCookies::class,
         \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-        \Flashtag\Client\Http\Middleware\VerifyCsrfToken::class,
+        \Flashtag\Front\Http\Middleware\VerifyCsrfToken::class,
     ];
 
     /**
@@ -26,9 +26,9 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'auth' => \Flashtag\Client\Http\Middleware\Authenticate::class,
+        'auth' => \Flashtag\Front\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-        'guest' => \Flashtag\Client\Http\Middleware\RedirectIfAuthenticated::class,
+        'guest' => \Flashtag\Front\Http\Middleware\RedirectIfAuthenticated::class,
         'jwt.auth' => \Tymon\JWTAuth\Middleware\GetUserFromToken::class,
         'jwt.refresh' => \Tymon\JWTAuth\Middleware\RefreshToken::class,
     ];

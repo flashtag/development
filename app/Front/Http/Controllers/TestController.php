@@ -1,9 +1,9 @@
 <?php
 
-namespace Flashtag\Client\Http\Controllers;
+namespace Flashtag\Front\Http\Controllers;
 
 use Flashtag\Category;
-use Flashtag\Client\Http\Requests;
+use Flashtag\Front\Http\Requests;
 use Flashtag\Field;
 use Flashtag\Post;
 use Flashtag\Tag;
