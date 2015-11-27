@@ -2,7 +2,7 @@
     <div class="form-group">
         <label for="media-type">Media type</label>
         <select v-model="type" @change="checkMediaType" name="media-type" id="media-type" class="form-control">
-            <option value="" disabled selected>Select type...</option>
+            <option :value="null">Select type...</option>
             <option v-for="mediaType in mediaTypes" :value="mediaType.id">{{ mediaType.text }}</option>
         </select>
     </div>
@@ -36,14 +36,15 @@
         },
 
         ready: function () {
-            this.checkMediaType();
+            this.$nextTick(function () {
+                this.checkMediaType();
+            });
         },
 
         methods: {
             checkMediaType: function () {
-                console.log(this.type);
                 this.showDropzone = (this.type == 'image');
-                this.showMediaInput = (this.type.length > 0) && (this.type != 'image');
+                this.showMediaInput = this.type && (this.type.length > 0) && (this.type != 'image');
             }
         }
     }
