@@ -19,7 +19,7 @@
                 <h2 class="section-heading">We've got what you need!</h2>
                 <hr class="light">
                 <p class="text-faded">Start Bootstrap has everything you need to get your new website up and running in no time! All of the templates and themes on Start Bootstrap are open source, free to download, and easy to use. No strings attached!</p>
-                <a href="/about" class="btn btn-default btn-xl">Learn More!</a>
+                <a href="#features" class="page-scroll btn btn-default btn-xl">What about features?</a>
             </div>
         </div>
     </div>
@@ -97,8 +97,8 @@
 <aside class="bg-dark">
     <div class="container text-center">
         <div class="call-to-action">
-            <h2>Free Download at Start Bootstrap!</h2>
-            <a href="#" class="btn btn-default btn-xl wow tada">Download Now!</a>
+            <h2>Free Download at Github!</h2>
+            <a href="https://github.com/flashtag/flashtag/releases" class="btn btn-default btn-xl wow tada">Download Now!</a>
         </div>
     </div>
 </aside>

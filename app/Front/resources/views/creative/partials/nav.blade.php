@@ -16,16 +16,16 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a class="page-scroll" href="#about">About</a>
+                    <a href="/about">About</a>
                 </li>
                 <li>
                     <a class="page-scroll" href="#features">Features</a>
                 </li>
                 <li>
-                    <a class="page-scroll" href="#posts">Posts</a>
+                    <a href="/posts">Posts</a>
                 </li>
                 <li>
-                    <a class="page-scroll" href="#contact">Contact</a>
+                    <a href="/contact">Contact</a>
                 </li>
             </ul>
         </div>
