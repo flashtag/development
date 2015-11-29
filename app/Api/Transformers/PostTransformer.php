@@ -30,8 +30,8 @@ class PostTransformer extends Transformer
             'order' => (int) $post->order,
             'body' => $post->body,
             'is_published' => (bool) $post->is_published,
-            'start_showing_at' => $post->start_showing_at->getTimestamp(),
-            'stop_showing_at' => $post->stop_showing_at->getTimestamp(),
+            'start_showing_at' => $post->start_showing_at ? $post->start_showing_at->getTimestamp() : null,
+            'stop_showing_at' => $post->stop_showing_at ? $post->stop_showing_at->getTimestamp() : null,
             'is_locked' => (bool) $post->is_locked,
             'locked_by_id' => (int) $post->locked_by_id,
             'image' => $post->image,
@@ -49,6 +49,12 @@ class PostTransformer extends Transformer
      */
     public function includeFields(Post $post)
     {
+        $fields = $post->fields;
+
+        if (empty($fields)) {
+            return null;
+        }
+
         return $this->collection($post->fields, new FieldTransformer());
     }
 
@@ -95,6 +101,12 @@ class PostTransformer extends Transformer
      */
     public function includeMeta(Post $post)
     {
+        $meta = $post->meta;
+
+        if (empty($meta)) {
+            return null;
+        }
+
         return $this->item($post->meta, new MetaTagTransformer());
     }
 
@@ -117,6 +129,12 @@ class PostTransformer extends Transformer
      */
     public function includeAuthor(Post $post)
     {
+        $author = $post->author;
+
+        if (empty($author)) {
+            return null;
+        }
+
         return $this->item($post->author, new AuthorTransformer());
     }
 
@@ -130,7 +148,7 @@ class PostTransformer extends Transformer
     {
         $media = $post->media;
 
-        if (is_null($media)) {
+        if (empty($media)) {
             return null;
         }
 
