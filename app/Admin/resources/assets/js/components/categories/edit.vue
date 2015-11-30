@@ -11,10 +11,7 @@
         <form class="Category EditForm">
 
             <section class="info row">
-                <div class="col-md-6">
-                    <!--<a v-link="'/categories/'+category.id+'/posts'" class="btn btn-link"><i class="fa fa-reorder"></i> Re-order Posts</a>-->
-                </div>
-                <div class="col-md-6 clearfix">
+                <div class="col-md-6 col-md-offset-6 clearfix">
                     <div class="action-buttons">
                         <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
                         <button @click.prevent="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
