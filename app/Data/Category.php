@@ -67,7 +67,7 @@ class Category extends Model
      */
     public function addImage($image)
     {
-        $name = 'category__'.$this->slug;
+        $name = 'category__'.$this->slug.'.'.$image->getExtension();
         $image->move(public_path('img/uploads/media'), $name);
 
         $this->updateMedia('image', $name);

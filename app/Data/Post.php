@@ -310,8 +310,8 @@ class Post extends Model implements HasPresenter
      */
     public function addImage($image)
     {
-        $name = 'post__'.$this->slug;
-        $image->move(public_path('img/uploads/media'), $name);
+        $name = 'post__'.$this->slug.'.'.$image->getExtension();
+        $image->move(public_path('img/uploads/posts'), $name);
         $this->image = $name;
 
         $this->save();
