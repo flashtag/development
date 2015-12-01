@@ -60,7 +60,7 @@
                     <media-input
                             :type.sync="category.media.type"
                             :url.sync="category.media.url"
-                            image-path="/img/uploads/categories/"
+                            image-path="/img/uploads/media/"
                             :image-upload="'/categories/'+$route.params.category_id+'/image'">
                     </media-input>
                 </div>

@@ -42,7 +42,6 @@
                     maxFiles: 1,
                     maxFilesize: 1.5,
                     uploadMultiple: false,
-                    //addRemoveLinks: true,
                     headers: { "Authorization": Cookies.get('jwt-token') }
                 }).on('maxfilesreached', function() {
                     //$('#dropzone-image').removeClass('dz-clickable'); // remove cursor
