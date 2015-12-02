@@ -220,8 +220,8 @@
                     self.post = response.entity.data;
                     self.post.category = self.post.category.data;
                     self.post.fields = self.post.fields.data;
-                    self.post.meta = self.post.meta.data;
-                    self.post.author = self.post.author.data;
+                    self.post.meta = self.post.meta ? self.post.meta.data : {};
+                    self.post.author = self.post.author ? self.post.author.data : {};
                     self.post.media = self.post.media ? self.post.media.data : {};
                     self.post.tags = self.post.tags.data.reduce(function (ids, tag) {
                         ids.push(tag.id);
