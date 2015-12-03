@@ -34,4 +34,11 @@ class Tag extends Model
         return static::where('slug', $tag_slug)
             ->firstOrFail();
     }
+
+    public function getShowingPosts()
+    {
+        return $this->posts->filter(function ($post) {
+            return $post->isShowing();
+        });
+    }
 }

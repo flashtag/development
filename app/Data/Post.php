@@ -367,4 +367,16 @@ class Post extends Model implements HasPresenter
             ->where('category_id', $category->id)
             ->firstOrFail();
     }
+
+    public function isShowing()
+    {
+        if (! $this->is_published) {
+            return false;
+        }
+
+        $startShowing = $this->start_showing_at ?: new Carbon('1999-01-01');
+        $stopShowing = $this->stop_showing_at ?: new Carbon('2038-01-01');
+
+        return ($startShowing->isPast() && $stopShowing->isFuture());
+    }
 }
