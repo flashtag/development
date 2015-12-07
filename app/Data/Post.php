@@ -393,23 +393,6 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * Get the post in a category, by its slug.
-     *
-     * @param string $post_slug
-     * @param string $category_slug
-     * @return Post
-     */
-    public static function getBySlugInCategory($post_slug, $category_slug)
-    {
-        $category = Category::getBySlug($category_slug);
-
-        return static::with('author', 'category')
-            ->where('slug', $post_slug)
-            ->where('category_id', $category->id)
-            ->firstOrFail();
-    }
-
-    /**
      * Whether or not the post is showing.
      *
      * @return bool
