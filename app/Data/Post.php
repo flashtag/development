@@ -85,6 +85,21 @@ class Post extends Model implements HasPresenter
     protected $historyLimit = 500;
 
     /**
+     * Save a new Post and return the instance.
+     *
+     * @param  array  $attributes
+     * @return static
+     */
+    public static function create(array $attributes = [])
+    {
+        $attributes['order'] = 0;
+        $post = parent::create($attributes);
+        $post->reorder(1);
+
+        return $post;
+    }
+
+    /**
      * @return string
      */
     public function getPresenterClass()
@@ -217,6 +232,8 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * Change the post's category.
+     *
      * @param \Flashtag\Data\Category $category
      * @return \Illuminate\Database\Eloquent\Model
      */
@@ -226,6 +243,8 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * Add tags to the post.
+     *
      * @param array $tags
      * @return \Illuminate\Database\Eloquent\Collection
      */
@@ -235,6 +254,8 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * Save fields.
+     *
      * @param \Illuminate\Support\Collection|array $fields
      */
     public function saveFields($fields)
@@ -257,7 +278,7 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * Move the post to a new order.
+     * Reorder the post within its category.
      *
      * @param int $order
      * @return bool
@@ -306,6 +327,8 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * Add an image to the post.
+     *
      * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
      */
     public function addImage($image)
@@ -317,6 +340,9 @@ class Post extends Model implements HasPresenter
         $this->save();
     }
 
+    /**
+     * Remove an image and delete it.
+     */
     public function removeImage()
     {
         $img = '/public/img/uploads/posts/'.$this->image;
@@ -330,6 +356,8 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * Get the latest visible posts.
+     *
      * @param int|null $count
      * @return \Illuminate\Database\Eloquent\Collection
      */
@@ -351,6 +379,12 @@ class Post extends Model implements HasPresenter
         return $query->get();
     }
 
+    /**
+     * Get a post by its slug.
+     *
+     * @param string $post_slug
+     * @return Post
+     */
     public static function getBySlug($post_slug)
     {
         return static::with('author', 'category')
@@ -358,6 +392,13 @@ class Post extends Model implements HasPresenter
             ->firstOrFail();
     }
 
+    /**
+     * Get the post in a category, by its slug.
+     *
+     * @param string $post_slug
+     * @param string $category_slug
+     * @return Post
+     */
     public static function getBySlugInCategory($post_slug, $category_slug)
     {
         $category = Category::getBySlug($category_slug);
@@ -368,6 +409,11 @@ class Post extends Model implements HasPresenter
             ->firstOrFail();
     }
 
+    /**
+     * Whether or not the post is showing.
+     *
+     * @return bool
+     */
     public function isShowing()
     {
         if (! $this->is_published) {
@@ -378,20 +424,5 @@ class Post extends Model implements HasPresenter
         $stopShowing = $this->stop_showing_at ?: new Carbon('2038-01-01');
 
         return ($startShowing->isPast() && $stopShowing->isFuture());
-    }
-
-    /**
-     * Save a new Post and return the instance.
-     *
-     * @param  array  $attributes
-     * @return static
-     */
-    public static function create(array $attributes = [])
-    {
-        $attributes['order'] = 0;
-        $post = parent::create($attributes);
-        $post->reorder(1);
-
-        return $post;
     }
 }
