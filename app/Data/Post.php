@@ -363,12 +363,8 @@ class Post extends Model implements HasPresenter
      */
     public static function getLatest($count = null)
     {
-        $now = new Carbon();
-
-        $query = static::with('author', 'category')
-            ->where('is_published', true)
-            ->where('start_showing_at', '<', $now)
-            ->where('stop_showing_at', '>', $now)
+        $query = static::showing()
+            ->with('author', 'category')
             ->orderBy('start_showing_at', 'DESC')
             ->orderBy('created_at', 'DESC');
 
@@ -407,5 +403,20 @@ class Post extends Model implements HasPresenter
         $stopShowing = $this->stop_showing_at ?: new Carbon('2038-01-01');
 
         return ($startShowing->isPast() && $stopShowing->isFuture());
+    }
+
+    /**
+     * Scope a query to only include posts that are available to show.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeShowing($query)
+    {
+        $now = new Carbon();
+
+        return $query->where('is_published', true)
+            ->where('start_showing_at', '<', $now)
+            ->where('stop_showing_at', '>', $now);
     }
 }
