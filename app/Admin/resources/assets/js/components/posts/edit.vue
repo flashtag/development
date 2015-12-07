@@ -179,6 +179,7 @@
         data: function() {
             return {
                 post: {
+                    body: ' ',
                     category: {},
                     tags: [],
                     fields: [],

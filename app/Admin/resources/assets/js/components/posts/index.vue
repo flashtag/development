@@ -60,7 +60,7 @@
                               title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
                     </td>
 
-                    <td>{{ post.category.data.name }}</td>
+                    <td>{{ post.category ? post.category.data.name : '' }}</td>
 
                     <td>{{ formatTimestamp(post.created_at) }}</td>
 
@@ -112,7 +112,7 @@
 
         methods: {
 
-            fetch: function (successHandler) {
+            fetch: function () {
                 var self = this;
                 return client({
                     path: '/posts?include=category&orderBy=updated_at|desc'
@@ -126,13 +126,12 @@
                 });
             },
 
-            fetchUsers: function (successHandler) {
+            fetchUsers: function () {
                 var self = this;
                 return client({
                     path: '/users'
                 }).then(function (response) {
                     self.users = response.entity.data;
-                    // successHandler(response.entity.data);
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')
@@ -146,7 +145,6 @@
                     path: '/categories'
                 }).then(function (response) {
                     self.categories = response.entity.data;
-                    // successHandler(response.entity.data);
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {
                         self.$dispatch('userHasLoggedOut')

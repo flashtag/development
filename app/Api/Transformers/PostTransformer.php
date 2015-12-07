@@ -66,7 +66,13 @@ class PostTransformer extends Transformer
      */
     public function includeCategory(Post $post)
     {
-        return $this->item($post->category, new CategoryTransformer());
+        $category = $post->category;
+
+        if (empty($category)) {
+            return null;
+        }
+
+        return $this->item($category, new CategoryTransformer());
     }
 
     /**

@@ -14,6 +14,7 @@ export default {
     },
 
     update: function (value) {
+        value = value || ' ';
         if (!CKEDITOR.instances[this.el.id]) {
             return this.vm.$nextTick(this.update.bind(this, value));
         }

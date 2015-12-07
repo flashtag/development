@@ -114,11 +114,11 @@ class PostsController extends Controller
             'order' => $request->get('order'),
             'category_id' => $request->get('category_id'),
             'author_id' => $request->get('author_id'),
-            'show_author' => $request->get('show_author'),
+            'show_author' => $request->get('show_author', false),
             'body' => $request->get('body'),
-            'is_published' => $request->get('is_published'),
-            'start_showing_at' => $request->get('start_showing_at'),
-            'stop_showing_at' => $request->get('stop_showing_at'),
+            'is_published' => $request->get('is_published', false),
+            'start_showing_at' => $request->get('start_showing_at') ?: null,
+            'stop_showing_at' => $request->get('stop_showing_at') ?: null,
         ];
     }
 
