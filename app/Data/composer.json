@@ -10,7 +10,9 @@
     "require": {
         "illuminate/database": "5.1.*",
         "venturecraft/revisionable": " 1.*",
-        "mccool/laravel-auto-presenter": "~4.1"
+        "mccool/laravel-auto-presenter": "~4.1",
+        "doctrine/dbal": "^2.5",
+        "fzaninotto/faker": "~1.4"
     },
     "autoload": {
         "psr-4": {
