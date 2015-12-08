@@ -17,7 +17,8 @@ $router->group(['middleware' => 'auth'], function ($router) {
     // Admin dashboard
     $router->get('/', function () {
         $user = \Auth::user();
-        $token = \JWTAuth::fromUser($user);
+        $auth = app(\Tymon\JWTAuth\JWTAuth::class);
+        $token = $auth->fromUser($user);
 
         return  view('admin::admin', compact('user', 'token'));
     });
