@@ -14,15 +14,25 @@ class DataServiceProvider extends ServiceProvider
 
     public function register()
     {
+        $this->registerServiceProviders();
+    }
+
+    public function boot()
+    {
+        $this->publishesMigrations();
+    }
+
+    private function registerServiceProviders()
+    {
         foreach ($this->providers as $provider) {
             $this->app->register($provider);
         }
     }
 
-    public function boot()
+    private function publishesMigrations()
     {
         $this->publishes([
-            __DIR__.'/../../database/migrations/' => database_path('migrations')
+            __DIR__.'/../database/migrations/' => database_path('migrations')
         ], 'migrations');
     }
 }

@@ -14,8 +14,15 @@ class AdminServiceProvider extends ServiceProvider
 
     public function boot(Router $router)
     {
+        $this->defineAdminRoutes($router);
+
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'admin');
 
+        $this->publishesAssets();
+    }
+
+    private function defineAdminRoutes($router)
+    {
         if (! $this->app->routesAreCached()) {
             $router->group([
                 'prefix' => 'admin',
@@ -24,5 +31,13 @@ class AdminServiceProvider extends ServiceProvider
                 require __DIR__.'/../Http/routes.php';
             });
         }
+    }
+
+    private function publishesAssets()
+    {
+        $this->publishes([
+            __DIR__.'/../public/build' => public_path('assets/admin'),
+            __DIR__.'/../public/vendor' => public_path('assets/vendor/admin'),
+        ], 'public');
     }
 }
