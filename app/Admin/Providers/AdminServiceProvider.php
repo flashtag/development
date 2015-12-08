@@ -2,14 +2,16 @@
 
 namespace Flashtag\Admin\Providers;
 
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AdminServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        //
+        $this->registerFacades();
     }
 
     public function boot(Router $router)
@@ -19,6 +21,14 @@ class AdminServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'admin');
 
         $this->publishesAssets();
+    }
+
+    private function registerFacades()
+    {
+        $this->app->booting(function () {
+            $loader = AliasLoader::getInstance();
+            $loader->alias('JWTAuth', JWTAuth::class);
+        });
     }
 
     private function defineAdminRoutes($router)
