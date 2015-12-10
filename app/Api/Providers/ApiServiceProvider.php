@@ -24,6 +24,12 @@ class ApiServiceProvider extends ServiceProvider
         $this->app->register(JWTAuthServiceProvider::class);
 
         $this->configOverrides();
+
+//        $this->app['Dingo\Api\Transformer\Factory']->setTransformer(function ($app) {
+//            $fractal = new \League\Fractal\Manager;
+//            $fractal->setSerializer(new YourSerializer);
+//            return new \Dingo\Api\Transformer\Adapter\Fractal($fractal, 'include', ',');
+//        });
     }
 
     /**

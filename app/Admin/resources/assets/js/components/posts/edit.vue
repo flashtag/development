@@ -165,6 +165,7 @@
 <script>
     import moment from 'moment';
     import swal from 'sweetalert';
+    import categories from '../../repositories/categories';
 
     export default {
 
@@ -426,6 +427,9 @@
 
         route: {
             data: function (transition) {
+                var cat = categories.get().then(function (response) {
+                    console.log(response);
+                });
                 this.fetch()
                     .then(this.fetchFields)
                     .then(this.fetchTags)
