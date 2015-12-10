@@ -2,9 +2,8 @@
   "private": true,
   "devDependencies": {
     "gulp": "^3.8.8",
-    "laravel-elixir": "^4.0.0"
+    "laravel-elixir": "^4.0.0",
+    "nightwatch": "^0.8.9"
   },
-  "dependencies": {
-
-  }
+  "dependencies": {}
 }
