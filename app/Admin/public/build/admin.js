@@ -26394,6 +26394,10 @@ var _repositoriesCategories = require('../../repositories/categories');
 
 var _repositoriesCategories2 = _interopRequireDefault(_repositoriesCategories);
 
+var _repositoriesTags = require('../../repositories/tags');
+
+var _repositoriesTags2 = _interopRequireDefault(_repositoriesTags);
+
 exports['default'] = {
 
     props: ['current-user'],
@@ -26543,14 +26547,12 @@ exports['default'] = {
 
     route: {
         data: function data(transition) {
-            var categoryId = this.$route.params.category_id;
+            var categoryId = transition.to.params.category_id;
             return {
-                category: _repositoriesCategories2['default'].getById(categoryId)
+                category: _repositoriesCategories2['default'].getById(categoryId),
+                allTags: _repositoriesTags2['default'].get(),
+                allCategories: _repositoriesCategories2['default'].get()
             };
-            //                this.fetch()
-            //                    .then(this.fetchCategories)
-            //                    .then(this.fetchTags)
-            //                    .then(transition.next);
         }
     }
 
@@ -26568,7 +26570,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":101,"../partials/media-input.vue":75,"./category-posts.vue":69,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],72:[function(require,module,exports){
+},{"../../repositories/categories":101,"../../repositories/tags":102,"../partials/media-input.vue":75,"./category-posts.vue":69,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],72:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -29114,6 +29116,29 @@ exports['default'] = {
     getById: function getById(id) {
         return client({
             path: '/categories/' + id
+        }).entity();
+    }
+
+};
+module.exports = exports['default'];
+
+},{}],102:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+exports['default'] = {
+
+    get: function get() {
+        return client({
+            path: '/tags'
+        }).entity();
+    },
+
+    getById: function getById(id) {
+        return client({
+            path: '/tags/' + id
         }).entity();
     }
 

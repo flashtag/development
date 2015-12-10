@@ -98,6 +98,7 @@
 <script>
     import swal from 'sweetalert';
     import categories from '../../repositories/categories';
+    import tags from '../../repositories/tags';
 
     export default {
 
@@ -255,14 +256,12 @@
 
         route: {
             data: function (transition) {
-                var categoryId = this.$route.params.category_id;
+                var categoryId = transition.to.params.category_id;
                 return {
-                    category: categories.getById(categoryId)
+                    category: categories.getById(categoryId),
+                    allTags: tags.get(),
+                    allCategories: categories.get()
                 };
-//                this.fetch()
-//                    .then(this.fetchCategories)
-//                    .then(this.fetchTags)
-//                    .then(transition.next);
             }
         }
 
