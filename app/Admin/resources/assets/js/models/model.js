@@ -8,7 +8,6 @@ class Model {
     _createGettersAndSetters() {
         for (var prop in this.attributes) {
             if (this.attributes.hasOwnProperty(prop)) {
-                debugger;
                 Object.defineProperty(this, prop, {
                     get: this._createGetterFor(prop),
                     set: this._createSetterFor(prop)
