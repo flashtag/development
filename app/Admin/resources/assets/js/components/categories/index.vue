@@ -24,7 +24,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="category in categories.data | filterBy nameFilter | orderBy sortKey sortDir"
+            <tr v-for="category in categories | filterBy nameFilter | orderBy sortKey sortDir"
                 class="Category">
                 <td><a v-link="'/categories/'+category.id">{{ category.name }}</a></td>
                 <td>{{ getParent(category) }}</td>
@@ -52,6 +52,17 @@
                 sortKey: null,
                 sortDir: -1
             }
+        },
+
+        ready: function () {
+            this.$nextTick(function() {
+                setTimeout(function() {
+//                    console.log(this.categories.all());
+                    for (var cat in this.categories) {
+                        console.log(cat);
+                    }
+                }.bind(this), 500);
+            }.bind(this));
         },
 
         methods: {

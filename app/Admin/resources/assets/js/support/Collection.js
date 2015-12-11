@@ -3,12 +3,6 @@ class Collection {
         this.items = items;
     }
 
-    static buildFromPromise(promise) {
-        return new Collection(promise.entity().then(function(entity) {
-            return entity.data;
-        }));
-    }
-
     all() {
         return this.items;
     }
