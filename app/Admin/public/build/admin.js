@@ -26407,20 +26407,9 @@ exports['default'] = {
         'media-input': require('../partials/media-input.vue')
     },
 
-    ready: function ready() {
-        //            console.log(this.category);
-    },
-
     data: function data() {
         return {
-            category: {
-                id: '',
-                name: '',
-                description: '',
-                order_by: 'order',
-                order_dir: 'asc',
-                media: { type: null }
-            },
+            category: {},
             allTags: [],
             allCategories: [],
             orderOptions: [{ id: 'order', text: 'Order (manual)' }, { id: 'created_at', text: 'Created' }, { id: 'updated_at', text: 'Updated' }],
@@ -26516,7 +26505,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/categories'\">Categories</a></li>\n        <li class=\"active\">{{ category.name }}</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <form class=\"Category EditForm\">\n\n            <section class=\"info row\">\n                <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                    <div class=\"action-buttons\">\n                        <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                        <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                        <button v-link=\"'/categories'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</button>\n                    </div>\n                </div>\n            </section>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Category</div>\n                <div class=\"panel-body\">\n                    <div class=\"form-group\">\n                        <label for=\"name\">Name</label>\n                        <input type=\"text\" v-model=\"category.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"category\">Parent category</label>\n                                <select v-model=\"category.parent_id\" name=\"category\" id=\"category\" class=\"form-control\">\n                                    <option :value=\"null\" selected=\"\">None</option>\n                                    <option v-if=\"allCategories\" v-for=\"category in allCategories\" :value=\"category.id\">{{ category.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group form-tags\">\n                                <label for=\"tags\">Tags</label>\n                                <select v-if=\"category.tags\" v-model=\"category.tags\" name=\"tags\" id=\"tags\" multiple=\"\" class=\"form-control\" v-select=\"category.tags\">\n                                    <option v-for=\"tag in allTags\" :value=\"tag.id\">{{ tag.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"description\">Description</label>\n                        <textarea v-if=\"category.description\" v-rich-editor=\"category.description\" name=\"description\" id=\"description\" class=\"form-control\"></textarea>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Media</div>\n                <div class=\"panel-body\">\n                    <media-input :type.sync=\"category.media.type\" :url.sync=\"category.media.url\" image-path=\"/img/uploads/media/\" :image-upload=\"'/categories/'+$route.params.category_id+'/image'\">\n                    </media-input>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Post Ordering</div>\n                <div class=\"panel-body\">\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"order_by\">Order posts in category by</label>\n                                <select v-model=\"category.order_by\" name=\"order_by\" id=\"order_by\" class=\"form-control\">\n                                    <option v-for=\"option in orderOptions\" value=\"{{ option.id }}\">{{ option.text }}</option>\n                                </select>\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"order_dir\">Order posts in category direction</label>\n                                <select v-model=\"category.order_dir\" name=\"order_dir\" id=\"order_dir\" class=\"form-control\">\n                                    <option v-for=\"direction in orderDirections\" value=\"{{ direction.id }}\">{{ direction.text }}</option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </form>\n\n        <category-posts v-if=\"showCategoryPosts\" :category-id=\"$route.params.category_id\" :posts=\"category.posts.data\"></category-posts>\n    </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/categories'\">Categories</a></li>\n        <li class=\"active\">{{ category.name }}</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <form class=\"Category EditForm\">\n\n            <section class=\"info row\">\n                <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                    <div class=\"action-buttons\">\n                        <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                        <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                        <button v-link=\"'/categories'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</button>\n                    </div>\n                </div>\n            </section>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Category</div>\n                <div class=\"panel-body\">\n                    <div class=\"form-group\">\n                        <label for=\"name\">Name</label>\n                        <input type=\"text\" v-model=\"category.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"category\">Parent category</label>\n                                <select v-model=\"category.parent_id\" name=\"category\" id=\"category\" class=\"form-control\">\n                                    <option :value=\"null\" selected=\"\">None</option>\n                                    <option v-if=\"allCategories\" v-for=\"category in allCategories\" :value=\"category.id\">{{ category.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group form-tags\">\n                                <label for=\"tags\">Tags</label>\n                                <select v-select=\"category.tags\" v-model=\"category.tags\" name=\"tags\" id=\"tags\" multiple=\"\" class=\"form-control\">\n                                    <option v-for=\"tag in allTags\" :value=\"tag.id\">{{ tag.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"description\">Description</label>\n                        <textarea v-if=\"category.description\" v-rich-editor=\"category.description\" name=\"description\" id=\"description\" class=\"form-control\"></textarea>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Media</div>\n                <div class=\"panel-body\">\n                    <media-input :type.sync=\"category.media.type\" :url.sync=\"category.media.url\" image-path=\"/img/uploads/media/\" :image-upload=\"'/categories/'+$route.params.category_id+'/image'\">\n                    </media-input>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Post Ordering</div>\n                <div class=\"panel-body\">\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"order_by\">Order posts in category by</label>\n                                <select v-model=\"category.order_by\" name=\"order_by\" id=\"order_by\" class=\"form-control\">\n                                    <option v-for=\"option in orderOptions\" value=\"{{ option.id }}\">{{ option.text }}</option>\n                                </select>\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"order_dir\">Order posts in category direction</label>\n                                <select v-model=\"category.order_dir\" name=\"order_dir\" id=\"order_dir\" class=\"form-control\">\n                                    <option v-for=\"direction in orderDirections\" value=\"{{ direction.id }}\">{{ direction.text }}</option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </form>\n\n        <category-posts v-if=\"showCategoryPosts\" :category-id=\"$route.params.category_id\" :posts=\"category.posts\"></category-posts>\n    </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -26528,7 +26517,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":102,"../../repositories/tags":103,"../partials/media-input.vue":75,"./category-posts.vue":69,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],72:[function(require,module,exports){
+},{"../../repositories/categories":103,"../../repositories/tags":104,"../partials/media-input.vue":75,"./category-posts.vue":69,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],72:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -26595,7 +26584,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":102,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],73:[function(require,module,exports){
+},{"../../repositories/categories":103,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],73:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -27639,7 +27628,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":102,"../partials/dropzone.vue":74,"../post-fields/templates/rich_text.vue":82,"../post-fields/templates/string.vue":83,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],86:[function(require,module,exports){
+},{"../../repositories/categories":103,"../partials/dropzone.vue":74,"../post-fields/templates/rich_text.vue":82,"../post-fields/templates/string.vue":83,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],86:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -29059,11 +29048,11 @@ var Category = (function () {
         this.name = data.name;
         this.slug = data.slug;
         this.description = data.description;
-        this.parent_id = data.parent_id;
+        this.parent_id = data.parent_id > 0 ? data.parent_id : null;
         this.order_by = data.order_by;
         this.order_dir = data.order_dir;
         this.parent = data.parent;
-        this.posts = data.posts || [];
+        this.posts = data.posts.data || [];
         this.tags = data.tags.data || [];
         this.media = data.media ? data.media.data : {};
         this.created_at = data.created_at;
@@ -29084,6 +29073,31 @@ exports['default'] = Category;
 module.exports = exports['default'];
 
 },{}],102:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Tag = function Tag(data) {
+    _classCallCheck(this, Tag);
+
+    this.id = data.id;
+    this.name = data.name;
+    this.slug = data.slug;
+    this.description = data.description;
+    this.posts = data.posts || [];
+    this.media = data.media ? data.media.data : {};
+    this.created_at = data.created_at;
+    this.updated_at = data.updated_at;
+};
+
+exports["default"] = Tag;
+module.exports = exports["default"];
+
+},{}],103:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -29100,7 +29114,7 @@ exports['default'] = {
 
     get: function get() {
         return client({
-            path: '/categories' + this.includes
+            path: '/categories' + (this.includes || '')
         }).entity().then(function (entity) {
             return entity.data.map(function (category) {
                 return new _modelsCategory2['default'](category);
@@ -29110,7 +29124,7 @@ exports['default'] = {
 
     getById: function getById(id) {
         return client({
-            path: '/categories/' + id + this.includes
+            path: '/categories/' + id + (this.includes || '')
         }).entity().then(function (entity) {
             return new _modelsCategory2['default'](entity.data);
         });
@@ -29129,28 +29143,37 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"../models/Category":101}],103:[function(require,module,exports){
+},{"../models/Category":101}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _modelsTag = require('../models/Tag');
+
+var _modelsTag2 = _interopRequireDefault(_modelsTag);
+
 exports['default'] = {
 
     get: function get() {
-        this.includes = this.includes || '';
-
         return client({
-            path: '/tags' + this.includes
-        }).entity();
+            path: '/tags' + (this.includes || '')
+        }).entity().then(function (entity) {
+            return entity.data.map(function (tag) {
+                return new _modelsTag2['default'](tag);
+            });
+        });
     },
 
     getById: function getById(id) {
-        this.includes = this.includes || '';
-
         return client({
-            path: '/tags/' + id + this.includes
-        }).entity();
+            path: '/tags/' + id + (this.includes || '')
+        }).entity().then(function (entity) {
+            return new _modelsTag2['default'](entity.data);
+        });
     },
 
     'with': function _with(includes) {
@@ -29166,6 +29189,6 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}]},{},[65]);
+},{"../models/Tag":102}]},{},[65]);
 
 //# sourceMappingURL=admin.js.map

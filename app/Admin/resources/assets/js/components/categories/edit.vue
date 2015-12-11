@@ -40,8 +40,7 @@
                         <div class="col-md-6">
                             <div class="form-group form-tags">
                                 <label for="tags">Tags</label>
-                                <select v-if="category.tags" v-model="category.tags" name="tags" id="tags" multiple class="form-control"
-                                        v-select="category.tags">
+                                <select v-select="category.tags" v-model="category.tags" name="tags" id="tags" multiple class="form-control">
                                     <option v-for="tag in allTags" :value="tag.id">{{ tag.name }}</option>
                                 </select>
                             </div>
@@ -91,7 +90,7 @@
             </div>
         </form>
 
-        <category-posts v-if="showCategoryPosts" :category-id="$route.params.category_id" :posts="category.posts.data"></category-posts>
+        <category-posts v-if="showCategoryPosts" :category-id="$route.params.category_id" :posts="category.posts"></category-posts>
     </div>
 </template>
 
@@ -109,20 +108,9 @@
             'media-input': require('../partials/media-input.vue')
         },
 
-        ready: function () {
-//            console.log(this.category);
-        },
-
         data: function() {
             return {
-                category: {
-                    id: '',
-                    name: '',
-                    description: '',
-                    order_by: 'order',
-                    order_dir: 'asc',
-                    media: { type: null }
-                },
+                category: {},
                 allTags: [],
                 allCategories: [],
                 orderOptions: [

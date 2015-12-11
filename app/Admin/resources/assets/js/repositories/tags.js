@@ -1,19 +1,23 @@
+import Tag from '../models/Tag';
+
 export default {
 
     get() {
-        this.includes = this.includes || '';
-
         return client({
-            path: '/tags' + this.includes
-        }).entity();
+            path: '/tags' + (this.includes || '')
+        }).entity().then(function(entity) {
+            return entity.data.map(function(tag) {
+                return new Tag(tag);
+            });
+        });
     },
 
     getById(id) {
-        this.includes = this.includes || '';
-
         return client({
-            path: '/tags/' + id + this.includes
-        }).entity();
+            path: '/tags/' + id + (this.includes || '')
+        }).entity().then(function(entity) {
+            return new Tag(entity.data);
+        });
     },
 
     with(includes) {

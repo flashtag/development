@@ -4,7 +4,7 @@ export default {
 
     get() {
         return client({
-            path: '/categories' + this.includes
+            path: '/categories' + (this.includes || '')
         }).entity().then(function(entity) {
             return entity.data.map(function(category) {
                 return new Category(category);
@@ -14,7 +14,7 @@ export default {
 
     getById(id) {
         return client({
-            path: '/categories/' + id + this.includes
+            path: '/categories/' + id + (this.includes || '')
         }).entity().then(function(entity) {
             return new Category(entity.data);
         });
