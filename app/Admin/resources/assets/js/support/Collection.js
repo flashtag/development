@@ -25,7 +25,7 @@ class Collection {
     }
 
     //next() {
-    //    if (++this.index >= this.colors.length) {
+    //    if (++this.index >= this.items.length) {
     //        return { done: true };
     //    }
     //    return { value: this.items[this.index], done: false };
