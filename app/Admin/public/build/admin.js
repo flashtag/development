@@ -29225,15 +29225,14 @@ var Model = (function () {
         this.attributes = attributes;
 
         // Am I going about this the right way here?
-        var self = this;
         for (var prop in this.attributes) {
             if (this.attributes.hasOwnProperty(prop)) {
                 Object.defineProperty(this, prop, {
                     get: function get() {
-                        return self.attributes[prop];
+                        return this.attributes[prop];
                     },
                     set: function set(value) {
-                        self.attributes[prop] = value;
+                        this.attributes[prop] = value;
                     }
                 });
             }

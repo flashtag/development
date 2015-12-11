@@ -4,12 +4,11 @@ class Model {
         this.attributes = attributes;
 
         // Am I going about this the right way here?
-        var self = this;
         for (var prop in this.attributes) {
             if (this.attributes.hasOwnProperty(prop)) {
                 Object.defineProperty(this, prop, {
-                    get: function () { return self.attributes[prop]; },
-                    set: function (value) { self.attributes[prop] = value; }
+                    get: function () { return this.attributes[prop]; },
+                    set: function (value) { this.attributes[prop] = value; }
                 });
             }
         }
