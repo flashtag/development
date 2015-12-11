@@ -3,15 +3,16 @@ class Model {
         this.resourcePath = resourcePath;
         this.attributes = attributes;
 
-        // Am I going about this the right way here?
-        for (var prop in this.attributes) {
-            if (this.attributes.hasOwnProperty(prop)) {
-                Object.defineProperty(this, prop, {
-                    get: function () { return this.attributes[prop]; },
-                    set: function (value) { this.attributes[prop] = value; }
-                });
-            }
-        }
+        // This does not work, every iteration, every property is set to the current prop being iterated.
+        //for (var prop in this.attributes) {
+        //    if (this.attributes.hasOwnProperty(prop)) {
+        //        debugger;
+        //        Object.defineProperty(this, prop, {
+        //            get: function () { return this.attributes[prop]; },
+        //            set: function (value) { this.attributes[prop] = value; }
+        //        });
+        //    }
+        //}
     }
 
     save() {
