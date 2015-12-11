@@ -2,17 +2,27 @@ class Model {
     constructor(resourcePath, attributes) {
         this.resourcePath = resourcePath;
         this.attributes = attributes;
+        this._createGettersAndSetters();
+    }
 
-        // This does not work, every iteration, every property is set to the current prop being iterated.
-        //for (var prop in this.attributes) {
-        //    if (this.attributes.hasOwnProperty(prop)) {
-        //        debugger;
-        //        Object.defineProperty(this, prop, {
-        //            get: function () { return this.attributes[prop]; },
-        //            set: function (value) { this.attributes[prop] = value; }
-        //        });
-        //    }
-        //}
+    _createGettersAndSetters() {
+        for (var prop in this.attributes) {
+            if (this.attributes.hasOwnProperty(prop)) {
+                debugger;
+                Object.defineProperty(this, prop, {
+                    get: this._createGetterFor(prop),
+                    set: this._createSetterFor(prop)
+                });
+            }
+        }
+    }
+
+    _createGetterFor(prop) {
+        return function() { return this.attributes[prop]; };
+    }
+
+    _createSetterFor(prop) {
+        return function(value) { this.attributes[prop] = value; };
     }
 
     save() {

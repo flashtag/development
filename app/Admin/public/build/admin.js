@@ -29057,8 +29057,6 @@ Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -29094,117 +29092,6 @@ var Category = (function (_Model) {
         });
     }
 
-    _createClass(Category, [{
-        key: 'id',
-        get: function get() {
-            return this.attributes['id'];
-        },
-        set: function set(value) {
-            this.attributes['id'] = value;
-        }
-    }, {
-        key: 'name',
-        get: function get() {
-            return this.attributes['name'];
-        },
-        set: function set(value) {
-            this.attributes['name'] = value;
-        }
-    }, {
-        key: 'slug',
-        get: function get() {
-            return this.attributes['slug'];
-        },
-        set: function set(value) {
-            this.attributes['slug'] = value;
-        }
-    }, {
-        key: 'description',
-        get: function get() {
-            return this.attributes['description'];
-        },
-        set: function set(value) {
-            this.attributes['description'] = value;
-        }
-    }, {
-        key: 'parent_id',
-        get: function get() {
-            return this.attributes['parent_id'];
-        },
-        set: function set(value) {
-            this.attributes['parent_id'] = value;
-        }
-    }, {
-        key: 'order_by',
-        get: function get() {
-            return this.attributes['order_by'];
-        },
-        set: function set(value) {
-            this.attributes['order_by'] = value;
-        }
-    }, {
-        key: 'order_dir',
-        get: function get() {
-            return this.attributes['order_dir'];
-        },
-        set: function set(value) {
-            this.attributes['order_dir'] = value;
-        }
-    }, {
-        key: 'parent',
-        get: function get() {
-            return this.attributes['parent'];
-        },
-        set: function set(value) {
-            this.attributes['parent'] = value;
-        }
-    }, {
-        key: 'posts',
-        get: function get() {
-            return this.attributes['posts'];
-        },
-        set: function set(value) {
-            this.attributes['posts'] = value;
-        }
-    }, {
-        key: 'tags',
-        get: function get() {
-            return this.attributes['tags'];
-        },
-        set: function set(value) {
-            this.attributes['tags'] = value;
-        }
-    }, {
-        key: 'media',
-        get: function get() {
-            return this.attributes['media'];
-        },
-        set: function set(value) {
-            this.attributes['media'] = value;
-        }
-    }, {
-        key: 'created_at',
-        get: function get() {
-            return this.attributes['created_at'];
-        },
-        set: function set(value) {
-            this.attributes['created_at'] = value;
-        }
-    }, {
-        key: 'updated_at',
-        get: function get() {
-            return this.attributes['updated_at'];
-        },
-        set: function set(value) {
-            this.attributes['updated_at'] = value;
-        }
-    }, {
-        key: 'parentName',
-        get: function get() {
-            return this.parent ? this.parent.data.name : '';
-        }
-    }]);
-
     return Category;
 })(_model2['default']);
 
@@ -29228,20 +29115,37 @@ var Model = (function () {
 
         this.resourcePath = resourcePath;
         this.attributes = attributes;
-
-        // This does not work, every iteration, every property is set to the current prop being iterated.
-        //for (var prop in this.attributes) {
-        //    if (this.attributes.hasOwnProperty(prop)) {
-        //        debugger;
-        //        Object.defineProperty(this, prop, {
-        //            get: function () { return this.attributes[prop]; },
-        //            set: function (value) { this.attributes[prop] = value; }
-        //        });
-        //    }
-        //}
+        this._createGettersAndSetters();
     }
 
     _createClass(Model, [{
+        key: '_createGettersAndSetters',
+        value: function _createGettersAndSetters() {
+            for (var prop in this.attributes) {
+                if (this.attributes.hasOwnProperty(prop)) {
+                    debugger;
+                    Object.defineProperty(this, prop, {
+                        get: this._createGetterFor(prop),
+                        set: this._createSetterFor(prop)
+                    });
+                }
+            }
+        }
+    }, {
+        key: '_createGetterFor',
+        value: function _createGetterFor(prop) {
+            return function () {
+                return this.attributes[prop];
+            };
+        }
+    }, {
+        key: '_createSetterFor',
+        value: function _createSetterFor(prop) {
+            return function (value) {
+                this.attributes[prop] = value;
+            };
+        }
+    }, {
         key: 'save',
         value: function save() {
             return client({
