@@ -140,15 +140,12 @@
              */
             save: function() {
                 var self = this;
-                return client({
-                    method: 'PUT',
-                    path: '/categories/'+this.category.id,
-                    entity: this.category
-                }).then(function (response) {
-                    self.notify('success', 'Saved successfully.');
-                }, function (response) {
-                    self.checkResponseStatus(response);
-                });
+                return this.category.save()
+                    .then(function() {
+                        self.notify('success', 'Saved successfully.');
+                    }, function (response) {
+                        self.checkResponseStatus(response);
+                    });
             },
 
             delete: function() {
