@@ -29073,11 +29073,7 @@ var Category = (function () {
     _createClass(Category, [{
         key: 'parentName',
         get: function get() {
-            if (this.parent) {
-                return category.parent.data.name;
-            }
-
-            return '';
+            return this.parent ? this.parent.data.name : '';
         }
     }]);
 

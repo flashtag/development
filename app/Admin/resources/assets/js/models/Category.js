@@ -16,11 +16,7 @@ class Category {
     }
 
     get parentName() {
-        if (this.parent) {
-            return category.parent.data.name;
-        }
-
-        return '';
+        return this.parent ? this.parent.data.name : '';
     }
 }
 
