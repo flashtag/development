@@ -7,6 +7,7 @@ class Category {
         this.parent_id = data.parent_id;
         this.order_by = data.order_by;
         this.order_dir = data.order_dir;
+        this.parent = data.parent;
         this.posts = data.posts || [];
         this.tags = data.tags.data || [];
         this.media = data.media ? data.media.data : {};
@@ -14,10 +15,12 @@ class Category {
         this.updated_at = data.updated_at;
     }
 
-    static buildFromPromise(promise) {
-        return promise.entity().then(function(entity) {
-            return new Category(entity.data);
-        });
+    get parentName() {
+        if (this.parent) {
+            return category.parent.data.name;
+        }
+
+        return '';
     }
 }
 

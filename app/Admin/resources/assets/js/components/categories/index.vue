@@ -4,37 +4,39 @@
         <li class="active">Categories</li>
     </ol>
 
-    <div class="filters">
-        <div class="row">
-            <div class="col-md-6">
-                <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
-            </div>
-            <div class="create-button col-md-6">
-                <button v-link="'/categories/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
+    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
+    <div v-if="!$loadingRouteData">
+
+        <div class="filters">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
+                </div>
+                <div class="create-button col-md-6">
+                    <button v-link="'/categories/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
+                </div>
             </div>
         </div>
+
+        <table class="Categories table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th><a href="#" @click.prevent="sortBy('name')">Name <i :class="orderIcon('name')"></i></a></th>
+                    <th><a>Parent</a></th>
+                    <th><a>Tags</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="category in categories | filterBy nameFilter | orderBy sortKey sortDir"
+                    class="Category">
+                    <td><a v-link="'/categories/'+category.id">{{ category.name }}</a></td>
+                    <td>{{ category.parentName }}</td>
+                    <td><span v-for="tag in category.tags" class="tag label label-default">{{ tag.name }}</span></td>
+                </tr>
+            </tbody>
+        </table>
+
     </div>
-
-    <table class="Categories table table-striped table-hover">
-        <thead>
-            <tr>
-                <th><a href="#" @click.prevent="sortBy('name')">Name <i :class="orderIcon('name')"></i></a></th>
-                <th><a>Parent</a></th>
-                <th><a>Tags</a></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="category in categories | filterBy nameFilter | orderBy sortKey sortDir"
-                class="Category">
-                <td><a v-link="'/categories/'+category.id">{{ category.name }}</a></td>
-                <td>{{ getParent(category) }}</td>
-                <td><span v-for="tag in category.tags.data" class="tag label label-default">{{ tag.name }}</span></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <paginator :pagination="pagination"></paginator>
-
 </template>
 
 <script>
@@ -47,22 +49,10 @@
         data: function () {
             return {
                 categories: [],
-                pagination: { links: {} },
                 nameFilter: null,
                 sortKey: null,
                 sortDir: -1
             }
-        },
-
-        ready: function () {
-            this.$nextTick(function() {
-                setTimeout(function() {
-//                    console.log(this.categories.all());
-                    for (var cat in this.categories) {
-                        console.log(cat);
-                    }
-                }.bind(this), 500);
-            }.bind(this));
         },
 
         methods: {
@@ -82,14 +72,6 @@
                 }
 
                 return 'fa fa-unsorted';
-            },
-
-            getParent: function (category) {
-                if (category.parent) {
-                    return category.parent.data.name;
-                }
-
-                return '';
             }
 
         },

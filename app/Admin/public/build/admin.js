@@ -26546,22 +26546,10 @@ exports['default'] = {
     data: function data() {
         return {
             categories: [],
-            pagination: { links: {} },
             nameFilter: null,
             sortKey: null,
             sortDir: -1
         };
-    },
-
-    ready: function ready() {
-        this.$nextTick((function () {
-            setTimeout((function () {
-                //                    console.log(this.categories.all());
-                for (var cat in this.categories) {
-                    console.log(cat);
-                }
-            }).bind(this), 500);
-        }).bind(this));
     },
 
     methods: {
@@ -26581,14 +26569,6 @@ exports['default'] = {
             }
 
             return 'fa fa-unsorted';
-        },
-
-        getParent: function getParent(category) {
-            if (category.parent) {
-                return category.parent.data.name;
-            }
-
-            return '';
         }
 
     },
@@ -26603,7 +26583,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Categories</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n            </div>\n            <div class=\"create-button col-md-6\">\n                <button v-link=\"'/categories/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Categories table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                <th><a>Parent</a></th>\n                <th><a>Tags</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"category in categories | filterBy nameFilter | orderBy sortKey sortDir\" class=\"Category\">\n                <td><a v-link=\"'/categories/'+category.id\">{{ category.name }}</a></td>\n                <td>{{ getParent(category) }}</td>\n                <td><span v-for=\"tag in category.tags.data\" class=\"tag label label-default\">{{ tag.name }}</span></td>\n            </tr>\n        </tbody>\n    </table>\n\n    <paginator :pagination=\"pagination\"></paginator>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Categories</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                </div>\n                <div class=\"create-button col-md-6\">\n                    <button v-link=\"'/categories/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n                </div>\n            </div>\n        </div>\n\n        <table class=\"Categories table table-striped table-hover\">\n            <thead>\n                <tr>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                    <th><a>Parent</a></th>\n                    <th><a>Tags</a></th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for=\"category in categories | filterBy nameFilter | orderBy sortKey sortDir\" class=\"Category\">\n                    <td><a v-link=\"'/categories/'+category.id\">{{ category.name }}</a></td>\n                    <td>{{ category.parentName }}</td>\n                    <td><span v-for=\"tag in category.tags\" class=\"tag label label-default\">{{ tag.name }}</span></td>\n                </tr>\n            </tbody>\n        </table>\n\n    </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -29061,15 +29041,15 @@ module.exports = {
 };
 
 },{"../components/authors/create.vue":66,"../components/authors/edit.vue":67,"../components/authors/index.vue":68,"../components/categories/create.vue":70,"../components/categories/edit.vue":71,"../components/categories/index.vue":72,"../components/home.vue":73,"../components/post-fields/create.vue":79,"../components/post-fields/edit.vue":80,"../components/post-fields/index.vue":81,"../components/posts/create.vue":84,"../components/posts/edit.vue":85,"../components/posts/index.vue":86,"../components/posts/revisions/index.vue":87,"../components/posts/revisions/show.vue":88,"../components/tags/create.vue":89,"../components/tags/edit.vue":90,"../components/tags/index.vue":91,"../components/users/create.vue":92,"../components/users/edit.vue":93,"../components/users/index.vue":94}],101:[function(require,module,exports){
-"use strict";
+'use strict';
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var Category = (function () {
     function Category(data) {
@@ -29082,6 +29062,7 @@ var Category = (function () {
         this.parent_id = data.parent_id;
         this.order_by = data.order_by;
         this.order_dir = data.order_dir;
+        this.parent = data.parent;
         this.posts = data.posts || [];
         this.tags = data.tags.data || [];
         this.media = data.media ? data.media.data : {};
@@ -29089,20 +29070,22 @@ var Category = (function () {
         this.updated_at = data.updated_at;
     }
 
-    _createClass(Category, null, [{
-        key: "buildFromPromise",
-        value: function buildFromPromise(promise) {
-            return promise.entity().then(function (entity) {
-                return new Category(entity.data);
-            });
+    _createClass(Category, [{
+        key: 'parentName',
+        get: function get() {
+            if (this.parent) {
+                return category.parent.data.name;
+            }
+
+            return '';
         }
     }]);
 
     return Category;
 })();
 
-exports["default"] = Category;
-module.exports = exports["default"];
+exports['default'] = Category;
+module.exports = exports['default'];
 
 },{}],102:[function(require,module,exports){
 'use strict';
@@ -29117,30 +29100,24 @@ var _modelsCategory = require('../models/Category');
 
 var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
 
-var _supportCollection = require('../support/Collection');
-
-var _supportCollection2 = _interopRequireDefault(_supportCollection);
-
 exports['default'] = {
 
     get: function get() {
-        //var promise = client({
-        //    path: '/categories' + this.includes
-        //});
-
         return client({
             path: '/categories' + this.includes
         }).entity().then(function (entity) {
-            return new _supportCollection2['default'](entity.data.map(function (category) {
+            return entity.data.map(function (category) {
                 return new _modelsCategory2['default'](category);
-            }));
+            });
         });
     },
 
     getById: function getById(id) {
-        return _modelsCategory2['default'].buildFromPromise(client({
+        return client({
             path: '/categories/' + id + this.includes
-        }));
+        }).entity().then(function (entity) {
+            return new _modelsCategory2['default'](entity.data);
+        });
     },
 
     'with': function _with(includes) {
@@ -29156,7 +29133,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"../models/Category":101,"../support/Collection":104}],103:[function(require,module,exports){
+},{"../models/Category":101}],103:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -29192,62 +29169,6 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-
-},{}],104:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Collection = (function () {
-    function Collection(items) {
-        _classCallCheck(this, Collection);
-
-        this.items = items;
-    }
-
-    _createClass(Collection, [{
-        key: "all",
-        value: function all() {
-            return this.items;
-        }
-    }, {
-        key: Symbol.iterator,
-        value: function value() {
-            var nextIndex = 0;
-            var items = this.items;
-
-            return {
-                next: function next() {
-                    if (nextIndex == items.length) {
-                        return { done: true };
-                    }
-                    return {
-                        value: items[nextIndex++],
-                        done: false
-                    };
-                }
-            };
-        }
-
-        //next() {
-        //    if (++this.index >= this.items.length) {
-        //        return { done: true };
-        //    }
-        //    return { value: this.items[this.index], done: false };
-        //}
-    }]);
-
-    return Collection;
-})();
-
-exports["default"] = Collection;
-module.exports = exports["default"];
 
 },{}]},{},[65]);
 
