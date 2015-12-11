@@ -109,6 +109,10 @@
             'media-input': require('../partials/media-input.vue')
         },
 
+        ready: function () {
+//            console.log(this.category);
+        },
+
         data: function() {
             return {
                 category: {
@@ -142,47 +146,6 @@
         },
 
         methods: {
-
-            fetch: function () {
-                var self = this;
-                return client({
-                    path: '/categories/'+ this.$route.params.category_id + '?include=posts,tags,media'
-                }).then(function (response) {
-                    self.category = response.entity.data;
-                    self.category.tags = self.category.tags.data.reduce(function (ids, tag) {
-                        ids.push(tag.id);
-                        return ids;
-                    }, []);
-                    self.category.media = self.category.media ? self.category.media.data : {};
-                }, function (response) {
-                    self.checkResponseStatus(response);
-                });
-            },
-
-            fetchCategories: function () {
-                var self = this;
-                return client({
-                    path: '/categories'
-                }).then(function (response) {
-                    self.allCategories = response.entity.data;
-                }, function (response) {
-                    self.checkResponseStatus(response);
-                });
-            },
-
-            fetchTags: function () {
-                var self = this;
-                return client({
-                    path: '/tags'
-                }).then(function (response) {
-                    self.allTags = response.entity.data.map(function (tag) {
-                        tag.text = tag.name;
-                        return tag;
-                    });
-                }, function (response) {
-                    self.checkResponseStatus(response);
-                });
-            },
 
             /**
              * Save the post.
@@ -244,12 +207,6 @@
                     delay: 3000,
                     offset: { x: 20, y: 70 }
                 });
-            },
-
-            checkResponseStatus: function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    this.$dispatch('userHasLoggedOut')
-                }
             }
 
         },
@@ -257,10 +214,11 @@
         route: {
             data: function (transition) {
                 var categoryId = transition.to.params.category_id;
+
                 return {
-                    category: categories.getById(categoryId),
-                    allTags: tags.get(),
-                    allCategories: categories.get()
+                    category: categories.with(['posts', 'tags', 'media']).getById(categoryId),
+                    allCategories: categories.get(),
+                    allTags: tags.get()
                 };
             }
         }

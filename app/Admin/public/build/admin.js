@@ -25882,7 +25882,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/App.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/App.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -25975,7 +25975,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/create.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26108,7 +26108,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/edit.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26184,7 +26184,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26315,7 +26315,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/category-posts.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/category-posts.vue"
   module.hot.dispose(function () {
     require("vueify-insert-css").cache["\n    .order {\n        width: 40px;\n    }\n"] = false
     document.head.removeChild(__vueify_style__)
@@ -26372,7 +26372,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/create.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26407,6 +26407,10 @@ exports['default'] = {
         'media-input': require('../partials/media-input.vue')
     },
 
+    ready: function ready() {
+        //            console.log(this.category);
+    },
+
     data: function data() {
         return {
             category: {
@@ -26433,47 +26437,6 @@ exports['default'] = {
     },
 
     methods: {
-
-        fetch: function fetch() {
-            var self = this;
-            return client({
-                path: '/categories/' + this.$route.params.category_id + '?include=posts,tags,media'
-            }).then(function (response) {
-                self.category = response.entity.data;
-                self.category.tags = self.category.tags.data.reduce(function (ids, tag) {
-                    ids.push(tag.id);
-                    return ids;
-                }, []);
-                self.category.media = self.category.media ? self.category.media.data : {};
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        fetchCategories: function fetchCategories() {
-            var self = this;
-            return client({
-                path: '/categories'
-            }).then(function (response) {
-                self.allCategories = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        fetchTags: function fetchTags() {
-            var self = this;
-            return client({
-                path: '/tags'
-            }).then(function (response) {
-                self.allTags = response.entity.data.map(function (tag) {
-                    tag.text = tag.name;
-                    return tag;
-                });
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
 
         /**
          * Save the post.
@@ -26535,12 +26498,6 @@ exports['default'] = {
                 delay: 3000,
                 offset: { x: 20, y: 70 }
             });
-        },
-
-        checkResponseStatus: function checkResponseStatus(response) {
-            if (response.status.code == 401 || response.status.code == 500) {
-                this.$dispatch('userHasLoggedOut');
-            }
         }
 
     },
@@ -26548,10 +26505,11 @@ exports['default'] = {
     route: {
         data: function data(transition) {
             var categoryId = transition.to.params.category_id;
+
             return {
-                category: _repositoriesCategories2['default'].getById(categoryId),
-                allTags: _repositoriesTags2['default'].get(),
-                allCategories: _repositoriesCategories2['default'].get()
+                category: _repositoriesCategories2['default']['with'](['posts', 'tags', 'media']).getById(categoryId),
+                allCategories: _repositoriesCategories2['default'].get(),
+                allTags: _repositoriesTags2['default'].get()
             };
         }
     }
@@ -26563,17 +26521,24 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/edit.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":101,"../../repositories/tags":102,"../partials/media-input.vue":75,"./category-posts.vue":69,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],72:[function(require,module,exports){
+},{"../../repositories/categories":102,"../../repositories/tags":103,"../partials/media-input.vue":75,"./category-posts.vue":69,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],72:[function(require,module,exports){
 'use strict';
 
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
 exports.__esModule = true;
+
+var _repositoriesCategories = require('../../repositories/categories');
+
+var _repositoriesCategories2 = _interopRequireDefault(_repositoriesCategories);
+
 exports['default'] = {
 
     props: ['current-user'],
@@ -26589,21 +26554,6 @@ exports['default'] = {
     },
 
     methods: {
-
-        fetch: function fetch(successHandler) {
-            var self = this;
-            client({
-                path: '/categories?include=parent,tags'
-            }).then(function (response) {
-                self.categories = response.entity.data;
-                self.pagination = response.entity.meta.pagination;
-                successHandler(response.entity.data);
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
 
         sortBy: function sortBy(key) {
             if (this.sortKey == key) {
@@ -26634,27 +26584,27 @@ exports['default'] = {
 
     route: {
         data: function data(transition) {
-            this.fetch(function (data) {
-                transition.next({ categories: data });
-            });
+            return {
+                categories: _repositoriesCategories2['default']['with']('tags').get()
+            };
         }
     }
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Categories</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n            </div>\n            <div class=\"create-button col-md-6\">\n                <button v-link=\"'/categories/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Categories table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                <th><a>Parent</a></th>\n                <th><a>Tags</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"category in categories | filterBy nameFilter | orderBy sortKey sortDir\" class=\"Category\">\n                <td><a v-link=\"'/categories/'+category.id\">{{ category.name }}</a></td>\n                <td>{{ getParent(category) }}</td>\n                <td><span v-for=\"tag in category.tags.data\" class=\"tag label label-default\">{{ tag.name }}</span></td>\n            </tr>\n        </tbody>\n    </table>\n\n    <paginator :pagination=\"pagination\"></paginator>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Categories</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n            </div>\n            <div class=\"create-button col-md-6\">\n                <button v-link=\"'/categories/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Categories table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                <th><a>Parent</a></th>\n                <th><a>Tags</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"category in categories.data | filterBy nameFilter | orderBy sortKey sortDir\" class=\"Category\">\n                <td><a v-link=\"'/categories/'+category.id\">{{ category.name }}</a></td>\n                <td>{{ getParent(category) }}</td>\n                <td><span v-for=\"tag in category.tags.data\" class=\"tag label label-default\">{{ tag.name }}</span></td>\n            </tr>\n        </tbody>\n    </table>\n\n    <paginator :pagination=\"pagination\"></paginator>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":44,"vue-hot-reload-api":42}],73:[function(require,module,exports){
+},{"../../repositories/categories":102,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],73:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26677,7 +26627,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/home.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/home.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26792,7 +26742,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/dropzone.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/dropzone.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26836,7 +26786,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26870,7 +26820,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/paginator.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/paginator.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26892,7 +26842,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/side-nav.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/side-nav.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26922,7 +26872,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/top-nav.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/top-nav.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26978,7 +26928,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/create.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27109,7 +27059,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/edit.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27182,7 +27132,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27206,7 +27156,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/rich_text.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/rich_text.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27230,7 +27180,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/string.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/string.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27385,7 +27335,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/create.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27691,14 +27641,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/edit.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":101,"../partials/dropzone.vue":74,"../post-fields/templates/rich_text.vue":82,"../post-fields/templates/string.vue":83,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],86:[function(require,module,exports){
+},{"../../repositories/categories":102,"../partials/dropzone.vue":74,"../post-fields/templates/rich_text.vue":82,"../post-fields/templates/string.vue":83,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],86:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -27967,7 +27917,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28144,7 +28094,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28333,7 +28283,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28386,7 +28336,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/create.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28519,7 +28469,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/edit.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28595,7 +28545,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28650,7 +28600,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/create.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28804,7 +28754,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/edit.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28880,7 +28830,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -29100,27 +29050,48 @@ module.exports = {
 };
 
 },{"../components/authors/create.vue":66,"../components/authors/edit.vue":67,"../components/authors/index.vue":68,"../components/categories/create.vue":70,"../components/categories/edit.vue":71,"../components/categories/index.vue":72,"../components/home.vue":73,"../components/post-fields/create.vue":79,"../components/post-fields/edit.vue":80,"../components/post-fields/index.vue":81,"../components/posts/create.vue":84,"../components/posts/edit.vue":85,"../components/posts/index.vue":86,"../components/posts/revisions/index.vue":87,"../components/posts/revisions/show.vue":88,"../components/tags/create.vue":89,"../components/tags/edit.vue":90,"../components/tags/index.vue":91,"../components/users/create.vue":92,"../components/users/edit.vue":93,"../components/users/index.vue":94}],101:[function(require,module,exports){
-'use strict';
+"use strict";
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports['default'] = {
 
-    get: function get() {
-        return client({
-            path: '/categories'
-        }).entity();
-    },
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-    getById: function getById(id) {
-        return client({
-            path: '/categories/' + id
-        }).entity();
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Category = (function () {
+    function Category(data) {
+        _classCallCheck(this, Category);
+
+        this.id = data.id;
+        this.name = data.name;
+        this.slug = data.slug;
+        this.description = data.description;
+        this.parent_id = data.parent_id;
+        this.order_by = data.order_by;
+        this.order_dir = data.order_dir;
+        this.posts = data.posts || [];
+        this.tags = data.tags.data || [];
+        this.media = data.media ? data.media.data : {};
+        this.created_at = data.created_at;
+        this.updated_at = data.updated_at;
     }
 
-};
-module.exports = exports['default'];
+    _createClass(Category, null, [{
+        key: "buildFromPromise",
+        value: function buildFromPromise(promise) {
+            return promise.entity().then(function (entity) {
+                return new Category(entity.data);
+            });
+        }
+    }]);
+
+    return Category;
+})();
+
+exports["default"] = Category;
+module.exports = exports["default"];
 
 },{}],102:[function(require,module,exports){
 'use strict';
@@ -29128,18 +29099,72 @@ module.exports = exports['default'];
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _modelsCategory = require('../models/Category');
+
+var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
+
 exports['default'] = {
 
     get: function get() {
         return client({
-            path: '/tags'
+            path: '/categories' + this.includes
         }).entity();
     },
 
     getById: function getById(id) {
+        return _modelsCategory2['default'].buildFromPromise(client({
+            path: '/categories/' + id + this.includes
+        }));
+    },
+
+    'with': function _with(includes) {
+        if (includes.constructor === Array) {
+            this.includes = '?include=' + includes.join();
+        } else {
+            this.includes = includes ? '?include=' + includes : '';
+        }
+
+        return this;
+    }
+
+};
+module.exports = exports['default'];
+
+},{"../models/Category":101}],103:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+exports['default'] = {
+
+    get: function get() {
+        this.includes = this.includes || '';
+
         return client({
-            path: '/tags/' + id
+            path: '/tags' + this.includes
         }).entity();
+    },
+
+    getById: function getById(id) {
+        this.includes = this.includes || '';
+
+        return client({
+            path: '/tags/' + id + this.includes
+        }).entity();
+    },
+
+    'with': function _with(includes) {
+        if (includes.constructor === Array) {
+            this.includes = '?include=' + includes.join();
+        } else {
+            this.includes = includes ? '?include=' + includes : '';
+        }
+
+        return this;
     }
 
 };

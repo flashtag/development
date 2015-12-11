@@ -24,7 +24,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="category in categories | filterBy nameFilter | orderBy sortKey sortDir"
+            <tr v-for="category in categories.data | filterBy nameFilter | orderBy sortKey sortDir"
                 class="Category">
                 <td><a v-link="'/categories/'+category.id">{{ category.name }}</a></td>
                 <td>{{ getParent(category) }}</td>
@@ -38,6 +38,8 @@
 </template>
 
 <script>
+    import categories from '../../repositories/categories';
+
     export default {
 
         props: ['current-user'],
@@ -53,21 +55,6 @@
         },
 
         methods: {
-
-            fetch: function (successHandler) {
-                var self = this;
-                client({
-                    path: '/categories?include=parent,tags'
-                }).then(function (response) {
-                    self.categories = response.entity.data;
-                    self.pagination = response.entity.meta.pagination;
-                    successHandler(response.entity.data);
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
-                });
-            },
 
             sortBy: function (key) {
                 if (this.sortKey == key) {
@@ -98,9 +85,9 @@
 
         route: {
             data: function (transition) {
-                this.fetch(function (data) {
-                    transition.next({categories: data})
-                });
+                return {
+                    categories: categories.with('tags').get()
+                };
             }
         }
 
