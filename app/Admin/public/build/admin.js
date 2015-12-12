@@ -25882,7 +25882,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/App.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/App.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -25975,7 +25975,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/create.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26108,7 +26108,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/edit.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26184,7 +26184,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26315,7 +26315,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/category-posts.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/category-posts.vue"
   module.hot.dispose(function () {
     require("vueify-insert-css").cache["\n    .order {\n        width: 40px;\n    }\n"] = false
     document.head.removeChild(__vueify_style__)
@@ -26375,7 +26375,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/create.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26506,14 +26506,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/edit.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":104,"../../repositories/tags":105,"../partials/media-input.vue":75,"./category-posts.vue":69,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],72:[function(require,module,exports){
+},{"../../repositories/categories":105,"../../repositories/tags":107,"../partials/media-input.vue":75,"./category-posts.vue":69,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],72:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -26573,14 +26573,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":104,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],73:[function(require,module,exports){
+},{"../../repositories/categories":105,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],73:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26603,7 +26603,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/home.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/home.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26718,7 +26718,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/dropzone.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/dropzone.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26762,7 +26762,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26796,7 +26796,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/paginator.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/paginator.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26818,7 +26818,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/side-nav.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/side-nav.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26848,7 +26848,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/top-nav.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/top-nav.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -26904,7 +26904,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/create.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27035,7 +27035,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/edit.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27108,7 +27108,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27132,7 +27132,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/rich_text.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/rich_text.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27156,7 +27156,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/string.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/string.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27311,7 +27311,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/create.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -27617,14 +27617,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/edit.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":104,"../partials/dropzone.vue":74,"../post-fields/templates/rich_text.vue":82,"../post-fields/templates/string.vue":83,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],86:[function(require,module,exports){
+},{"../../repositories/categories":105,"../partials/dropzone.vue":74,"../post-fields/templates/rich_text.vue":82,"../post-fields/templates/string.vue":83,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],86:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -27639,6 +27639,18 @@ var _sweetalert = require('sweetalert');
 
 var _sweetalert2 = _interopRequireDefault(_sweetalert);
 
+var _repositoriesPosts = require('../../repositories/posts');
+
+var _repositoriesPosts2 = _interopRequireDefault(_repositoriesPosts);
+
+var _repositoriesCategories = require('../../repositories/categories');
+
+var _repositoriesCategories2 = _interopRequireDefault(_repositoriesCategories);
+
+var _repositoriesUsers = require('../../repositories/users');
+
+var _repositoriesUsers2 = _interopRequireDefault(_repositoriesUsers);
+
 exports['default'] = {
 
     props: ['current-user'],
@@ -27646,7 +27658,6 @@ exports['default'] = {
     data: function data() {
         return {
             posts: [],
-            pagination: { links: {} },
             categories: [],
             users: [],
             titleFilter: null,
@@ -27656,70 +27667,13 @@ exports['default'] = {
         };
     },
 
+    ready: function ready() {
+        this.$nextTick((function () {
+            this.initTooltips();
+        }).bind(this));
+    },
+
     methods: {
-
-        fetch: function fetch() {
-            var self = this;
-            return client({
-                path: '/posts?include=category&orderBy=updated_at|desc'
-            }).then(function (response) {
-                self.pagination = response.entity.meta.pagination;
-                self.posts = response.entity.data;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        fetchUsers: function fetchUsers() {
-            var self = this;
-            return client({
-                path: '/users'
-            }).then(function (response) {
-                self.users = response.entity.data;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        fetchCategories: function fetchCategories() {
-            var self = this;
-            return client({
-                path: '/categories'
-            }).then(function (response) {
-                self.categories = response.entity.data;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        publish: function publish(post) {
-            return client({
-                method: 'PATCH',
-                path: '/posts/' + post.id + '/publish',
-                entity: {
-                    is_published: post.is_published,
-                    user_id: this.currentUser.id
-                }
-            });
-        },
-
-        isShowing: function isShowing(post) {
-            if (!post.is_published) {
-                return false;
-            }
-
-            var start = !!post.publish_start ? _moment2['default'](post.publish_start, "YYYY-MM-DD HH:mm:ss") : _moment2['default']("1980-01-01", "YYYY-MM-DD");
-            var end = !!post.publish_end ? _moment2['default'](post.publish_end, "YYYY-MM-DD HH:mm:ss") : _moment2['default']("2033-01-19", "YYYY-MM-DD");
-            var now = _moment2['default']();
-
-            return start <= now && now <= end;
-        },
 
         goToPost: function goToPost(post) {
             if (!post.is_locked) {
@@ -27882,25 +27836,29 @@ exports['default'] = {
 
     route: {
         data: function data(transition) {
-            this.fetch().then(this.fetchCategories).then(this.fetchUsers).then(transition.next).then(this.initTooltips);
+            return {
+                posts: _repositoriesPosts2['default']['with']('category').orderBy('updated_at', 'desc').get(),
+                categories: _repositoriesCategories2['default'].get(),
+                users: _repositoriesUsers2['default'].get()
+            };
         }
     }
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Posts</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"create-button\">\n            <button v-link=\"'/posts/create'\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</button>\n        </div>\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                </div>\n                <div class=\"col-md-6\">\n                    <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                        <option value=\"\" selected=\"\">Filter by category...</option>\n                        <option v-for=\"category in categories\" :value=\"category.name\">\n                            {{ category.name }}\n                        </option>\n                    </select>\n                </div>\n            </div>\n        </div>\n\n        <table class=\"Posts table table-striped table-hover\">\n            <thead>\n                <tr>\n                    <th v-if=\"categoryFilter\"><a href=\"#\" @click.prevent=\"sortBy('order')\">Order <i :class=\"orderIcon('order')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('category.data.name')\">Category <i :class=\"orderIcon('category.data.name')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                    <th class=\"text-centered\"><a>Showing</a></th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for=\"post in posts\n                        | filterBy titleFilter in 'title'\n                        | filterBy categoryFilter in 'category.data.name'\n                        | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n                    <td v-if=\"categoryFilter\" class=\"order\">\n                        <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n                    </td>\n\n                    <td>\n                        <a href=\"#!/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                        <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                    </td>\n\n                    <td>{{ post.category ? post.category.data.name : '' }}</td>\n\n                    <td>{{ formatTimestamp(post.created_at) }}</td>\n\n                    <td class=\"published\">\n                        <div class=\"switch\">\n                            <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"publish(post, $event)\">\n                            <label for=\"is_published_{{post.id}}\"></label>\n                        </div>\n                    </td>\n\n                    <td class=\"text-centered\">\n                        <span v-if=\"isShowing(post)\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                        <span v-if=\"!isShowing(post)\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n                    </td>\n\n                </tr>\n            </tbody>\n        </table>\n\n        <paginator :pagination=\"pagination\"></paginator>\n    </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Posts</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"create-button\">\n            <button v-link=\"'/posts/create'\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</button>\n        </div>\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                </div>\n                <div class=\"col-md-6\">\n                    <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                        <option value=\"\" selected=\"\">Filter by category...</option>\n                        <option v-for=\"category in categories\" :value=\"category.name\">\n                            {{ category.name }}\n                        </option>\n                    </select>\n                </div>\n            </div>\n        </div>\n\n        <table class=\"Posts table table-striped table-hover\">\n            <thead>\n                <tr>\n                    <th v-if=\"categoryFilter\"><a href=\"#\" @click.prevent=\"sortBy('order')\">Order <i :class=\"orderIcon('order')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('category.name')\">Category <i :class=\"orderIcon('category.name')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                    <th class=\"text-centered\"><a>Showing</a></th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for=\"post in posts\n                        | filterBy titleFilter in 'title'\n                        | filterBy categoryFilter in 'category.name'\n                        | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n                    <td v-if=\"categoryFilter\" class=\"order\">\n                        <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n                    </td>\n\n                    <td>\n                        <a href=\"#!/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                        <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                    </td>\n\n                    <td>{{ post.category ? post.category.name : '' }}</td>\n\n                    <td>{{ formatTimestamp(post.created_at) }}</td>\n\n                    <td class=\"published\">\n                        <div class=\"switch\">\n                            <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish()\">\n                            <label for=\"is_published_{{post.id}}\"></label>\n                        </div>\n                    </td>\n\n                    <td class=\"text-centered\">\n                        <span v-if=\"post.isShowing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                        <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n                    </td>\n\n                </tr>\n            </tbody>\n        </table>\n\n    </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],87:[function(require,module,exports){
+},{"../../repositories/categories":105,"../../repositories/posts":106,"../../repositories/users":108,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],87:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -28070,7 +28028,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28259,7 +28217,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28315,14 +28273,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/create.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/tag":103,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],90:[function(require,module,exports){
+},{"../../models/tag":104,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],90:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -28432,14 +28390,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/edit.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/tags":105,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],91:[function(require,module,exports){
+},{"../../repositories/tags":107,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],91:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -28500,14 +28458,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/tags":105,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],92:[function(require,module,exports){
+},{"../../repositories/tags":107,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],92:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28555,7 +28513,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/create.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/create.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28709,7 +28667,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/edit.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -28785,7 +28743,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -29082,6 +29040,15 @@ var Model = (function () {
             });
         }
     }, {
+        key: 'update',
+        value: function update(attributes) {
+            return client({
+                method: 'PATCH',
+                path: '/' + this.resourcePath + '/' + this.attributes['id'],
+                entity: attributes
+            });
+        }
+    }, {
         key: 'destroy',
         value: function destroy() {
             return client({
@@ -29141,6 +29108,90 @@ Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _model = require('./model');
+
+var _model2 = _interopRequireDefault(_model);
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+var Post = (function (_Model) {
+    _inherits(Post, _Model);
+
+    function Post(data) {
+        _classCallCheck(this, Post);
+
+        _get(Object.getPrototypeOf(Post.prototype), 'constructor', this).call(this, 'posts', {
+            id: data.id,
+            title: data.title,
+            category_id: data.category_id,
+            slug: data.slug,
+            body: data.body,
+            is_published: data.is_published,
+            order: data.order,
+            is_locked: data.is_locked,
+            locked_by_id: data.locked_by_id,
+            category: data.category ? data.category.data : {},
+            tags: data.tags ? data.tags.data : [],
+            fields: data.fields ? data.fields.data : [],
+            revisions: data.revisions ? data.revisions.data : [],
+            media: data.media ? data.media.data : {},
+            created_at: data.created_at,
+            updated_at: data.updated_at
+        });
+    }
+
+    _createClass(Post, [{
+        key: 'publish',
+        value: function publish(user_id) {
+            return client({
+                method: 'PATCH',
+                path: '/posts/' + this.attributes['id'] + '/publish',
+                entity: {
+                    is_published: this.attributes['is_published'],
+                    user_id: user_id
+                }
+            });
+        }
+    }, {
+        key: 'isShowing',
+        get: function get() {
+            if (!this.attributes['is_published']) {
+                return false;
+            }
+
+            var start = !!this.attributes['publish_start'] ? (0, _moment2['default'])(this.attributes['publish_start'], "YYYY-MM-DD HH:mm:ss") : (0, _moment2['default'])("1980-01-01", "YYYY-MM-DD");
+            var end = !!this.attributes['publish_end'] ? (0, _moment2['default'])(this.attributes['publish_end'], "YYYY-MM-DD HH:mm:ss") : (0, _moment2['default'])("2033-01-19", "YYYY-MM-DD");
+            var now = (0, _moment2['default'])();
+
+            return start <= now && now <= end;
+        }
+    }]);
+
+    return Post;
+})(_model2['default']);
+
+exports['default'] = Post;
+module.exports = exports['default'];
+
+},{"./model":102,"moment":6}],104:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -29177,7 +29228,7 @@ var Tag = (function (_Model) {
 exports['default'] = Tag;
 module.exports = exports['default'];
 
-},{"./model":102}],104:[function(require,module,exports){
+},{"./model":102}],105:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -29222,7 +29273,72 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"../models/category":101}],105:[function(require,module,exports){
+},{"../models/category":101}],106:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _modelsPost = require('../models/post');
+
+var _modelsPost2 = _interopRequireDefault(_modelsPost);
+
+exports['default'] = {
+
+    get: function get() {
+        return client({
+            path: '/posts',
+            params: this.params()
+        }).entity().then(function (entity) {
+            return entity.data.map(function (post) {
+                return new _modelsPost2['default'](post);
+            });
+        });
+    },
+
+    getById: function getById(id) {
+        return client({
+            path: '/posts/' + id,
+            params: this.params()
+        }).entity().then(function (entity) {
+            return new _modelsPost2['default'](entity.data);
+        });
+    },
+
+    params: function params() {
+        var params = {};
+        if (this.includes) {
+            params.include = this.includes;
+        }
+        if (this.orderBy) {
+            params.orderBy = this.orderBy;
+        }
+        return params;
+    },
+
+    'with': function _with() {
+        for (var _len = arguments.length, includes = Array(_len), _key = 0; _key < _len; _key++) {
+            includes[_key] = arguments[_key];
+        }
+
+        this.includes = includes ? includes.join() : '';
+
+        return this;
+    },
+
+    orderBy: function orderBy(key, dir) {
+        dir = dir ? '|' + dir : '|asc';
+        this.orderBy = key ? key + dir : '';
+
+        return this;
+    }
+};
+module.exports = exports['default'];
+
+},{"../models/post":103}],107:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -29267,6 +29383,51 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"../models/tag":103}]},{},[65]);
+},{"../models/tag":104}],108:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _modelsPost = require('../models/post');
+
+var _modelsPost2 = _interopRequireDefault(_modelsPost);
+
+exports['default'] = {
+
+    get: function get() {
+        return client({
+            path: '/users' + (this.includes || '')
+        }).entity().then(function (entity) {
+            return entity.data.map(function (user) {
+                return new _modelsPost2['default'](user);
+            });
+        });
+    },
+
+    getById: function getById(id) {
+        return client({
+            path: '/users/' + id + (this.includes || '')
+        }).entity().then(function (entity) {
+            return new _modelsPost2['default'](entity.data);
+        });
+    },
+
+    'with': function _with() {
+        for (var _len = arguments.length, includes = Array(_len), _key = 0; _key < _len; _key++) {
+            includes[_key] = arguments[_key];
+        }
+
+        this.includes = includes ? '?include=' + includes.join() : '';
+
+        return this;
+    }
+};
+module.exports = exports['default'];
+
+},{"../models/post":103}]},{},[65]);
 
 //# sourceMappingURL=admin.js.map

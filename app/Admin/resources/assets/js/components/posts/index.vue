@@ -32,7 +32,7 @@
                 <tr>
                     <th v-if="categoryFilter"><a href="#" @click.prevent="sortBy('order')">Order <i :class="orderIcon('order')"></i></a></th>
                     <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
-                    <th><a href="#" @click.prevent="sortBy('category.data.name')">Category <i :class="orderIcon('category.data.name')"></i></a></th>
+                    <th><a href="#" @click.prevent="sortBy('category.name')">Category <i :class="orderIcon('category.name')"></i></a></th>
                     <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
                     <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
                     <th class="text-centered"><a>Showing</a></th>
@@ -41,7 +41,7 @@
             <tbody>
                 <tr v-for="post in posts
                         | filterBy titleFilter in 'title'
-                        | filterBy categoryFilter in 'category.data.name'
+                        | filterBy categoryFilter in 'category.name'
                         | orderBy sortKey sortDir"
                     class="Post" :class="{ 'Post--unpublished': !post.is_published }">
 
@@ -60,7 +60,7 @@
                               title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
                     </td>
 
-                    <td>{{ post.category ? post.category.data.name : '' }}</td>
+                    <td>{{ post.category ? post.category.name : '' }}</td>
 
                     <td>{{ formatTimestamp(post.created_at) }}</td>
 
@@ -71,27 +71,29 @@
                                    type="checkbox"
                                    name="is_published"
                                    v-model="post.is_published"
-                                   @change="publish(post, $event)">
+                                   @change="post.publish()">
                             <label for="is_published_{{post.id}}"></label>
                         </div>
                     </td>
 
                     <td class="text-centered">
-                        <span v-if="isShowing(post)" class="showing"><i class="fa fa-check"></i></span>
-                        <span v-if="!isShowing(post)" class="not-showing"><i class="fa fa-times"></i></span>
+                        <span v-if="post.isShowing" class="showing"><i class="fa fa-check"></i></span>
+                        <span v-else class="not-showing"><i class="fa fa-times"></i></span>
                     </td>
 
                 </tr>
             </tbody>
         </table>
 
-        <paginator :pagination="pagination"></paginator>
     </div>
 </template>
 
 <script>
     import moment from 'moment';
     import swal from 'sweetalert';
+    import posts from '../../repositories/posts';
+    import categories from '../../repositories/categories';
+    import users from '../../repositories/users';
 
     export default {
 
@@ -100,7 +102,6 @@
         data: function () {
             return {
                 posts: [],
-                pagination: { links: {} },
                 categories: [],
                 users: [],
                 titleFilter: null,
@@ -110,70 +111,13 @@
             }
         },
 
+        ready: function() {
+            this.$nextTick(function() {
+                this.initTooltips();
+            }.bind(this));
+        },
+
         methods: {
-
-            fetch: function () {
-                var self = this;
-                return client({
-                    path: '/posts?include=category&orderBy=updated_at|desc'
-                }).then(function (response) {
-                    self.pagination = response.entity.meta.pagination;
-                    self.posts = response.entity.data;
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
-                });
-            },
-
-            fetchUsers: function () {
-                var self = this;
-                return client({
-                    path: '/users'
-                }).then(function (response) {
-                    self.users = response.entity.data;
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
-                });
-            },
-
-            fetchCategories: function () {
-                var self = this;
-                return client({
-                    path: '/categories'
-                }).then(function (response) {
-                    self.categories = response.entity.data;
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
-                });
-            },
-
-            publish: function (post) {
-                return client({
-                    method: 'PATCH',
-                    path: '/posts/' + post.id + '/publish',
-                    entity: {
-                        is_published: post.is_published,
-                        user_id: this.currentUser.id
-                    }
-                });
-            },
-
-            isShowing: function (post) {
-                if (! post.is_published) {
-                    return false;
-                }
-
-                var start = !!post.publish_start ? moment(post.publish_start, "YYYY-MM-DD HH:mm:ss") : moment("1980-01-01", "YYYY-MM-DD");
-                var end   = !!post.publish_end   ? moment(post.publish_end, "YYYY-MM-DD HH:mm:ss")   : moment("2033-01-19", "YYYY-MM-DD");
-                var now = moment();
-
-                return (start <= now && now <= end);
-            },
 
             goToPost: function (post) {
                 if (! post.is_locked) {
@@ -337,11 +281,11 @@
 
         route: {
             data: function (transition) {
-                this.fetch()
-                    .then(this.fetchCategories)
-                    .then(this.fetchUsers)
-                    .then(transition.next)
-                    .then(this.initTooltips);
+                return {
+                    posts: posts.with('category').orderBy('updated_at', 'desc').get(),
+                    categories: categories.get(),
+                    users: users.get()
+                };
             }
         }
 

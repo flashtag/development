@@ -23,6 +23,14 @@
             });
         }
 
+        update(attributes) {
+            return client({
+                method: 'PATCH',
+                path: '/' + this.resourcePath + '/' + this.attributes['id'],
+                entity: attributes
+            });
+        }
+
         destroy() {
             return client({
                 method: 'DELETE',
