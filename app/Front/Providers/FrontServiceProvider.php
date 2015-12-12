@@ -23,5 +23,9 @@ class FrontServiceProvider extends ServiceProvider
                 require __DIR__.'/../Http/routes.php';
             });
         }
+
+        $this->publishes([
+            __DIR__.'/../public/assets' => public_path('assets/front')
+        ], 'public');
     }
 }
