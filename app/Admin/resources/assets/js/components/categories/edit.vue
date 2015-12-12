@@ -160,10 +160,7 @@
                     closeOnConfirm: false,
                     showLoaderOnConfirm: true
                 }, function () {
-                    client({
-                        method: 'DELETE',
-                        path: '/categories/' + self.category.id
-                    }).then(function () {
+                    self.category.destroy().then(function () {
                         swal({
                             html: true,
                             title: 'Deleted!',

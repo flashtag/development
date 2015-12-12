@@ -33,6 +33,8 @@
 </template>
 
 <script>
+    import Category from '../../models/category';
+
     export default {
 
         props: ['current-user'],
@@ -53,11 +55,7 @@
              */
             save: function() {
                 var self = this;
-                client({
-                    method: 'POST',
-                    path: '/categories',
-                    entity: this.category
-                }).then(function (response) {
+                Category.create(this.category).then(function (response) {
                     self.$route.router.go('/categories');
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {

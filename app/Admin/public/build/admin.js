@@ -26329,7 +26329,14 @@ if (module.hot) {(function () {  module.hot.accept()
 },{"vue":44,"vue-hot-reload-api":42,"vueify-insert-css":45}],70:[function(require,module,exports){
 'use strict';
 
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
 exports.__esModule = true;
+
+var _modelsCategory = require('../../models/category');
+
+var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
+
 exports['default'] = {
 
     props: ['current-user'],
@@ -26350,11 +26357,7 @@ exports['default'] = {
          */
         save: function save() {
             var self = this;
-            client({
-                method: 'POST',
-                path: '/categories',
-                entity: this.category
-            }).then(function (response) {
+            _modelsCategory2['default'].create(this.category).then(function (response) {
                 self.$route.router.go('/categories');
             }, function (response) {
                 if (response.status.code == 401 || response.status.code == 500) {
@@ -26379,7 +26382,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":44,"vue-hot-reload-api":42}],71:[function(require,module,exports){
+},{"../../models/category":101,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],71:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -26451,10 +26454,7 @@ exports['default'] = {
                 closeOnConfirm: false,
                 showLoaderOnConfirm: true
             }, function () {
-                client({
-                    method: 'DELETE',
-                    path: '/categories/' + self.category.id
-                }).then(function () {
+                self.category.destroy().then(function () {
                     _sweetalert2['default']({
                         html: true,
                         title: 'Deleted!',
@@ -28269,7 +28269,14 @@ if (module.hot) {(function () {  module.hot.accept()
 },{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":4,"moment":6,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],89:[function(require,module,exports){
 'use strict';
 
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
 exports.__esModule = true;
+
+var _modelsTag = require('../../models/tag');
+
+var _modelsTag2 = _interopRequireDefault(_modelsTag);
+
 exports['default'] = {
 
     props: ['current-user'],
@@ -28290,11 +28297,7 @@ exports['default'] = {
          */
         save: function save() {
             var self = this;
-            client({
-                method: 'POST',
-                path: '/tags',
-                entity: this.tag
-            }).then(function (response) {
+            _modelsTag2['default'].create(this.tag).then(function (response) {
                 self.$route.router.go('/tags');
             }, function (response) {
                 if (response.status.code == 401 || response.status.code == 500) {
@@ -28319,12 +28322,16 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":44,"vue-hot-reload-api":42}],90:[function(require,module,exports){
+},{"../../models/tag":103,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],90:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
 exports.__esModule = true;
+
+var _repositoriesTags = require('../../repositories/tags');
+
+var _repositoriesTags2 = _interopRequireDefault(_repositoriesTags);
 
 var _sweetalert = require('sweetalert');
 
@@ -28346,29 +28353,12 @@ exports['default'] = {
 
     methods: {
 
-        fetch: function fetch(successHandler) {
-            var self = this;
-            client({
-                path: '/tags/' + this.$route.params.tag_id
-            }).then(function (response) {
-                self.tag = response.entity.data;
-                successHandler(self.tag);
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
         /**
          * Save the post.
          */
         save: function save() {
             var self = this;
-            console.log(this.tag);
-            client({
-                method: 'PUT',
-                path: '/tags/' + this.tag.id,
-                entity: this.tag
-            }).then(function (response) {
+            this.tag.save().then(function (response) {
                 self.notify('success', 'Saved successfully.');
             }, function (response) {
                 self.checkResponseStatus(response);
@@ -28387,10 +28377,7 @@ exports['default'] = {
                 closeOnConfirm: false,
                 showLoaderOnConfirm: true
             }, function () {
-                client({
-                    method: 'DELETE',
-                    path: '/tags/' + self.tag.id
-                }).then(function () {
+                self.tag.destroy().then(function () {
                     _sweetalert2['default']({
                         html: true,
                         title: 'Deleted!',
@@ -28432,9 +28419,9 @@ exports['default'] = {
 
     route: {
         data: function data(transition) {
-            this.fetch((function (tag) {
-                transition.next({ tag: tag });
-            }).bind(this));
+            return {
+                tag: _repositoriesTags2['default'].getById(transition.to.params.tag_id)
+            };
         }
     }
 
@@ -28452,10 +28439,17 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],91:[function(require,module,exports){
+},{"../../repositories/tags":105,"babel-runtime/helpers/interop-require-default":1,"sweetalert":41,"vue":44,"vue-hot-reload-api":42}],91:[function(require,module,exports){
 'use strict';
 
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
 exports.__esModule = true;
+
+var _repositoriesTags = require('../../repositories/tags');
+
+var _repositoriesTags2 = _interopRequireDefault(_repositoriesTags);
+
 exports['default'] = {
 
     props: ['current-user'],
@@ -28471,21 +28465,6 @@ exports['default'] = {
     },
 
     methods: {
-
-        fetch: function fetch(successHandler) {
-            var self = this;
-            client({
-                path: '/tags'
-            }).then(function (response) {
-                self.tags = response.entity.data;
-                self.pagination = response.entity.meta.pagination;
-                successHandler(response.entity.data);
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
 
         sortBy: function sortBy(key) {
             if (this.sortKey == key) {
@@ -28508,9 +28487,9 @@ exports['default'] = {
 
     route: {
         data: function data(transition) {
-            this.fetch(function (data) {
-                transition.next({ tags: data });
-            });
+            return {
+                tags: _repositoriesTags2['default'].get()
+            };
         }
     }
 
@@ -28528,7 +28507,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":44,"vue-hot-reload-api":42}],92:[function(require,module,exports){
+},{"../../repositories/tags":105,"babel-runtime/helpers/interop-require-default":1,"vue":44,"vue-hot-reload-api":42}],92:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -29026,31 +29005,6 @@ module.exports = {
 };
 
 },{"../components/authors/create.vue":66,"../components/authors/edit.vue":67,"../components/authors/index.vue":68,"../components/categories/create.vue":70,"../components/categories/edit.vue":71,"../components/categories/index.vue":72,"../components/home.vue":73,"../components/post-fields/create.vue":79,"../components/post-fields/edit.vue":80,"../components/post-fields/index.vue":81,"../components/posts/create.vue":84,"../components/posts/edit.vue":85,"../components/posts/index.vue":86,"../components/posts/revisions/index.vue":87,"../components/posts/revisions/show.vue":88,"../components/tags/create.vue":89,"../components/tags/edit.vue":90,"../components/tags/index.vue":91,"../components/users/create.vue":92,"../components/users/edit.vue":93,"../components/users/index.vue":94}],101:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Tag = function Tag(data) {
-    _classCallCheck(this, Tag);
-
-    this.id = data.id;
-    this.name = data.name;
-    this.slug = data.slug;
-    this.description = data.description;
-    this.posts = data.posts || [];
-    this.media = data.media ? data.media.data : {};
-    this.created_at = data.created_at;
-    this.updated_at = data.updated_at;
-};
-
-exports["default"] = Tag;
-module.exports = exports["default"];
-
-},{}],102:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -29085,7 +29039,7 @@ var Category = (function (_Model) {
             order_dir: data.order_dir,
             parent: data.parent,
             posts: data.posts ? data.posts.data : [],
-            tags: data.tags.data || [],
+            tags: data.tags ? data.tags.data : [],
             media: data.media ? data.media.data : {},
             created_at: data.created_at,
             updated_at: data.updated_at
@@ -29098,7 +29052,7 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":103}],103:[function(require,module,exports){
+},{"./model":102}],102:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -29119,6 +29073,23 @@ var Model = (function () {
     }
 
     _createClass(Model, [{
+        key: 'save',
+        value: function save() {
+            return client({
+                method: 'PUT',
+                path: '/' + this.resourcePath + '/' + this.attributes['id'],
+                entity: this.attributes
+            });
+        }
+    }, {
+        key: 'destroy',
+        value: function destroy() {
+            return client({
+                method: 'DELETE',
+                path: '/' + this.resourcePath + '/' + this.attributes['id']
+            });
+        }
+    }, {
         key: '_createGettersAndSetters',
         value: function _createGettersAndSetters() {
             for (var prop in this.attributes) {
@@ -29144,13 +29115,15 @@ var Model = (function () {
                 this.attributes[prop] = value;
             };
         }
-    }, {
-        key: 'save',
-        value: function save() {
+    }], [{
+        key: 'create',
+        value: function create(attributes) {
+            var model = new this(attributes);
+
             return client({
-                method: 'PUT',
-                path: '/' + this.resourcePath + '/' + this.attributes['id'],
-                entity: this.attributes
+                method: 'POST',
+                path: '/' + model.resourcePath,
+                entity: model.attributes
             });
         }
     }]);
@@ -29161,7 +29134,50 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],104:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _model = require('./model');
+
+var _model2 = _interopRequireDefault(_model);
+
+var Tag = (function (_Model) {
+    _inherits(Tag, _Model);
+
+    function Tag(data) {
+        _classCallCheck(this, Tag);
+
+        _get(Object.getPrototypeOf(Tag.prototype), 'constructor', this).call(this, 'tags', {
+            id: data.id,
+            name: data.name,
+            slug: data.slug,
+            description: data.description,
+            posts: data.posts || [],
+            media: data.media ? data.media.data : {},
+            created_at: data.created_at,
+            updated_at: data.updated_at
+        });
+    }
+
+    return Tag;
+})(_model2['default']);
+
+exports['default'] = Tag;
+module.exports = exports['default'];
+
+},{"./model":102}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -29194,20 +29210,19 @@ exports['default'] = {
         });
     },
 
-    'with': function _with(includes) {
-        if (includes.constructor === Array) {
-            this.includes = '?include=' + includes.join();
-        } else {
-            this.includes = includes ? '?include=' + includes : '';
+    'with': function _with() {
+        for (var _len = arguments.length, includes = Array(_len), _key = 0; _key < _len; _key++) {
+            includes[_key] = arguments[_key];
         }
+
+        this.includes = includes ? '?include=' + includes.join() : '';
 
         return this;
     }
-
 };
 module.exports = exports['default'];
 
-},{"../models/category":102}],105:[function(require,module,exports){
+},{"../models/category":101}],105:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -29216,7 +29231,7 @@ Object.defineProperty(exports, '__esModule', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _modelsTag = require('../models/Tag');
+var _modelsTag = require('../models/tag');
 
 var _modelsTag2 = _interopRequireDefault(_modelsTag);
 
@@ -29240,19 +29255,18 @@ exports['default'] = {
         });
     },
 
-    'with': function _with(includes) {
-        if (includes.constructor === Array) {
-            this.includes = '?include=' + includes.join();
-        } else {
-            this.includes = includes ? '?include=' + includes : '';
+    'with': function _with() {
+        for (var _len = arguments.length, includes = Array(_len), _key = 0; _key < _len; _key++) {
+            includes[_key] = arguments[_key];
         }
+
+        this.includes = includes ? '?include=' + includes.join : '';
 
         return this;
     }
-
 };
 module.exports = exports['default'];
 
-},{"../models/Tag":101}]},{},[65]);
+},{"../models/tag":103}]},{},[65]);
 
 //# sourceMappingURL=admin.js.map

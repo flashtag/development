@@ -33,6 +33,8 @@
 </template>
 
 <script>
+    import Tag from '../../models/tag';
+
     export default {
 
         props: ['current-user'],
@@ -53,11 +55,7 @@
              */
             save: function() {
                 var self = this;
-                client({
-                    method: 'POST',
-                    path: '/tags',
-                    entity: this.tag
-                }).then(function (response) {
+                Tag.create(this.tag).then(function (response) {
                     self.$route.router.go('/tags');
                 }, function (response) {
                     if (response.status.code == 401 || response.status.code == 500) {

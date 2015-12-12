@@ -1,4 +1,4 @@
-import Tag from '../models/Tag';
+import Tag from '../models/tag';
 
 export default {
 
@@ -20,14 +20,9 @@ export default {
         });
     },
 
-    with(includes) {
-        if (includes.constructor === Array) {
-            this.includes = '?include=' + includes.join();
-        } else {
-            this.includes = includes ? '?include=' + includes : '';
-        }
+    with(...includes) {
+        this.includes = includes ? '?include=' + includes.join : '';
 
         return this;
     }
-
 }

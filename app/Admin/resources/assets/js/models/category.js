@@ -12,7 +12,7 @@ class Category extends Model {
             order_dir: data.order_dir,
             parent: data.parent,
             posts: data.posts ? data.posts.data : [],
-            tags: data.tags.data || [],
+            tags: data.tags ? data.tags.data : [],
             media: data.media ? data.media.data : {},
             created_at: data.created_at,
             updated_at: data.updated_at

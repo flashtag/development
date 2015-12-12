@@ -34,6 +34,7 @@
 </template>
 
 <script>
+    import tags from '../../repositories/tags';
     import swal from 'sweetalert';
 
     export default {
@@ -52,29 +53,12 @@
 
         methods: {
 
-            fetch: function (successHandler) {
-                var self = this;
-                client({
-                    path: '/tags/'+ this.$route.params.tag_id
-                }).then(function (response) {
-                    self.tag = response.entity.data;
-                    successHandler(self.tag);
-                }, function (response) {
-                    self.checkResponseStatus(response);
-                });
-            },
-
             /**
              * Save the post.
              */
             save: function() {
                 var self = this;
-                console.log(this.tag);
-                client({
-                    method: 'PUT',
-                    path: '/tags/'+this.tag.id,
-                    entity: this.tag
-                }).then(function (response) {
+                this.tag.save().then(function (response) {
                     self.notify('success', 'Saved successfully.');
                 }, function (response) {
                     self.checkResponseStatus(response);
@@ -93,22 +77,20 @@
                     closeOnConfirm: false,
                     showLoaderOnConfirm: true
                 }, function () {
-                    client({
-                        method: 'DELETE',
-                        path: '/tags/' + self.tag.id
-                    }).then(function () {
-                        swal({
-                            html: true,
-                            title: 'Deleted!',
-                            text: '<strong>' + self.tag.name + '</strong> was deleted!',
-                            type: 'success'
+                    self.tag.destroy()
+                        .then(function () {
+                            swal({
+                                html: true,
+                                title: 'Deleted!',
+                                text: '<strong>' + self.tag.name + '</strong> was deleted!',
+                                type: 'success'
+                            }, function () {
+                                self.deleted = true;
+                                self.$route.router.go('/tags');
+                            });
                         }, function () {
-                            self.deleted = true;
-                            self.$route.router.go('/tags');
+                            swal("Oops", "We couldn't connect to the server!", "error");
                         });
-                    }, function () {
-                        swal("Oops", "We couldn't connect to the server!", "error");
-                    });
                 });
             },
 
@@ -138,9 +120,9 @@
 
         route: {
             data: function (transition) {
-                this.fetch(function (tag) {
-                    transition.next({tag: tag});
-                }.bind(this));
+                return {
+                    tag: tags.getById(transition.to.params.tag_id)
+                };
             }
         }
 

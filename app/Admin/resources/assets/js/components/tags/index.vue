@@ -34,6 +34,8 @@
 </template>
 
 <script>
+    import tags from '../../repositories/tags';
+
     export default {
 
         props: ['current-user'],
@@ -49,21 +51,6 @@
         },
 
         methods: {
-
-            fetch: function (successHandler) {
-                var self = this;
-                client({
-                    path: '/tags'
-                }).then(function (response) {
-                    self.tags = response.entity.data;
-                    self.pagination = response.entity.meta.pagination;
-                    successHandler(response.entity.data);
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
-                });
-            },
 
             sortBy: function (key) {
                 if (this.sortKey == key) {
@@ -86,9 +73,9 @@
 
         route: {
             data: function (transition) {
-                this.fetch(function (data) {
-                    transition.next({tags: data})
-                });
+                return {
+                    tags: tags.get()
+                };
             }
         }
 
