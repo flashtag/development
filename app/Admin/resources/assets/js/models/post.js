@@ -10,6 +10,8 @@ class Post extends Model {
             slug: data.slug,
             body: data.body,
             is_published: data.is_published,
+            start_showing_at: data.start_showing_at,
+            stop_showing_at: data.stop_showing_at,
             order: data.order,
             is_locked: data.is_locked,
             locked_by_id: data.locked_by_id,
@@ -39,11 +41,11 @@ class Post extends Model {
             return false;
         }
 
-        var start = !!this.attributes['publish_start'] ? moment(this.attributes['publish_start'], "YYYY-MM-DD HH:mm:ss") : moment("1980-01-01", "YYYY-MM-DD");
-        var end = !!this.attributes['publish_end'] ? moment(this.attributes['publish_end'], "YYYY-MM-DD HH:mm:ss")   : moment("2033-01-19", "YYYY-MM-DD");
+        var start = !!this.attributes['start_showing_at'] ? moment(this.attributes['start_showing_at'], "YYYY-MM-DD HH:mm:ss") : moment("1980-01-01", "YYYY-MM-DD");
+        var stop = !!this.attributes['stop_showing_at'] ? moment(this.attributes['stop_showing_at'], "YYYY-MM-DD HH:mm:ss")   : moment("2033-01-19", "YYYY-MM-DD");
         var now = moment();
 
-        return (start <= now && now <= end);
+        return (start <= now && now <= stop);
     }
 }
 
