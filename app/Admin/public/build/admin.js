@@ -29059,28 +29059,24 @@ var Model = (function () {
     }, {
         key: '_createGettersAndSetters',
         value: function _createGettersAndSetters() {
-            for (var prop in this.attributes) {
-                if (this.attributes.hasOwnProperty(prop)) {
-                    Object.defineProperty(this, prop, {
-                        get: this._createGetterFor(prop),
-                        set: this._createSetterFor(prop)
+            var _this = this;
+
+            var _loop = function (prop) {
+                if (_this.attributes.hasOwnProperty(prop)) {
+                    Object.defineProperty(_this, prop, {
+                        get: function get() {
+                            return this.attributes[prop];
+                        },
+                        set: function set(value) {
+                            this.attributes[prop] = value;
+                        }
                     });
                 }
+            };
+
+            for (var prop in this.attributes) {
+                _loop(prop);
             }
-        }
-    }, {
-        key: '_createGetterFor',
-        value: function _createGetterFor(prop) {
-            return function () {
-                return this.attributes[prop];
-            };
-        }
-    }, {
-        key: '_createSetterFor',
-        value: function _createSetterFor(prop) {
-            return function (value) {
-                this.attributes[prop] = value;
-            };
         }
     }], [{
         key: 'create',

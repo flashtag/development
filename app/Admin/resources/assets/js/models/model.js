@@ -39,22 +39,14 @@
         }
 
         _createGettersAndSetters() {
-            for (var prop in this.attributes) {
+            for (let prop in this.attributes) {
                 if (this.attributes.hasOwnProperty(prop)) {
                     Object.defineProperty(this, prop, {
-                        get: this._createGetterFor(prop),
-                        set: this._createSetterFor(prop)
+                        get: function() { return this.attributes[prop]; },
+                        set: function(value) { this.attributes[prop] = value; }
                     });
                 }
             }
-        }
-
-        _createGetterFor(prop) {
-            return function() { return this.attributes[prop]; };
-        }
-
-        _createSetterFor(prop) {
-            return function(value) { this.attributes[prop] = value; };
         }
     }
 
