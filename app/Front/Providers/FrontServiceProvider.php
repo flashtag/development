@@ -25,6 +25,7 @@ class FrontServiceProvider extends ServiceProvider
         }
 
         $this->publishes([
+            __DIR__.'/../resources/views' => base_path('resources/views/vendor/front'),
             __DIR__.'/../public/assets' => public_path('assets/front')
         ], 'public');
     }
