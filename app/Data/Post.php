@@ -413,10 +413,14 @@ class Post extends Model implements HasPresenter
      */
     public function scopeShowing($query)
     {
-        $now = new Carbon();
-
         return $query->where('is_published', true)
-            ->where('start_showing_at', '<', $now)
-            ->where('stop_showing_at', '>', $now);
+            ->where(function ($query) {
+                $query->where('start_showing_at', '<', new Carbon())
+                    ->orWhere('start_showing_at', null);
+            })
+            ->where(function ($query) {
+                $query->where('stop_showing_at', '>', new Carbon())
+                    ->orWhere('stop_showing_at', null);
+            });
     }
 }
