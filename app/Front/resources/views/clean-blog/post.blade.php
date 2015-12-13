@@ -12,7 +12,7 @@
                         <h2 class="subheading">{{ $post->subtitle }}</h2>
                         <span class="meta">
                             Published
-                            @if ($post->show_author) by <a href="/authors/{{ $post->author->slug }}">{{ $post->author->name or 'Flashtag' }}</a> @endif
+                            @if ($post->show_author && $post->author) by <a href="/authors/{{ $post->author->slug }}">{{ $post->author->name or 'Flashtag' }}</a> @endif
                             on {{ $post->publishedOn() }}
                             @if ($post->category) in <a href="/{{ $post->category->slug }}">{{ $post->category->name }}</a> @endif
                         </span>
