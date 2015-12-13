@@ -220,7 +220,7 @@
                     path: '/posts/'+ this.$route.params.post_id +'?include=category,tags,fields,meta,author,media'
                 }).then(function (response) {
                     self.post = response.entity.data;
-                    self.post.category = self.post.category.data;
+                    self.post.category = self.post.category ? self.post.category.data : {};
                     self.post.fields = self.post.fields.data;
                     self.post.meta = self.post.meta ? self.post.meta.data : {};
                     self.post.author = self.post.author ? self.post.author.data : {};
