@@ -15,8 +15,6 @@
 </template>
 
 <script>
-import Cookies from 'js-cookie';
-
 export default {
 
     data: function() {
@@ -45,38 +43,38 @@ export default {
         },
 
         setLoginStatus: function () {
-            var token = Cookies.get('jwt-token');
+            var token = localStorage.getItem('jwt-token');
             if (token !== null && token !== 'undefined') {
                 var self = this;
-                client({
-                    path: '/auth/user/me'
-                }).then(function (response) {
-                    self.setLogin(response.entity.user);
-                    self.$broadcast('data-loaded');
-                }, function (response) {
-                    self.destroyLogin();
-                });
+                client.get('/api/auth/user/me')
+                    .then(function (response) {
+                        self.setLogin(response.data.user);
+                        self.$broadcast('data-loaded');
+                    }, function (response) {
+                        self.destroyLogin();
+                    });
             }
         },
 
         setLogin: function (user) {
             this.user = user;
             this.authenticated = true;
-            this.token = Cookies.get('jwt-token');
+            this.token = localStorage.getItem('jwt-token');
         },
 
         destroyLogin: function () {
             this.user = null;
             this.token = null;
             this.authenticated = false;
-            Cookies.remove('jwt-token');
+            localStorage.removeItem('jwt-token');
         },
 
         getInitialToken: function () {
-            if (! Cookies.get('jwt-token')) {
+            this.token = localStorage.getItem('jwt-token');
+            if (this.token === null || this.token === 'undefined') {
                 this.token = document.getElementById('jwt').getAttribute('content');
-                Cookies.set('jwt-token', 'Bearer ' + this.token, {expires: 7, path: ''});
             }
+            localStorage.setItem('jwt-token', 'Bearer ' + this.token);
         }
 
     }

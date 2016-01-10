@@ -1,17 +1,15 @@
 import Vue from 'vue';
-import Router from 'vue-router';
-import Admin from './App.vue'
 
-Vue.use(Router);
+Vue.use(require('vue-router'));
+Vue.use(require('vue-resource'));
 
 // Develop
 Vue.config.debug = true;
 
-// Rest client
-window.client = require('./http/client');
-
-// Router
-var router = require('./http/router');
+// HTTP Client
+Vue.http.interceptors.push(require('./http/interceptors/jwtAuth'));
+window.client = Vue.http;
+window.resource = Vue.resource;
 
 // Components
 Vue.component('top-nav', require('./components/partials/top-nav.vue'));
@@ -23,4 +21,5 @@ Vue.directive('select', require('./directives/select'));
 Vue.directive('rich-editor', require('./directives/rich-editor'));
 
 // Start
-router.start(Admin, '#Admin');
+var router = require('./http/router');
+router.start(require('./App.vue'), '#Admin');

@@ -1,6 +1,5 @@
 <template>
     <h1>Dashboard for {{ userName }}</h1>
-
 </template>
 
 <script>

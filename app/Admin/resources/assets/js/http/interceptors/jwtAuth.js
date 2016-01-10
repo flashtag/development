@@ -1,48 +1,25 @@
-var Cookies = require('js-cookie');
+export default {
 
-(function (define) {
-    'use strict';
+    request: function (request) {
+        var token = localStorage.getItem('jwt-token');
+        var headers = request.headers || (request.headers = {});
 
-    define(function (require) {
+        if (token !== null && token !== 'undefined') {
+            headers.Authorization = token;
+        }
 
-        var interceptor = require('rest/interceptor');
+        return request;
+    },
 
-        /**
-         * Authenticates the request using JWT Authentication
-         *
-         * @param {Client} [client] client to wrap
-         * @param {Object} config
-         *
-         * @returns {Client}
-         */
-        return interceptor({
-            request: function (request, config) {
-                var token = Cookies.get('jwt-token');
-                var headers = request.headers || (request.headers = {});
+    response: function (response) {
+        if (response.status == 401) {
+            localStorage.removeItem('jwt-token');
+        }
+        if (response.headers('authorization')) {
+            localStorage.setItem('jwt-token', response.headers('authorization'))
+        }
 
-                if (token !== null && token !== 'undefined') {
-                    headers.Authorization = token;
-                }
+        return response;
+    }
 
-                return request;
-            },
-            response: function (response) {
-                if (response.status && response.status.code == 401) {
-                    Cookies.remove('jwt-token');
-                }
-                if (response.headers && response.headers.Authorization) {
-                    Cookies.set('jwt-token', response.headers.Authorization, { expires: 7, path: '' })
-                }
-                if (response.entity && response.entity.token && response.entity.token.length > 10) {
-                    Cookies.set('jwt-token', 'Bearer ' + response.entity.token, { expires: 7, path: '' });
-                }
-
-                return response;
-            }
-        });
-
-    });
-
-}(
-    typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); }
-));
+}
