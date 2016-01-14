@@ -361,18 +361,14 @@ class Post extends Model implements HasPresenter
      * @param int|null $count
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function getLatest($count = null)
+    public static function getLatest($count = 10)
     {
         $query = static::showing()
             ->with('author', 'category')
             ->orderBy('start_showing_at', 'DESC')
             ->orderBy('created_at', 'DESC');
 
-        if ($count) {
-            return $query->take($count)->get();
-        }
-
-        return $query->get();
+        return $query->simplePaginate($count);
     }
 
     /**
