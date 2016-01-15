@@ -13,13 +13,14 @@ $router->post('password/email', 'Auth\PasswordController@postEmail');
 $router->get('password/reset/{token}', 'Auth\PasswordController@getReset');
 $router->post('password/reset', 'Auth\PasswordController@postReset');
 
+// Administration routes...
 $router->group(['middleware' => 'auth'], function ($router) {
-    // Admin dashboard
-    $router->get('/', function () {
-        $user = \Auth::user();
-        $auth = app(\Tymon\JWTAuth\JWTAuth::class);
-        $token = $auth->fromUser($user);
-
-        return  view('admin::admin', compact('user', 'token'));
-    });
+    $router->get('/', 'HomeController@home');
+    $router->resource('posts', 'PostsController');
+    $router->resource('posts/{post_id}/revisions', 'RevisionsController', ['only' => ['index', 'show']]);
+    $router->resource('post-fields', 'PostFieldsController');
+    $router->resource('categories', 'CategoriesController');
+    $router->resource('tags', 'TagsController');
+    $router->resource('authors', 'AuthorsController');
+    $router->resource('users', 'UsersController');
 });
