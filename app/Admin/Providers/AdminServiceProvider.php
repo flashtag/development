@@ -19,6 +19,10 @@ class AdminServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'admin');
 
         $this->publishesAssets();
+
+        view()->composer('admin::layout', function ($view) {
+            $view->with('current_user', \Auth::user());
+        });
     }
 
     private function defineAdminRoutes($router)
