@@ -2,24 +2,29 @@ import Post from '../models/post';
 
 export default {
 
+    resource: resource('posts{/id}'),
+
     get() {
-        return client({
-            path: '/posts',
-            params: this.params()
-        }).entity().then(function(entity) {
-            return entity.data.map(function(post) {
-                return new Post(post);
+        var posts;
+
+        this.resource.get(this.params())
+            .then(function(response) {
+                posts = response.data.data.map(function(p) {
+                    return new Post(p);
+                });
             });
-        });
+
+        return posts;
     },
 
     getById(id) {
-        return client({
-            path: '/posts/' + id,
-            params: this.params()
-        }).entity().then(function(entity) {
-            return new Post(entity.data);
-        });
+        var params = this.params();
+        params.id = id;
+
+        return this.resource.get(params)
+            .then(function(response) {
+                return new Post(response.data.data);
+            });
     },
 
     params() {

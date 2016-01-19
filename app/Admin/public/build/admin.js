@@ -9,2201 +9,6 @@ exports["default"] = function (obj) {
 
 exports.__esModule = true;
 },{}],2:[function(require,module,exports){
-'use strict'
-
-/**
- * Diff Match and Patch
- *
- * Copyright 2006 Google Inc.
- * http://code.google.com/p/google-diff-match-patch/
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @fileoverview Computes the difference between two texts to create a patch.
- * Applies the patch onto another text, allowing for errors.
- * @author fraser@google.com (Neil Fraser)
- */
-
-/**
- * Class containing the diff, match and patch methods.
- * @constructor
- */
-function diff_match_patch() {
-
-  // Defaults.
-  // Redefine these in your program to override the defaults.
-
-  // Number of seconds to map a diff before giving up (0 for infinity).
-  this.Diff_Timeout = 1.0;
-  // Cost of an empty edit operation in terms of edit characters.
-  this.Diff_EditCost = 4;
-  // At what point is no match declared (0.0 = perfection, 1.0 = very loose).
-  this.Match_Threshold = 0.5;
-  // How far to search for a match (0 = exact location, 1000+ = broad match).
-  // A match this many characters away from the expected location will add
-  // 1.0 to the score (0.0 is a perfect match).
-  this.Match_Distance = 1000;
-  // When deleting a large block of text (over ~64 characters), how close do
-  // the contents have to be to match the expected contents. (0.0 = perfection,
-  // 1.0 = very loose).  Note that Match_Threshold controls how closely the
-  // end points of a delete need to match.
-  this.Patch_DeleteThreshold = 0.5;
-  // Chunk size for context length.
-  this.Patch_Margin = 4;
-
-  // The number of bits in an int.
-  this.Match_MaxBits = 32;
-}
-
-
-//  DIFF FUNCTIONS
-
-
-/**
- * The data structure representing a diff is an array of tuples:
- * [[DIFF_DELETE, 'Hello'], [DIFF_INSERT, 'Goodbye'], [DIFF_EQUAL, ' world.']]
- * which means: delete 'Hello', add 'Goodbye' and keep ' world.'
- */
-var DIFF_DELETE = -1;
-var DIFF_INSERT = 1;
-var DIFF_EQUAL = 0;
-
-/** @typedef {{0: number, 1: string}} */
-diff_match_patch.Diff;
-
-
-/**
- * Find the differences between two texts.  Simplifies the problem by stripping
- * any common prefix or suffix off the texts before diffing.
- * @param {string} text1 Old string to be diffed.
- * @param {string} text2 New string to be diffed.
- * @param {boolean=} opt_checklines Optional speedup flag. If present and false,
- *     then don't run a line-level diff first to identify the changed areas.
- *     Defaults to true, which does a faster, slightly less optimal diff.
- * @param {number} opt_deadline Optional time when the diff should be complete
- *     by.  Used internally for recursive calls.  Users should set DiffTimeout
- *     instead.
- * @return {!Array.<!diff_match_patch.Diff>} Array of diff tuples.
- */
-diff_match_patch.prototype.diff_main = function(text1, text2, opt_checklines,
-    opt_deadline) {
-  // Set a deadline by which time the diff must be complete.
-  if (typeof opt_deadline == 'undefined') {
-    if (this.Diff_Timeout <= 0) {
-      opt_deadline = Number.MAX_VALUE;
-    } else {
-      opt_deadline = (new Date).getTime() + this.Diff_Timeout * 1000;
-    }
-  }
-  var deadline = opt_deadline;
-
-  // Check for null inputs.
-  if (text1 == null || text2 == null) {
-    throw new Error('Null input. (diff_main)');
-  }
-
-  // Check for equality (speedup).
-  if (text1 == text2) {
-    if (text1) {
-      return [[DIFF_EQUAL, text1]];
-    }
-    return [];
-  }
-
-  if (typeof opt_checklines == 'undefined') {
-    opt_checklines = true;
-  }
-  var checklines = opt_checklines;
-
-  // Trim off common prefix (speedup).
-  var commonlength = this.diff_commonPrefix(text1, text2);
-  var commonprefix = text1.substring(0, commonlength);
-  text1 = text1.substring(commonlength);
-  text2 = text2.substring(commonlength);
-
-  // Trim off common suffix (speedup).
-  commonlength = this.diff_commonSuffix(text1, text2);
-  var commonsuffix = text1.substring(text1.length - commonlength);
-  text1 = text1.substring(0, text1.length - commonlength);
-  text2 = text2.substring(0, text2.length - commonlength);
-
-  // Compute the diff on the middle block.
-  var diffs = this.diff_compute_(text1, text2, checklines, deadline);
-
-  // Restore the prefix and suffix.
-  if (commonprefix) {
-    diffs.unshift([DIFF_EQUAL, commonprefix]);
-  }
-  if (commonsuffix) {
-    diffs.push([DIFF_EQUAL, commonsuffix]);
-  }
-  this.diff_cleanupMerge(diffs);
-  return diffs;
-};
-
-
-/**
- * Find the differences between two texts.  Assumes that the texts do not
- * have any common prefix or suffix.
- * @param {string} text1 Old string to be diffed.
- * @param {string} text2 New string to be diffed.
- * @param {boolean} checklines Speedup flag.  If false, then don't run a
- *     line-level diff first to identify the changed areas.
- *     If true, then run a faster, slightly less optimal diff.
- * @param {number} deadline Time when the diff should be complete by.
- * @return {!Array.<!diff_match_patch.Diff>} Array of diff tuples.
- * @private
- */
-diff_match_patch.prototype.diff_compute_ = function(text1, text2, checklines,
-    deadline) {
-  var diffs;
-
-  if (!text1) {
-    // Just add some text (speedup).
-    return [[DIFF_INSERT, text2]];
-  }
-
-  if (!text2) {
-    // Just delete some text (speedup).
-    return [[DIFF_DELETE, text1]];
-  }
-
-  var longtext = text1.length > text2.length ? text1 : text2;
-  var shorttext = text1.length > text2.length ? text2 : text1;
-  var i = longtext.indexOf(shorttext);
-  if (i != -1) {
-    // Shorter text is inside the longer text (speedup).
-    diffs = [[DIFF_INSERT, longtext.substring(0, i)],
-             [DIFF_EQUAL, shorttext],
-             [DIFF_INSERT, longtext.substring(i + shorttext.length)]];
-    // Swap insertions for deletions if diff is reversed.
-    if (text1.length > text2.length) {
-      diffs[0][0] = diffs[2][0] = DIFF_DELETE;
-    }
-    return diffs;
-  }
-
-  if (shorttext.length == 1) {
-    // Single character string.
-    // After the previous speedup, the character can't be an equality.
-    return [[DIFF_DELETE, text1], [DIFF_INSERT, text2]];
-  }
-
-  // Check to see if the problem can be split in two.
-  var hm = this.diff_halfMatch_(text1, text2);
-  if (hm) {
-    // A half-match was found, sort out the return data.
-    var text1_a = hm[0];
-    var text1_b = hm[1];
-    var text2_a = hm[2];
-    var text2_b = hm[3];
-    var mid_common = hm[4];
-    // Send both pairs off for separate processing.
-    var diffs_a = this.diff_main(text1_a, text2_a, checklines, deadline);
-    var diffs_b = this.diff_main(text1_b, text2_b, checklines, deadline);
-    // Merge the results.
-    return diffs_a.concat([[DIFF_EQUAL, mid_common]], diffs_b);
-  }
-
-  if (checklines && text1.length > 100 && text2.length > 100) {
-    return this.diff_lineMode_(text1, text2, deadline);
-  }
-
-  return this.diff_bisect_(text1, text2, deadline);
-};
-
-
-/**
- * Do a quick line-level diff on both strings, then rediff the parts for
- * greater accuracy.
- * This speedup can produce non-minimal diffs.
- * @param {string} text1 Old string to be diffed.
- * @param {string} text2 New string to be diffed.
- * @param {number} deadline Time when the diff should be complete by.
- * @return {!Array.<!diff_match_patch.Diff>} Array of diff tuples.
- * @private
- */
-diff_match_patch.prototype.diff_lineMode_ = function(text1, text2, deadline) {
-  // Scan the text on a line-by-line basis first.
-  var a = this.diff_linesToChars_(text1, text2);
-  text1 = a.chars1;
-  text2 = a.chars2;
-  var linearray = a.lineArray;
-
-  var diffs = this.diff_main(text1, text2, false, deadline);
-
-  // Convert the diff back to original text.
-  this.diff_charsToLines_(diffs, linearray);
-  // Eliminate freak matches (e.g. blank lines)
-  this.diff_cleanupSemantic(diffs);
-
-  // Rediff any replacement blocks, this time character-by-character.
-  // Add a dummy entry at the end.
-  diffs.push([DIFF_EQUAL, '']);
-  var pointer = 0;
-  var count_delete = 0;
-  var count_insert = 0;
-  var text_delete = '';
-  var text_insert = '';
-  while (pointer < diffs.length) {
-    switch (diffs[pointer][0]) {
-      case DIFF_INSERT:
-        count_insert++;
-        text_insert += diffs[pointer][1];
-        break;
-      case DIFF_DELETE:
-        count_delete++;
-        text_delete += diffs[pointer][1];
-        break;
-      case DIFF_EQUAL:
-        // Upon reaching an equality, check for prior redundancies.
-        if (count_delete >= 1 && count_insert >= 1) {
-          // Delete the offending records and add the merged ones.
-          diffs.splice(pointer - count_delete - count_insert,
-                       count_delete + count_insert);
-          pointer = pointer - count_delete - count_insert;
-          var a = this.diff_main(text_delete, text_insert, false, deadline);
-          for (var j = a.length - 1; j >= 0; j--) {
-            diffs.splice(pointer, 0, a[j]);
-          }
-          pointer = pointer + a.length;
-        }
-        count_insert = 0;
-        count_delete = 0;
-        text_delete = '';
-        text_insert = '';
-        break;
-    }
-    pointer++;
-  }
-  diffs.pop();  // Remove the dummy entry at the end.
-
-  return diffs;
-};
-
-
-/**
- * Find the 'middle snake' of a diff, split the problem in two
- * and return the recursively constructed diff.
- * See Myers 1986 paper: An O(ND) Difference Algorithm and Its Variations.
- * @param {string} text1 Old string to be diffed.
- * @param {string} text2 New string to be diffed.
- * @param {number} deadline Time at which to bail if not yet complete.
- * @return {!Array.<!diff_match_patch.Diff>} Array of diff tuples.
- * @private
- */
-diff_match_patch.prototype.diff_bisect_ = function(text1, text2, deadline) {
-  // Cache the text lengths to prevent multiple calls.
-  var text1_length = text1.length;
-  var text2_length = text2.length;
-  var max_d = Math.ceil((text1_length + text2_length) / 2);
-  var v_offset = max_d;
-  var v_length = 2 * max_d;
-  var v1 = new Array(v_length);
-  var v2 = new Array(v_length);
-  // Setting all elements to -1 is faster in Chrome & Firefox than mixing
-  // integers and undefined.
-  for (var x = 0; x < v_length; x++) {
-    v1[x] = -1;
-    v2[x] = -1;
-  }
-  v1[v_offset + 1] = 0;
-  v2[v_offset + 1] = 0;
-  var delta = text1_length - text2_length;
-  // If the total number of characters is odd, then the front path will collide
-  // with the reverse path.
-  var front = (delta % 2 != 0);
-  // Offsets for start and end of k loop.
-  // Prevents mapping of space beyond the grid.
-  var k1start = 0;
-  var k1end = 0;
-  var k2start = 0;
-  var k2end = 0;
-  for (var d = 0; d < max_d; d++) {
-    // Bail out if deadline is reached.
-    if ((new Date()).getTime() > deadline) {
-      break;
-    }
-
-    // Walk the front path one step.
-    for (var k1 = -d + k1start; k1 <= d - k1end; k1 += 2) {
-      var k1_offset = v_offset + k1;
-      var x1;
-      if (k1 == -d || (k1 != d && v1[k1_offset - 1] < v1[k1_offset + 1])) {
-        x1 = v1[k1_offset + 1];
-      } else {
-        x1 = v1[k1_offset - 1] + 1;
-      }
-      var y1 = x1 - k1;
-      while (x1 < text1_length && y1 < text2_length &&
-             text1.charAt(x1) == text2.charAt(y1)) {
-        x1++;
-        y1++;
-      }
-      v1[k1_offset] = x1;
-      if (x1 > text1_length) {
-        // Ran off the right of the graph.
-        k1end += 2;
-      } else if (y1 > text2_length) {
-        // Ran off the bottom of the graph.
-        k1start += 2;
-      } else if (front) {
-        var k2_offset = v_offset + delta - k1;
-        if (k2_offset >= 0 && k2_offset < v_length && v2[k2_offset] != -1) {
-          // Mirror x2 onto top-left coordinate system.
-          var x2 = text1_length - v2[k2_offset];
-          if (x1 >= x2) {
-            // Overlap detected.
-            return this.diff_bisectSplit_(text1, text2, x1, y1, deadline);
-          }
-        }
-      }
-    }
-
-    // Walk the reverse path one step.
-    for (var k2 = -d + k2start; k2 <= d - k2end; k2 += 2) {
-      var k2_offset = v_offset + k2;
-      var x2;
-      if (k2 == -d || (k2 != d && v2[k2_offset - 1] < v2[k2_offset + 1])) {
-        x2 = v2[k2_offset + 1];
-      } else {
-        x2 = v2[k2_offset - 1] + 1;
-      }
-      var y2 = x2 - k2;
-      while (x2 < text1_length && y2 < text2_length &&
-             text1.charAt(text1_length - x2 - 1) ==
-             text2.charAt(text2_length - y2 - 1)) {
-        x2++;
-        y2++;
-      }
-      v2[k2_offset] = x2;
-      if (x2 > text1_length) {
-        // Ran off the left of the graph.
-        k2end += 2;
-      } else if (y2 > text2_length) {
-        // Ran off the top of the graph.
-        k2start += 2;
-      } else if (!front) {
-        var k1_offset = v_offset + delta - k2;
-        if (k1_offset >= 0 && k1_offset < v_length && v1[k1_offset] != -1) {
-          var x1 = v1[k1_offset];
-          var y1 = v_offset + x1 - k1_offset;
-          // Mirror x2 onto top-left coordinate system.
-          x2 = text1_length - x2;
-          if (x1 >= x2) {
-            // Overlap detected.
-            return this.diff_bisectSplit_(text1, text2, x1, y1, deadline);
-          }
-        }
-      }
-    }
-  }
-  // Diff took too long and hit the deadline or
-  // number of diffs equals number of characters, no commonality at all.
-  return [[DIFF_DELETE, text1], [DIFF_INSERT, text2]];
-};
-
-
-/**
- * Given the location of the 'middle snake', split the diff in two parts
- * and recurse.
- * @param {string} text1 Old string to be diffed.
- * @param {string} text2 New string to be diffed.
- * @param {number} x Index of split point in text1.
- * @param {number} y Index of split point in text2.
- * @param {number} deadline Time at which to bail if not yet complete.
- * @return {!Array.<!diff_match_patch.Diff>} Array of diff tuples.
- * @private
- */
-diff_match_patch.prototype.diff_bisectSplit_ = function(text1, text2, x, y,
-    deadline) {
-  var text1a = text1.substring(0, x);
-  var text2a = text2.substring(0, y);
-  var text1b = text1.substring(x);
-  var text2b = text2.substring(y);
-
-  // Compute both diffs serially.
-  var diffs = this.diff_main(text1a, text2a, false, deadline);
-  var diffsb = this.diff_main(text1b, text2b, false, deadline);
-
-  return diffs.concat(diffsb);
-};
-
-
-/**
- * Split two texts into an array of strings.  Reduce the texts to a string of
- * hashes where each Unicode character represents one line.
- * @param {string} text1 First string.
- * @param {string} text2 Second string.
- * @return {{chars1: string, chars2: string, lineArray: !Array.<string>}}
- *     An object containing the encoded text1, the encoded text2 and
- *     the array of unique strings.
- *     The zeroth element of the array of unique strings is intentionally blank.
- * @private
- */
-diff_match_patch.prototype.diff_linesToChars_ = function(text1, text2) {
-  var lineArray = [];  // e.g. lineArray[4] == 'Hello\n'
-  var lineHash = {};   // e.g. lineHash['Hello\n'] == 4
-
-  // '\x00' is a valid character, but various debuggers don't like it.
-  // So we'll insert a junk entry to avoid generating a null character.
-  lineArray[0] = '';
-
-  /**
-   * Split a text into an array of strings.  Reduce the texts to a string of
-   * hashes where each Unicode character represents one line.
-   * Modifies linearray and linehash through being a closure.
-   * @param {string} text String to encode.
-   * @return {string} Encoded string.
-   * @private
-   */
-  function diff_linesToCharsMunge_(text) {
-    var chars = '';
-    // Walk the text, pulling out a substring for each line.
-    // text.split('\n') would would temporarily double our memory footprint.
-    // Modifying text would create many large strings to garbage collect.
-    var lineStart = 0;
-    var lineEnd = -1;
-    // Keeping our own length variable is faster than looking it up.
-    var lineArrayLength = lineArray.length;
-    while (lineEnd < text.length - 1) {
-      lineEnd = text.indexOf('\n', lineStart);
-      if (lineEnd == -1) {
-        lineEnd = text.length - 1;
-      }
-      var line = text.substring(lineStart, lineEnd + 1);
-      lineStart = lineEnd + 1;
-
-      if (lineHash.hasOwnProperty ? lineHash.hasOwnProperty(line) :
-          (lineHash[line] !== undefined)) {
-        chars += String.fromCharCode(lineHash[line]);
-      } else {
-        chars += String.fromCharCode(lineArrayLength);
-        lineHash[line] = lineArrayLength;
-        lineArray[lineArrayLength++] = line;
-      }
-    }
-    return chars;
-  }
-
-  var chars1 = diff_linesToCharsMunge_(text1);
-  var chars2 = diff_linesToCharsMunge_(text2);
-  return {chars1: chars1, chars2: chars2, lineArray: lineArray};
-};
-
-
-/**
- * Rehydrate the text in a diff from a string of line hashes to real lines of
- * text.
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- * @param {!Array.<string>} lineArray Array of unique strings.
- * @private
- */
-diff_match_patch.prototype.diff_charsToLines_ = function(diffs, lineArray) {
-  for (var x = 0; x < diffs.length; x++) {
-    var chars = diffs[x][1];
-    var text = [];
-    for (var y = 0; y < chars.length; y++) {
-      text[y] = lineArray[chars.charCodeAt(y)];
-    }
-    diffs[x][1] = text.join('');
-  }
-};
-
-
-/**
- * Determine the common prefix of two strings.
- * @param {string} text1 First string.
- * @param {string} text2 Second string.
- * @return {number} The number of characters common to the start of each
- *     string.
- */
-diff_match_patch.prototype.diff_commonPrefix = function(text1, text2) {
-  // Quick check for common null cases.
-  if (!text1 || !text2 || text1.charAt(0) != text2.charAt(0)) {
-    return 0;
-  }
-  // Binary search.
-  // Performance analysis: http://neil.fraser.name/news/2007/10/09/
-  var pointermin = 0;
-  var pointermax = Math.min(text1.length, text2.length);
-  var pointermid = pointermax;
-  var pointerstart = 0;
-  while (pointermin < pointermid) {
-    if (text1.substring(pointerstart, pointermid) ==
-        text2.substring(pointerstart, pointermid)) {
-      pointermin = pointermid;
-      pointerstart = pointermin;
-    } else {
-      pointermax = pointermid;
-    }
-    pointermid = Math.floor((pointermax - pointermin) / 2 + pointermin);
-  }
-  return pointermid;
-};
-
-
-/**
- * Determine the common suffix of two strings.
- * @param {string} text1 First string.
- * @param {string} text2 Second string.
- * @return {number} The number of characters common to the end of each string.
- */
-diff_match_patch.prototype.diff_commonSuffix = function(text1, text2) {
-  // Quick check for common null cases.
-  if (!text1 || !text2 ||
-      text1.charAt(text1.length - 1) != text2.charAt(text2.length - 1)) {
-    return 0;
-  }
-  // Binary search.
-  // Performance analysis: http://neil.fraser.name/news/2007/10/09/
-  var pointermin = 0;
-  var pointermax = Math.min(text1.length, text2.length);
-  var pointermid = pointermax;
-  var pointerend = 0;
-  while (pointermin < pointermid) {
-    if (text1.substring(text1.length - pointermid, text1.length - pointerend) ==
-        text2.substring(text2.length - pointermid, text2.length - pointerend)) {
-      pointermin = pointermid;
-      pointerend = pointermin;
-    } else {
-      pointermax = pointermid;
-    }
-    pointermid = Math.floor((pointermax - pointermin) / 2 + pointermin);
-  }
-  return pointermid;
-};
-
-
-/**
- * Determine if the suffix of one string is the prefix of another.
- * @param {string} text1 First string.
- * @param {string} text2 Second string.
- * @return {number} The number of characters common to the end of the first
- *     string and the start of the second string.
- * @private
- */
-diff_match_patch.prototype.diff_commonOverlap_ = function(text1, text2) {
-  // Cache the text lengths to prevent multiple calls.
-  var text1_length = text1.length;
-  var text2_length = text2.length;
-  // Eliminate the null case.
-  if (text1_length == 0 || text2_length == 0) {
-    return 0;
-  }
-  // Truncate the longer string.
-  if (text1_length > text2_length) {
-    text1 = text1.substring(text1_length - text2_length);
-  } else if (text1_length < text2_length) {
-    text2 = text2.substring(0, text1_length);
-  }
-  var text_length = Math.min(text1_length, text2_length);
-  // Quick check for the worst case.
-  if (text1 == text2) {
-    return text_length;
-  }
-
-  // Start by looking for a single character match
-  // and increase length until no match is found.
-  // Performance analysis: http://neil.fraser.name/news/2010/11/04/
-  var best = 0;
-  var length = 1;
-  while (true) {
-    var pattern = text1.substring(text_length - length);
-    var found = text2.indexOf(pattern);
-    if (found == -1) {
-      return best;
-    }
-    length += found;
-    if (found == 0 || text1.substring(text_length - length) ==
-        text2.substring(0, length)) {
-      best = length;
-      length++;
-    }
-  }
-};
-
-
-/**
- * Do the two texts share a substring which is at least half the length of the
- * longer text?
- * This speedup can produce non-minimal diffs.
- * @param {string} text1 First string.
- * @param {string} text2 Second string.
- * @return {Array.<string>} Five element Array, containing the prefix of
- *     text1, the suffix of text1, the prefix of text2, the suffix of
- *     text2 and the common middle.  Or null if there was no match.
- * @private
- */
-diff_match_patch.prototype.diff_halfMatch_ = function(text1, text2) {
-  if (this.Diff_Timeout <= 0) {
-    // Don't risk returning a non-optimal diff if we have unlimited time.
-    return null;
-  }
-  var longtext = text1.length > text2.length ? text1 : text2;
-  var shorttext = text1.length > text2.length ? text2 : text1;
-  if (longtext.length < 4 || shorttext.length * 2 < longtext.length) {
-    return null;  // Pointless.
-  }
-  var dmp = this;  // 'this' becomes 'window' in a closure.
-
-  /**
-   * Does a substring of shorttext exist within longtext such that the substring
-   * is at least half the length of longtext?
-   * Closure, but does not reference any external variables.
-   * @param {string} longtext Longer string.
-   * @param {string} shorttext Shorter string.
-   * @param {number} i Start index of quarter length substring within longtext.
-   * @return {Array.<string>} Five element Array, containing the prefix of
-   *     longtext, the suffix of longtext, the prefix of shorttext, the suffix
-   *     of shorttext and the common middle.  Or null if there was no match.
-   * @private
-   */
-  function diff_halfMatchI_(longtext, shorttext, i) {
-    // Start with a 1/4 length substring at position i as a seed.
-    var seed = longtext.substring(i, i + Math.floor(longtext.length / 4));
-    var j = -1;
-    var best_common = '';
-    var best_longtext_a, best_longtext_b, best_shorttext_a, best_shorttext_b;
-    while ((j = shorttext.indexOf(seed, j + 1)) != -1) {
-      var prefixLength = dmp.diff_commonPrefix(longtext.substring(i),
-                                               shorttext.substring(j));
-      var suffixLength = dmp.diff_commonSuffix(longtext.substring(0, i),
-                                               shorttext.substring(0, j));
-      if (best_common.length < suffixLength + prefixLength) {
-        best_common = shorttext.substring(j - suffixLength, j) +
-            shorttext.substring(j, j + prefixLength);
-        best_longtext_a = longtext.substring(0, i - suffixLength);
-        best_longtext_b = longtext.substring(i + prefixLength);
-        best_shorttext_a = shorttext.substring(0, j - suffixLength);
-        best_shorttext_b = shorttext.substring(j + prefixLength);
-      }
-    }
-    if (best_common.length * 2 >= longtext.length) {
-      return [best_longtext_a, best_longtext_b,
-              best_shorttext_a, best_shorttext_b, best_common];
-    } else {
-      return null;
-    }
-  }
-
-  // First check if the second quarter is the seed for a half-match.
-  var hm1 = diff_halfMatchI_(longtext, shorttext,
-                             Math.ceil(longtext.length / 4));
-  // Check again based on the third quarter.
-  var hm2 = diff_halfMatchI_(longtext, shorttext,
-                             Math.ceil(longtext.length / 2));
-  var hm;
-  if (!hm1 && !hm2) {
-    return null;
-  } else if (!hm2) {
-    hm = hm1;
-  } else if (!hm1) {
-    hm = hm2;
-  } else {
-    // Both matched.  Select the longest.
-    hm = hm1[4].length > hm2[4].length ? hm1 : hm2;
-  }
-
-  // A half-match was found, sort out the return data.
-  var text1_a, text1_b, text2_a, text2_b;
-  if (text1.length > text2.length) {
-    text1_a = hm[0];
-    text1_b = hm[1];
-    text2_a = hm[2];
-    text2_b = hm[3];
-  } else {
-    text2_a = hm[0];
-    text2_b = hm[1];
-    text1_a = hm[2];
-    text1_b = hm[3];
-  }
-  var mid_common = hm[4];
-  return [text1_a, text1_b, text2_a, text2_b, mid_common];
-};
-
-
-/**
- * Reduce the number of edits by eliminating semantically trivial equalities.
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- */
-diff_match_patch.prototype.diff_cleanupSemantic = function(diffs) {
-  var changes = false;
-  var equalities = [];  // Stack of indices where equalities are found.
-  var equalitiesLength = 0;  // Keeping our own length var is faster in JS.
-  /** @type {?string} */
-  var lastequality = null;
-  // Always equal to diffs[equalities[equalitiesLength - 1]][1]
-  var pointer = 0;  // Index of current position.
-  // Number of characters that changed prior to the equality.
-  var length_insertions1 = 0;
-  var length_deletions1 = 0;
-  // Number of characters that changed after the equality.
-  var length_insertions2 = 0;
-  var length_deletions2 = 0;
-  while (pointer < diffs.length) {
-    if (diffs[pointer][0] == DIFF_EQUAL) {  // Equality found.
-      equalities[equalitiesLength++] = pointer;
-      length_insertions1 = length_insertions2;
-      length_deletions1 = length_deletions2;
-      length_insertions2 = 0;
-      length_deletions2 = 0;
-      lastequality = diffs[pointer][1];
-    } else {  // An insertion or deletion.
-      if (diffs[pointer][0] == DIFF_INSERT) {
-        length_insertions2 += diffs[pointer][1].length;
-      } else {
-        length_deletions2 += diffs[pointer][1].length;
-      }
-      // Eliminate an equality that is smaller or equal to the edits on both
-      // sides of it.
-      if (lastequality && (lastequality.length <=
-          Math.max(length_insertions1, length_deletions1)) &&
-          (lastequality.length <= Math.max(length_insertions2,
-                                           length_deletions2))) {
-        // Duplicate record.
-        diffs.splice(equalities[equalitiesLength - 1], 0,
-                     [DIFF_DELETE, lastequality]);
-        // Change second copy to insert.
-        diffs[equalities[equalitiesLength - 1] + 1][0] = DIFF_INSERT;
-        // Throw away the equality we just deleted.
-        equalitiesLength--;
-        // Throw away the previous equality (it needs to be reevaluated).
-        equalitiesLength--;
-        pointer = equalitiesLength > 0 ? equalities[equalitiesLength - 1] : -1;
-        length_insertions1 = 0;  // Reset the counters.
-        length_deletions1 = 0;
-        length_insertions2 = 0;
-        length_deletions2 = 0;
-        lastequality = null;
-        changes = true;
-      }
-    }
-    pointer++;
-  }
-
-  // Normalize the diff.
-  if (changes) {
-    this.diff_cleanupMerge(diffs);
-  }
-  this.diff_cleanupSemanticLossless(diffs);
-
-  // Find any overlaps between deletions and insertions.
-  // e.g: <del>abcxxx</del><ins>xxxdef</ins>
-  //   -> <del>abc</del>xxx<ins>def</ins>
-  // e.g: <del>xxxabc</del><ins>defxxx</ins>
-  //   -> <ins>def</ins>xxx<del>abc</del>
-  // Only extract an overlap if it is as big as the edit ahead or behind it.
-  pointer = 1;
-  while (pointer < diffs.length) {
-    if (diffs[pointer - 1][0] == DIFF_DELETE &&
-        diffs[pointer][0] == DIFF_INSERT) {
-      var deletion = diffs[pointer - 1][1];
-      var insertion = diffs[pointer][1];
-      var overlap_length1 = this.diff_commonOverlap_(deletion, insertion);
-      var overlap_length2 = this.diff_commonOverlap_(insertion, deletion);
-      if (overlap_length1 >= overlap_length2) {
-        if (overlap_length1 >= deletion.length / 2 ||
-            overlap_length1 >= insertion.length / 2) {
-          // Overlap found.  Insert an equality and trim the surrounding edits.
-          diffs.splice(pointer, 0,
-              [DIFF_EQUAL, insertion.substring(0, overlap_length1)]);
-          diffs[pointer - 1][1] =
-              deletion.substring(0, deletion.length - overlap_length1);
-          diffs[pointer + 1][1] = insertion.substring(overlap_length1);
-          pointer++;
-        }
-      } else {
-        if (overlap_length2 >= deletion.length / 2 ||
-            overlap_length2 >= insertion.length / 2) {
-          // Reverse overlap found.
-          // Insert an equality and swap and trim the surrounding edits.
-          diffs.splice(pointer, 0,
-              [DIFF_EQUAL, deletion.substring(0, overlap_length2)]);
-          diffs[pointer - 1][0] = DIFF_INSERT;
-          diffs[pointer - 1][1] =
-              insertion.substring(0, insertion.length - overlap_length2);
-          diffs[pointer + 1][0] = DIFF_DELETE;
-          diffs[pointer + 1][1] =
-              deletion.substring(overlap_length2);
-          pointer++;
-        }
-      }
-      pointer++;
-    }
-    pointer++;
-  }
-};
-
-
-/**
- * Look for single edits surrounded on both sides by equalities
- * which can be shifted sideways to align the edit to a word boundary.
- * e.g: The c<ins>at c</ins>ame. -> The <ins>cat </ins>came.
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- */
-diff_match_patch.prototype.diff_cleanupSemanticLossless = function(diffs) {
-  /**
-   * Given two strings, compute a score representing whether the internal
-   * boundary falls on logical boundaries.
-   * Scores range from 6 (best) to 0 (worst).
-   * Closure, but does not reference any external variables.
-   * @param {string} one First string.
-   * @param {string} two Second string.
-   * @return {number} The score.
-   * @private
-   */
-  function diff_cleanupSemanticScore_(one, two) {
-    if (!one || !two) {
-      // Edges are the best.
-      return 6;
-    }
-
-    // Each port of this function behaves slightly differently due to
-    // subtle differences in each language's definition of things like
-    // 'whitespace'.  Since this function's purpose is largely cosmetic,
-    // the choice has been made to use each language's native features
-    // rather than force total conformity.
-    var char1 = one.charAt(one.length - 1);
-    var char2 = two.charAt(0);
-    var nonAlphaNumeric1 = char1.match(diff_match_patch.nonAlphaNumericRegex_);
-    var nonAlphaNumeric2 = char2.match(diff_match_patch.nonAlphaNumericRegex_);
-    var whitespace1 = nonAlphaNumeric1 &&
-        char1.match(diff_match_patch.whitespaceRegex_);
-    var whitespace2 = nonAlphaNumeric2 &&
-        char2.match(diff_match_patch.whitespaceRegex_);
-    var lineBreak1 = whitespace1 &&
-        char1.match(diff_match_patch.linebreakRegex_);
-    var lineBreak2 = whitespace2 &&
-        char2.match(diff_match_patch.linebreakRegex_);
-    var blankLine1 = lineBreak1 &&
-        one.match(diff_match_patch.blanklineEndRegex_);
-    var blankLine2 = lineBreak2 &&
-        two.match(diff_match_patch.blanklineStartRegex_);
-
-    if (blankLine1 || blankLine2) {
-      // Five points for blank lines.
-      return 5;
-    } else if (lineBreak1 || lineBreak2) {
-      // Four points for line breaks.
-      return 4;
-    } else if (nonAlphaNumeric1 && !whitespace1 && whitespace2) {
-      // Three points for end of sentences.
-      return 3;
-    } else if (whitespace1 || whitespace2) {
-      // Two points for whitespace.
-      return 2;
-    } else if (nonAlphaNumeric1 || nonAlphaNumeric2) {
-      // One point for non-alphanumeric.
-      return 1;
-    }
-    return 0;
-  }
-
-  var pointer = 1;
-  // Intentionally ignore the first and last element (don't need checking).
-  while (pointer < diffs.length - 1) {
-    if (diffs[pointer - 1][0] == DIFF_EQUAL &&
-        diffs[pointer + 1][0] == DIFF_EQUAL) {
-      // This is a single edit surrounded by equalities.
-      var equality1 = diffs[pointer - 1][1];
-      var edit = diffs[pointer][1];
-      var equality2 = diffs[pointer + 1][1];
-
-      // First, shift the edit as far left as possible.
-      var commonOffset = this.diff_commonSuffix(equality1, edit);
-      if (commonOffset) {
-        var commonString = edit.substring(edit.length - commonOffset);
-        equality1 = equality1.substring(0, equality1.length - commonOffset);
-        edit = commonString + edit.substring(0, edit.length - commonOffset);
-        equality2 = commonString + equality2;
-      }
-
-      // Second, step character by character right, looking for the best fit.
-      var bestEquality1 = equality1;
-      var bestEdit = edit;
-      var bestEquality2 = equality2;
-      var bestScore = diff_cleanupSemanticScore_(equality1, edit) +
-          diff_cleanupSemanticScore_(edit, equality2);
-      while (edit.charAt(0) === equality2.charAt(0)) {
-        equality1 += edit.charAt(0);
-        edit = edit.substring(1) + equality2.charAt(0);
-        equality2 = equality2.substring(1);
-        var score = diff_cleanupSemanticScore_(equality1, edit) +
-            diff_cleanupSemanticScore_(edit, equality2);
-        // The >= encourages trailing rather than leading whitespace on edits.
-        if (score >= bestScore) {
-          bestScore = score;
-          bestEquality1 = equality1;
-          bestEdit = edit;
-          bestEquality2 = equality2;
-        }
-      }
-
-      if (diffs[pointer - 1][1] != bestEquality1) {
-        // We have an improvement, save it back to the diff.
-        if (bestEquality1) {
-          diffs[pointer - 1][1] = bestEquality1;
-        } else {
-          diffs.splice(pointer - 1, 1);
-          pointer--;
-        }
-        diffs[pointer][1] = bestEdit;
-        if (bestEquality2) {
-          diffs[pointer + 1][1] = bestEquality2;
-        } else {
-          diffs.splice(pointer + 1, 1);
-          pointer--;
-        }
-      }
-    }
-    pointer++;
-  }
-};
-
-// Define some regex patterns for matching boundaries.
-diff_match_patch.nonAlphaNumericRegex_ = /[^a-zA-Z0-9]/;
-diff_match_patch.whitespaceRegex_ = /\s/;
-diff_match_patch.linebreakRegex_ = /[\r\n]/;
-diff_match_patch.blanklineEndRegex_ = /\n\r?\n$/;
-diff_match_patch.blanklineStartRegex_ = /^\r?\n\r?\n/;
-
-/**
- * Reduce the number of edits by eliminating operationally trivial equalities.
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- */
-diff_match_patch.prototype.diff_cleanupEfficiency = function(diffs) {
-  var changes = false;
-  var equalities = [];  // Stack of indices where equalities are found.
-  var equalitiesLength = 0;  // Keeping our own length var is faster in JS.
-  /** @type {?string} */
-  var lastequality = null;
-  // Always equal to diffs[equalities[equalitiesLength - 1]][1]
-  var pointer = 0;  // Index of current position.
-  // Is there an insertion operation before the last equality.
-  var pre_ins = false;
-  // Is there a deletion operation before the last equality.
-  var pre_del = false;
-  // Is there an insertion operation after the last equality.
-  var post_ins = false;
-  // Is there a deletion operation after the last equality.
-  var post_del = false;
-  while (pointer < diffs.length) {
-    if (diffs[pointer][0] == DIFF_EQUAL) {  // Equality found.
-      if (diffs[pointer][1].length < this.Diff_EditCost &&
-          (post_ins || post_del)) {
-        // Candidate found.
-        equalities[equalitiesLength++] = pointer;
-        pre_ins = post_ins;
-        pre_del = post_del;
-        lastequality = diffs[pointer][1];
-      } else {
-        // Not a candidate, and can never become one.
-        equalitiesLength = 0;
-        lastequality = null;
-      }
-      post_ins = post_del = false;
-    } else {  // An insertion or deletion.
-      if (diffs[pointer][0] == DIFF_DELETE) {
-        post_del = true;
-      } else {
-        post_ins = true;
-      }
-      /*
-       * Five types to be split:
-       * <ins>A</ins><del>B</del>XY<ins>C</ins><del>D</del>
-       * <ins>A</ins>X<ins>C</ins><del>D</del>
-       * <ins>A</ins><del>B</del>X<ins>C</ins>
-       * <ins>A</del>X<ins>C</ins><del>D</del>
-       * <ins>A</ins><del>B</del>X<del>C</del>
-       */
-      if (lastequality && ((pre_ins && pre_del && post_ins && post_del) ||
-                           ((lastequality.length < this.Diff_EditCost / 2) &&
-                            (pre_ins + pre_del + post_ins + post_del) == 3))) {
-        // Duplicate record.
-        diffs.splice(equalities[equalitiesLength - 1], 0,
-                     [DIFF_DELETE, lastequality]);
-        // Change second copy to insert.
-        diffs[equalities[equalitiesLength - 1] + 1][0] = DIFF_INSERT;
-        equalitiesLength--;  // Throw away the equality we just deleted;
-        lastequality = null;
-        if (pre_ins && pre_del) {
-          // No changes made which could affect previous entry, keep going.
-          post_ins = post_del = true;
-          equalitiesLength = 0;
-        } else {
-          equalitiesLength--;  // Throw away the previous equality.
-          pointer = equalitiesLength > 0 ?
-              equalities[equalitiesLength - 1] : -1;
-          post_ins = post_del = false;
-        }
-        changes = true;
-      }
-    }
-    pointer++;
-  }
-
-  if (changes) {
-    this.diff_cleanupMerge(diffs);
-  }
-};
-
-
-/**
- * Reorder and merge like edit sections.  Merge equalities.
- * Any edit section can move as long as it doesn't cross an equality.
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- */
-diff_match_patch.prototype.diff_cleanupMerge = function(diffs) {
-  diffs.push([DIFF_EQUAL, '']);  // Add a dummy entry at the end.
-  var pointer = 0;
-  var count_delete = 0;
-  var count_insert = 0;
-  var text_delete = '';
-  var text_insert = '';
-  var commonlength;
-  while (pointer < diffs.length) {
-    switch (diffs[pointer][0]) {
-      case DIFF_INSERT:
-        count_insert++;
-        text_insert += diffs[pointer][1];
-        pointer++;
-        break;
-      case DIFF_DELETE:
-        count_delete++;
-        text_delete += diffs[pointer][1];
-        pointer++;
-        break;
-      case DIFF_EQUAL:
-        // Upon reaching an equality, check for prior redundancies.
-        if (count_delete + count_insert > 1) {
-          if (count_delete !== 0 && count_insert !== 0) {
-            // Factor out any common prefixies.
-            commonlength = this.diff_commonPrefix(text_insert, text_delete);
-            if (commonlength !== 0) {
-              if ((pointer - count_delete - count_insert) > 0 &&
-                  diffs[pointer - count_delete - count_insert - 1][0] ==
-                  DIFF_EQUAL) {
-                diffs[pointer - count_delete - count_insert - 1][1] +=
-                    text_insert.substring(0, commonlength);
-              } else {
-                diffs.splice(0, 0, [DIFF_EQUAL,
-                                    text_insert.substring(0, commonlength)]);
-                pointer++;
-              }
-              text_insert = text_insert.substring(commonlength);
-              text_delete = text_delete.substring(commonlength);
-            }
-            // Factor out any common suffixies.
-            commonlength = this.diff_commonSuffix(text_insert, text_delete);
-            if (commonlength !== 0) {
-              diffs[pointer][1] = text_insert.substring(text_insert.length -
-                  commonlength) + diffs[pointer][1];
-              text_insert = text_insert.substring(0, text_insert.length -
-                  commonlength);
-              text_delete = text_delete.substring(0, text_delete.length -
-                  commonlength);
-            }
-          }
-          // Delete the offending records and add the merged ones.
-          if (count_delete === 0) {
-            diffs.splice(pointer - count_insert,
-                count_delete + count_insert, [DIFF_INSERT, text_insert]);
-          } else if (count_insert === 0) {
-            diffs.splice(pointer - count_delete,
-                count_delete + count_insert, [DIFF_DELETE, text_delete]);
-          } else {
-            diffs.splice(pointer - count_delete - count_insert,
-                count_delete + count_insert, [DIFF_DELETE, text_delete],
-                [DIFF_INSERT, text_insert]);
-          }
-          pointer = pointer - count_delete - count_insert +
-                    (count_delete ? 1 : 0) + (count_insert ? 1 : 0) + 1;
-        } else if (pointer !== 0 && diffs[pointer - 1][0] == DIFF_EQUAL) {
-          // Merge this equality with the previous one.
-          diffs[pointer - 1][1] += diffs[pointer][1];
-          diffs.splice(pointer, 1);
-        } else {
-          pointer++;
-        }
-        count_insert = 0;
-        count_delete = 0;
-        text_delete = '';
-        text_insert = '';
-        break;
-    }
-  }
-  if (diffs[diffs.length - 1][1] === '') {
-    diffs.pop();  // Remove the dummy entry at the end.
-  }
-
-  // Second pass: look for single edits surrounded on both sides by equalities
-  // which can be shifted sideways to eliminate an equality.
-  // e.g: A<ins>BA</ins>C -> <ins>AB</ins>AC
-  var changes = false;
-  pointer = 1;
-  // Intentionally ignore the first and last element (don't need checking).
-  while (pointer < diffs.length - 1) {
-    if (diffs[pointer - 1][0] == DIFF_EQUAL &&
-        diffs[pointer + 1][0] == DIFF_EQUAL) {
-      // This is a single edit surrounded by equalities.
-      if (diffs[pointer][1].substring(diffs[pointer][1].length -
-          diffs[pointer - 1][1].length) == diffs[pointer - 1][1]) {
-        // Shift the edit over the previous equality.
-        diffs[pointer][1] = diffs[pointer - 1][1] +
-            diffs[pointer][1].substring(0, diffs[pointer][1].length -
-                                        diffs[pointer - 1][1].length);
-        diffs[pointer + 1][1] = diffs[pointer - 1][1] + diffs[pointer + 1][1];
-        diffs.splice(pointer - 1, 1);
-        changes = true;
-      } else if (diffs[pointer][1].substring(0, diffs[pointer + 1][1].length) ==
-          diffs[pointer + 1][1]) {
-        // Shift the edit over the next equality.
-        diffs[pointer - 1][1] += diffs[pointer + 1][1];
-        diffs[pointer][1] =
-            diffs[pointer][1].substring(diffs[pointer + 1][1].length) +
-            diffs[pointer + 1][1];
-        diffs.splice(pointer + 1, 1);
-        changes = true;
-      }
-    }
-    pointer++;
-  }
-  // If shifts were made, the diff needs reordering and another shift sweep.
-  if (changes) {
-    this.diff_cleanupMerge(diffs);
-  }
-};
-
-
-/**
- * loc is a location in text1, compute and return the equivalent location in
- * text2.
- * e.g. 'The cat' vs 'The big cat', 1->1, 5->8
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- * @param {number} loc Location within text1.
- * @return {number} Location within text2.
- */
-diff_match_patch.prototype.diff_xIndex = function(diffs, loc) {
-  var chars1 = 0;
-  var chars2 = 0;
-  var last_chars1 = 0;
-  var last_chars2 = 0;
-  var x;
-  for (x = 0; x < diffs.length; x++) {
-    if (diffs[x][0] !== DIFF_INSERT) {  // Equality or deletion.
-      chars1 += diffs[x][1].length;
-    }
-    if (diffs[x][0] !== DIFF_DELETE) {  // Equality or insertion.
-      chars2 += diffs[x][1].length;
-    }
-    if (chars1 > loc) {  // Overshot the location.
-      break;
-    }
-    last_chars1 = chars1;
-    last_chars2 = chars2;
-  }
-  // Was the location was deleted?
-  if (diffs.length != x && diffs[x][0] === DIFF_DELETE) {
-    return last_chars2;
-  }
-  // Add the remaining character length.
-  return last_chars2 + (loc - last_chars1);
-};
-
-
-/**
- * Convert a diff array into a pretty HTML report.
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- * @return {string} HTML representation.
- */
-diff_match_patch.prototype.diff_prettyHtml = function(diffs) {
-  var html = [];
-  var pattern_amp = /&/g;
-  var pattern_lt = /</g;
-  var pattern_gt = />/g;
-  var pattern_para = /\n/g;
-  for (var x = 0; x < diffs.length; x++) {
-    var op = diffs[x][0];    // Operation (insert, delete, equal)
-    var data = diffs[x][1];  // Text of change.
-    var text = data.replace(pattern_amp, '&amp;').replace(pattern_lt, '&lt;')
-        .replace(pattern_gt, '&gt;').replace(pattern_para, '&para;<br>');
-    switch (op) {
-      case DIFF_INSERT:
-        html[x] = '<ins style="background:#e6ffe6;">' + text + '</ins>';
-        break;
-      case DIFF_DELETE:
-        html[x] = '<del style="background:#ffe6e6;">' + text + '</del>';
-        break;
-      case DIFF_EQUAL:
-        html[x] = '<span>' + text + '</span>';
-        break;
-    }
-  }
-  return html.join('');
-};
-
-
-/**
- * Compute and return the source text (all equalities and deletions).
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- * @return {string} Source text.
- */
-diff_match_patch.prototype.diff_text1 = function(diffs) {
-  var text = [];
-  for (var x = 0; x < diffs.length; x++) {
-    if (diffs[x][0] !== DIFF_INSERT) {
-      text[x] = diffs[x][1];
-    }
-  }
-  return text.join('');
-};
-
-
-/**
- * Compute and return the destination text (all equalities and insertions).
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- * @return {string} Destination text.
- */
-diff_match_patch.prototype.diff_text2 = function(diffs) {
-  var text = [];
-  for (var x = 0; x < diffs.length; x++) {
-    if (diffs[x][0] !== DIFF_DELETE) {
-      text[x] = diffs[x][1];
-    }
-  }
-  return text.join('');
-};
-
-
-/**
- * Compute the Levenshtein distance; the number of inserted, deleted or
- * substituted characters.
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- * @return {number} Number of changes.
- */
-diff_match_patch.prototype.diff_levenshtein = function(diffs) {
-  var levenshtein = 0;
-  var insertions = 0;
-  var deletions = 0;
-  for (var x = 0; x < diffs.length; x++) {
-    var op = diffs[x][0];
-    var data = diffs[x][1];
-    switch (op) {
-      case DIFF_INSERT:
-        insertions += data.length;
-        break;
-      case DIFF_DELETE:
-        deletions += data.length;
-        break;
-      case DIFF_EQUAL:
-        // A deletion and an insertion is one substitution.
-        levenshtein += Math.max(insertions, deletions);
-        insertions = 0;
-        deletions = 0;
-        break;
-    }
-  }
-  levenshtein += Math.max(insertions, deletions);
-  return levenshtein;
-};
-
-
-/**
- * Crush the diff into an encoded string which describes the operations
- * required to transform text1 into text2.
- * E.g. =3\t-2\t+ing  -> Keep 3 chars, delete 2 chars, insert 'ing'.
- * Operations are tab-separated.  Inserted text is escaped using %xx notation.
- * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
- * @return {string} Delta text.
- */
-diff_match_patch.prototype.diff_toDelta = function(diffs) {
-  var text = [];
-  for (var x = 0; x < diffs.length; x++) {
-    switch (diffs[x][0]) {
-      case DIFF_INSERT:
-        text[x] = '+' + encodeURI(diffs[x][1]);
-        break;
-      case DIFF_DELETE:
-        text[x] = '-' + diffs[x][1].length;
-        break;
-      case DIFF_EQUAL:
-        text[x] = '=' + diffs[x][1].length;
-        break;
-    }
-  }
-  return text.join('\t').replace(/%20/g, ' ');
-};
-
-
-/**
- * Given the original text1, and an encoded string which describes the
- * operations required to transform text1 into text2, compute the full diff.
- * @param {string} text1 Source string for the diff.
- * @param {string} delta Delta text.
- * @return {!Array.<!diff_match_patch.Diff>} Array of diff tuples.
- * @throws {!Error} If invalid input.
- */
-diff_match_patch.prototype.diff_fromDelta = function(text1, delta) {
-  var diffs = [];
-  var diffsLength = 0;  // Keeping our own length var is faster in JS.
-  var pointer = 0;  // Cursor in text1
-  var tokens = delta.split(/\t/g);
-  for (var x = 0; x < tokens.length; x++) {
-    // Each token begins with a one character parameter which specifies the
-    // operation of this token (delete, insert, equality).
-    var param = tokens[x].substring(1);
-    switch (tokens[x].charAt(0)) {
-      case '+':
-        try {
-          diffs[diffsLength++] = [DIFF_INSERT, decodeURI(param)];
-        } catch (ex) {
-          // Malformed URI sequence.
-          throw new Error('Illegal escape in diff_fromDelta: ' + param);
-        }
-        break;
-      case '-':
-        // Fall through.
-      case '=':
-        var n = parseInt(param, 10);
-        if (isNaN(n) || n < 0) {
-          throw new Error('Invalid number in diff_fromDelta: ' + param);
-        }
-        var text = text1.substring(pointer, pointer += n);
-        if (tokens[x].charAt(0) == '=') {
-          diffs[diffsLength++] = [DIFF_EQUAL, text];
-        } else {
-          diffs[diffsLength++] = [DIFF_DELETE, text];
-        }
-        break;
-      default:
-        // Blank tokens are ok (from a trailing \t).
-        // Anything else is an error.
-        if (tokens[x]) {
-          throw new Error('Invalid diff operation in diff_fromDelta: ' +
-                          tokens[x]);
-        }
-    }
-  }
-  if (pointer != text1.length) {
-    throw new Error('Delta length (' + pointer +
-        ') does not equal source text length (' + text1.length + ').');
-  }
-  return diffs;
-};
-
-
-//  MATCH FUNCTIONS
-
-
-/**
- * Locate the best instance of 'pattern' in 'text' near 'loc'.
- * @param {string} text The text to search.
- * @param {string} pattern The pattern to search for.
- * @param {number} loc The location to search around.
- * @return {number} Best match index or -1.
- */
-diff_match_patch.prototype.match_main = function(text, pattern, loc) {
-  // Check for null inputs.
-  if (text == null || pattern == null || loc == null) {
-    throw new Error('Null input. (match_main)');
-  }
-
-  loc = Math.max(0, Math.min(loc, text.length));
-  if (text == pattern) {
-    // Shortcut (potentially not guaranteed by the algorithm)
-    return 0;
-  } else if (!text.length) {
-    // Nothing to match.
-    return -1;
-  } else if (text.substring(loc, loc + pattern.length) == pattern) {
-    // Perfect match at the perfect spot!  (Includes case of null pattern)
-    return loc;
-  } else {
-    // Do a fuzzy compare.
-    return this.match_bitap_(text, pattern, loc);
-  }
-};
-
-
-/**
- * Locate the best instance of 'pattern' in 'text' near 'loc' using the
- * Bitap algorithm.
- * @param {string} text The text to search.
- * @param {string} pattern The pattern to search for.
- * @param {number} loc The location to search around.
- * @return {number} Best match index or -1.
- * @private
- */
-diff_match_patch.prototype.match_bitap_ = function(text, pattern, loc) {
-  if (pattern.length > this.Match_MaxBits) {
-    throw new Error('Pattern too long for this browser.');
-  }
-
-  // Initialise the alphabet.
-  var s = this.match_alphabet_(pattern);
-
-  var dmp = this;  // 'this' becomes 'window' in a closure.
-
-  /**
-   * Compute and return the score for a match with e errors and x location.
-   * Accesses loc and pattern through being a closure.
-   * @param {number} e Number of errors in match.
-   * @param {number} x Location of match.
-   * @return {number} Overall score for match (0.0 = good, 1.0 = bad).
-   * @private
-   */
-  function match_bitapScore_(e, x) {
-    var accuracy = e / pattern.length;
-    var proximity = Math.abs(loc - x);
-    if (!dmp.Match_Distance) {
-      // Dodge divide by zero error.
-      return proximity ? 1.0 : accuracy;
-    }
-    return accuracy + (proximity / dmp.Match_Distance);
-  }
-
-  // Highest score beyond which we give up.
-  var score_threshold = this.Match_Threshold;
-  // Is there a nearby exact match? (speedup)
-  var best_loc = text.indexOf(pattern, loc);
-  if (best_loc != -1) {
-    score_threshold = Math.min(match_bitapScore_(0, best_loc), score_threshold);
-    // What about in the other direction? (speedup)
-    best_loc = text.lastIndexOf(pattern, loc + pattern.length);
-    if (best_loc != -1) {
-      score_threshold =
-          Math.min(match_bitapScore_(0, best_loc), score_threshold);
-    }
-  }
-
-  // Initialise the bit arrays.
-  var matchmask = 1 << (pattern.length - 1);
-  best_loc = -1;
-
-  var bin_min, bin_mid;
-  var bin_max = pattern.length + text.length;
-  var last_rd;
-  for (var d = 0; d < pattern.length; d++) {
-    // Scan for the best match; each iteration allows for one more error.
-    // Run a binary search to determine how far from 'loc' we can stray at this
-    // error level.
-    bin_min = 0;
-    bin_mid = bin_max;
-    while (bin_min < bin_mid) {
-      if (match_bitapScore_(d, loc + bin_mid) <= score_threshold) {
-        bin_min = bin_mid;
-      } else {
-        bin_max = bin_mid;
-      }
-      bin_mid = Math.floor((bin_max - bin_min) / 2 + bin_min);
-    }
-    // Use the result from this iteration as the maximum for the next.
-    bin_max = bin_mid;
-    var start = Math.max(1, loc - bin_mid + 1);
-    var finish = Math.min(loc + bin_mid, text.length) + pattern.length;
-
-    var rd = Array(finish + 2);
-    rd[finish + 1] = (1 << d) - 1;
-    for (var j = finish; j >= start; j--) {
-      // The alphabet (s) is a sparse hash, so the following line generates
-      // warnings.
-      var charMatch = s[text.charAt(j - 1)];
-      if (d === 0) {  // First pass: exact match.
-        rd[j] = ((rd[j + 1] << 1) | 1) & charMatch;
-      } else {  // Subsequent passes: fuzzy match.
-        rd[j] = (((rd[j + 1] << 1) | 1) & charMatch) |
-                (((last_rd[j + 1] | last_rd[j]) << 1) | 1) |
-                last_rd[j + 1];
-      }
-      if (rd[j] & matchmask) {
-        var score = match_bitapScore_(d, j - 1);
-        // This match will almost certainly be better than any existing match.
-        // But check anyway.
-        if (score <= score_threshold) {
-          // Told you so.
-          score_threshold = score;
-          best_loc = j - 1;
-          if (best_loc > loc) {
-            // When passing loc, don't exceed our current distance from loc.
-            start = Math.max(1, 2 * loc - best_loc);
-          } else {
-            // Already passed loc, downhill from here on in.
-            break;
-          }
-        }
-      }
-    }
-    // No hope for a (better) match at greater error levels.
-    if (match_bitapScore_(d + 1, loc) > score_threshold) {
-      break;
-    }
-    last_rd = rd;
-  }
-  return best_loc;
-};
-
-
-/**
- * Initialise the alphabet for the Bitap algorithm.
- * @param {string} pattern The text to encode.
- * @return {!Object} Hash of character locations.
- * @private
- */
-diff_match_patch.prototype.match_alphabet_ = function(pattern) {
-  var s = {};
-  for (var i = 0; i < pattern.length; i++) {
-    s[pattern.charAt(i)] = 0;
-  }
-  for (var i = 0; i < pattern.length; i++) {
-    s[pattern.charAt(i)] |= 1 << (pattern.length - i - 1);
-  }
-  return s;
-};
-
-
-//  PATCH FUNCTIONS
-
-
-/**
- * Increase the context until it is unique,
- * but don't let the pattern expand beyond Match_MaxBits.
- * @param {!diff_match_patch.patch_obj} patch The patch to grow.
- * @param {string} text Source text.
- * @private
- */
-diff_match_patch.prototype.patch_addContext_ = function(patch, text) {
-  if (text.length == 0) {
-    return;
-  }
-  var pattern = text.substring(patch.start2, patch.start2 + patch.length1);
-  var padding = 0;
-
-  // Look for the first and last matches of pattern in text.  If two different
-  // matches are found, increase the pattern length.
-  while (text.indexOf(pattern) != text.lastIndexOf(pattern) &&
-         pattern.length < this.Match_MaxBits - this.Patch_Margin -
-         this.Patch_Margin) {
-    padding += this.Patch_Margin;
-    pattern = text.substring(patch.start2 - padding,
-                             patch.start2 + patch.length1 + padding);
-  }
-  // Add one chunk for good luck.
-  padding += this.Patch_Margin;
-
-  // Add the prefix.
-  var prefix = text.substring(patch.start2 - padding, patch.start2);
-  if (prefix) {
-    patch.diffs.unshift([DIFF_EQUAL, prefix]);
-  }
-  // Add the suffix.
-  var suffix = text.substring(patch.start2 + patch.length1,
-                              patch.start2 + patch.length1 + padding);
-  if (suffix) {
-    patch.diffs.push([DIFF_EQUAL, suffix]);
-  }
-
-  // Roll back the start points.
-  patch.start1 -= prefix.length;
-  patch.start2 -= prefix.length;
-  // Extend the lengths.
-  patch.length1 += prefix.length + suffix.length;
-  patch.length2 += prefix.length + suffix.length;
-};
-
-
-/**
- * Compute a list of patches to turn text1 into text2.
- * Use diffs if provided, otherwise compute it ourselves.
- * There are four ways to call this function, depending on what data is
- * available to the caller:
- * Method 1:
- * a = text1, b = text2
- * Method 2:
- * a = diffs
- * Method 3 (optimal):
- * a = text1, b = diffs
- * Method 4 (deprecated, use method 3):
- * a = text1, b = text2, c = diffs
- *
- * @param {string|!Array.<!diff_match_patch.Diff>} a text1 (methods 1,3,4) or
- * Array of diff tuples for text1 to text2 (method 2).
- * @param {string|!Array.<!diff_match_patch.Diff>} opt_b text2 (methods 1,4) or
- * Array of diff tuples for text1 to text2 (method 3) or undefined (method 2).
- * @param {string|!Array.<!diff_match_patch.Diff>} opt_c Array of diff tuples
- * for text1 to text2 (method 4) or undefined (methods 1,2,3).
- * @return {!Array.<!diff_match_patch.patch_obj>} Array of Patch objects.
- */
-diff_match_patch.prototype.patch_make = function(a, opt_b, opt_c) {
-  var text1, diffs;
-  if (typeof a == 'string' && typeof opt_b == 'string' &&
-      typeof opt_c == 'undefined') {
-    // Method 1: text1, text2
-    // Compute diffs from text1 and text2.
-    text1 = /** @type {string} */(a);
-    diffs = this.diff_main(text1, /** @type {string} */(opt_b), true);
-    if (diffs.length > 2) {
-      this.diff_cleanupSemantic(diffs);
-      this.diff_cleanupEfficiency(diffs);
-    }
-  } else if (a && typeof a == 'object' && typeof opt_b == 'undefined' &&
-      typeof opt_c == 'undefined') {
-    // Method 2: diffs
-    // Compute text1 from diffs.
-    diffs = /** @type {!Array.<!diff_match_patch.Diff>} */(a);
-    text1 = this.diff_text1(diffs);
-  } else if (typeof a == 'string' && opt_b && typeof opt_b == 'object' &&
-      typeof opt_c == 'undefined') {
-    // Method 3: text1, diffs
-    text1 = /** @type {string} */(a);
-    diffs = /** @type {!Array.<!diff_match_patch.Diff>} */(opt_b);
-  } else if (typeof a == 'string' && typeof opt_b == 'string' &&
-      opt_c && typeof opt_c == 'object') {
-    // Method 4: text1, text2, diffs
-    // text2 is not used.
-    text1 = /** @type {string} */(a);
-    diffs = /** @type {!Array.<!diff_match_patch.Diff>} */(opt_c);
-  } else {
-    throw new Error('Unknown call format to patch_make.');
-  }
-
-  if (diffs.length === 0) {
-    return [];  // Get rid of the null case.
-  }
-  var patches = [];
-  var patch = new diff_match_patch.patch_obj();
-  var patchDiffLength = 0;  // Keeping our own length var is faster in JS.
-  var char_count1 = 0;  // Number of characters into the text1 string.
-  var char_count2 = 0;  // Number of characters into the text2 string.
-  // Start with text1 (prepatch_text) and apply the diffs until we arrive at
-  // text2 (postpatch_text).  We recreate the patches one by one to determine
-  // context info.
-  var prepatch_text = text1;
-  var postpatch_text = text1;
-  for (var x = 0; x < diffs.length; x++) {
-    var diff_type = diffs[x][0];
-    var diff_text = diffs[x][1];
-
-    if (!patchDiffLength && diff_type !== DIFF_EQUAL) {
-      // A new patch starts here.
-      patch.start1 = char_count1;
-      patch.start2 = char_count2;
-    }
-
-    switch (diff_type) {
-      case DIFF_INSERT:
-        patch.diffs[patchDiffLength++] = diffs[x];
-        patch.length2 += diff_text.length;
-        postpatch_text = postpatch_text.substring(0, char_count2) + diff_text +
-                         postpatch_text.substring(char_count2);
-        break;
-      case DIFF_DELETE:
-        patch.length1 += diff_text.length;
-        patch.diffs[patchDiffLength++] = diffs[x];
-        postpatch_text = postpatch_text.substring(0, char_count2) +
-                         postpatch_text.substring(char_count2 +
-                             diff_text.length);
-        break;
-      case DIFF_EQUAL:
-        if (diff_text.length <= 2 * this.Patch_Margin &&
-            patchDiffLength && diffs.length != x + 1) {
-          // Small equality inside a patch.
-          patch.diffs[patchDiffLength++] = diffs[x];
-          patch.length1 += diff_text.length;
-          patch.length2 += diff_text.length;
-        } else if (diff_text.length >= 2 * this.Patch_Margin) {
-          // Time for a new patch.
-          if (patchDiffLength) {
-            this.patch_addContext_(patch, prepatch_text);
-            patches.push(patch);
-            patch = new diff_match_patch.patch_obj();
-            patchDiffLength = 0;
-            // Unlike Unidiff, our patch lists have a rolling context.
-            // http://code.google.com/p/google-diff-match-patch/wiki/Unidiff
-            // Update prepatch text & pos to reflect the application of the
-            // just completed patch.
-            prepatch_text = postpatch_text;
-            char_count1 = char_count2;
-          }
-        }
-        break;
-    }
-
-    // Update the current character count.
-    if (diff_type !== DIFF_INSERT) {
-      char_count1 += diff_text.length;
-    }
-    if (diff_type !== DIFF_DELETE) {
-      char_count2 += diff_text.length;
-    }
-  }
-  // Pick up the leftover patch if not empty.
-  if (patchDiffLength) {
-    this.patch_addContext_(patch, prepatch_text);
-    patches.push(patch);
-  }
-
-  return patches;
-};
-
-
-/**
- * Given an array of patches, return another array that is identical.
- * @param {!Array.<!diff_match_patch.patch_obj>} patches Array of Patch objects.
- * @return {!Array.<!diff_match_patch.patch_obj>} Array of Patch objects.
- */
-diff_match_patch.prototype.patch_deepCopy = function(patches) {
-  // Making deep copies is hard in JavaScript.
-  var patchesCopy = [];
-  for (var x = 0; x < patches.length; x++) {
-    var patch = patches[x];
-    var patchCopy = new diff_match_patch.patch_obj();
-    patchCopy.diffs = [];
-    for (var y = 0; y < patch.diffs.length; y++) {
-      patchCopy.diffs[y] = patch.diffs[y].slice();
-    }
-    patchCopy.start1 = patch.start1;
-    patchCopy.start2 = patch.start2;
-    patchCopy.length1 = patch.length1;
-    patchCopy.length2 = patch.length2;
-    patchesCopy[x] = patchCopy;
-  }
-  return patchesCopy;
-};
-
-
-/**
- * Merge a set of patches onto the text.  Return a patched text, as well
- * as a list of true/false values indicating which patches were applied.
- * @param {!Array.<!diff_match_patch.patch_obj>} patches Array of Patch objects.
- * @param {string} text Old text.
- * @return {!Array.<string|!Array.<boolean>>} Two element Array, containing the
- *      new text and an array of boolean values.
- */
-diff_match_patch.prototype.patch_apply = function(patches, text) {
-  if (patches.length == 0) {
-    return [text, []];
-  }
-
-  // Deep copy the patches so that no changes are made to originals.
-  patches = this.patch_deepCopy(patches);
-
-  var nullPadding = this.patch_addPadding(patches);
-  text = nullPadding + text + nullPadding;
-
-  this.patch_splitMax(patches);
-  // delta keeps track of the offset between the expected and actual location
-  // of the previous patch.  If there are patches expected at positions 10 and
-  // 20, but the first patch was found at 12, delta is 2 and the second patch
-  // has an effective expected position of 22.
-  var delta = 0;
-  var results = [];
-  for (var x = 0; x < patches.length; x++) {
-    var expected_loc = patches[x].start2 + delta;
-    var text1 = this.diff_text1(patches[x].diffs);
-    var start_loc;
-    var end_loc = -1;
-    if (text1.length > this.Match_MaxBits) {
-      // patch_splitMax will only provide an oversized pattern in the case of
-      // a monster delete.
-      start_loc = this.match_main(text, text1.substring(0, this.Match_MaxBits),
-                                  expected_loc);
-      if (start_loc != -1) {
-        end_loc = this.match_main(text,
-            text1.substring(text1.length - this.Match_MaxBits),
-            expected_loc + text1.length - this.Match_MaxBits);
-        if (end_loc == -1 || start_loc >= end_loc) {
-          // Can't find valid trailing context.  Drop this patch.
-          start_loc = -1;
-        }
-      }
-    } else {
-      start_loc = this.match_main(text, text1, expected_loc);
-    }
-    if (start_loc == -1) {
-      // No match found.  :(
-      results[x] = false;
-      // Subtract the delta for this failed patch from subsequent patches.
-      delta -= patches[x].length2 - patches[x].length1;
-    } else {
-      // Found a match.  :)
-      results[x] = true;
-      delta = start_loc - expected_loc;
-      var text2;
-      if (end_loc == -1) {
-        text2 = text.substring(start_loc, start_loc + text1.length);
-      } else {
-        text2 = text.substring(start_loc, end_loc + this.Match_MaxBits);
-      }
-      if (text1 == text2) {
-        // Perfect match, just shove the replacement text in.
-        text = text.substring(0, start_loc) +
-               this.diff_text2(patches[x].diffs) +
-               text.substring(start_loc + text1.length);
-      } else {
-        // Imperfect match.  Run a diff to get a framework of equivalent
-        // indices.
-        var diffs = this.diff_main(text1, text2, false);
-        if (text1.length > this.Match_MaxBits &&
-            this.diff_levenshtein(diffs) / text1.length >
-            this.Patch_DeleteThreshold) {
-          // The end points match, but the content is unacceptably bad.
-          results[x] = false;
-        } else {
-          this.diff_cleanupSemanticLossless(diffs);
-          var index1 = 0;
-          var index2;
-          for (var y = 0; y < patches[x].diffs.length; y++) {
-            var mod = patches[x].diffs[y];
-            if (mod[0] !== DIFF_EQUAL) {
-              index2 = this.diff_xIndex(diffs, index1);
-            }
-            if (mod[0] === DIFF_INSERT) {  // Insertion
-              text = text.substring(0, start_loc + index2) + mod[1] +
-                     text.substring(start_loc + index2);
-            } else if (mod[0] === DIFF_DELETE) {  // Deletion
-              text = text.substring(0, start_loc + index2) +
-                     text.substring(start_loc + this.diff_xIndex(diffs,
-                         index1 + mod[1].length));
-            }
-            if (mod[0] !== DIFF_DELETE) {
-              index1 += mod[1].length;
-            }
-          }
-        }
-      }
-    }
-  }
-  // Strip the padding off.
-  text = text.substring(nullPadding.length, text.length - nullPadding.length);
-  return [text, results];
-};
-
-
-/**
- * Add some padding on text start and end so that edges can match something.
- * Intended to be called only from within patch_apply.
- * @param {!Array.<!diff_match_patch.patch_obj>} patches Array of Patch objects.
- * @return {string} The padding string added to each side.
- */
-diff_match_patch.prototype.patch_addPadding = function(patches) {
-  var paddingLength = this.Patch_Margin;
-  var nullPadding = '';
-  for (var x = 1; x <= paddingLength; x++) {
-    nullPadding += String.fromCharCode(x);
-  }
-
-  // Bump all the patches forward.
-  for (var x = 0; x < patches.length; x++) {
-    patches[x].start1 += paddingLength;
-    patches[x].start2 += paddingLength;
-  }
-
-  // Add some padding on start of first diff.
-  var patch = patches[0];
-  var diffs = patch.diffs;
-  if (diffs.length == 0 || diffs[0][0] != DIFF_EQUAL) {
-    // Add nullPadding equality.
-    diffs.unshift([DIFF_EQUAL, nullPadding]);
-    patch.start1 -= paddingLength;  // Should be 0.
-    patch.start2 -= paddingLength;  // Should be 0.
-    patch.length1 += paddingLength;
-    patch.length2 += paddingLength;
-  } else if (paddingLength > diffs[0][1].length) {
-    // Grow first equality.
-    var extraLength = paddingLength - diffs[0][1].length;
-    diffs[0][1] = nullPadding.substring(diffs[0][1].length) + diffs[0][1];
-    patch.start1 -= extraLength;
-    patch.start2 -= extraLength;
-    patch.length1 += extraLength;
-    patch.length2 += extraLength;
-  }
-
-  // Add some padding on end of last diff.
-  patch = patches[patches.length - 1];
-  diffs = patch.diffs;
-  if (diffs.length == 0 || diffs[diffs.length - 1][0] != DIFF_EQUAL) {
-    // Add nullPadding equality.
-    diffs.push([DIFF_EQUAL, nullPadding]);
-    patch.length1 += paddingLength;
-    patch.length2 += paddingLength;
-  } else if (paddingLength > diffs[diffs.length - 1][1].length) {
-    // Grow last equality.
-    var extraLength = paddingLength - diffs[diffs.length - 1][1].length;
-    diffs[diffs.length - 1][1] += nullPadding.substring(0, extraLength);
-    patch.length1 += extraLength;
-    patch.length2 += extraLength;
-  }
-
-  return nullPadding;
-};
-
-
-/**
- * Look through the patches and break up any which are longer than the maximum
- * limit of the match algorithm.
- * Intended to be called only from within patch_apply.
- * @param {!Array.<!diff_match_patch.patch_obj>} patches Array of Patch objects.
- */
-diff_match_patch.prototype.patch_splitMax = function(patches) {
-  var patch_size = this.Match_MaxBits;
-  for (var x = 0; x < patches.length; x++) {
-    if (patches[x].length1 <= patch_size) {
-      continue;
-    }
-    var bigpatch = patches[x];
-    // Remove the big old patch.
-    patches.splice(x--, 1);
-    var start1 = bigpatch.start1;
-    var start2 = bigpatch.start2;
-    var precontext = '';
-    while (bigpatch.diffs.length !== 0) {
-      // Create one of several smaller patches.
-      var patch = new diff_match_patch.patch_obj();
-      var empty = true;
-      patch.start1 = start1 - precontext.length;
-      patch.start2 = start2 - precontext.length;
-      if (precontext !== '') {
-        patch.length1 = patch.length2 = precontext.length;
-        patch.diffs.push([DIFF_EQUAL, precontext]);
-      }
-      while (bigpatch.diffs.length !== 0 &&
-             patch.length1 < patch_size - this.Patch_Margin) {
-        var diff_type = bigpatch.diffs[0][0];
-        var diff_text = bigpatch.diffs[0][1];
-        if (diff_type === DIFF_INSERT) {
-          // Insertions are harmless.
-          patch.length2 += diff_text.length;
-          start2 += diff_text.length;
-          patch.diffs.push(bigpatch.diffs.shift());
-          empty = false;
-        } else if (diff_type === DIFF_DELETE && patch.diffs.length == 1 &&
-                   patch.diffs[0][0] == DIFF_EQUAL &&
-                   diff_text.length > 2 * patch_size) {
-          // This is a large deletion.  Let it pass in one chunk.
-          patch.length1 += diff_text.length;
-          start1 += diff_text.length;
-          empty = false;
-          patch.diffs.push([diff_type, diff_text]);
-          bigpatch.diffs.shift();
-        } else {
-          // Deletion or equality.  Only take as much as we can stomach.
-          diff_text = diff_text.substring(0,
-              patch_size - patch.length1 - this.Patch_Margin);
-          patch.length1 += diff_text.length;
-          start1 += diff_text.length;
-          if (diff_type === DIFF_EQUAL) {
-            patch.length2 += diff_text.length;
-            start2 += diff_text.length;
-          } else {
-            empty = false;
-          }
-          patch.diffs.push([diff_type, diff_text]);
-          if (diff_text == bigpatch.diffs[0][1]) {
-            bigpatch.diffs.shift();
-          } else {
-            bigpatch.diffs[0][1] =
-                bigpatch.diffs[0][1].substring(diff_text.length);
-          }
-        }
-      }
-      // Compute the head context for the next patch.
-      precontext = this.diff_text2(patch.diffs);
-      precontext =
-          precontext.substring(precontext.length - this.Patch_Margin);
-      // Append the end context for this patch.
-      var postcontext = this.diff_text1(bigpatch.diffs)
-                            .substring(0, this.Patch_Margin);
-      if (postcontext !== '') {
-        patch.length1 += postcontext.length;
-        patch.length2 += postcontext.length;
-        if (patch.diffs.length !== 0 &&
-            patch.diffs[patch.diffs.length - 1][0] === DIFF_EQUAL) {
-          patch.diffs[patch.diffs.length - 1][1] += postcontext;
-        } else {
-          patch.diffs.push([DIFF_EQUAL, postcontext]);
-        }
-      }
-      if (!empty) {
-        patches.splice(++x, 0, patch);
-      }
-    }
-  }
-};
-
-
-/**
- * Take a list of patches and return a textual representation.
- * @param {!Array.<!diff_match_patch.patch_obj>} patches Array of Patch objects.
- * @return {string} Text representation of patches.
- */
-diff_match_patch.prototype.patch_toText = function(patches) {
-  var text = [];
-  for (var x = 0; x < patches.length; x++) {
-    text[x] = patches[x];
-  }
-  return text.join('');
-};
-
-
-/**
- * Parse a textual representation of patches and return a list of Patch objects.
- * @param {string} textline Text representation of patches.
- * @return {!Array.<!diff_match_patch.patch_obj>} Array of Patch objects.
- * @throws {!Error} If invalid input.
- */
-diff_match_patch.prototype.patch_fromText = function(textline) {
-  var patches = [];
-  if (!textline) {
-    return patches;
-  }
-  var text = textline.split('\n');
-  var textPointer = 0;
-  var patchHeader = /^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@$/;
-  while (textPointer < text.length) {
-    var m = text[textPointer].match(patchHeader);
-    if (!m) {
-      throw new Error('Invalid patch string: ' + text[textPointer]);
-    }
-    var patch = new diff_match_patch.patch_obj();
-    patches.push(patch);
-    patch.start1 = parseInt(m[1], 10);
-    if (m[2] === '') {
-      patch.start1--;
-      patch.length1 = 1;
-    } else if (m[2] == '0') {
-      patch.length1 = 0;
-    } else {
-      patch.start1--;
-      patch.length1 = parseInt(m[2], 10);
-    }
-
-    patch.start2 = parseInt(m[3], 10);
-    if (m[4] === '') {
-      patch.start2--;
-      patch.length2 = 1;
-    } else if (m[4] == '0') {
-      patch.length2 = 0;
-    } else {
-      patch.start2--;
-      patch.length2 = parseInt(m[4], 10);
-    }
-    textPointer++;
-
-    while (textPointer < text.length) {
-      var sign = text[textPointer].charAt(0);
-      try {
-        var line = decodeURI(text[textPointer].substring(1));
-      } catch (ex) {
-        // Malformed URI sequence.
-        throw new Error('Illegal escape in patch_fromText: ' + line);
-      }
-      if (sign == '-') {
-        // Deletion.
-        patch.diffs.push([DIFF_DELETE, line]);
-      } else if (sign == '+') {
-        // Insertion.
-        patch.diffs.push([DIFF_INSERT, line]);
-      } else if (sign == ' ') {
-        // Minor equality.
-        patch.diffs.push([DIFF_EQUAL, line]);
-      } else if (sign == '@') {
-        // Start of next patch.
-        break;
-      } else if (sign === '') {
-        // Blank line?  Whatever.
-      } else {
-        // WTF?
-        throw new Error('Invalid patch mode "' + sign + '" in: ' + line);
-      }
-      textPointer++;
-    }
-  }
-  return patches;
-};
-
-
-/**
- * Class representing one patch operation.
- * @constructor
- */
-diff_match_patch.patch_obj = function() {
-  /** @type {!Array.<!diff_match_patch.Diff>} */
-  this.diffs = [];
-  /** @type {?number} */
-  this.start1 = null;
-  /** @type {?number} */
-  this.start2 = null;
-  /** @type {number} */
-  this.length1 = 0;
-  /** @type {number} */
-  this.length2 = 0;
-};
-
-
-/**
- * Emmulate GNU diff's format.
- * Header: @@ -382,8 +481,9 @@
- * Indicies are printed as 1-based, not 0-based.
- * @return {string} The GNU diff string.
- */
-diff_match_patch.patch_obj.prototype.toString = function() {
-  var coords1, coords2;
-  if (this.length1 === 0) {
-    coords1 = this.start1 + ',0';
-  } else if (this.length1 == 1) {
-    coords1 = this.start1 + 1;
-  } else {
-    coords1 = (this.start1 + 1) + ',' + this.length1;
-  }
-  if (this.length2 === 0) {
-    coords2 = this.start2 + ',0';
-  } else if (this.length2 == 1) {
-    coords2 = this.start2 + 1;
-  } else {
-    coords2 = (this.start2 + 1) + ',' + this.length2;
-  }
-  var text = ['@@ -' + coords1 + ' +' + coords2 + ' @@\n'];
-  var op;
-  // Escape the body of the patch with %xx notation.
-  for (var x = 0; x < this.diffs.length; x++) {
-    switch (this.diffs[x][0]) {
-      case DIFF_INSERT:
-        op = '+';
-        break;
-      case DIFF_DELETE:
-        op = '-';
-        break;
-      case DIFF_EQUAL:
-        op = ' ';
-        break;
-    }
-    text[x + 1] = op + encodeURI(this.diffs[x][1]) + '\n';
-  }
-  return text.join('').replace(/%20/g, ' ');
-};
-
-
-// The following export code was added by @ForbesLindesay
-module.exports = diff_match_patch;
-module.exports['diff_match_patch'] = diff_match_patch;
-module.exports['DIFF_DELETE'] = DIFF_DELETE;
-module.exports['DIFF_INSERT'] = DIFF_INSERT;
-module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
-
-},{}],3:[function(require,module,exports){
 
 /*
  *
@@ -3957,342 +1762,9 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
 }).call(this);
 
-},{}],4:[function(require,module,exports){
-(function (global){
-/*! http://mths.be/he v0.5.0 by @mathias | MIT license */
-;(function(root) {
-
-	// Detect free variables `exports`.
-	var freeExports = typeof exports == 'object' && exports;
-
-	// Detect free variable `module`.
-	var freeModule = typeof module == 'object' && module &&
-		module.exports == freeExports && module;
-
-	// Detect free variable `global`, from Node.js or Browserified code,
-	// and use it as `root`.
-	var freeGlobal = typeof global == 'object' && global;
-	if (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal) {
-		root = freeGlobal;
-	}
-
-	/*--------------------------------------------------------------------------*/
-
-	// All astral symbols.
-	var regexAstralSymbols = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-	// All ASCII symbols (not just printable ASCII) except those listed in the
-	// first column of the overrides table.
-	// http://whatwg.org/html/tokenization.html#table-charref-overrides
-	var regexAsciiWhitelist = /[\x01-\x7F]/g;
-	// All BMP symbols that are not ASCII newlines, printable ASCII symbols, or
-	// code points listed in the first column of the overrides table on
-	// http://whatwg.org/html/tokenization.html#table-charref-overrides.
-	var regexBmpWhitelist = /[\x01-\t\x0B\f\x0E-\x1F\x7F\x81\x8D\x8F\x90\x9D\xA0-\uFFFF]/g;
-
-	var regexEncodeNonAscii = /<\u20D2|=\u20E5|>\u20D2|\u205F\u200A|\u219D\u0338|\u2202\u0338|\u2220\u20D2|\u2229\uFE00|\u222A\uFE00|\u223C\u20D2|\u223D\u0331|\u223E\u0333|\u2242\u0338|\u224B\u0338|\u224D\u20D2|\u224E\u0338|\u224F\u0338|\u2250\u0338|\u2261\u20E5|\u2264\u20D2|\u2265\u20D2|\u2266\u0338|\u2267\u0338|\u2268\uFE00|\u2269\uFE00|\u226A\u0338|\u226A\u20D2|\u226B\u0338|\u226B\u20D2|\u227F\u0338|\u2282\u20D2|\u2283\u20D2|\u228A\uFE00|\u228B\uFE00|\u228F\u0338|\u2290\u0338|\u2293\uFE00|\u2294\uFE00|\u22B4\u20D2|\u22B5\u20D2|\u22D8\u0338|\u22D9\u0338|\u22DA\uFE00|\u22DB\uFE00|\u22F5\u0338|\u22F9\u0338|\u2933\u0338|\u29CF\u0338|\u29D0\u0338|\u2A6D\u0338|\u2A70\u0338|\u2A7D\u0338|\u2A7E\u0338|\u2AA1\u0338|\u2AA2\u0338|\u2AAC\uFE00|\u2AAD\uFE00|\u2AAF\u0338|\u2AB0\u0338|\u2AC5\u0338|\u2AC6\u0338|\u2ACB\uFE00|\u2ACC\uFE00|\u2AFD\u20E5|[\xA0-\u0113\u0116-\u0122\u0124-\u012B\u012E-\u014D\u0150-\u017E\u0192\u01B5\u01F5\u0237\u02C6\u02C7\u02D8-\u02DD\u0311\u0391-\u03A1\u03A3-\u03A9\u03B1-\u03C9\u03D1\u03D2\u03D5\u03D6\u03DC\u03DD\u03F0\u03F1\u03F5\u03F6\u0401-\u040C\u040E-\u044F\u0451-\u045C\u045E\u045F\u2002-\u2005\u2007-\u2010\u2013-\u2016\u2018-\u201A\u201C-\u201E\u2020-\u2022\u2025\u2026\u2030-\u2035\u2039\u203A\u203E\u2041\u2043\u2044\u204F\u2057\u205F-\u2063\u20AC\u20DB\u20DC\u2102\u2105\u210A-\u2113\u2115-\u211E\u2122\u2124\u2127-\u2129\u212C\u212D\u212F-\u2131\u2133-\u2138\u2145-\u2148\u2153-\u215E\u2190-\u219B\u219D-\u21A7\u21A9-\u21AE\u21B0-\u21B3\u21B5-\u21B7\u21BA-\u21DB\u21DD\u21E4\u21E5\u21F5\u21FD-\u2205\u2207-\u2209\u220B\u220C\u220F-\u2214\u2216-\u2218\u221A\u221D-\u2238\u223A-\u2257\u2259\u225A\u225C\u225F-\u2262\u2264-\u228B\u228D-\u229B\u229D-\u22A5\u22A7-\u22B0\u22B2-\u22BB\u22BD-\u22DB\u22DE-\u22E3\u22E6-\u22F7\u22F9-\u22FE\u2305\u2306\u2308-\u2310\u2312\u2313\u2315\u2316\u231C-\u231F\u2322\u2323\u232D\u232E\u2336\u233D\u233F\u237C\u23B0\u23B1\u23B4-\u23B6\u23DC-\u23DF\u23E2\u23E7\u2423\u24C8\u2500\u2502\u250C\u2510\u2514\u2518\u251C\u2524\u252C\u2534\u253C\u2550-\u256C\u2580\u2584\u2588\u2591-\u2593\u25A1\u25AA\u25AB\u25AD\u25AE\u25B1\u25B3-\u25B5\u25B8\u25B9\u25BD-\u25BF\u25C2\u25C3\u25CA\u25CB\u25EC\u25EF\u25F8-\u25FC\u2605\u2606\u260E\u2640\u2642\u2660\u2663\u2665\u2666\u266A\u266D-\u266F\u2713\u2717\u2720\u2736\u2758\u2772\u2773\u27C8\u27C9\u27E6-\u27ED\u27F5-\u27FA\u27FC\u27FF\u2902-\u2905\u290C-\u2913\u2916\u2919-\u2920\u2923-\u292A\u2933\u2935-\u2939\u293C\u293D\u2945\u2948-\u294B\u294E-\u2976\u2978\u2979\u297B-\u297F\u2985\u2986\u298B-\u2996\u299A\u299C\u299D\u29A4-\u29B7\u29B9\u29BB\u29BC\u29BE-\u29C5\u29C9\u29CD-\u29D0\u29DC-\u29DE\u29E3-\u29E5\u29EB\u29F4\u29F6\u2A00-\u2A02\u2A04\u2A06\u2A0C\u2A0D\u2A10-\u2A17\u2A22-\u2A27\u2A29\u2A2A\u2A2D-\u2A31\u2A33-\u2A3C\u2A3F\u2A40\u2A42-\u2A4D\u2A50\u2A53-\u2A58\u2A5A-\u2A5D\u2A5F\u2A66\u2A6A\u2A6D-\u2A75\u2A77-\u2A9A\u2A9D-\u2AA2\u2AA4-\u2AB0\u2AB3-\u2AC8\u2ACB\u2ACC\u2ACF-\u2ADB\u2AE4\u2AE6-\u2AE9\u2AEB-\u2AF3\u2AFD\uFB00-\uFB04]|\uD835[\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDCCF\uDD04\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDD6B]/g;
-	var encodeMap = {'\xC1':'Aacute','\xE1':'aacute','\u0102':'Abreve','\u0103':'abreve','\u223E':'ac','\u223F':'acd','\u223E\u0333':'acE','\xC2':'Acirc','\xE2':'acirc','\xB4':'acute','\u0410':'Acy','\u0430':'acy','\xC6':'AElig','\xE6':'aelig','\u2061':'af','\uD835\uDD04':'Afr','\uD835\uDD1E':'afr','\xC0':'Agrave','\xE0':'agrave','\u2135':'aleph','\u0391':'Alpha','\u03B1':'alpha','\u0100':'Amacr','\u0101':'amacr','\u2A3F':'amalg','&':'amp','\u2A55':'andand','\u2A53':'And','\u2227':'and','\u2A5C':'andd','\u2A58':'andslope','\u2A5A':'andv','\u2220':'ang','\u29A4':'ange','\u29A8':'angmsdaa','\u29A9':'angmsdab','\u29AA':'angmsdac','\u29AB':'angmsdad','\u29AC':'angmsdae','\u29AD':'angmsdaf','\u29AE':'angmsdag','\u29AF':'angmsdah','\u2221':'angmsd','\u221F':'angrt','\u22BE':'angrtvb','\u299D':'angrtvbd','\u2222':'angsph','\xC5':'angst','\u237C':'angzarr','\u0104':'Aogon','\u0105':'aogon','\uD835\uDD38':'Aopf','\uD835\uDD52':'aopf','\u2A6F':'apacir','\u2248':'ap','\u2A70':'apE','\u224A':'ape','\u224B':'apid','\'':'apos','\xE5':'aring','\uD835\uDC9C':'Ascr','\uD835\uDCB6':'ascr','\u2254':'colone','*':'ast','\u224D':'CupCap','\xC3':'Atilde','\xE3':'atilde','\xC4':'Auml','\xE4':'auml','\u2233':'awconint','\u2A11':'awint','\u224C':'bcong','\u03F6':'bepsi','\u2035':'bprime','\u223D':'bsim','\u22CD':'bsime','\u2216':'setmn','\u2AE7':'Barv','\u22BD':'barvee','\u2305':'barwed','\u2306':'Barwed','\u23B5':'bbrk','\u23B6':'bbrktbrk','\u0411':'Bcy','\u0431':'bcy','\u201E':'bdquo','\u2235':'becaus','\u29B0':'bemptyv','\u212C':'Bscr','\u0392':'Beta','\u03B2':'beta','\u2136':'beth','\u226C':'twixt','\uD835\uDD05':'Bfr','\uD835\uDD1F':'bfr','\u22C2':'xcap','\u25EF':'xcirc','\u22C3':'xcup','\u2A00':'xodot','\u2A01':'xoplus','\u2A02':'xotime','\u2A06':'xsqcup','\u2605':'starf','\u25BD':'xdtri','\u25B3':'xutri','\u2A04':'xuplus','\u22C1':'Vee','\u22C0':'Wedge','\u290D':'rbarr','\u29EB':'lozf','\u25AA':'squf','\u25B4':'utrif','\u25BE':'dtrif','\u25C2':'ltrif','\u25B8':'rtrif','\u2423':'blank','\u2592':'blk12','\u2591':'blk14','\u2593':'blk34','\u2588':'block','=\u20E5':'bne','\u2261\u20E5':'bnequiv','\u2AED':'bNot','\u2310':'bnot','\uD835\uDD39':'Bopf','\uD835\uDD53':'bopf','\u22A5':'bot','\u22C8':'bowtie','\u29C9':'boxbox','\u2510':'boxdl','\u2555':'boxdL','\u2556':'boxDl','\u2557':'boxDL','\u250C':'boxdr','\u2552':'boxdR','\u2553':'boxDr','\u2554':'boxDR','\u2500':'boxh','\u2550':'boxH','\u252C':'boxhd','\u2564':'boxHd','\u2565':'boxhD','\u2566':'boxHD','\u2534':'boxhu','\u2567':'boxHu','\u2568':'boxhU','\u2569':'boxHU','\u229F':'minusb','\u229E':'plusb','\u22A0':'timesb','\u2518':'boxul','\u255B':'boxuL','\u255C':'boxUl','\u255D':'boxUL','\u2514':'boxur','\u2558':'boxuR','\u2559':'boxUr','\u255A':'boxUR','\u2502':'boxv','\u2551':'boxV','\u253C':'boxvh','\u256A':'boxvH','\u256B':'boxVh','\u256C':'boxVH','\u2524':'boxvl','\u2561':'boxvL','\u2562':'boxVl','\u2563':'boxVL','\u251C':'boxvr','\u255E':'boxvR','\u255F':'boxVr','\u2560':'boxVR','\u02D8':'breve','\xA6':'brvbar','\uD835\uDCB7':'bscr','\u204F':'bsemi','\u29C5':'bsolb','\\':'bsol','\u27C8':'bsolhsub','\u2022':'bull','\u224E':'bump','\u2AAE':'bumpE','\u224F':'bumpe','\u0106':'Cacute','\u0107':'cacute','\u2A44':'capand','\u2A49':'capbrcup','\u2A4B':'capcap','\u2229':'cap','\u22D2':'Cap','\u2A47':'capcup','\u2A40':'capdot','\u2145':'DD','\u2229\uFE00':'caps','\u2041':'caret','\u02C7':'caron','\u212D':'Cfr','\u2A4D':'ccaps','\u010C':'Ccaron','\u010D':'ccaron','\xC7':'Ccedil','\xE7':'ccedil','\u0108':'Ccirc','\u0109':'ccirc','\u2230':'Cconint','\u2A4C':'ccups','\u2A50':'ccupssm','\u010A':'Cdot','\u010B':'cdot','\xB8':'cedil','\u29B2':'cemptyv','\xA2':'cent','\xB7':'middot','\uD835\uDD20':'cfr','\u0427':'CHcy','\u0447':'chcy','\u2713':'check','\u03A7':'Chi','\u03C7':'chi','\u02C6':'circ','\u2257':'cire','\u21BA':'olarr','\u21BB':'orarr','\u229B':'oast','\u229A':'ocir','\u229D':'odash','\u2299':'odot','\xAE':'reg','\u24C8':'oS','\u2296':'ominus','\u2295':'oplus','\u2297':'otimes','\u25CB':'cir','\u29C3':'cirE','\u2A10':'cirfnint','\u2AEF':'cirmid','\u29C2':'cirscir','\u2232':'cwconint','\u201D':'rdquo','\u2019':'rsquo','\u2663':'clubs',':':'colon','\u2237':'Colon','\u2A74':'Colone',',':'comma','@':'commat','\u2201':'comp','\u2218':'compfn','\u2102':'Copf','\u2245':'cong','\u2A6D':'congdot','\u2261':'equiv','\u222E':'oint','\u222F':'Conint','\uD835\uDD54':'copf','\u2210':'coprod','\xA9':'copy','\u2117':'copysr','\u21B5':'crarr','\u2717':'cross','\u2A2F':'Cross','\uD835\uDC9E':'Cscr','\uD835\uDCB8':'cscr','\u2ACF':'csub','\u2AD1':'csube','\u2AD0':'csup','\u2AD2':'csupe','\u22EF':'ctdot','\u2938':'cudarrl','\u2935':'cudarrr','\u22DE':'cuepr','\u22DF':'cuesc','\u21B6':'cularr','\u293D':'cularrp','\u2A48':'cupbrcap','\u2A46':'cupcap','\u222A':'cup','\u22D3':'Cup','\u2A4A':'cupcup','\u228D':'cupdot','\u2A45':'cupor','\u222A\uFE00':'cups','\u21B7':'curarr','\u293C':'curarrm','\u22CE':'cuvee','\u22CF':'cuwed','\xA4':'curren','\u2231':'cwint','\u232D':'cylcty','\u2020':'dagger','\u2021':'Dagger','\u2138':'daleth','\u2193':'darr','\u21A1':'Darr','\u21D3':'dArr','\u2010':'dash','\u2AE4':'Dashv','\u22A3':'dashv','\u290F':'rBarr','\u02DD':'dblac','\u010E':'Dcaron','\u010F':'dcaron','\u0414':'Dcy','\u0434':'dcy','\u21CA':'ddarr','\u2146':'dd','\u2911':'DDotrahd','\u2A77':'eDDot','\xB0':'deg','\u2207':'Del','\u0394':'Delta','\u03B4':'delta','\u29B1':'demptyv','\u297F':'dfisht','\uD835\uDD07':'Dfr','\uD835\uDD21':'dfr','\u2965':'dHar','\u21C3':'dharl','\u21C2':'dharr','\u02D9':'dot','`':'grave','\u02DC':'tilde','\u22C4':'diam','\u2666':'diams','\xA8':'die','\u03DD':'gammad','\u22F2':'disin','\xF7':'div','\u22C7':'divonx','\u0402':'DJcy','\u0452':'djcy','\u231E':'dlcorn','\u230D':'dlcrop','$':'dollar','\uD835\uDD3B':'Dopf','\uD835\uDD55':'dopf','\u20DC':'DotDot','\u2250':'doteq','\u2251':'eDot','\u2238':'minusd','\u2214':'plusdo','\u22A1':'sdotb','\u21D0':'lArr','\u21D4':'iff','\u27F8':'xlArr','\u27FA':'xhArr','\u27F9':'xrArr','\u21D2':'rArr','\u22A8':'vDash','\u21D1':'uArr','\u21D5':'vArr','\u2225':'par','\u2913':'DownArrowBar','\u21F5':'duarr','\u0311':'DownBreve','\u2950':'DownLeftRightVector','\u295E':'DownLeftTeeVector','\u2956':'DownLeftVectorBar','\u21BD':'lhard','\u295F':'DownRightTeeVector','\u2957':'DownRightVectorBar','\u21C1':'rhard','\u21A7':'mapstodown','\u22A4':'top','\u2910':'RBarr','\u231F':'drcorn','\u230C':'drcrop','\uD835\uDC9F':'Dscr','\uD835\uDCB9':'dscr','\u0405':'DScy','\u0455':'dscy','\u29F6':'dsol','\u0110':'Dstrok','\u0111':'dstrok','\u22F1':'dtdot','\u25BF':'dtri','\u296F':'duhar','\u29A6':'dwangle','\u040F':'DZcy','\u045F':'dzcy','\u27FF':'dzigrarr','\xC9':'Eacute','\xE9':'eacute','\u2A6E':'easter','\u011A':'Ecaron','\u011B':'ecaron','\xCA':'Ecirc','\xEA':'ecirc','\u2256':'ecir','\u2255':'ecolon','\u042D':'Ecy','\u044D':'ecy','\u0116':'Edot','\u0117':'edot','\u2147':'ee','\u2252':'efDot','\uD835\uDD08':'Efr','\uD835\uDD22':'efr','\u2A9A':'eg','\xC8':'Egrave','\xE8':'egrave','\u2A96':'egs','\u2A98':'egsdot','\u2A99':'el','\u2208':'in','\u23E7':'elinters','\u2113':'ell','\u2A95':'els','\u2A97':'elsdot','\u0112':'Emacr','\u0113':'emacr','\u2205':'empty','\u25FB':'EmptySmallSquare','\u25AB':'EmptyVerySmallSquare','\u2004':'emsp13','\u2005':'emsp14','\u2003':'emsp','\u014A':'ENG','\u014B':'eng','\u2002':'ensp','\u0118':'Eogon','\u0119':'eogon','\uD835\uDD3C':'Eopf','\uD835\uDD56':'eopf','\u22D5':'epar','\u29E3':'eparsl','\u2A71':'eplus','\u03B5':'epsi','\u0395':'Epsilon','\u03F5':'epsiv','\u2242':'esim','\u2A75':'Equal','=':'equals','\u225F':'equest','\u21CC':'rlhar','\u2A78':'equivDD','\u29E5':'eqvparsl','\u2971':'erarr','\u2253':'erDot','\u212F':'escr','\u2130':'Escr','\u2A73':'Esim','\u0397':'Eta','\u03B7':'eta','\xD0':'ETH','\xF0':'eth','\xCB':'Euml','\xEB':'euml','\u20AC':'euro','!':'excl','\u2203':'exist','\u0424':'Fcy','\u0444':'fcy','\u2640':'female','\uFB03':'ffilig','\uFB00':'fflig','\uFB04':'ffllig','\uD835\uDD09':'Ffr','\uD835\uDD23':'ffr','\uFB01':'filig','\u25FC':'FilledSmallSquare','fj':'fjlig','\u266D':'flat','\uFB02':'fllig','\u25B1':'fltns','\u0192':'fnof','\uD835\uDD3D':'Fopf','\uD835\uDD57':'fopf','\u2200':'forall','\u22D4':'fork','\u2AD9':'forkv','\u2131':'Fscr','\u2A0D':'fpartint','\xBD':'half','\u2153':'frac13','\xBC':'frac14','\u2155':'frac15','\u2159':'frac16','\u215B':'frac18','\u2154':'frac23','\u2156':'frac25','\xBE':'frac34','\u2157':'frac35','\u215C':'frac38','\u2158':'frac45','\u215A':'frac56','\u215D':'frac58','\u215E':'frac78','\u2044':'frasl','\u2322':'frown','\uD835\uDCBB':'fscr','\u01F5':'gacute','\u0393':'Gamma','\u03B3':'gamma','\u03DC':'Gammad','\u2A86':'gap','\u011E':'Gbreve','\u011F':'gbreve','\u0122':'Gcedil','\u011C':'Gcirc','\u011D':'gcirc','\u0413':'Gcy','\u0433':'gcy','\u0120':'Gdot','\u0121':'gdot','\u2265':'ge','\u2267':'gE','\u2A8C':'gEl','\u22DB':'gel','\u2A7E':'ges','\u2AA9':'gescc','\u2A80':'gesdot','\u2A82':'gesdoto','\u2A84':'gesdotol','\u22DB\uFE00':'gesl','\u2A94':'gesles','\uD835\uDD0A':'Gfr','\uD835\uDD24':'gfr','\u226B':'gg','\u22D9':'Gg','\u2137':'gimel','\u0403':'GJcy','\u0453':'gjcy','\u2AA5':'gla','\u2277':'gl','\u2A92':'glE','\u2AA4':'glj','\u2A8A':'gnap','\u2A88':'gne','\u2269':'gnE','\u22E7':'gnsim','\uD835\uDD3E':'Gopf','\uD835\uDD58':'gopf','\u2AA2':'GreaterGreater','\u2273':'gsim','\uD835\uDCA2':'Gscr','\u210A':'gscr','\u2A8E':'gsime','\u2A90':'gsiml','\u2AA7':'gtcc','\u2A7A':'gtcir','>':'gt','\u22D7':'gtdot','\u2995':'gtlPar','\u2A7C':'gtquest','\u2978':'gtrarr','\u2269\uFE00':'gvnE','\u200A':'hairsp','\u210B':'Hscr','\u042A':'HARDcy','\u044A':'hardcy','\u2948':'harrcir','\u2194':'harr','\u21AD':'harrw','^':'Hat','\u210F':'hbar','\u0124':'Hcirc','\u0125':'hcirc','\u2665':'hearts','\u2026':'mldr','\u22B9':'hercon','\uD835\uDD25':'hfr','\u210C':'Hfr','\u2925':'searhk','\u2926':'swarhk','\u21FF':'hoarr','\u223B':'homtht','\u21A9':'larrhk','\u21AA':'rarrhk','\uD835\uDD59':'hopf','\u210D':'Hopf','\u2015':'horbar','\uD835\uDCBD':'hscr','\u0126':'Hstrok','\u0127':'hstrok','\u2043':'hybull','\xCD':'Iacute','\xED':'iacute','\u2063':'ic','\xCE':'Icirc','\xEE':'icirc','\u0418':'Icy','\u0438':'icy','\u0130':'Idot','\u0415':'IEcy','\u0435':'iecy','\xA1':'iexcl','\uD835\uDD26':'ifr','\u2111':'Im','\xCC':'Igrave','\xEC':'igrave','\u2148':'ii','\u2A0C':'qint','\u222D':'tint','\u29DC':'iinfin','\u2129':'iiota','\u0132':'IJlig','\u0133':'ijlig','\u012A':'Imacr','\u012B':'imacr','\u2110':'Iscr','\u0131':'imath','\u22B7':'imof','\u01B5':'imped','\u2105':'incare','\u221E':'infin','\u29DD':'infintie','\u22BA':'intcal','\u222B':'int','\u222C':'Int','\u2124':'Zopf','\u2A17':'intlarhk','\u2A3C':'iprod','\u2062':'it','\u0401':'IOcy','\u0451':'iocy','\u012E':'Iogon','\u012F':'iogon','\uD835\uDD40':'Iopf','\uD835\uDD5A':'iopf','\u0399':'Iota','\u03B9':'iota','\xBF':'iquest','\uD835\uDCBE':'iscr','\u22F5':'isindot','\u22F9':'isinE','\u22F4':'isins','\u22F3':'isinsv','\u0128':'Itilde','\u0129':'itilde','\u0406':'Iukcy','\u0456':'iukcy','\xCF':'Iuml','\xEF':'iuml','\u0134':'Jcirc','\u0135':'jcirc','\u0419':'Jcy','\u0439':'jcy','\uD835\uDD0D':'Jfr','\uD835\uDD27':'jfr','\u0237':'jmath','\uD835\uDD41':'Jopf','\uD835\uDD5B':'jopf','\uD835\uDCA5':'Jscr','\uD835\uDCBF':'jscr','\u0408':'Jsercy','\u0458':'jsercy','\u0404':'Jukcy','\u0454':'jukcy','\u039A':'Kappa','\u03BA':'kappa','\u03F0':'kappav','\u0136':'Kcedil','\u0137':'kcedil','\u041A':'Kcy','\u043A':'kcy','\uD835\uDD0E':'Kfr','\uD835\uDD28':'kfr','\u0138':'kgreen','\u0425':'KHcy','\u0445':'khcy','\u040C':'KJcy','\u045C':'kjcy','\uD835\uDD42':'Kopf','\uD835\uDD5C':'kopf','\uD835\uDCA6':'Kscr','\uD835\uDCC0':'kscr','\u21DA':'lAarr','\u0139':'Lacute','\u013A':'lacute','\u29B4':'laemptyv','\u2112':'Lscr','\u039B':'Lambda','\u03BB':'lambda','\u27E8':'lang','\u27EA':'Lang','\u2991':'langd','\u2A85':'lap','\xAB':'laquo','\u21E4':'larrb','\u291F':'larrbfs','\u2190':'larr','\u219E':'Larr','\u291D':'larrfs','\u21AB':'larrlp','\u2939':'larrpl','\u2973':'larrsim','\u21A2':'larrtl','\u2919':'latail','\u291B':'lAtail','\u2AAB':'lat','\u2AAD':'late','\u2AAD\uFE00':'lates','\u290C':'lbarr','\u290E':'lBarr','\u2772':'lbbrk','{':'lcub','[':'lsqb','\u298B':'lbrke','\u298F':'lbrksld','\u298D':'lbrkslu','\u013D':'Lcaron','\u013E':'lcaron','\u013B':'Lcedil','\u013C':'lcedil','\u2308':'lceil','\u041B':'Lcy','\u043B':'lcy','\u2936':'ldca','\u201C':'ldquo','\u2967':'ldrdhar','\u294B':'ldrushar','\u21B2':'ldsh','\u2264':'le','\u2266':'lE','\u21C6':'lrarr','\u27E6':'lobrk','\u2961':'LeftDownTeeVector','\u2959':'LeftDownVectorBar','\u230A':'lfloor','\u21BC':'lharu','\u21C7':'llarr','\u21CB':'lrhar','\u294E':'LeftRightVector','\u21A4':'mapstoleft','\u295A':'LeftTeeVector','\u22CB':'lthree','\u29CF':'LeftTriangleBar','\u22B2':'vltri','\u22B4':'ltrie','\u2951':'LeftUpDownVector','\u2960':'LeftUpTeeVector','\u2958':'LeftUpVectorBar','\u21BF':'uharl','\u2952':'LeftVectorBar','\u2A8B':'lEg','\u22DA':'leg','\u2A7D':'les','\u2AA8':'lescc','\u2A7F':'lesdot','\u2A81':'lesdoto','\u2A83':'lesdotor','\u22DA\uFE00':'lesg','\u2A93':'lesges','\u22D6':'ltdot','\u2276':'lg','\u2AA1':'LessLess','\u2272':'lsim','\u297C':'lfisht','\uD835\uDD0F':'Lfr','\uD835\uDD29':'lfr','\u2A91':'lgE','\u2962':'lHar','\u296A':'lharul','\u2584':'lhblk','\u0409':'LJcy','\u0459':'ljcy','\u226A':'ll','\u22D8':'Ll','\u296B':'llhard','\u25FA':'lltri','\u013F':'Lmidot','\u0140':'lmidot','\u23B0':'lmoust','\u2A89':'lnap','\u2A87':'lne','\u2268':'lnE','\u22E6':'lnsim','\u27EC':'loang','\u21FD':'loarr','\u27F5':'xlarr','\u27F7':'xharr','\u27FC':'xmap','\u27F6':'xrarr','\u21AC':'rarrlp','\u2985':'lopar','\uD835\uDD43':'Lopf','\uD835\uDD5D':'lopf','\u2A2D':'loplus','\u2A34':'lotimes','\u2217':'lowast','_':'lowbar','\u2199':'swarr','\u2198':'searr','\u25CA':'loz','(':'lpar','\u2993':'lparlt','\u296D':'lrhard','\u200E':'lrm','\u22BF':'lrtri','\u2039':'lsaquo','\uD835\uDCC1':'lscr','\u21B0':'lsh','\u2A8D':'lsime','\u2A8F':'lsimg','\u2018':'lsquo','\u201A':'sbquo','\u0141':'Lstrok','\u0142':'lstrok','\u2AA6':'ltcc','\u2A79':'ltcir','<':'lt','\u22C9':'ltimes','\u2976':'ltlarr','\u2A7B':'ltquest','\u25C3':'ltri','\u2996':'ltrPar','\u294A':'lurdshar','\u2966':'luruhar','\u2268\uFE00':'lvnE','\xAF':'macr','\u2642':'male','\u2720':'malt','\u2905':'Map','\u21A6':'map','\u21A5':'mapstoup','\u25AE':'marker','\u2A29':'mcomma','\u041C':'Mcy','\u043C':'mcy','\u2014':'mdash','\u223A':'mDDot','\u205F':'MediumSpace','\u2133':'Mscr','\uD835\uDD10':'Mfr','\uD835\uDD2A':'mfr','\u2127':'mho','\xB5':'micro','\u2AF0':'midcir','\u2223':'mid','\u2212':'minus','\u2A2A':'minusdu','\u2213':'mp','\u2ADB':'mlcp','\u22A7':'models','\uD835\uDD44':'Mopf','\uD835\uDD5E':'mopf','\uD835\uDCC2':'mscr','\u039C':'Mu','\u03BC':'mu','\u22B8':'mumap','\u0143':'Nacute','\u0144':'nacute','\u2220\u20D2':'nang','\u2249':'nap','\u2A70\u0338':'napE','\u224B\u0338':'napid','\u0149':'napos','\u266E':'natur','\u2115':'Nopf','\xA0':'nbsp','\u224E\u0338':'nbump','\u224F\u0338':'nbumpe','\u2A43':'ncap','\u0147':'Ncaron','\u0148':'ncaron','\u0145':'Ncedil','\u0146':'ncedil','\u2247':'ncong','\u2A6D\u0338':'ncongdot','\u2A42':'ncup','\u041D':'Ncy','\u043D':'ncy','\u2013':'ndash','\u2924':'nearhk','\u2197':'nearr','\u21D7':'neArr','\u2260':'ne','\u2250\u0338':'nedot','\u200B':'ZeroWidthSpace','\u2262':'nequiv','\u2928':'toea','\u2242\u0338':'nesim','\n':'NewLine','\u2204':'nexist','\uD835\uDD11':'Nfr','\uD835\uDD2B':'nfr','\u2267\u0338':'ngE','\u2271':'nge','\u2A7E\u0338':'nges','\u22D9\u0338':'nGg','\u2275':'ngsim','\u226B\u20D2':'nGt','\u226F':'ngt','\u226B\u0338':'nGtv','\u21AE':'nharr','\u21CE':'nhArr','\u2AF2':'nhpar','\u220B':'ni','\u22FC':'nis','\u22FA':'nisd','\u040A':'NJcy','\u045A':'njcy','\u219A':'nlarr','\u21CD':'nlArr','\u2025':'nldr','\u2266\u0338':'nlE','\u2270':'nle','\u2A7D\u0338':'nles','\u226E':'nlt','\u22D8\u0338':'nLl','\u2274':'nlsim','\u226A\u20D2':'nLt','\u22EA':'nltri','\u22EC':'nltrie','\u226A\u0338':'nLtv','\u2224':'nmid','\u2060':'NoBreak','\uD835\uDD5F':'nopf','\u2AEC':'Not','\xAC':'not','\u226D':'NotCupCap','\u2226':'npar','\u2209':'notin','\u2279':'ntgl','\u22F5\u0338':'notindot','\u22F9\u0338':'notinE','\u22F7':'notinvb','\u22F6':'notinvc','\u29CF\u0338':'NotLeftTriangleBar','\u2278':'ntlg','\u2AA2\u0338':'NotNestedGreaterGreater','\u2AA1\u0338':'NotNestedLessLess','\u220C':'notni','\u22FE':'notnivb','\u22FD':'notnivc','\u2280':'npr','\u2AAF\u0338':'npre','\u22E0':'nprcue','\u29D0\u0338':'NotRightTriangleBar','\u22EB':'nrtri','\u22ED':'nrtrie','\u228F\u0338':'NotSquareSubset','\u22E2':'nsqsube','\u2290\u0338':'NotSquareSuperset','\u22E3':'nsqsupe','\u2282\u20D2':'vnsub','\u2288':'nsube','\u2281':'nsc','\u2AB0\u0338':'nsce','\u22E1':'nsccue','\u227F\u0338':'NotSucceedsTilde','\u2283\u20D2':'vnsup','\u2289':'nsupe','\u2241':'nsim','\u2244':'nsime','\u2AFD\u20E5':'nparsl','\u2202\u0338':'npart','\u2A14':'npolint','\u2933\u0338':'nrarrc','\u219B':'nrarr','\u21CF':'nrArr','\u219D\u0338':'nrarrw','\uD835\uDCA9':'Nscr','\uD835\uDCC3':'nscr','\u2284':'nsub','\u2AC5\u0338':'nsubE','\u2285':'nsup','\u2AC6\u0338':'nsupE','\xD1':'Ntilde','\xF1':'ntilde','\u039D':'Nu','\u03BD':'nu','#':'num','\u2116':'numero','\u2007':'numsp','\u224D\u20D2':'nvap','\u22AC':'nvdash','\u22AD':'nvDash','\u22AE':'nVdash','\u22AF':'nVDash','\u2265\u20D2':'nvge','>\u20D2':'nvgt','\u2904':'nvHarr','\u29DE':'nvinfin','\u2902':'nvlArr','\u2264\u20D2':'nvle','<\u20D2':'nvlt','\u22B4\u20D2':'nvltrie','\u2903':'nvrArr','\u22B5\u20D2':'nvrtrie','\u223C\u20D2':'nvsim','\u2923':'nwarhk','\u2196':'nwarr','\u21D6':'nwArr','\u2927':'nwnear','\xD3':'Oacute','\xF3':'oacute','\xD4':'Ocirc','\xF4':'ocirc','\u041E':'Ocy','\u043E':'ocy','\u0150':'Odblac','\u0151':'odblac','\u2A38':'odiv','\u29BC':'odsold','\u0152':'OElig','\u0153':'oelig','\u29BF':'ofcir','\uD835\uDD12':'Ofr','\uD835\uDD2C':'ofr','\u02DB':'ogon','\xD2':'Ograve','\xF2':'ograve','\u29C1':'ogt','\u29B5':'ohbar','\u03A9':'ohm','\u29BE':'olcir','\u29BB':'olcross','\u203E':'oline','\u29C0':'olt','\u014C':'Omacr','\u014D':'omacr','\u03C9':'omega','\u039F':'Omicron','\u03BF':'omicron','\u29B6':'omid','\uD835\uDD46':'Oopf','\uD835\uDD60':'oopf','\u29B7':'opar','\u29B9':'operp','\u2A54':'Or','\u2228':'or','\u2A5D':'ord','\u2134':'oscr','\xAA':'ordf','\xBA':'ordm','\u22B6':'origof','\u2A56':'oror','\u2A57':'orslope','\u2A5B':'orv','\uD835\uDCAA':'Oscr','\xD8':'Oslash','\xF8':'oslash','\u2298':'osol','\xD5':'Otilde','\xF5':'otilde','\u2A36':'otimesas','\u2A37':'Otimes','\xD6':'Ouml','\xF6':'ouml','\u233D':'ovbar','\u23DE':'OverBrace','\u23B4':'tbrk','\u23DC':'OverParenthesis','\xB6':'para','\u2AF3':'parsim','\u2AFD':'parsl','\u2202':'part','\u041F':'Pcy','\u043F':'pcy','%':'percnt','.':'period','\u2030':'permil','\u2031':'pertenk','\uD835\uDD13':'Pfr','\uD835\uDD2D':'pfr','\u03A6':'Phi','\u03C6':'phi','\u03D5':'phiv','\u260E':'phone','\u03A0':'Pi','\u03C0':'pi','\u03D6':'piv','\u210E':'planckh','\u2A23':'plusacir','\u2A22':'pluscir','+':'plus','\u2A25':'plusdu','\u2A72':'pluse','\xB1':'pm','\u2A26':'plussim','\u2A27':'plustwo','\u2A15':'pointint','\uD835\uDD61':'popf','\u2119':'Popf','\xA3':'pound','\u2AB7':'prap','\u2ABB':'Pr','\u227A':'pr','\u227C':'prcue','\u2AAF':'pre','\u227E':'prsim','\u2AB9':'prnap','\u2AB5':'prnE','\u22E8':'prnsim','\u2AB3':'prE','\u2032':'prime','\u2033':'Prime','\u220F':'prod','\u232E':'profalar','\u2312':'profline','\u2313':'profsurf','\u221D':'prop','\u22B0':'prurel','\uD835\uDCAB':'Pscr','\uD835\uDCC5':'pscr','\u03A8':'Psi','\u03C8':'psi','\u2008':'puncsp','\uD835\uDD14':'Qfr','\uD835\uDD2E':'qfr','\uD835\uDD62':'qopf','\u211A':'Qopf','\u2057':'qprime','\uD835\uDCAC':'Qscr','\uD835\uDCC6':'qscr','\u2A16':'quatint','?':'quest','"':'quot','\u21DB':'rAarr','\u223D\u0331':'race','\u0154':'Racute','\u0155':'racute','\u221A':'Sqrt','\u29B3':'raemptyv','\u27E9':'rang','\u27EB':'Rang','\u2992':'rangd','\u29A5':'range','\xBB':'raquo','\u2975':'rarrap','\u21E5':'rarrb','\u2920':'rarrbfs','\u2933':'rarrc','\u2192':'rarr','\u21A0':'Rarr','\u291E':'rarrfs','\u2945':'rarrpl','\u2974':'rarrsim','\u2916':'Rarrtl','\u21A3':'rarrtl','\u219D':'rarrw','\u291A':'ratail','\u291C':'rAtail','\u2236':'ratio','\u2773':'rbbrk','}':'rcub',']':'rsqb','\u298C':'rbrke','\u298E':'rbrksld','\u2990':'rbrkslu','\u0158':'Rcaron','\u0159':'rcaron','\u0156':'Rcedil','\u0157':'rcedil','\u2309':'rceil','\u0420':'Rcy','\u0440':'rcy','\u2937':'rdca','\u2969':'rdldhar','\u21B3':'rdsh','\u211C':'Re','\u211B':'Rscr','\u211D':'Ropf','\u25AD':'rect','\u297D':'rfisht','\u230B':'rfloor','\uD835\uDD2F':'rfr','\u2964':'rHar','\u21C0':'rharu','\u296C':'rharul','\u03A1':'Rho','\u03C1':'rho','\u03F1':'rhov','\u21C4':'rlarr','\u27E7':'robrk','\u295D':'RightDownTeeVector','\u2955':'RightDownVectorBar','\u21C9':'rrarr','\u22A2':'vdash','\u295B':'RightTeeVector','\u22CC':'rthree','\u29D0':'RightTriangleBar','\u22B3':'vrtri','\u22B5':'rtrie','\u294F':'RightUpDownVector','\u295C':'RightUpTeeVector','\u2954':'RightUpVectorBar','\u21BE':'uharr','\u2953':'RightVectorBar','\u02DA':'ring','\u200F':'rlm','\u23B1':'rmoust','\u2AEE':'rnmid','\u27ED':'roang','\u21FE':'roarr','\u2986':'ropar','\uD835\uDD63':'ropf','\u2A2E':'roplus','\u2A35':'rotimes','\u2970':'RoundImplies',')':'rpar','\u2994':'rpargt','\u2A12':'rppolint','\u203A':'rsaquo','\uD835\uDCC7':'rscr','\u21B1':'rsh','\u22CA':'rtimes','\u25B9':'rtri','\u29CE':'rtriltri','\u29F4':'RuleDelayed','\u2968':'ruluhar','\u211E':'rx','\u015A':'Sacute','\u015B':'sacute','\u2AB8':'scap','\u0160':'Scaron','\u0161':'scaron','\u2ABC':'Sc','\u227B':'sc','\u227D':'sccue','\u2AB0':'sce','\u2AB4':'scE','\u015E':'Scedil','\u015F':'scedil','\u015C':'Scirc','\u015D':'scirc','\u2ABA':'scnap','\u2AB6':'scnE','\u22E9':'scnsim','\u2A13':'scpolint','\u227F':'scsim','\u0421':'Scy','\u0441':'scy','\u22C5':'sdot','\u2A66':'sdote','\u21D8':'seArr','\xA7':'sect',';':'semi','\u2929':'tosa','\u2736':'sext','\uD835\uDD16':'Sfr','\uD835\uDD30':'sfr','\u266F':'sharp','\u0429':'SHCHcy','\u0449':'shchcy','\u0428':'SHcy','\u0448':'shcy','\u2191':'uarr','\xAD':'shy','\u03A3':'Sigma','\u03C3':'sigma','\u03C2':'sigmaf','\u223C':'sim','\u2A6A':'simdot','\u2243':'sime','\u2A9E':'simg','\u2AA0':'simgE','\u2A9D':'siml','\u2A9F':'simlE','\u2246':'simne','\u2A24':'simplus','\u2972':'simrarr','\u2A33':'smashp','\u29E4':'smeparsl','\u2323':'smile','\u2AAA':'smt','\u2AAC':'smte','\u2AAC\uFE00':'smtes','\u042C':'SOFTcy','\u044C':'softcy','\u233F':'solbar','\u29C4':'solb','/':'sol','\uD835\uDD4A':'Sopf','\uD835\uDD64':'sopf','\u2660':'spades','\u2293':'sqcap','\u2293\uFE00':'sqcaps','\u2294':'sqcup','\u2294\uFE00':'sqcups','\u228F':'sqsub','\u2291':'sqsube','\u2290':'sqsup','\u2292':'sqsupe','\u25A1':'squ','\uD835\uDCAE':'Sscr','\uD835\uDCC8':'sscr','\u22C6':'Star','\u2606':'star','\u2282':'sub','\u22D0':'Sub','\u2ABD':'subdot','\u2AC5':'subE','\u2286':'sube','\u2AC3':'subedot','\u2AC1':'submult','\u2ACB':'subnE','\u228A':'subne','\u2ABF':'subplus','\u2979':'subrarr','\u2AC7':'subsim','\u2AD5':'subsub','\u2AD3':'subsup','\u2211':'sum','\u266A':'sung','\xB9':'sup1','\xB2':'sup2','\xB3':'sup3','\u2283':'sup','\u22D1':'Sup','\u2ABE':'supdot','\u2AD8':'supdsub','\u2AC6':'supE','\u2287':'supe','\u2AC4':'supedot','\u27C9':'suphsol','\u2AD7':'suphsub','\u297B':'suplarr','\u2AC2':'supmult','\u2ACC':'supnE','\u228B':'supne','\u2AC0':'supplus','\u2AC8':'supsim','\u2AD4':'supsub','\u2AD6':'supsup','\u21D9':'swArr','\u292A':'swnwar','\xDF':'szlig','\t':'Tab','\u2316':'target','\u03A4':'Tau','\u03C4':'tau','\u0164':'Tcaron','\u0165':'tcaron','\u0162':'Tcedil','\u0163':'tcedil','\u0422':'Tcy','\u0442':'tcy','\u20DB':'tdot','\u2315':'telrec','\uD835\uDD17':'Tfr','\uD835\uDD31':'tfr','\u2234':'there4','\u0398':'Theta','\u03B8':'theta','\u03D1':'thetav','\u205F\u200A':'ThickSpace','\u2009':'thinsp','\xDE':'THORN','\xFE':'thorn','\u2A31':'timesbar','\xD7':'times','\u2A30':'timesd','\u2336':'topbot','\u2AF1':'topcir','\uD835\uDD4B':'Topf','\uD835\uDD65':'topf','\u2ADA':'topfork','\u2034':'tprime','\u2122':'trade','\u25B5':'utri','\u225C':'trie','\u25EC':'tridot','\u2A3A':'triminus','\u2A39':'triplus','\u29CD':'trisb','\u2A3B':'tritime','\u23E2':'trpezium','\uD835\uDCAF':'Tscr','\uD835\uDCC9':'tscr','\u0426':'TScy','\u0446':'tscy','\u040B':'TSHcy','\u045B':'tshcy','\u0166':'Tstrok','\u0167':'tstrok','\xDA':'Uacute','\xFA':'uacute','\u219F':'Uarr','\u2949':'Uarrocir','\u040E':'Ubrcy','\u045E':'ubrcy','\u016C':'Ubreve','\u016D':'ubreve','\xDB':'Ucirc','\xFB':'ucirc','\u0423':'Ucy','\u0443':'ucy','\u21C5':'udarr','\u0170':'Udblac','\u0171':'udblac','\u296E':'udhar','\u297E':'ufisht','\uD835\uDD18':'Ufr','\uD835\uDD32':'ufr','\xD9':'Ugrave','\xF9':'ugrave','\u2963':'uHar','\u2580':'uhblk','\u231C':'ulcorn','\u230F':'ulcrop','\u25F8':'ultri','\u016A':'Umacr','\u016B':'umacr','\u23DF':'UnderBrace','\u23DD':'UnderParenthesis','\u228E':'uplus','\u0172':'Uogon','\u0173':'uogon','\uD835\uDD4C':'Uopf','\uD835\uDD66':'uopf','\u2912':'UpArrowBar','\u2195':'varr','\u03C5':'upsi','\u03D2':'Upsi','\u03A5':'Upsilon','\u21C8':'uuarr','\u231D':'urcorn','\u230E':'urcrop','\u016E':'Uring','\u016F':'uring','\u25F9':'urtri','\uD835\uDCB0':'Uscr','\uD835\uDCCA':'uscr','\u22F0':'utdot','\u0168':'Utilde','\u0169':'utilde','\xDC':'Uuml','\xFC':'uuml','\u29A7':'uwangle','\u299C':'vangrt','\u228A\uFE00':'vsubne','\u2ACB\uFE00':'vsubnE','\u228B\uFE00':'vsupne','\u2ACC\uFE00':'vsupnE','\u2AE8':'vBar','\u2AEB':'Vbar','\u2AE9':'vBarv','\u0412':'Vcy','\u0432':'vcy','\u22A9':'Vdash','\u22AB':'VDash','\u2AE6':'Vdashl','\u22BB':'veebar','\u225A':'veeeq','\u22EE':'vellip','|':'vert','\u2016':'Vert','\u2758':'VerticalSeparator','\u2240':'wr','\uD835\uDD19':'Vfr','\uD835\uDD33':'vfr','\uD835\uDD4D':'Vopf','\uD835\uDD67':'vopf','\uD835\uDCB1':'Vscr','\uD835\uDCCB':'vscr','\u22AA':'Vvdash','\u299A':'vzigzag','\u0174':'Wcirc','\u0175':'wcirc','\u2A5F':'wedbar','\u2259':'wedgeq','\u2118':'wp','\uD835\uDD1A':'Wfr','\uD835\uDD34':'wfr','\uD835\uDD4E':'Wopf','\uD835\uDD68':'wopf','\uD835\uDCB2':'Wscr','\uD835\uDCCC':'wscr','\uD835\uDD1B':'Xfr','\uD835\uDD35':'xfr','\u039E':'Xi','\u03BE':'xi','\u22FB':'xnis','\uD835\uDD4F':'Xopf','\uD835\uDD69':'xopf','\uD835\uDCB3':'Xscr','\uD835\uDCCD':'xscr','\xDD':'Yacute','\xFD':'yacute','\u042F':'YAcy','\u044F':'yacy','\u0176':'Ycirc','\u0177':'ycirc','\u042B':'Ycy','\u044B':'ycy','\xA5':'yen','\uD835\uDD1C':'Yfr','\uD835\uDD36':'yfr','\u0407':'YIcy','\u0457':'yicy','\uD835\uDD50':'Yopf','\uD835\uDD6A':'yopf','\uD835\uDCB4':'Yscr','\uD835\uDCCE':'yscr','\u042E':'YUcy','\u044E':'yucy','\xFF':'yuml','\u0178':'Yuml','\u0179':'Zacute','\u017A':'zacute','\u017D':'Zcaron','\u017E':'zcaron','\u0417':'Zcy','\u0437':'zcy','\u017B':'Zdot','\u017C':'zdot','\u2128':'Zfr','\u0396':'Zeta','\u03B6':'zeta','\uD835\uDD37':'zfr','\u0416':'ZHcy','\u0436':'zhcy','\u21DD':'zigrarr','\uD835\uDD6B':'zopf','\uD835\uDCB5':'Zscr','\uD835\uDCCF':'zscr','\u200D':'zwj','\u200C':'zwnj'};
-
-	var regexEscape = /["&'<>`]/g;
-	var escapeMap = {
-		'"': '&quot;',
-		'&': '&amp;',
-		'\'': '&#x27;',
-		'<': '&lt;',
-		// See https://mathiasbynens.be/notes/ambiguous-ampersands: in HTML, the
-		// following is not strictly necessary unless it’s part of a tag or an
-		// unquoted attribute value. We’re only escaping it to support those
-		// situations, and for XML support.
-		'>': '&gt;',
-		// In Internet Explorer ≤ 8, the backtick character can be used
-		// to break out of (un)quoted attribute values or HTML comments.
-		// See http://html5sec.org/#102, http://html5sec.org/#108, and
-		// http://html5sec.org/#133.
-		'`': '&#x60;'
-	};
-
-	var regexInvalidEntity = /&#(?:[xX][^a-fA-F0-9]|[^0-9xX])/;
-	var regexInvalidRawCodePoint = /[\0-\x08\x0B\x0E-\x1F\x7F-\x9F\uFDD0-\uFDEF\uFFFE\uFFFF]|[\uD83F\uD87F\uD8BF\uD8FF\uD93F\uD97F\uD9BF\uD9FF\uDA3F\uDA7F\uDABF\uDAFF\uDB3F\uDB7F\uDBBF\uDBFF][\uDFFE\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/;
-	var regexDecode = /&#([0-9]+)(;?)|&#[xX]([a-fA-F0-9]+)(;?)|&([0-9a-zA-Z]+);|&(Aacute|iacute|Uacute|plusmn|otilde|Otilde|Agrave|agrave|yacute|Yacute|oslash|Oslash|Atilde|atilde|brvbar|Ccedil|ccedil|ograve|curren|divide|Eacute|eacute|Ograve|oacute|Egrave|egrave|ugrave|frac12|frac14|frac34|Ugrave|Oacute|Iacute|ntilde|Ntilde|uacute|middot|Igrave|igrave|iquest|aacute|laquo|THORN|micro|iexcl|icirc|Icirc|Acirc|ucirc|ecirc|Ocirc|ocirc|Ecirc|Ucirc|aring|Aring|aelig|AElig|acute|pound|raquo|acirc|times|thorn|szlig|cedil|COPY|Auml|ordf|ordm|uuml|macr|Uuml|auml|Ouml|ouml|para|nbsp|Euml|quot|QUOT|euml|yuml|cent|sect|copy|sup1|sup2|sup3|Iuml|iuml|shy|eth|reg|not|yen|amp|AMP|REG|uml|ETH|deg|gt|GT|LT|lt)([=a-zA-Z0-9])?/g;
-	var decodeMap = {'Aacute':'\xC1','aacute':'\xE1','Abreve':'\u0102','abreve':'\u0103','ac':'\u223E','acd':'\u223F','acE':'\u223E\u0333','Acirc':'\xC2','acirc':'\xE2','acute':'\xB4','Acy':'\u0410','acy':'\u0430','AElig':'\xC6','aelig':'\xE6','af':'\u2061','Afr':'\uD835\uDD04','afr':'\uD835\uDD1E','Agrave':'\xC0','agrave':'\xE0','alefsym':'\u2135','aleph':'\u2135','Alpha':'\u0391','alpha':'\u03B1','Amacr':'\u0100','amacr':'\u0101','amalg':'\u2A3F','amp':'&','AMP':'&','andand':'\u2A55','And':'\u2A53','and':'\u2227','andd':'\u2A5C','andslope':'\u2A58','andv':'\u2A5A','ang':'\u2220','ange':'\u29A4','angle':'\u2220','angmsdaa':'\u29A8','angmsdab':'\u29A9','angmsdac':'\u29AA','angmsdad':'\u29AB','angmsdae':'\u29AC','angmsdaf':'\u29AD','angmsdag':'\u29AE','angmsdah':'\u29AF','angmsd':'\u2221','angrt':'\u221F','angrtvb':'\u22BE','angrtvbd':'\u299D','angsph':'\u2222','angst':'\xC5','angzarr':'\u237C','Aogon':'\u0104','aogon':'\u0105','Aopf':'\uD835\uDD38','aopf':'\uD835\uDD52','apacir':'\u2A6F','ap':'\u2248','apE':'\u2A70','ape':'\u224A','apid':'\u224B','apos':'\'','ApplyFunction':'\u2061','approx':'\u2248','approxeq':'\u224A','Aring':'\xC5','aring':'\xE5','Ascr':'\uD835\uDC9C','ascr':'\uD835\uDCB6','Assign':'\u2254','ast':'*','asymp':'\u2248','asympeq':'\u224D','Atilde':'\xC3','atilde':'\xE3','Auml':'\xC4','auml':'\xE4','awconint':'\u2233','awint':'\u2A11','backcong':'\u224C','backepsilon':'\u03F6','backprime':'\u2035','backsim':'\u223D','backsimeq':'\u22CD','Backslash':'\u2216','Barv':'\u2AE7','barvee':'\u22BD','barwed':'\u2305','Barwed':'\u2306','barwedge':'\u2305','bbrk':'\u23B5','bbrktbrk':'\u23B6','bcong':'\u224C','Bcy':'\u0411','bcy':'\u0431','bdquo':'\u201E','becaus':'\u2235','because':'\u2235','Because':'\u2235','bemptyv':'\u29B0','bepsi':'\u03F6','bernou':'\u212C','Bernoullis':'\u212C','Beta':'\u0392','beta':'\u03B2','beth':'\u2136','between':'\u226C','Bfr':'\uD835\uDD05','bfr':'\uD835\uDD1F','bigcap':'\u22C2','bigcirc':'\u25EF','bigcup':'\u22C3','bigodot':'\u2A00','bigoplus':'\u2A01','bigotimes':'\u2A02','bigsqcup':'\u2A06','bigstar':'\u2605','bigtriangledown':'\u25BD','bigtriangleup':'\u25B3','biguplus':'\u2A04','bigvee':'\u22C1','bigwedge':'\u22C0','bkarow':'\u290D','blacklozenge':'\u29EB','blacksquare':'\u25AA','blacktriangle':'\u25B4','blacktriangledown':'\u25BE','blacktriangleleft':'\u25C2','blacktriangleright':'\u25B8','blank':'\u2423','blk12':'\u2592','blk14':'\u2591','blk34':'\u2593','block':'\u2588','bne':'=\u20E5','bnequiv':'\u2261\u20E5','bNot':'\u2AED','bnot':'\u2310','Bopf':'\uD835\uDD39','bopf':'\uD835\uDD53','bot':'\u22A5','bottom':'\u22A5','bowtie':'\u22C8','boxbox':'\u29C9','boxdl':'\u2510','boxdL':'\u2555','boxDl':'\u2556','boxDL':'\u2557','boxdr':'\u250C','boxdR':'\u2552','boxDr':'\u2553','boxDR':'\u2554','boxh':'\u2500','boxH':'\u2550','boxhd':'\u252C','boxHd':'\u2564','boxhD':'\u2565','boxHD':'\u2566','boxhu':'\u2534','boxHu':'\u2567','boxhU':'\u2568','boxHU':'\u2569','boxminus':'\u229F','boxplus':'\u229E','boxtimes':'\u22A0','boxul':'\u2518','boxuL':'\u255B','boxUl':'\u255C','boxUL':'\u255D','boxur':'\u2514','boxuR':'\u2558','boxUr':'\u2559','boxUR':'\u255A','boxv':'\u2502','boxV':'\u2551','boxvh':'\u253C','boxvH':'\u256A','boxVh':'\u256B','boxVH':'\u256C','boxvl':'\u2524','boxvL':'\u2561','boxVl':'\u2562','boxVL':'\u2563','boxvr':'\u251C','boxvR':'\u255E','boxVr':'\u255F','boxVR':'\u2560','bprime':'\u2035','breve':'\u02D8','Breve':'\u02D8','brvbar':'\xA6','bscr':'\uD835\uDCB7','Bscr':'\u212C','bsemi':'\u204F','bsim':'\u223D','bsime':'\u22CD','bsolb':'\u29C5','bsol':'\\','bsolhsub':'\u27C8','bull':'\u2022','bullet':'\u2022','bump':'\u224E','bumpE':'\u2AAE','bumpe':'\u224F','Bumpeq':'\u224E','bumpeq':'\u224F','Cacute':'\u0106','cacute':'\u0107','capand':'\u2A44','capbrcup':'\u2A49','capcap':'\u2A4B','cap':'\u2229','Cap':'\u22D2','capcup':'\u2A47','capdot':'\u2A40','CapitalDifferentialD':'\u2145','caps':'\u2229\uFE00','caret':'\u2041','caron':'\u02C7','Cayleys':'\u212D','ccaps':'\u2A4D','Ccaron':'\u010C','ccaron':'\u010D','Ccedil':'\xC7','ccedil':'\xE7','Ccirc':'\u0108','ccirc':'\u0109','Cconint':'\u2230','ccups':'\u2A4C','ccupssm':'\u2A50','Cdot':'\u010A','cdot':'\u010B','cedil':'\xB8','Cedilla':'\xB8','cemptyv':'\u29B2','cent':'\xA2','centerdot':'\xB7','CenterDot':'\xB7','cfr':'\uD835\uDD20','Cfr':'\u212D','CHcy':'\u0427','chcy':'\u0447','check':'\u2713','checkmark':'\u2713','Chi':'\u03A7','chi':'\u03C7','circ':'\u02C6','circeq':'\u2257','circlearrowleft':'\u21BA','circlearrowright':'\u21BB','circledast':'\u229B','circledcirc':'\u229A','circleddash':'\u229D','CircleDot':'\u2299','circledR':'\xAE','circledS':'\u24C8','CircleMinus':'\u2296','CirclePlus':'\u2295','CircleTimes':'\u2297','cir':'\u25CB','cirE':'\u29C3','cire':'\u2257','cirfnint':'\u2A10','cirmid':'\u2AEF','cirscir':'\u29C2','ClockwiseContourIntegral':'\u2232','CloseCurlyDoubleQuote':'\u201D','CloseCurlyQuote':'\u2019','clubs':'\u2663','clubsuit':'\u2663','colon':':','Colon':'\u2237','Colone':'\u2A74','colone':'\u2254','coloneq':'\u2254','comma':',','commat':'@','comp':'\u2201','compfn':'\u2218','complement':'\u2201','complexes':'\u2102','cong':'\u2245','congdot':'\u2A6D','Congruent':'\u2261','conint':'\u222E','Conint':'\u222F','ContourIntegral':'\u222E','copf':'\uD835\uDD54','Copf':'\u2102','coprod':'\u2210','Coproduct':'\u2210','copy':'\xA9','COPY':'\xA9','copysr':'\u2117','CounterClockwiseContourIntegral':'\u2233','crarr':'\u21B5','cross':'\u2717','Cross':'\u2A2F','Cscr':'\uD835\uDC9E','cscr':'\uD835\uDCB8','csub':'\u2ACF','csube':'\u2AD1','csup':'\u2AD0','csupe':'\u2AD2','ctdot':'\u22EF','cudarrl':'\u2938','cudarrr':'\u2935','cuepr':'\u22DE','cuesc':'\u22DF','cularr':'\u21B6','cularrp':'\u293D','cupbrcap':'\u2A48','cupcap':'\u2A46','CupCap':'\u224D','cup':'\u222A','Cup':'\u22D3','cupcup':'\u2A4A','cupdot':'\u228D','cupor':'\u2A45','cups':'\u222A\uFE00','curarr':'\u21B7','curarrm':'\u293C','curlyeqprec':'\u22DE','curlyeqsucc':'\u22DF','curlyvee':'\u22CE','curlywedge':'\u22CF','curren':'\xA4','curvearrowleft':'\u21B6','curvearrowright':'\u21B7','cuvee':'\u22CE','cuwed':'\u22CF','cwconint':'\u2232','cwint':'\u2231','cylcty':'\u232D','dagger':'\u2020','Dagger':'\u2021','daleth':'\u2138','darr':'\u2193','Darr':'\u21A1','dArr':'\u21D3','dash':'\u2010','Dashv':'\u2AE4','dashv':'\u22A3','dbkarow':'\u290F','dblac':'\u02DD','Dcaron':'\u010E','dcaron':'\u010F','Dcy':'\u0414','dcy':'\u0434','ddagger':'\u2021','ddarr':'\u21CA','DD':'\u2145','dd':'\u2146','DDotrahd':'\u2911','ddotseq':'\u2A77','deg':'\xB0','Del':'\u2207','Delta':'\u0394','delta':'\u03B4','demptyv':'\u29B1','dfisht':'\u297F','Dfr':'\uD835\uDD07','dfr':'\uD835\uDD21','dHar':'\u2965','dharl':'\u21C3','dharr':'\u21C2','DiacriticalAcute':'\xB4','DiacriticalDot':'\u02D9','DiacriticalDoubleAcute':'\u02DD','DiacriticalGrave':'`','DiacriticalTilde':'\u02DC','diam':'\u22C4','diamond':'\u22C4','Diamond':'\u22C4','diamondsuit':'\u2666','diams':'\u2666','die':'\xA8','DifferentialD':'\u2146','digamma':'\u03DD','disin':'\u22F2','div':'\xF7','divide':'\xF7','divideontimes':'\u22C7','divonx':'\u22C7','DJcy':'\u0402','djcy':'\u0452','dlcorn':'\u231E','dlcrop':'\u230D','dollar':'$','Dopf':'\uD835\uDD3B','dopf':'\uD835\uDD55','Dot':'\xA8','dot':'\u02D9','DotDot':'\u20DC','doteq':'\u2250','doteqdot':'\u2251','DotEqual':'\u2250','dotminus':'\u2238','dotplus':'\u2214','dotsquare':'\u22A1','doublebarwedge':'\u2306','DoubleContourIntegral':'\u222F','DoubleDot':'\xA8','DoubleDownArrow':'\u21D3','DoubleLeftArrow':'\u21D0','DoubleLeftRightArrow':'\u21D4','DoubleLeftTee':'\u2AE4','DoubleLongLeftArrow':'\u27F8','DoubleLongLeftRightArrow':'\u27FA','DoubleLongRightArrow':'\u27F9','DoubleRightArrow':'\u21D2','DoubleRightTee':'\u22A8','DoubleUpArrow':'\u21D1','DoubleUpDownArrow':'\u21D5','DoubleVerticalBar':'\u2225','DownArrowBar':'\u2913','downarrow':'\u2193','DownArrow':'\u2193','Downarrow':'\u21D3','DownArrowUpArrow':'\u21F5','DownBreve':'\u0311','downdownarrows':'\u21CA','downharpoonleft':'\u21C3','downharpoonright':'\u21C2','DownLeftRightVector':'\u2950','DownLeftTeeVector':'\u295E','DownLeftVectorBar':'\u2956','DownLeftVector':'\u21BD','DownRightTeeVector':'\u295F','DownRightVectorBar':'\u2957','DownRightVector':'\u21C1','DownTeeArrow':'\u21A7','DownTee':'\u22A4','drbkarow':'\u2910','drcorn':'\u231F','drcrop':'\u230C','Dscr':'\uD835\uDC9F','dscr':'\uD835\uDCB9','DScy':'\u0405','dscy':'\u0455','dsol':'\u29F6','Dstrok':'\u0110','dstrok':'\u0111','dtdot':'\u22F1','dtri':'\u25BF','dtrif':'\u25BE','duarr':'\u21F5','duhar':'\u296F','dwangle':'\u29A6','DZcy':'\u040F','dzcy':'\u045F','dzigrarr':'\u27FF','Eacute':'\xC9','eacute':'\xE9','easter':'\u2A6E','Ecaron':'\u011A','ecaron':'\u011B','Ecirc':'\xCA','ecirc':'\xEA','ecir':'\u2256','ecolon':'\u2255','Ecy':'\u042D','ecy':'\u044D','eDDot':'\u2A77','Edot':'\u0116','edot':'\u0117','eDot':'\u2251','ee':'\u2147','efDot':'\u2252','Efr':'\uD835\uDD08','efr':'\uD835\uDD22','eg':'\u2A9A','Egrave':'\xC8','egrave':'\xE8','egs':'\u2A96','egsdot':'\u2A98','el':'\u2A99','Element':'\u2208','elinters':'\u23E7','ell':'\u2113','els':'\u2A95','elsdot':'\u2A97','Emacr':'\u0112','emacr':'\u0113','empty':'\u2205','emptyset':'\u2205','EmptySmallSquare':'\u25FB','emptyv':'\u2205','EmptyVerySmallSquare':'\u25AB','emsp13':'\u2004','emsp14':'\u2005','emsp':'\u2003','ENG':'\u014A','eng':'\u014B','ensp':'\u2002','Eogon':'\u0118','eogon':'\u0119','Eopf':'\uD835\uDD3C','eopf':'\uD835\uDD56','epar':'\u22D5','eparsl':'\u29E3','eplus':'\u2A71','epsi':'\u03B5','Epsilon':'\u0395','epsilon':'\u03B5','epsiv':'\u03F5','eqcirc':'\u2256','eqcolon':'\u2255','eqsim':'\u2242','eqslantgtr':'\u2A96','eqslantless':'\u2A95','Equal':'\u2A75','equals':'=','EqualTilde':'\u2242','equest':'\u225F','Equilibrium':'\u21CC','equiv':'\u2261','equivDD':'\u2A78','eqvparsl':'\u29E5','erarr':'\u2971','erDot':'\u2253','escr':'\u212F','Escr':'\u2130','esdot':'\u2250','Esim':'\u2A73','esim':'\u2242','Eta':'\u0397','eta':'\u03B7','ETH':'\xD0','eth':'\xF0','Euml':'\xCB','euml':'\xEB','euro':'\u20AC','excl':'!','exist':'\u2203','Exists':'\u2203','expectation':'\u2130','exponentiale':'\u2147','ExponentialE':'\u2147','fallingdotseq':'\u2252','Fcy':'\u0424','fcy':'\u0444','female':'\u2640','ffilig':'\uFB03','fflig':'\uFB00','ffllig':'\uFB04','Ffr':'\uD835\uDD09','ffr':'\uD835\uDD23','filig':'\uFB01','FilledSmallSquare':'\u25FC','FilledVerySmallSquare':'\u25AA','fjlig':'fj','flat':'\u266D','fllig':'\uFB02','fltns':'\u25B1','fnof':'\u0192','Fopf':'\uD835\uDD3D','fopf':'\uD835\uDD57','forall':'\u2200','ForAll':'\u2200','fork':'\u22D4','forkv':'\u2AD9','Fouriertrf':'\u2131','fpartint':'\u2A0D','frac12':'\xBD','frac13':'\u2153','frac14':'\xBC','frac15':'\u2155','frac16':'\u2159','frac18':'\u215B','frac23':'\u2154','frac25':'\u2156','frac34':'\xBE','frac35':'\u2157','frac38':'\u215C','frac45':'\u2158','frac56':'\u215A','frac58':'\u215D','frac78':'\u215E','frasl':'\u2044','frown':'\u2322','fscr':'\uD835\uDCBB','Fscr':'\u2131','gacute':'\u01F5','Gamma':'\u0393','gamma':'\u03B3','Gammad':'\u03DC','gammad':'\u03DD','gap':'\u2A86','Gbreve':'\u011E','gbreve':'\u011F','Gcedil':'\u0122','Gcirc':'\u011C','gcirc':'\u011D','Gcy':'\u0413','gcy':'\u0433','Gdot':'\u0120','gdot':'\u0121','ge':'\u2265','gE':'\u2267','gEl':'\u2A8C','gel':'\u22DB','geq':'\u2265','geqq':'\u2267','geqslant':'\u2A7E','gescc':'\u2AA9','ges':'\u2A7E','gesdot':'\u2A80','gesdoto':'\u2A82','gesdotol':'\u2A84','gesl':'\u22DB\uFE00','gesles':'\u2A94','Gfr':'\uD835\uDD0A','gfr':'\uD835\uDD24','gg':'\u226B','Gg':'\u22D9','ggg':'\u22D9','gimel':'\u2137','GJcy':'\u0403','gjcy':'\u0453','gla':'\u2AA5','gl':'\u2277','glE':'\u2A92','glj':'\u2AA4','gnap':'\u2A8A','gnapprox':'\u2A8A','gne':'\u2A88','gnE':'\u2269','gneq':'\u2A88','gneqq':'\u2269','gnsim':'\u22E7','Gopf':'\uD835\uDD3E','gopf':'\uD835\uDD58','grave':'`','GreaterEqual':'\u2265','GreaterEqualLess':'\u22DB','GreaterFullEqual':'\u2267','GreaterGreater':'\u2AA2','GreaterLess':'\u2277','GreaterSlantEqual':'\u2A7E','GreaterTilde':'\u2273','Gscr':'\uD835\uDCA2','gscr':'\u210A','gsim':'\u2273','gsime':'\u2A8E','gsiml':'\u2A90','gtcc':'\u2AA7','gtcir':'\u2A7A','gt':'>','GT':'>','Gt':'\u226B','gtdot':'\u22D7','gtlPar':'\u2995','gtquest':'\u2A7C','gtrapprox':'\u2A86','gtrarr':'\u2978','gtrdot':'\u22D7','gtreqless':'\u22DB','gtreqqless':'\u2A8C','gtrless':'\u2277','gtrsim':'\u2273','gvertneqq':'\u2269\uFE00','gvnE':'\u2269\uFE00','Hacek':'\u02C7','hairsp':'\u200A','half':'\xBD','hamilt':'\u210B','HARDcy':'\u042A','hardcy':'\u044A','harrcir':'\u2948','harr':'\u2194','hArr':'\u21D4','harrw':'\u21AD','Hat':'^','hbar':'\u210F','Hcirc':'\u0124','hcirc':'\u0125','hearts':'\u2665','heartsuit':'\u2665','hellip':'\u2026','hercon':'\u22B9','hfr':'\uD835\uDD25','Hfr':'\u210C','HilbertSpace':'\u210B','hksearow':'\u2925','hkswarow':'\u2926','hoarr':'\u21FF','homtht':'\u223B','hookleftarrow':'\u21A9','hookrightarrow':'\u21AA','hopf':'\uD835\uDD59','Hopf':'\u210D','horbar':'\u2015','HorizontalLine':'\u2500','hscr':'\uD835\uDCBD','Hscr':'\u210B','hslash':'\u210F','Hstrok':'\u0126','hstrok':'\u0127','HumpDownHump':'\u224E','HumpEqual':'\u224F','hybull':'\u2043','hyphen':'\u2010','Iacute':'\xCD','iacute':'\xED','ic':'\u2063','Icirc':'\xCE','icirc':'\xEE','Icy':'\u0418','icy':'\u0438','Idot':'\u0130','IEcy':'\u0415','iecy':'\u0435','iexcl':'\xA1','iff':'\u21D4','ifr':'\uD835\uDD26','Ifr':'\u2111','Igrave':'\xCC','igrave':'\xEC','ii':'\u2148','iiiint':'\u2A0C','iiint':'\u222D','iinfin':'\u29DC','iiota':'\u2129','IJlig':'\u0132','ijlig':'\u0133','Imacr':'\u012A','imacr':'\u012B','image':'\u2111','ImaginaryI':'\u2148','imagline':'\u2110','imagpart':'\u2111','imath':'\u0131','Im':'\u2111','imof':'\u22B7','imped':'\u01B5','Implies':'\u21D2','incare':'\u2105','in':'\u2208','infin':'\u221E','infintie':'\u29DD','inodot':'\u0131','intcal':'\u22BA','int':'\u222B','Int':'\u222C','integers':'\u2124','Integral':'\u222B','intercal':'\u22BA','Intersection':'\u22C2','intlarhk':'\u2A17','intprod':'\u2A3C','InvisibleComma':'\u2063','InvisibleTimes':'\u2062','IOcy':'\u0401','iocy':'\u0451','Iogon':'\u012E','iogon':'\u012F','Iopf':'\uD835\uDD40','iopf':'\uD835\uDD5A','Iota':'\u0399','iota':'\u03B9','iprod':'\u2A3C','iquest':'\xBF','iscr':'\uD835\uDCBE','Iscr':'\u2110','isin':'\u2208','isindot':'\u22F5','isinE':'\u22F9','isins':'\u22F4','isinsv':'\u22F3','isinv':'\u2208','it':'\u2062','Itilde':'\u0128','itilde':'\u0129','Iukcy':'\u0406','iukcy':'\u0456','Iuml':'\xCF','iuml':'\xEF','Jcirc':'\u0134','jcirc':'\u0135','Jcy':'\u0419','jcy':'\u0439','Jfr':'\uD835\uDD0D','jfr':'\uD835\uDD27','jmath':'\u0237','Jopf':'\uD835\uDD41','jopf':'\uD835\uDD5B','Jscr':'\uD835\uDCA5','jscr':'\uD835\uDCBF','Jsercy':'\u0408','jsercy':'\u0458','Jukcy':'\u0404','jukcy':'\u0454','Kappa':'\u039A','kappa':'\u03BA','kappav':'\u03F0','Kcedil':'\u0136','kcedil':'\u0137','Kcy':'\u041A','kcy':'\u043A','Kfr':'\uD835\uDD0E','kfr':'\uD835\uDD28','kgreen':'\u0138','KHcy':'\u0425','khcy':'\u0445','KJcy':'\u040C','kjcy':'\u045C','Kopf':'\uD835\uDD42','kopf':'\uD835\uDD5C','Kscr':'\uD835\uDCA6','kscr':'\uD835\uDCC0','lAarr':'\u21DA','Lacute':'\u0139','lacute':'\u013A','laemptyv':'\u29B4','lagran':'\u2112','Lambda':'\u039B','lambda':'\u03BB','lang':'\u27E8','Lang':'\u27EA','langd':'\u2991','langle':'\u27E8','lap':'\u2A85','Laplacetrf':'\u2112','laquo':'\xAB','larrb':'\u21E4','larrbfs':'\u291F','larr':'\u2190','Larr':'\u219E','lArr':'\u21D0','larrfs':'\u291D','larrhk':'\u21A9','larrlp':'\u21AB','larrpl':'\u2939','larrsim':'\u2973','larrtl':'\u21A2','latail':'\u2919','lAtail':'\u291B','lat':'\u2AAB','late':'\u2AAD','lates':'\u2AAD\uFE00','lbarr':'\u290C','lBarr':'\u290E','lbbrk':'\u2772','lbrace':'{','lbrack':'[','lbrke':'\u298B','lbrksld':'\u298F','lbrkslu':'\u298D','Lcaron':'\u013D','lcaron':'\u013E','Lcedil':'\u013B','lcedil':'\u013C','lceil':'\u2308','lcub':'{','Lcy':'\u041B','lcy':'\u043B','ldca':'\u2936','ldquo':'\u201C','ldquor':'\u201E','ldrdhar':'\u2967','ldrushar':'\u294B','ldsh':'\u21B2','le':'\u2264','lE':'\u2266','LeftAngleBracket':'\u27E8','LeftArrowBar':'\u21E4','leftarrow':'\u2190','LeftArrow':'\u2190','Leftarrow':'\u21D0','LeftArrowRightArrow':'\u21C6','leftarrowtail':'\u21A2','LeftCeiling':'\u2308','LeftDoubleBracket':'\u27E6','LeftDownTeeVector':'\u2961','LeftDownVectorBar':'\u2959','LeftDownVector':'\u21C3','LeftFloor':'\u230A','leftharpoondown':'\u21BD','leftharpoonup':'\u21BC','leftleftarrows':'\u21C7','leftrightarrow':'\u2194','LeftRightArrow':'\u2194','Leftrightarrow':'\u21D4','leftrightarrows':'\u21C6','leftrightharpoons':'\u21CB','leftrightsquigarrow':'\u21AD','LeftRightVector':'\u294E','LeftTeeArrow':'\u21A4','LeftTee':'\u22A3','LeftTeeVector':'\u295A','leftthreetimes':'\u22CB','LeftTriangleBar':'\u29CF','LeftTriangle':'\u22B2','LeftTriangleEqual':'\u22B4','LeftUpDownVector':'\u2951','LeftUpTeeVector':'\u2960','LeftUpVectorBar':'\u2958','LeftUpVector':'\u21BF','LeftVectorBar':'\u2952','LeftVector':'\u21BC','lEg':'\u2A8B','leg':'\u22DA','leq':'\u2264','leqq':'\u2266','leqslant':'\u2A7D','lescc':'\u2AA8','les':'\u2A7D','lesdot':'\u2A7F','lesdoto':'\u2A81','lesdotor':'\u2A83','lesg':'\u22DA\uFE00','lesges':'\u2A93','lessapprox':'\u2A85','lessdot':'\u22D6','lesseqgtr':'\u22DA','lesseqqgtr':'\u2A8B','LessEqualGreater':'\u22DA','LessFullEqual':'\u2266','LessGreater':'\u2276','lessgtr':'\u2276','LessLess':'\u2AA1','lesssim':'\u2272','LessSlantEqual':'\u2A7D','LessTilde':'\u2272','lfisht':'\u297C','lfloor':'\u230A','Lfr':'\uD835\uDD0F','lfr':'\uD835\uDD29','lg':'\u2276','lgE':'\u2A91','lHar':'\u2962','lhard':'\u21BD','lharu':'\u21BC','lharul':'\u296A','lhblk':'\u2584','LJcy':'\u0409','ljcy':'\u0459','llarr':'\u21C7','ll':'\u226A','Ll':'\u22D8','llcorner':'\u231E','Lleftarrow':'\u21DA','llhard':'\u296B','lltri':'\u25FA','Lmidot':'\u013F','lmidot':'\u0140','lmoustache':'\u23B0','lmoust':'\u23B0','lnap':'\u2A89','lnapprox':'\u2A89','lne':'\u2A87','lnE':'\u2268','lneq':'\u2A87','lneqq':'\u2268','lnsim':'\u22E6','loang':'\u27EC','loarr':'\u21FD','lobrk':'\u27E6','longleftarrow':'\u27F5','LongLeftArrow':'\u27F5','Longleftarrow':'\u27F8','longleftrightarrow':'\u27F7','LongLeftRightArrow':'\u27F7','Longleftrightarrow':'\u27FA','longmapsto':'\u27FC','longrightarrow':'\u27F6','LongRightArrow':'\u27F6','Longrightarrow':'\u27F9','looparrowleft':'\u21AB','looparrowright':'\u21AC','lopar':'\u2985','Lopf':'\uD835\uDD43','lopf':'\uD835\uDD5D','loplus':'\u2A2D','lotimes':'\u2A34','lowast':'\u2217','lowbar':'_','LowerLeftArrow':'\u2199','LowerRightArrow':'\u2198','loz':'\u25CA','lozenge':'\u25CA','lozf':'\u29EB','lpar':'(','lparlt':'\u2993','lrarr':'\u21C6','lrcorner':'\u231F','lrhar':'\u21CB','lrhard':'\u296D','lrm':'\u200E','lrtri':'\u22BF','lsaquo':'\u2039','lscr':'\uD835\uDCC1','Lscr':'\u2112','lsh':'\u21B0','Lsh':'\u21B0','lsim':'\u2272','lsime':'\u2A8D','lsimg':'\u2A8F','lsqb':'[','lsquo':'\u2018','lsquor':'\u201A','Lstrok':'\u0141','lstrok':'\u0142','ltcc':'\u2AA6','ltcir':'\u2A79','lt':'<','LT':'<','Lt':'\u226A','ltdot':'\u22D6','lthree':'\u22CB','ltimes':'\u22C9','ltlarr':'\u2976','ltquest':'\u2A7B','ltri':'\u25C3','ltrie':'\u22B4','ltrif':'\u25C2','ltrPar':'\u2996','lurdshar':'\u294A','luruhar':'\u2966','lvertneqq':'\u2268\uFE00','lvnE':'\u2268\uFE00','macr':'\xAF','male':'\u2642','malt':'\u2720','maltese':'\u2720','Map':'\u2905','map':'\u21A6','mapsto':'\u21A6','mapstodown':'\u21A7','mapstoleft':'\u21A4','mapstoup':'\u21A5','marker':'\u25AE','mcomma':'\u2A29','Mcy':'\u041C','mcy':'\u043C','mdash':'\u2014','mDDot':'\u223A','measuredangle':'\u2221','MediumSpace':'\u205F','Mellintrf':'\u2133','Mfr':'\uD835\uDD10','mfr':'\uD835\uDD2A','mho':'\u2127','micro':'\xB5','midast':'*','midcir':'\u2AF0','mid':'\u2223','middot':'\xB7','minusb':'\u229F','minus':'\u2212','minusd':'\u2238','minusdu':'\u2A2A','MinusPlus':'\u2213','mlcp':'\u2ADB','mldr':'\u2026','mnplus':'\u2213','models':'\u22A7','Mopf':'\uD835\uDD44','mopf':'\uD835\uDD5E','mp':'\u2213','mscr':'\uD835\uDCC2','Mscr':'\u2133','mstpos':'\u223E','Mu':'\u039C','mu':'\u03BC','multimap':'\u22B8','mumap':'\u22B8','nabla':'\u2207','Nacute':'\u0143','nacute':'\u0144','nang':'\u2220\u20D2','nap':'\u2249','napE':'\u2A70\u0338','napid':'\u224B\u0338','napos':'\u0149','napprox':'\u2249','natural':'\u266E','naturals':'\u2115','natur':'\u266E','nbsp':'\xA0','nbump':'\u224E\u0338','nbumpe':'\u224F\u0338','ncap':'\u2A43','Ncaron':'\u0147','ncaron':'\u0148','Ncedil':'\u0145','ncedil':'\u0146','ncong':'\u2247','ncongdot':'\u2A6D\u0338','ncup':'\u2A42','Ncy':'\u041D','ncy':'\u043D','ndash':'\u2013','nearhk':'\u2924','nearr':'\u2197','neArr':'\u21D7','nearrow':'\u2197','ne':'\u2260','nedot':'\u2250\u0338','NegativeMediumSpace':'\u200B','NegativeThickSpace':'\u200B','NegativeThinSpace':'\u200B','NegativeVeryThinSpace':'\u200B','nequiv':'\u2262','nesear':'\u2928','nesim':'\u2242\u0338','NestedGreaterGreater':'\u226B','NestedLessLess':'\u226A','NewLine':'\n','nexist':'\u2204','nexists':'\u2204','Nfr':'\uD835\uDD11','nfr':'\uD835\uDD2B','ngE':'\u2267\u0338','nge':'\u2271','ngeq':'\u2271','ngeqq':'\u2267\u0338','ngeqslant':'\u2A7E\u0338','nges':'\u2A7E\u0338','nGg':'\u22D9\u0338','ngsim':'\u2275','nGt':'\u226B\u20D2','ngt':'\u226F','ngtr':'\u226F','nGtv':'\u226B\u0338','nharr':'\u21AE','nhArr':'\u21CE','nhpar':'\u2AF2','ni':'\u220B','nis':'\u22FC','nisd':'\u22FA','niv':'\u220B','NJcy':'\u040A','njcy':'\u045A','nlarr':'\u219A','nlArr':'\u21CD','nldr':'\u2025','nlE':'\u2266\u0338','nle':'\u2270','nleftarrow':'\u219A','nLeftarrow':'\u21CD','nleftrightarrow':'\u21AE','nLeftrightarrow':'\u21CE','nleq':'\u2270','nleqq':'\u2266\u0338','nleqslant':'\u2A7D\u0338','nles':'\u2A7D\u0338','nless':'\u226E','nLl':'\u22D8\u0338','nlsim':'\u2274','nLt':'\u226A\u20D2','nlt':'\u226E','nltri':'\u22EA','nltrie':'\u22EC','nLtv':'\u226A\u0338','nmid':'\u2224','NoBreak':'\u2060','NonBreakingSpace':'\xA0','nopf':'\uD835\uDD5F','Nopf':'\u2115','Not':'\u2AEC','not':'\xAC','NotCongruent':'\u2262','NotCupCap':'\u226D','NotDoubleVerticalBar':'\u2226','NotElement':'\u2209','NotEqual':'\u2260','NotEqualTilde':'\u2242\u0338','NotExists':'\u2204','NotGreater':'\u226F','NotGreaterEqual':'\u2271','NotGreaterFullEqual':'\u2267\u0338','NotGreaterGreater':'\u226B\u0338','NotGreaterLess':'\u2279','NotGreaterSlantEqual':'\u2A7E\u0338','NotGreaterTilde':'\u2275','NotHumpDownHump':'\u224E\u0338','NotHumpEqual':'\u224F\u0338','notin':'\u2209','notindot':'\u22F5\u0338','notinE':'\u22F9\u0338','notinva':'\u2209','notinvb':'\u22F7','notinvc':'\u22F6','NotLeftTriangleBar':'\u29CF\u0338','NotLeftTriangle':'\u22EA','NotLeftTriangleEqual':'\u22EC','NotLess':'\u226E','NotLessEqual':'\u2270','NotLessGreater':'\u2278','NotLessLess':'\u226A\u0338','NotLessSlantEqual':'\u2A7D\u0338','NotLessTilde':'\u2274','NotNestedGreaterGreater':'\u2AA2\u0338','NotNestedLessLess':'\u2AA1\u0338','notni':'\u220C','notniva':'\u220C','notnivb':'\u22FE','notnivc':'\u22FD','NotPrecedes':'\u2280','NotPrecedesEqual':'\u2AAF\u0338','NotPrecedesSlantEqual':'\u22E0','NotReverseElement':'\u220C','NotRightTriangleBar':'\u29D0\u0338','NotRightTriangle':'\u22EB','NotRightTriangleEqual':'\u22ED','NotSquareSubset':'\u228F\u0338','NotSquareSubsetEqual':'\u22E2','NotSquareSuperset':'\u2290\u0338','NotSquareSupersetEqual':'\u22E3','NotSubset':'\u2282\u20D2','NotSubsetEqual':'\u2288','NotSucceeds':'\u2281','NotSucceedsEqual':'\u2AB0\u0338','NotSucceedsSlantEqual':'\u22E1','NotSucceedsTilde':'\u227F\u0338','NotSuperset':'\u2283\u20D2','NotSupersetEqual':'\u2289','NotTilde':'\u2241','NotTildeEqual':'\u2244','NotTildeFullEqual':'\u2247','NotTildeTilde':'\u2249','NotVerticalBar':'\u2224','nparallel':'\u2226','npar':'\u2226','nparsl':'\u2AFD\u20E5','npart':'\u2202\u0338','npolint':'\u2A14','npr':'\u2280','nprcue':'\u22E0','nprec':'\u2280','npreceq':'\u2AAF\u0338','npre':'\u2AAF\u0338','nrarrc':'\u2933\u0338','nrarr':'\u219B','nrArr':'\u21CF','nrarrw':'\u219D\u0338','nrightarrow':'\u219B','nRightarrow':'\u21CF','nrtri':'\u22EB','nrtrie':'\u22ED','nsc':'\u2281','nsccue':'\u22E1','nsce':'\u2AB0\u0338','Nscr':'\uD835\uDCA9','nscr':'\uD835\uDCC3','nshortmid':'\u2224','nshortparallel':'\u2226','nsim':'\u2241','nsime':'\u2244','nsimeq':'\u2244','nsmid':'\u2224','nspar':'\u2226','nsqsube':'\u22E2','nsqsupe':'\u22E3','nsub':'\u2284','nsubE':'\u2AC5\u0338','nsube':'\u2288','nsubset':'\u2282\u20D2','nsubseteq':'\u2288','nsubseteqq':'\u2AC5\u0338','nsucc':'\u2281','nsucceq':'\u2AB0\u0338','nsup':'\u2285','nsupE':'\u2AC6\u0338','nsupe':'\u2289','nsupset':'\u2283\u20D2','nsupseteq':'\u2289','nsupseteqq':'\u2AC6\u0338','ntgl':'\u2279','Ntilde':'\xD1','ntilde':'\xF1','ntlg':'\u2278','ntriangleleft':'\u22EA','ntrianglelefteq':'\u22EC','ntriangleright':'\u22EB','ntrianglerighteq':'\u22ED','Nu':'\u039D','nu':'\u03BD','num':'#','numero':'\u2116','numsp':'\u2007','nvap':'\u224D\u20D2','nvdash':'\u22AC','nvDash':'\u22AD','nVdash':'\u22AE','nVDash':'\u22AF','nvge':'\u2265\u20D2','nvgt':'>\u20D2','nvHarr':'\u2904','nvinfin':'\u29DE','nvlArr':'\u2902','nvle':'\u2264\u20D2','nvlt':'<\u20D2','nvltrie':'\u22B4\u20D2','nvrArr':'\u2903','nvrtrie':'\u22B5\u20D2','nvsim':'\u223C\u20D2','nwarhk':'\u2923','nwarr':'\u2196','nwArr':'\u21D6','nwarrow':'\u2196','nwnear':'\u2927','Oacute':'\xD3','oacute':'\xF3','oast':'\u229B','Ocirc':'\xD4','ocirc':'\xF4','ocir':'\u229A','Ocy':'\u041E','ocy':'\u043E','odash':'\u229D','Odblac':'\u0150','odblac':'\u0151','odiv':'\u2A38','odot':'\u2299','odsold':'\u29BC','OElig':'\u0152','oelig':'\u0153','ofcir':'\u29BF','Ofr':'\uD835\uDD12','ofr':'\uD835\uDD2C','ogon':'\u02DB','Ograve':'\xD2','ograve':'\xF2','ogt':'\u29C1','ohbar':'\u29B5','ohm':'\u03A9','oint':'\u222E','olarr':'\u21BA','olcir':'\u29BE','olcross':'\u29BB','oline':'\u203E','olt':'\u29C0','Omacr':'\u014C','omacr':'\u014D','Omega':'\u03A9','omega':'\u03C9','Omicron':'\u039F','omicron':'\u03BF','omid':'\u29B6','ominus':'\u2296','Oopf':'\uD835\uDD46','oopf':'\uD835\uDD60','opar':'\u29B7','OpenCurlyDoubleQuote':'\u201C','OpenCurlyQuote':'\u2018','operp':'\u29B9','oplus':'\u2295','orarr':'\u21BB','Or':'\u2A54','or':'\u2228','ord':'\u2A5D','order':'\u2134','orderof':'\u2134','ordf':'\xAA','ordm':'\xBA','origof':'\u22B6','oror':'\u2A56','orslope':'\u2A57','orv':'\u2A5B','oS':'\u24C8','Oscr':'\uD835\uDCAA','oscr':'\u2134','Oslash':'\xD8','oslash':'\xF8','osol':'\u2298','Otilde':'\xD5','otilde':'\xF5','otimesas':'\u2A36','Otimes':'\u2A37','otimes':'\u2297','Ouml':'\xD6','ouml':'\xF6','ovbar':'\u233D','OverBar':'\u203E','OverBrace':'\u23DE','OverBracket':'\u23B4','OverParenthesis':'\u23DC','para':'\xB6','parallel':'\u2225','par':'\u2225','parsim':'\u2AF3','parsl':'\u2AFD','part':'\u2202','PartialD':'\u2202','Pcy':'\u041F','pcy':'\u043F','percnt':'%','period':'.','permil':'\u2030','perp':'\u22A5','pertenk':'\u2031','Pfr':'\uD835\uDD13','pfr':'\uD835\uDD2D','Phi':'\u03A6','phi':'\u03C6','phiv':'\u03D5','phmmat':'\u2133','phone':'\u260E','Pi':'\u03A0','pi':'\u03C0','pitchfork':'\u22D4','piv':'\u03D6','planck':'\u210F','planckh':'\u210E','plankv':'\u210F','plusacir':'\u2A23','plusb':'\u229E','pluscir':'\u2A22','plus':'+','plusdo':'\u2214','plusdu':'\u2A25','pluse':'\u2A72','PlusMinus':'\xB1','plusmn':'\xB1','plussim':'\u2A26','plustwo':'\u2A27','pm':'\xB1','Poincareplane':'\u210C','pointint':'\u2A15','popf':'\uD835\uDD61','Popf':'\u2119','pound':'\xA3','prap':'\u2AB7','Pr':'\u2ABB','pr':'\u227A','prcue':'\u227C','precapprox':'\u2AB7','prec':'\u227A','preccurlyeq':'\u227C','Precedes':'\u227A','PrecedesEqual':'\u2AAF','PrecedesSlantEqual':'\u227C','PrecedesTilde':'\u227E','preceq':'\u2AAF','precnapprox':'\u2AB9','precneqq':'\u2AB5','precnsim':'\u22E8','pre':'\u2AAF','prE':'\u2AB3','precsim':'\u227E','prime':'\u2032','Prime':'\u2033','primes':'\u2119','prnap':'\u2AB9','prnE':'\u2AB5','prnsim':'\u22E8','prod':'\u220F','Product':'\u220F','profalar':'\u232E','profline':'\u2312','profsurf':'\u2313','prop':'\u221D','Proportional':'\u221D','Proportion':'\u2237','propto':'\u221D','prsim':'\u227E','prurel':'\u22B0','Pscr':'\uD835\uDCAB','pscr':'\uD835\uDCC5','Psi':'\u03A8','psi':'\u03C8','puncsp':'\u2008','Qfr':'\uD835\uDD14','qfr':'\uD835\uDD2E','qint':'\u2A0C','qopf':'\uD835\uDD62','Qopf':'\u211A','qprime':'\u2057','Qscr':'\uD835\uDCAC','qscr':'\uD835\uDCC6','quaternions':'\u210D','quatint':'\u2A16','quest':'?','questeq':'\u225F','quot':'"','QUOT':'"','rAarr':'\u21DB','race':'\u223D\u0331','Racute':'\u0154','racute':'\u0155','radic':'\u221A','raemptyv':'\u29B3','rang':'\u27E9','Rang':'\u27EB','rangd':'\u2992','range':'\u29A5','rangle':'\u27E9','raquo':'\xBB','rarrap':'\u2975','rarrb':'\u21E5','rarrbfs':'\u2920','rarrc':'\u2933','rarr':'\u2192','Rarr':'\u21A0','rArr':'\u21D2','rarrfs':'\u291E','rarrhk':'\u21AA','rarrlp':'\u21AC','rarrpl':'\u2945','rarrsim':'\u2974','Rarrtl':'\u2916','rarrtl':'\u21A3','rarrw':'\u219D','ratail':'\u291A','rAtail':'\u291C','ratio':'\u2236','rationals':'\u211A','rbarr':'\u290D','rBarr':'\u290F','RBarr':'\u2910','rbbrk':'\u2773','rbrace':'}','rbrack':']','rbrke':'\u298C','rbrksld':'\u298E','rbrkslu':'\u2990','Rcaron':'\u0158','rcaron':'\u0159','Rcedil':'\u0156','rcedil':'\u0157','rceil':'\u2309','rcub':'}','Rcy':'\u0420','rcy':'\u0440','rdca':'\u2937','rdldhar':'\u2969','rdquo':'\u201D','rdquor':'\u201D','rdsh':'\u21B3','real':'\u211C','realine':'\u211B','realpart':'\u211C','reals':'\u211D','Re':'\u211C','rect':'\u25AD','reg':'\xAE','REG':'\xAE','ReverseElement':'\u220B','ReverseEquilibrium':'\u21CB','ReverseUpEquilibrium':'\u296F','rfisht':'\u297D','rfloor':'\u230B','rfr':'\uD835\uDD2F','Rfr':'\u211C','rHar':'\u2964','rhard':'\u21C1','rharu':'\u21C0','rharul':'\u296C','Rho':'\u03A1','rho':'\u03C1','rhov':'\u03F1','RightAngleBracket':'\u27E9','RightArrowBar':'\u21E5','rightarrow':'\u2192','RightArrow':'\u2192','Rightarrow':'\u21D2','RightArrowLeftArrow':'\u21C4','rightarrowtail':'\u21A3','RightCeiling':'\u2309','RightDoubleBracket':'\u27E7','RightDownTeeVector':'\u295D','RightDownVectorBar':'\u2955','RightDownVector':'\u21C2','RightFloor':'\u230B','rightharpoondown':'\u21C1','rightharpoonup':'\u21C0','rightleftarrows':'\u21C4','rightleftharpoons':'\u21CC','rightrightarrows':'\u21C9','rightsquigarrow':'\u219D','RightTeeArrow':'\u21A6','RightTee':'\u22A2','RightTeeVector':'\u295B','rightthreetimes':'\u22CC','RightTriangleBar':'\u29D0','RightTriangle':'\u22B3','RightTriangleEqual':'\u22B5','RightUpDownVector':'\u294F','RightUpTeeVector':'\u295C','RightUpVectorBar':'\u2954','RightUpVector':'\u21BE','RightVectorBar':'\u2953','RightVector':'\u21C0','ring':'\u02DA','risingdotseq':'\u2253','rlarr':'\u21C4','rlhar':'\u21CC','rlm':'\u200F','rmoustache':'\u23B1','rmoust':'\u23B1','rnmid':'\u2AEE','roang':'\u27ED','roarr':'\u21FE','robrk':'\u27E7','ropar':'\u2986','ropf':'\uD835\uDD63','Ropf':'\u211D','roplus':'\u2A2E','rotimes':'\u2A35','RoundImplies':'\u2970','rpar':')','rpargt':'\u2994','rppolint':'\u2A12','rrarr':'\u21C9','Rrightarrow':'\u21DB','rsaquo':'\u203A','rscr':'\uD835\uDCC7','Rscr':'\u211B','rsh':'\u21B1','Rsh':'\u21B1','rsqb':']','rsquo':'\u2019','rsquor':'\u2019','rthree':'\u22CC','rtimes':'\u22CA','rtri':'\u25B9','rtrie':'\u22B5','rtrif':'\u25B8','rtriltri':'\u29CE','RuleDelayed':'\u29F4','ruluhar':'\u2968','rx':'\u211E','Sacute':'\u015A','sacute':'\u015B','sbquo':'\u201A','scap':'\u2AB8','Scaron':'\u0160','scaron':'\u0161','Sc':'\u2ABC','sc':'\u227B','sccue':'\u227D','sce':'\u2AB0','scE':'\u2AB4','Scedil':'\u015E','scedil':'\u015F','Scirc':'\u015C','scirc':'\u015D','scnap':'\u2ABA','scnE':'\u2AB6','scnsim':'\u22E9','scpolint':'\u2A13','scsim':'\u227F','Scy':'\u0421','scy':'\u0441','sdotb':'\u22A1','sdot':'\u22C5','sdote':'\u2A66','searhk':'\u2925','searr':'\u2198','seArr':'\u21D8','searrow':'\u2198','sect':'\xA7','semi':';','seswar':'\u2929','setminus':'\u2216','setmn':'\u2216','sext':'\u2736','Sfr':'\uD835\uDD16','sfr':'\uD835\uDD30','sfrown':'\u2322','sharp':'\u266F','SHCHcy':'\u0429','shchcy':'\u0449','SHcy':'\u0428','shcy':'\u0448','ShortDownArrow':'\u2193','ShortLeftArrow':'\u2190','shortmid':'\u2223','shortparallel':'\u2225','ShortRightArrow':'\u2192','ShortUpArrow':'\u2191','shy':'\xAD','Sigma':'\u03A3','sigma':'\u03C3','sigmaf':'\u03C2','sigmav':'\u03C2','sim':'\u223C','simdot':'\u2A6A','sime':'\u2243','simeq':'\u2243','simg':'\u2A9E','simgE':'\u2AA0','siml':'\u2A9D','simlE':'\u2A9F','simne':'\u2246','simplus':'\u2A24','simrarr':'\u2972','slarr':'\u2190','SmallCircle':'\u2218','smallsetminus':'\u2216','smashp':'\u2A33','smeparsl':'\u29E4','smid':'\u2223','smile':'\u2323','smt':'\u2AAA','smte':'\u2AAC','smtes':'\u2AAC\uFE00','SOFTcy':'\u042C','softcy':'\u044C','solbar':'\u233F','solb':'\u29C4','sol':'/','Sopf':'\uD835\uDD4A','sopf':'\uD835\uDD64','spades':'\u2660','spadesuit':'\u2660','spar':'\u2225','sqcap':'\u2293','sqcaps':'\u2293\uFE00','sqcup':'\u2294','sqcups':'\u2294\uFE00','Sqrt':'\u221A','sqsub':'\u228F','sqsube':'\u2291','sqsubset':'\u228F','sqsubseteq':'\u2291','sqsup':'\u2290','sqsupe':'\u2292','sqsupset':'\u2290','sqsupseteq':'\u2292','square':'\u25A1','Square':'\u25A1','SquareIntersection':'\u2293','SquareSubset':'\u228F','SquareSubsetEqual':'\u2291','SquareSuperset':'\u2290','SquareSupersetEqual':'\u2292','SquareUnion':'\u2294','squarf':'\u25AA','squ':'\u25A1','squf':'\u25AA','srarr':'\u2192','Sscr':'\uD835\uDCAE','sscr':'\uD835\uDCC8','ssetmn':'\u2216','ssmile':'\u2323','sstarf':'\u22C6','Star':'\u22C6','star':'\u2606','starf':'\u2605','straightepsilon':'\u03F5','straightphi':'\u03D5','strns':'\xAF','sub':'\u2282','Sub':'\u22D0','subdot':'\u2ABD','subE':'\u2AC5','sube':'\u2286','subedot':'\u2AC3','submult':'\u2AC1','subnE':'\u2ACB','subne':'\u228A','subplus':'\u2ABF','subrarr':'\u2979','subset':'\u2282','Subset':'\u22D0','subseteq':'\u2286','subseteqq':'\u2AC5','SubsetEqual':'\u2286','subsetneq':'\u228A','subsetneqq':'\u2ACB','subsim':'\u2AC7','subsub':'\u2AD5','subsup':'\u2AD3','succapprox':'\u2AB8','succ':'\u227B','succcurlyeq':'\u227D','Succeeds':'\u227B','SucceedsEqual':'\u2AB0','SucceedsSlantEqual':'\u227D','SucceedsTilde':'\u227F','succeq':'\u2AB0','succnapprox':'\u2ABA','succneqq':'\u2AB6','succnsim':'\u22E9','succsim':'\u227F','SuchThat':'\u220B','sum':'\u2211','Sum':'\u2211','sung':'\u266A','sup1':'\xB9','sup2':'\xB2','sup3':'\xB3','sup':'\u2283','Sup':'\u22D1','supdot':'\u2ABE','supdsub':'\u2AD8','supE':'\u2AC6','supe':'\u2287','supedot':'\u2AC4','Superset':'\u2283','SupersetEqual':'\u2287','suphsol':'\u27C9','suphsub':'\u2AD7','suplarr':'\u297B','supmult':'\u2AC2','supnE':'\u2ACC','supne':'\u228B','supplus':'\u2AC0','supset':'\u2283','Supset':'\u22D1','supseteq':'\u2287','supseteqq':'\u2AC6','supsetneq':'\u228B','supsetneqq':'\u2ACC','supsim':'\u2AC8','supsub':'\u2AD4','supsup':'\u2AD6','swarhk':'\u2926','swarr':'\u2199','swArr':'\u21D9','swarrow':'\u2199','swnwar':'\u292A','szlig':'\xDF','Tab':'\t','target':'\u2316','Tau':'\u03A4','tau':'\u03C4','tbrk':'\u23B4','Tcaron':'\u0164','tcaron':'\u0165','Tcedil':'\u0162','tcedil':'\u0163','Tcy':'\u0422','tcy':'\u0442','tdot':'\u20DB','telrec':'\u2315','Tfr':'\uD835\uDD17','tfr':'\uD835\uDD31','there4':'\u2234','therefore':'\u2234','Therefore':'\u2234','Theta':'\u0398','theta':'\u03B8','thetasym':'\u03D1','thetav':'\u03D1','thickapprox':'\u2248','thicksim':'\u223C','ThickSpace':'\u205F\u200A','ThinSpace':'\u2009','thinsp':'\u2009','thkap':'\u2248','thksim':'\u223C','THORN':'\xDE','thorn':'\xFE','tilde':'\u02DC','Tilde':'\u223C','TildeEqual':'\u2243','TildeFullEqual':'\u2245','TildeTilde':'\u2248','timesbar':'\u2A31','timesb':'\u22A0','times':'\xD7','timesd':'\u2A30','tint':'\u222D','toea':'\u2928','topbot':'\u2336','topcir':'\u2AF1','top':'\u22A4','Topf':'\uD835\uDD4B','topf':'\uD835\uDD65','topfork':'\u2ADA','tosa':'\u2929','tprime':'\u2034','trade':'\u2122','TRADE':'\u2122','triangle':'\u25B5','triangledown':'\u25BF','triangleleft':'\u25C3','trianglelefteq':'\u22B4','triangleq':'\u225C','triangleright':'\u25B9','trianglerighteq':'\u22B5','tridot':'\u25EC','trie':'\u225C','triminus':'\u2A3A','TripleDot':'\u20DB','triplus':'\u2A39','trisb':'\u29CD','tritime':'\u2A3B','trpezium':'\u23E2','Tscr':'\uD835\uDCAF','tscr':'\uD835\uDCC9','TScy':'\u0426','tscy':'\u0446','TSHcy':'\u040B','tshcy':'\u045B','Tstrok':'\u0166','tstrok':'\u0167','twixt':'\u226C','twoheadleftarrow':'\u219E','twoheadrightarrow':'\u21A0','Uacute':'\xDA','uacute':'\xFA','uarr':'\u2191','Uarr':'\u219F','uArr':'\u21D1','Uarrocir':'\u2949','Ubrcy':'\u040E','ubrcy':'\u045E','Ubreve':'\u016C','ubreve':'\u016D','Ucirc':'\xDB','ucirc':'\xFB','Ucy':'\u0423','ucy':'\u0443','udarr':'\u21C5','Udblac':'\u0170','udblac':'\u0171','udhar':'\u296E','ufisht':'\u297E','Ufr':'\uD835\uDD18','ufr':'\uD835\uDD32','Ugrave':'\xD9','ugrave':'\xF9','uHar':'\u2963','uharl':'\u21BF','uharr':'\u21BE','uhblk':'\u2580','ulcorn':'\u231C','ulcorner':'\u231C','ulcrop':'\u230F','ultri':'\u25F8','Umacr':'\u016A','umacr':'\u016B','uml':'\xA8','UnderBar':'_','UnderBrace':'\u23DF','UnderBracket':'\u23B5','UnderParenthesis':'\u23DD','Union':'\u22C3','UnionPlus':'\u228E','Uogon':'\u0172','uogon':'\u0173','Uopf':'\uD835\uDD4C','uopf':'\uD835\uDD66','UpArrowBar':'\u2912','uparrow':'\u2191','UpArrow':'\u2191','Uparrow':'\u21D1','UpArrowDownArrow':'\u21C5','updownarrow':'\u2195','UpDownArrow':'\u2195','Updownarrow':'\u21D5','UpEquilibrium':'\u296E','upharpoonleft':'\u21BF','upharpoonright':'\u21BE','uplus':'\u228E','UpperLeftArrow':'\u2196','UpperRightArrow':'\u2197','upsi':'\u03C5','Upsi':'\u03D2','upsih':'\u03D2','Upsilon':'\u03A5','upsilon':'\u03C5','UpTeeArrow':'\u21A5','UpTee':'\u22A5','upuparrows':'\u21C8','urcorn':'\u231D','urcorner':'\u231D','urcrop':'\u230E','Uring':'\u016E','uring':'\u016F','urtri':'\u25F9','Uscr':'\uD835\uDCB0','uscr':'\uD835\uDCCA','utdot':'\u22F0','Utilde':'\u0168','utilde':'\u0169','utri':'\u25B5','utrif':'\u25B4','uuarr':'\u21C8','Uuml':'\xDC','uuml':'\xFC','uwangle':'\u29A7','vangrt':'\u299C','varepsilon':'\u03F5','varkappa':'\u03F0','varnothing':'\u2205','varphi':'\u03D5','varpi':'\u03D6','varpropto':'\u221D','varr':'\u2195','vArr':'\u21D5','varrho':'\u03F1','varsigma':'\u03C2','varsubsetneq':'\u228A\uFE00','varsubsetneqq':'\u2ACB\uFE00','varsupsetneq':'\u228B\uFE00','varsupsetneqq':'\u2ACC\uFE00','vartheta':'\u03D1','vartriangleleft':'\u22B2','vartriangleright':'\u22B3','vBar':'\u2AE8','Vbar':'\u2AEB','vBarv':'\u2AE9','Vcy':'\u0412','vcy':'\u0432','vdash':'\u22A2','vDash':'\u22A8','Vdash':'\u22A9','VDash':'\u22AB','Vdashl':'\u2AE6','veebar':'\u22BB','vee':'\u2228','Vee':'\u22C1','veeeq':'\u225A','vellip':'\u22EE','verbar':'|','Verbar':'\u2016','vert':'|','Vert':'\u2016','VerticalBar':'\u2223','VerticalLine':'|','VerticalSeparator':'\u2758','VerticalTilde':'\u2240','VeryThinSpace':'\u200A','Vfr':'\uD835\uDD19','vfr':'\uD835\uDD33','vltri':'\u22B2','vnsub':'\u2282\u20D2','vnsup':'\u2283\u20D2','Vopf':'\uD835\uDD4D','vopf':'\uD835\uDD67','vprop':'\u221D','vrtri':'\u22B3','Vscr':'\uD835\uDCB1','vscr':'\uD835\uDCCB','vsubnE':'\u2ACB\uFE00','vsubne':'\u228A\uFE00','vsupnE':'\u2ACC\uFE00','vsupne':'\u228B\uFE00','Vvdash':'\u22AA','vzigzag':'\u299A','Wcirc':'\u0174','wcirc':'\u0175','wedbar':'\u2A5F','wedge':'\u2227','Wedge':'\u22C0','wedgeq':'\u2259','weierp':'\u2118','Wfr':'\uD835\uDD1A','wfr':'\uD835\uDD34','Wopf':'\uD835\uDD4E','wopf':'\uD835\uDD68','wp':'\u2118','wr':'\u2240','wreath':'\u2240','Wscr':'\uD835\uDCB2','wscr':'\uD835\uDCCC','xcap':'\u22C2','xcirc':'\u25EF','xcup':'\u22C3','xdtri':'\u25BD','Xfr':'\uD835\uDD1B','xfr':'\uD835\uDD35','xharr':'\u27F7','xhArr':'\u27FA','Xi':'\u039E','xi':'\u03BE','xlarr':'\u27F5','xlArr':'\u27F8','xmap':'\u27FC','xnis':'\u22FB','xodot':'\u2A00','Xopf':'\uD835\uDD4F','xopf':'\uD835\uDD69','xoplus':'\u2A01','xotime':'\u2A02','xrarr':'\u27F6','xrArr':'\u27F9','Xscr':'\uD835\uDCB3','xscr':'\uD835\uDCCD','xsqcup':'\u2A06','xuplus':'\u2A04','xutri':'\u25B3','xvee':'\u22C1','xwedge':'\u22C0','Yacute':'\xDD','yacute':'\xFD','YAcy':'\u042F','yacy':'\u044F','Ycirc':'\u0176','ycirc':'\u0177','Ycy':'\u042B','ycy':'\u044B','yen':'\xA5','Yfr':'\uD835\uDD1C','yfr':'\uD835\uDD36','YIcy':'\u0407','yicy':'\u0457','Yopf':'\uD835\uDD50','yopf':'\uD835\uDD6A','Yscr':'\uD835\uDCB4','yscr':'\uD835\uDCCE','YUcy':'\u042E','yucy':'\u044E','yuml':'\xFF','Yuml':'\u0178','Zacute':'\u0179','zacute':'\u017A','Zcaron':'\u017D','zcaron':'\u017E','Zcy':'\u0417','zcy':'\u0437','Zdot':'\u017B','zdot':'\u017C','zeetrf':'\u2128','ZeroWidthSpace':'\u200B','Zeta':'\u0396','zeta':'\u03B6','zfr':'\uD835\uDD37','Zfr':'\u2128','ZHcy':'\u0416','zhcy':'\u0436','zigrarr':'\u21DD','zopf':'\uD835\uDD6B','Zopf':'\u2124','Zscr':'\uD835\uDCB5','zscr':'\uD835\uDCCF','zwj':'\u200D','zwnj':'\u200C'};
-	var decodeMapLegacy = {'Aacute':'\xC1','aacute':'\xE1','Acirc':'\xC2','acirc':'\xE2','acute':'\xB4','AElig':'\xC6','aelig':'\xE6','Agrave':'\xC0','agrave':'\xE0','amp':'&','AMP':'&','Aring':'\xC5','aring':'\xE5','Atilde':'\xC3','atilde':'\xE3','Auml':'\xC4','auml':'\xE4','brvbar':'\xA6','Ccedil':'\xC7','ccedil':'\xE7','cedil':'\xB8','cent':'\xA2','copy':'\xA9','COPY':'\xA9','curren':'\xA4','deg':'\xB0','divide':'\xF7','Eacute':'\xC9','eacute':'\xE9','Ecirc':'\xCA','ecirc':'\xEA','Egrave':'\xC8','egrave':'\xE8','ETH':'\xD0','eth':'\xF0','Euml':'\xCB','euml':'\xEB','frac12':'\xBD','frac14':'\xBC','frac34':'\xBE','gt':'>','GT':'>','Iacute':'\xCD','iacute':'\xED','Icirc':'\xCE','icirc':'\xEE','iexcl':'\xA1','Igrave':'\xCC','igrave':'\xEC','iquest':'\xBF','Iuml':'\xCF','iuml':'\xEF','laquo':'\xAB','lt':'<','LT':'<','macr':'\xAF','micro':'\xB5','middot':'\xB7','nbsp':'\xA0','not':'\xAC','Ntilde':'\xD1','ntilde':'\xF1','Oacute':'\xD3','oacute':'\xF3','Ocirc':'\xD4','ocirc':'\xF4','Ograve':'\xD2','ograve':'\xF2','ordf':'\xAA','ordm':'\xBA','Oslash':'\xD8','oslash':'\xF8','Otilde':'\xD5','otilde':'\xF5','Ouml':'\xD6','ouml':'\xF6','para':'\xB6','plusmn':'\xB1','pound':'\xA3','quot':'"','QUOT':'"','raquo':'\xBB','reg':'\xAE','REG':'\xAE','sect':'\xA7','shy':'\xAD','sup1':'\xB9','sup2':'\xB2','sup3':'\xB3','szlig':'\xDF','THORN':'\xDE','thorn':'\xFE','times':'\xD7','Uacute':'\xDA','uacute':'\xFA','Ucirc':'\xDB','ucirc':'\xFB','Ugrave':'\xD9','ugrave':'\xF9','uml':'\xA8','Uuml':'\xDC','uuml':'\xFC','Yacute':'\xDD','yacute':'\xFD','yen':'\xA5','yuml':'\xFF'};
-	var decodeMapNumeric = {'0':'\uFFFD','128':'\u20AC','130':'\u201A','131':'\u0192','132':'\u201E','133':'\u2026','134':'\u2020','135':'\u2021','136':'\u02C6','137':'\u2030','138':'\u0160','139':'\u2039','140':'\u0152','142':'\u017D','145':'\u2018','146':'\u2019','147':'\u201C','148':'\u201D','149':'\u2022','150':'\u2013','151':'\u2014','152':'\u02DC','153':'\u2122','154':'\u0161','155':'\u203A','156':'\u0153','158':'\u017E','159':'\u0178'};
-	var invalidReferenceCodePoints = [1,2,3,4,5,6,7,8,11,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,64976,64977,64978,64979,64980,64981,64982,64983,64984,64985,64986,64987,64988,64989,64990,64991,64992,64993,64994,64995,64996,64997,64998,64999,65000,65001,65002,65003,65004,65005,65006,65007,65534,65535,131070,131071,196606,196607,262142,262143,327678,327679,393214,393215,458750,458751,524286,524287,589822,589823,655358,655359,720894,720895,786430,786431,851966,851967,917502,917503,983038,983039,1048574,1048575,1114110,1114111];
-
-	/*--------------------------------------------------------------------------*/
-
-	var stringFromCharCode = String.fromCharCode;
-
-	var object = {};
-	var hasOwnProperty = object.hasOwnProperty;
-	var has = function(object, propertyName) {
-		return hasOwnProperty.call(object, propertyName);
-	};
-
-	var contains = function(array, value) {
-		var index = -1;
-		var length = array.length;
-		while (++index < length) {
-			if (array[index] == value) {
-				return true;
-			}
-		}
-		return false;
-	};
-
-	var merge = function(options, defaults) {
-		if (!options) {
-			return defaults;
-		}
-		var result = {};
-		var key;
-		for (key in defaults) {
-			// A `hasOwnProperty` check is not needed here, since only recognized
-			// option names are used anyway. Any others are ignored.
-			result[key] = has(options, key) ? options[key] : defaults[key];
-		}
-		return result;
-	};
-
-	// Modified version of `ucs2encode`; see http://mths.be/punycode.
-	var codePointToSymbol = function(codePoint, strict) {
-		var output = '';
-		if ((codePoint >= 0xD800 && codePoint <= 0xDFFF) || codePoint > 0x10FFFF) {
-			// See issue #4:
-			// “Otherwise, if the number is in the range 0xD800 to 0xDFFF or is
-			// greater than 0x10FFFF, then this is a parse error. Return a U+FFFD
-			// REPLACEMENT CHARACTER.”
-			if (strict) {
-				parseError('character reference outside the permissible Unicode range');
-			}
-			return '\uFFFD';
-		}
-		if (has(decodeMapNumeric, codePoint)) {
-			if (strict) {
-				parseError('disallowed character reference');
-			}
-			return decodeMapNumeric[codePoint];
-		}
-		if (strict && contains(invalidReferenceCodePoints, codePoint)) {
-			parseError('disallowed character reference');
-		}
-		if (codePoint > 0xFFFF) {
-			codePoint -= 0x10000;
-			output += stringFromCharCode(codePoint >>> 10 & 0x3FF | 0xD800);
-			codePoint = 0xDC00 | codePoint & 0x3FF;
-		}
-		output += stringFromCharCode(codePoint);
-		return output;
-	};
-
-	var hexEscape = function(symbol) {
-		return '&#x' + symbol.charCodeAt(0).toString(16).toUpperCase() + ';';
-	};
-
-	var parseError = function(message) {
-		throw Error('Parse error: ' + message);
-	};
-
-	/*--------------------------------------------------------------------------*/
-
-	var encode = function(string, options) {
-		options = merge(options, encode.options);
-		var strict = options.strict;
-		if (strict && regexInvalidRawCodePoint.test(string)) {
-			parseError('forbidden code point');
-		}
-		var encodeEverything = options.encodeEverything;
-		var useNamedReferences = options.useNamedReferences;
-		var allowUnsafeSymbols = options.allowUnsafeSymbols;
-		if (encodeEverything) {
-			// Encode ASCII symbols.
-			string = string.replace(regexAsciiWhitelist, function(symbol) {
-				// Use named references if requested & possible.
-				if (useNamedReferences && has(encodeMap, symbol)) {
-					return '&' + encodeMap[symbol] + ';';
-				}
-				return hexEscape(symbol);
-			});
-			// Shorten a few escapes that represent two symbols, of which at least one
-			// is within the ASCII range.
-			if (useNamedReferences) {
-				string = string
-					.replace(/&gt;\u20D2/g, '&nvgt;')
-					.replace(/&lt;\u20D2/g, '&nvlt;')
-					.replace(/&#x66;&#x6A;/g, '&fjlig;');
-			}
-			// Encode non-ASCII symbols.
-			if (useNamedReferences) {
-				// Encode non-ASCII symbols that can be replaced with a named reference.
-				string = string.replace(regexEncodeNonAscii, function(string) {
-					// Note: there is no need to check `has(encodeMap, string)` here.
-					return '&' + encodeMap[string] + ';';
-				});
-			}
-			// Note: any remaining non-ASCII symbols are handled outside of the `if`.
-		} else if (useNamedReferences) {
-			// Apply named character references.
-			// Encode `<>"'&` using named character references.
-			if (!allowUnsafeSymbols) {
-				string = string.replace(regexEscape, function(string) {
-					return '&' + encodeMap[string] + ';'; // no need to check `has()` here
-				});
-			}
-			// Shorten escapes that represent two symbols, of which at least one is
-			// `<>"'&`.
-			string = string
-				.replace(/&gt;\u20D2/g, '&nvgt;')
-				.replace(/&lt;\u20D2/g, '&nvlt;');
-			// Encode non-ASCII symbols that can be replaced with a named reference.
-			string = string.replace(regexEncodeNonAscii, function(string) {
-				// Note: there is no need to check `has(encodeMap, string)` here.
-				return '&' + encodeMap[string] + ';';
-			});
-		} else if (!allowUnsafeSymbols) {
-			// Encode `<>"'&` using hexadecimal escapes, now that they’re not handled
-			// using named character references.
-			string = string.replace(regexEscape, hexEscape);
-		}
-		return string
-			// Encode astral symbols.
-			.replace(regexAstralSymbols, function($0) {
-				// https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
-				var high = $0.charCodeAt(0);
-				var low = $0.charCodeAt(1);
-				var codePoint = (high - 0xD800) * 0x400 + low - 0xDC00 + 0x10000;
-				return '&#x' + codePoint.toString(16).toUpperCase() + ';';
-			})
-			// Encode any remaining BMP symbols that are not printable ASCII symbols
-			// using a hexadecimal escape.
-			.replace(regexBmpWhitelist, hexEscape);
-	};
-	// Expose default options (so they can be overridden globally).
-	encode.options = {
-		'allowUnsafeSymbols': false,
-		'encodeEverything': false,
-		'strict': false,
-		'useNamedReferences': false
-	};
-
-	var decode = function(html, options) {
-		options = merge(options, decode.options);
-		var strict = options.strict;
-		if (strict && regexInvalidEntity.test(html)) {
-			parseError('malformed character reference');
-		}
-		return html.replace(regexDecode, function($0, $1, $2, $3, $4, $5, $6, $7) {
-			var codePoint;
-			var semicolon;
-			var hexDigits;
-			var reference;
-			var next;
-			if ($1) {
-				// Decode decimal escapes, e.g. `&#119558;`.
-				codePoint = $1;
-				semicolon = $2;
-				if (strict && !semicolon) {
-					parseError('character reference was not terminated by a semicolon');
-				}
-				return codePointToSymbol(codePoint, strict);
-			}
-			if ($3) {
-				// Decode hexadecimal escapes, e.g. `&#x1D306;`.
-				hexDigits = $3;
-				semicolon = $4;
-				if (strict && !semicolon) {
-					parseError('character reference was not terminated by a semicolon');
-				}
-				codePoint = parseInt(hexDigits, 16);
-				return codePointToSymbol(codePoint, strict);
-			}
-			if ($5) {
-				// Decode named character references with trailing `;`, e.g. `&copy;`.
-				reference = $5;
-				if (has(decodeMap, reference)) {
-					return decodeMap[reference];
-				} else {
-					// Ambiguous ampersand; see http://mths.be/notes/ambiguous-ampersands.
-					if (strict) {
-						parseError(
-							'named character reference was not terminated by a semicolon'
-						);
-					}
-					return $0;
-				}
-			}
-			// If we’re still here, it’s a legacy reference for sure. No need for an
-			// extra `if` check.
-			// Decode named character references without trailing `;`, e.g. `&amp`
-			// This is only a parse error if it gets converted to `&`, or if it is
-			// followed by `=` in an attribute context.
-			reference = $6;
-			next = $7;
-			if (next && options.isAttributeValue) {
-				if (strict && next == '=') {
-					parseError('`&` did not start a character reference');
-				}
-				return $0;
-			} else {
-				if (strict) {
-					parseError(
-						'named character reference was not terminated by a semicolon'
-					);
-				}
-				// Note: there is no need to check `has(decodeMapLegacy, reference)`.
-				return decodeMapLegacy[reference] + (next || '');
-			}
-		});
-	};
-	// Expose default options (so they can be overridden globally).
-	decode.options = {
-		'isAttributeValue': false,
-		'strict': false
-	};
-
-	var escape = function(string) {
-		return string.replace(regexEscape, function($0) {
-			// Note: there is no need to check `has(escapeMap, $0)` here.
-			return escapeMap[$0];
-		});
-	};
-
-	/*--------------------------------------------------------------------------*/
-
-	var he = {
-		'version': '0.5.0',
-		'encode': encode,
-		'decode': decode,
-		'escape': escape,
-		'unescape': decode
-	};
-
-	// Some AMD build optimizers, like r.js, check for specific condition patterns
-	// like the following:
-	if (
-		typeof define == 'function' &&
-		typeof define.amd == 'object' &&
-		define.amd
-	) {
-		define(function() {
-			return he;
-		});
-	}	else if (freeExports && !freeExports.nodeType) {
-		if (freeModule) { // in Node.js or RingoJS v0.8.0+
-			freeModule.exports = he;
-		} else { // in Narwhal or RingoJS v0.7.0-
-			for (var key in he) {
-				has(he, key) && (freeExports[key] = he[key]);
-			}
-		}
-	} else { // in Rhino or a web browser
-		root.he = he;
-	}
-
-}(this));
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],5:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /*!
- * JavaScript Cookie v2.0.4
+ * JavaScript Cookie v2.1.0
  * https://github.com/js-cookie/js-cookie
  *
  * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
@@ -4348,8 +1820,12 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 					}
 				} catch (e) {}
 
-				value = encodeURIComponent(String(value));
-				value = value.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+				if (!converter.write) {
+					value = encodeURIComponent(String(value))
+						.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+				} else {
+					value = converter.write(value, key);
+				}
 
 				key = encodeURIComponent(String(key));
 				key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
@@ -4387,7 +1863,9 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 				}
 
 				try {
-					cookie = converter && converter(cookie, name) || cookie.replace(rdecode, decodeURIComponent);
+					cookie = converter.read ?
+						converter.read(cookie, name) : converter(cookie, name) ||
+						cookie.replace(rdecode, decodeURIComponent);
 
 					if (this.json) {
 						try {
@@ -4428,17 +1906,17 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 		return api;
 	}
 
-	return init();
+	return init(function () {});
 }));
 
-},{}],6:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 //! moment.js
-//! version : 2.10.6
+//! version : 2.11.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
 
-(function (global, factory) {
+;(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
     global.moment = factory()
@@ -4555,39 +2033,45 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return m;
     }
 
+    function isUndefined(input) {
+        return input === void 0;
+    }
+
+    // Plugins that add properties should also add the key here (null value),
+    // so we can properly clone ourselves.
     var momentProperties = utils_hooks__hooks.momentProperties = [];
 
     function copyConfig(to, from) {
         var i, prop, val;
 
-        if (typeof from._isAMomentObject !== 'undefined') {
+        if (!isUndefined(from._isAMomentObject)) {
             to._isAMomentObject = from._isAMomentObject;
         }
-        if (typeof from._i !== 'undefined') {
+        if (!isUndefined(from._i)) {
             to._i = from._i;
         }
-        if (typeof from._f !== 'undefined') {
+        if (!isUndefined(from._f)) {
             to._f = from._f;
         }
-        if (typeof from._l !== 'undefined') {
+        if (!isUndefined(from._l)) {
             to._l = from._l;
         }
-        if (typeof from._strict !== 'undefined') {
+        if (!isUndefined(from._strict)) {
             to._strict = from._strict;
         }
-        if (typeof from._tzm !== 'undefined') {
+        if (!isUndefined(from._tzm)) {
             to._tzm = from._tzm;
         }
-        if (typeof from._isUTC !== 'undefined') {
+        if (!isUndefined(from._isUTC)) {
             to._isUTC = from._isUTC;
         }
-        if (typeof from._offset !== 'undefined') {
+        if (!isUndefined(from._offset)) {
             to._offset = from._offset;
         }
-        if (typeof from._pf !== 'undefined') {
+        if (!isUndefined(from._pf)) {
             to._pf = getParsingFlags(from);
         }
-        if (typeof from._locale !== 'undefined') {
+        if (!isUndefined(from._locale)) {
             to._locale = from._locale;
         }
 
@@ -4595,7 +2079,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
             for (i in momentProperties) {
                 prop = momentProperties[i];
                 val = from[prop];
-                if (typeof val !== 'undefined') {
+                if (!isUndefined(val)) {
                     to[prop] = val;
                 }
             }
@@ -4642,6 +2126,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return value;
     }
 
+    // compare two arrays, return the number of differences
     function compareArrays(array1, array2, dontConvert) {
         var len = Math.min(array1.length, array2.length),
             lengthDiff = Math.abs(array1.length - array2.length),
@@ -4659,6 +2144,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function Locale() {
     }
 
+    // internal storage for locale config files
     var locales = {};
     var globalLocale;
 
@@ -4696,7 +2182,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function loadLocale(name) {
         var oldLocale = null;
         // TODO: Find a better way to register and load all the locales in Node
-        if (!locales[name] && typeof module !== 'undefined' &&
+        if (!locales[name] && (typeof module !== 'undefined') &&
                 module && module.exports) {
             try {
                 oldLocale = globalLocale._abbr;
@@ -4715,7 +2201,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function locale_locales__getSetGlobalLocale (key, values) {
         var data;
         if (key) {
-            if (typeof values === 'undefined') {
+            if (isUndefined(values)) {
                 data = locale_locales__getLocale(key);
             }
             else {
@@ -4800,6 +2286,10 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return normalizedInput;
     }
 
+    function isFunction(input) {
+        return input instanceof Function || Object.prototype.toString.call(input) === '[object Function]';
+    }
+
     function makeGetSet (unit, keepTime) {
         return function (value) {
             if (value != null) {
@@ -4813,11 +2303,14 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function get_set__get (mom, unit) {
-        return mom._d['get' + (mom._isUTC ? 'UTC' : '') + unit]();
+        return mom.isValid() ?
+            mom._d['get' + (mom._isUTC ? 'UTC' : '') + unit]() : NaN;
     }
 
     function get_set__set (mom, unit, value) {
-        return mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value);
+        if (mom.isValid()) {
+            mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value);
+        }
     }
 
     // MOMENTS
@@ -4830,7 +2323,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
             }
         } else {
             units = normalizeUnits(units);
-            if (typeof this[units] === 'function') {
+            if (isFunction(this[units])) {
                 return this[units](value);
             }
         }
@@ -4845,7 +2338,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
             Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
     }
 
-    var formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Q|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g;
+    var formattingTokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g;
 
     var localFormattingTokens = /(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g;
 
@@ -4941,6 +2434,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     var match4         = /\d{4}/;         //    0000 - 9999
     var match6         = /[+-]?\d{6}/;    // -999999 - 999999
     var match1to2      = /\d\d?/;         //       0 - 99
+    var match3to4      = /\d\d\d\d?/;     //     999 - 9999
+    var match5to6      = /\d\d\d\d\d\d?/; //   99999 - 999999
     var match1to3      = /\d{1,3}/;       //       0 - 999
     var match1to4      = /\d{1,4}/;       //       0 - 9999
     var match1to6      = /[+-]?\d{1,6}/;  // -999999 - 999999
@@ -4949,23 +2444,19 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     var matchSigned    = /[+-]?\d+/;      //    -inf - inf
 
     var matchOffset    = /Z|[+-]\d\d:?\d\d/gi; // +00:00 -00:00 +0000 -0000 or Z
+    var matchShortOffset = /Z|[+-]\d\d(?::?\d\d)?/gi; // +00 -00 +00:00 -00:00 +0000 -0000 or Z
 
     var matchTimestamp = /[+-]?\d+(\.\d{1,3})?/; // 123456789 123456789.123
 
     // any word (or two) characters or numbers including two/three word month in arabic.
+    // includes scottish gaelic two word and hyphenated months
     var matchWord = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i;
+
 
     var regexes = {};
 
-    function isFunction (sth) {
-        // https://github.com/moment/moment/issues/2325
-        return typeof sth === 'function' &&
-            Object.prototype.toString.call(sth) === '[object Function]';
-    }
-
-
     function addRegexToken (token, regex, strictRegex) {
-        regexes[token] = isFunction(regex) ? regex : function (isStrict) {
+        regexes[token] = isFunction(regex) ? regex : function (isStrict, localeData) {
             return (isStrict && strictRegex) ? strictRegex : regex;
         };
     }
@@ -4980,9 +2471,13 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     // Code from http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
     function unescapeFormat(s) {
-        return s.replace('\\', '').replace(/\\(\[)|\\(\])|\[([^\]\[]*)\]|\\(.)/g, function (matched, p1, p2, p3, p4) {
+        return regexEscape(s.replace('\\', '').replace(/\\(\[)|\\(\])|\[([^\]\[]*)\]|\\(.)/g, function (matched, p1, p2, p3, p4) {
             return p1 || p2 || p3 || p4;
-        }).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        }));
+    }
+
+    function regexEscape(s) {
+        return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
     var tokens = {};
@@ -5022,6 +2517,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     var MINUTE = 4;
     var SECOND = 5;
     var MILLISECOND = 6;
+    var WEEK = 7;
+    var WEEKDAY = 8;
 
     function daysInMonth(year, month) {
         return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
@@ -5049,8 +2546,12 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     addRegexToken('M',    match1to2);
     addRegexToken('MM',   match1to2, match2);
-    addRegexToken('MMM',  matchWord);
-    addRegexToken('MMMM', matchWord);
+    addRegexToken('MMM',  function (isStrict, locale) {
+        return locale.monthsShortRegex(isStrict);
+    });
+    addRegexToken('MMMM', function (isStrict, locale) {
+        return locale.monthsRegex(isStrict);
+    });
 
     addParseToken(['M', 'MM'], function (input, array) {
         array[MONTH] = toInt(input) - 1;
@@ -5068,14 +2569,17 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     // LOCALES
 
+    var MONTHS_IN_FORMAT = /D[oD]?(\[[^\[\]]*\]|\s+)+MMMM?/;
     var defaultLocaleMonths = 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_');
-    function localeMonths (m) {
-        return this._months[m.month()];
+    function localeMonths (m, format) {
+        return isArray(this._months) ? this._months[m.month()] :
+            this._months[MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'][m.month()];
     }
 
     var defaultLocaleMonthsShort = 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_');
-    function localeMonthsShort (m) {
-        return this._monthsShort[m.month()];
+    function localeMonthsShort (m, format) {
+        return isArray(this._monthsShort) ? this._monthsShort[m.month()] :
+            this._monthsShort[MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'][m.month()];
     }
 
     function localeMonthsParse (monthName, format, strict) {
@@ -5114,6 +2618,11 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function setMonth (mom, value) {
         var dayOfMonth;
 
+        if (!mom.isValid()) {
+            // No op
+            return mom;
+        }
+
         // TODO: Move this out of here!
         if (typeof value === 'string') {
             value = mom.localeData().monthsParse(value);
@@ -5142,6 +2651,72 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return daysInMonth(this.year(), this.month());
     }
 
+    var defaultMonthsShortRegex = matchWord;
+    function monthsShortRegex (isStrict) {
+        if (this._monthsParseExact) {
+            if (!hasOwnProp(this, '_monthsRegex')) {
+                computeMonthsParse.call(this);
+            }
+            if (isStrict) {
+                return this._monthsShortStrictRegex;
+            } else {
+                return this._monthsShortRegex;
+            }
+        } else {
+            return this._monthsShortStrictRegex && isStrict ?
+                this._monthsShortStrictRegex : this._monthsShortRegex;
+        }
+    }
+
+    var defaultMonthsRegex = matchWord;
+    function monthsRegex (isStrict) {
+        if (this._monthsParseExact) {
+            if (!hasOwnProp(this, '_monthsRegex')) {
+                computeMonthsParse.call(this);
+            }
+            if (isStrict) {
+                return this._monthsStrictRegex;
+            } else {
+                return this._monthsRegex;
+            }
+        } else {
+            return this._monthsStrictRegex && isStrict ?
+                this._monthsStrictRegex : this._monthsRegex;
+        }
+    }
+
+    function computeMonthsParse () {
+        function cmpLenRev(a, b) {
+            return b.length - a.length;
+        }
+
+        var shortPieces = [], longPieces = [], mixedPieces = [],
+            i, mom;
+        for (i = 0; i < 12; i++) {
+            // make the regex if we don't have it already
+            mom = create_utc__createUTC([2000, i]);
+            shortPieces.push(this.monthsShort(mom, ''));
+            longPieces.push(this.months(mom, ''));
+            mixedPieces.push(this.months(mom, ''));
+            mixedPieces.push(this.monthsShort(mom, ''));
+        }
+        // Sorting makes sure if one month (or abbr) is a prefix of another it
+        // will match the longer piece.
+        shortPieces.sort(cmpLenRev);
+        longPieces.sort(cmpLenRev);
+        mixedPieces.sort(cmpLenRev);
+        for (i = 0; i < 12; i++) {
+            shortPieces[i] = regexEscape(shortPieces[i]);
+            longPieces[i] = regexEscape(longPieces[i]);
+            mixedPieces[i] = regexEscape(mixedPieces[i]);
+        }
+
+        this._monthsRegex = new RegExp('^(' + mixedPieces.join('|') + ')', 'i');
+        this._monthsShortRegex = this._monthsRegex;
+        this._monthsStrictRegex = new RegExp('^(' + longPieces.join('|') + ')$', 'i');
+        this._monthsShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')$', 'i');
+    }
+
     function checkOverflow (m) {
         var overflow;
         var a = m._a;
@@ -5159,6 +2734,12 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
             if (getParsingFlags(m)._overflowDayOfYear && (overflow < YEAR || overflow > DATE)) {
                 overflow = DATE;
             }
+            if (getParsingFlags(m)._overflowWeeks && overflow === -1) {
+                overflow = WEEK;
+            }
+            if (getParsingFlags(m)._overflowWeekday && overflow === -1) {
+                overflow = WEEKDAY;
+            }
 
             getParsingFlags(m).overflow = overflow;
         }
@@ -5167,7 +2748,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function warn(msg) {
-        if (utils_hooks__hooks.suppressDeprecationWarnings === false && typeof console !== 'undefined' && console.warn) {
+        if (utils_hooks__hooks.suppressDeprecationWarnings === false &&
+                (typeof console !==  'undefined') && console.warn) {
             console.warn('Deprecation warning: ' + msg);
         }
     }
@@ -5177,7 +2759,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
         return extend(function () {
             if (firstTime) {
-                warn(msg + '\n' + (new Error()).stack);
+                warn(msg + '\nArguments: ' + Array.prototype.slice.call(arguments).join(', ') + '\n' + (new Error()).stack);
                 firstTime = false;
             }
             return fn.apply(this, arguments);
@@ -5195,22 +2777,39 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     utils_hooks__hooks.suppressDeprecationWarnings = false;
 
-    var from_string__isoRegex = /^\s*(?:[+-]\d{6}|\d{4})-(?:(\d\d-\d\d)|(W\d\d$)|(W\d\d-\d)|(\d\d\d))((T| )(\d\d(:\d\d(:\d\d(\.\d+)?)?)?)?([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
+    // iso 8601 regex
+    // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
+    var extendedIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?/;
+    var basicIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})(?:\d\d\d\d|W\d\d\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?:\d\d(?:\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?/;
+
+    var tzRegex = /Z|[+-]\d\d(?::?\d\d)?/;
 
     var isoDates = [
-        ['YYYYYY-MM-DD', /[+-]\d{6}-\d{2}-\d{2}/],
-        ['YYYY-MM-DD', /\d{4}-\d{2}-\d{2}/],
-        ['GGGG-[W]WW-E', /\d{4}-W\d{2}-\d/],
-        ['GGGG-[W]WW', /\d{4}-W\d{2}/],
-        ['YYYY-DDD', /\d{4}-\d{3}/]
+        ['YYYYYY-MM-DD', /[+-]\d{6}-\d\d-\d\d/],
+        ['YYYY-MM-DD', /\d{4}-\d\d-\d\d/],
+        ['GGGG-[W]WW-E', /\d{4}-W\d\d-\d/],
+        ['GGGG-[W]WW', /\d{4}-W\d\d/, false],
+        ['YYYY-DDD', /\d{4}-\d{3}/],
+        ['YYYY-MM', /\d{4}-\d\d/, false],
+        ['YYYYYYMMDD', /[+-]\d{10}/],
+        ['YYYYMMDD', /\d{8}/],
+        // YYYYMM is NOT allowed by the standard
+        ['GGGG[W]WWE', /\d{4}W\d{3}/],
+        ['GGGG[W]WW', /\d{4}W\d{2}/, false],
+        ['YYYYDDD', /\d{7}/]
     ];
 
     // iso time formats and regexes
     var isoTimes = [
-        ['HH:mm:ss.SSSS', /(T| )\d\d:\d\d:\d\d\.\d+/],
-        ['HH:mm:ss', /(T| )\d\d:\d\d:\d\d/],
-        ['HH:mm', /(T| )\d\d:\d\d/],
-        ['HH', /(T| )\d\d/]
+        ['HH:mm:ss.SSSS', /\d\d:\d\d:\d\d\.\d+/],
+        ['HH:mm:ss,SSSS', /\d\d:\d\d:\d\d,\d+/],
+        ['HH:mm:ss', /\d\d:\d\d:\d\d/],
+        ['HH:mm', /\d\d:\d\d/],
+        ['HHmmss.SSSS', /\d\d\d\d\d\d\.\d+/],
+        ['HHmmss,SSSS', /\d\d\d\d\d\d,\d+/],
+        ['HHmmss', /\d\d\d\d\d\d/],
+        ['HHmm', /\d\d\d\d/],
+        ['HH', /\d\d/]
     ];
 
     var aspNetJsonRegex = /^\/?Date\((\-?\d+)/i;
@@ -5219,26 +2818,49 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function configFromISO(config) {
         var i, l,
             string = config._i,
-            match = from_string__isoRegex.exec(string);
+            match = extendedIsoRegex.exec(string) || basicIsoRegex.exec(string),
+            allowTime, dateFormat, timeFormat, tzFormat;
 
         if (match) {
             getParsingFlags(config).iso = true;
+
             for (i = 0, l = isoDates.length; i < l; i++) {
-                if (isoDates[i][1].exec(string)) {
-                    config._f = isoDates[i][0];
+                if (isoDates[i][1].exec(match[1])) {
+                    dateFormat = isoDates[i][0];
+                    allowTime = isoDates[i][2] !== false;
                     break;
                 }
             }
-            for (i = 0, l = isoTimes.length; i < l; i++) {
-                if (isoTimes[i][1].exec(string)) {
-                    // match[6] should be 'T' or space
-                    config._f += (match[6] || ' ') + isoTimes[i][0];
-                    break;
+            if (dateFormat == null) {
+                config._isValid = false;
+                return;
+            }
+            if (match[3]) {
+                for (i = 0, l = isoTimes.length; i < l; i++) {
+                    if (isoTimes[i][1].exec(match[3])) {
+                        // match[2] should be 'T' or space
+                        timeFormat = (match[2] || ' ') + isoTimes[i][0];
+                        break;
+                    }
+                }
+                if (timeFormat == null) {
+                    config._isValid = false;
+                    return;
                 }
             }
-            if (string.match(matchOffset)) {
-                config._f += 'Z';
+            if (!allowTime && timeFormat != null) {
+                config._isValid = false;
+                return;
             }
+            if (match[4]) {
+                if (tzRegex.exec(match[4])) {
+                    tzFormat = 'Z';
+                } else {
+                    config._isValid = false;
+                    return;
+                }
+            }
+            config._f = dateFormat + (timeFormat || '') + (tzFormat || '');
             configFromStringAndFormat(config);
         } else {
             config._isValid = false;
@@ -5276,8 +2898,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         //http://stackoverflow.com/questions/181348/instantiating-a-javascript-object-by-calling-prototype-constructor-apply
         var date = new Date(y, m, d, h, M, s, ms);
 
-        //the date constructor doesn't accept years < 1970
-        if (y < 1970) {
+        //the date constructor remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0 && isFinite(date.getFullYear())) {
             date.setFullYear(y);
         }
         return date;
@@ -5285,11 +2907,20 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     function createUTCDate (y) {
         var date = new Date(Date.UTC.apply(null, arguments));
-        if (y < 1970) {
+
+        //the Date.UTC function remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0 && isFinite(date.getUTCFullYear())) {
             date.setUTCFullYear(y);
         }
         return date;
     }
+
+    // FORMATTING
+
+    addFormatToken('Y', 0, 0, function () {
+        var y = this.year();
+        return y <= 9999 ? '' + y : '+' + y;
+    });
 
     addFormatToken(0, ['YY', 2], 0, function () {
         return this.year() % 100;
@@ -5318,6 +2949,9 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     addParseToken('YY', function (input, array) {
         array[YEAR] = utils_hooks__hooks.parseTwoDigitYear(input);
     });
+    addParseToken('Y', function (input, array) {
+        array[YEAR] = parseInt(input, 10);
+    });
 
     // HELPERS
 
@@ -5343,124 +2977,66 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return isLeapYear(this.year());
     }
 
-    addFormatToken('w', ['ww', 2], 'wo', 'week');
-    addFormatToken('W', ['WW', 2], 'Wo', 'isoWeek');
+    // start-of-first-week - start-of-year
+    function firstWeekOffset(year, dow, doy) {
+        var // first-week day -- which january is always in the first week (4 for iso, 1 for other)
+            fwd = 7 + dow - doy,
+            // first-week day local weekday -- which local weekday is fwd
+            fwdlw = (7 + createUTCDate(year, 0, fwd).getUTCDay() - dow) % 7;
 
-    // ALIASES
-
-    addUnitAlias('week', 'w');
-    addUnitAlias('isoWeek', 'W');
-
-    // PARSING
-
-    addRegexToken('w',  match1to2);
-    addRegexToken('ww', match1to2, match2);
-    addRegexToken('W',  match1to2);
-    addRegexToken('WW', match1to2, match2);
-
-    addWeekParseToken(['w', 'ww', 'W', 'WW'], function (input, week, config, token) {
-        week[token.substr(0, 1)] = toInt(input);
-    });
-
-    // HELPERS
-
-    // firstDayOfWeek       0 = sun, 6 = sat
-    //                      the day of the week that starts the week
-    //                      (usually sunday or monday)
-    // firstDayOfWeekOfYear 0 = sun, 6 = sat
-    //                      the first week is the week that contains the first
-    //                      of this day of the week
-    //                      (eg. ISO weeks use thursday (4))
-    function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
-        var end = firstDayOfWeekOfYear - firstDayOfWeek,
-            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day(),
-            adjustedMoment;
-
-
-        if (daysToDayOfWeek > end) {
-            daysToDayOfWeek -= 7;
-        }
-
-        if (daysToDayOfWeek < end - 7) {
-            daysToDayOfWeek += 7;
-        }
-
-        adjustedMoment = local__createLocal(mom).add(daysToDayOfWeek, 'd');
-        return {
-            week: Math.ceil(adjustedMoment.dayOfYear() / 7),
-            year: adjustedMoment.year()
-        };
+        return -fwdlw + fwd - 1;
     }
-
-    // LOCALES
-
-    function localeWeek (mom) {
-        return weekOfYear(mom, this._week.dow, this._week.doy).week;
-    }
-
-    var defaultLocaleWeek = {
-        dow : 0, // Sunday is the first day of the week.
-        doy : 6  // The week that contains Jan 1st is the first week of the year.
-    };
-
-    function localeFirstDayOfWeek () {
-        return this._week.dow;
-    }
-
-    function localeFirstDayOfYear () {
-        return this._week.doy;
-    }
-
-    // MOMENTS
-
-    function getSetWeek (input) {
-        var week = this.localeData().week(this);
-        return input == null ? week : this.add((input - week) * 7, 'd');
-    }
-
-    function getSetISOWeek (input) {
-        var week = weekOfYear(this, 1, 4).week;
-        return input == null ? week : this.add((input - week) * 7, 'd');
-    }
-
-    addFormatToken('DDD', ['DDDD', 3], 'DDDo', 'dayOfYear');
-
-    // ALIASES
-
-    addUnitAlias('dayOfYear', 'DDD');
-
-    // PARSING
-
-    addRegexToken('DDD',  match1to3);
-    addRegexToken('DDDD', match3);
-    addParseToken(['DDD', 'DDDD'], function (input, array, config) {
-        config._dayOfYear = toInt(input);
-    });
-
-    // HELPERS
 
     //http://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday
-    function dayOfYearFromWeeks(year, week, weekday, firstDayOfWeekOfYear, firstDayOfWeek) {
-        var week1Jan = 6 + firstDayOfWeek - firstDayOfWeekOfYear, janX = createUTCDate(year, 0, 1 + week1Jan), d = janX.getUTCDay(), dayOfYear;
-        if (d < firstDayOfWeek) {
-            d += 7;
+    function dayOfYearFromWeeks(year, week, weekday, dow, doy) {
+        var localWeekday = (7 + weekday - dow) % 7,
+            weekOffset = firstWeekOffset(year, dow, doy),
+            dayOfYear = 1 + 7 * (week - 1) + localWeekday + weekOffset,
+            resYear, resDayOfYear;
+
+        if (dayOfYear <= 0) {
+            resYear = year - 1;
+            resDayOfYear = daysInYear(resYear) + dayOfYear;
+        } else if (dayOfYear > daysInYear(year)) {
+            resYear = year + 1;
+            resDayOfYear = dayOfYear - daysInYear(year);
+        } else {
+            resYear = year;
+            resDayOfYear = dayOfYear;
         }
 
-        weekday = weekday != null ? 1 * weekday : firstDayOfWeek;
-
-        dayOfYear = 1 + week1Jan + 7 * (week - 1) - d + weekday;
-
         return {
-            year: dayOfYear > 0 ? year : year - 1,
-            dayOfYear: dayOfYear > 0 ?  dayOfYear : daysInYear(year - 1) + dayOfYear
+            year: resYear,
+            dayOfYear: resDayOfYear
         };
     }
 
-    // MOMENTS
+    function weekOfYear(mom, dow, doy) {
+        var weekOffset = firstWeekOffset(mom.year(), dow, doy),
+            week = Math.floor((mom.dayOfYear() - weekOffset - 1) / 7) + 1,
+            resWeek, resYear;
 
-    function getSetDayOfYear (input) {
-        var dayOfYear = Math.round((this.clone().startOf('day') - this.clone().startOf('year')) / 864e5) + 1;
-        return input == null ? dayOfYear : this.add((input - dayOfYear), 'd');
+        if (week < 1) {
+            resYear = mom.year() - 1;
+            resWeek = week + weeksInYear(resYear, dow, doy);
+        } else if (week > weeksInYear(mom.year(), dow, doy)) {
+            resWeek = week - weeksInYear(mom.year(), dow, doy);
+            resYear = mom.year() + 1;
+        } else {
+            resYear = mom.year();
+            resWeek = week;
+        }
+
+        return {
+            week: resWeek,
+            year: resYear
+        };
+    }
+
+    function weeksInYear(year, dow, doy) {
+        var weekOffset = firstWeekOffset(year, dow, doy),
+            weekOffsetNext = firstWeekOffset(year + 1, dow, doy);
+        return (daysInYear(year) - weekOffset + weekOffsetNext) / 7;
     }
 
     // Pick the first defined of two or three arguments.
@@ -5475,11 +3051,12 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function currentDateArray(config) {
-        var now = new Date();
+        // hooks is actually the exported moment object
+        var nowValue = new Date(utils_hooks__hooks.now());
         if (config._useUTC) {
-            return [now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()];
+            return [nowValue.getUTCFullYear(), nowValue.getUTCMonth(), nowValue.getUTCDate()];
         }
-        return [now.getFullYear(), now.getMonth(), now.getDate()];
+        return [nowValue.getFullYear(), nowValue.getMonth(), nowValue.getDate()];
     }
 
     // convert an array to a date.
@@ -5549,7 +3126,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function dayOfYearFromWeekInfo(config) {
-        var w, weekYear, week, weekday, dow, doy, temp;
+        var w, weekYear, week, weekday, dow, doy, temp, weekdayOverflow;
 
         w = config._w;
         if (w.GG != null || w.W != null || w.E != null) {
@@ -5563,6 +3140,9 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
             weekYear = defaults(w.GG, config._a[YEAR], weekOfYear(local__createLocal(), 1, 4).year);
             week = defaults(w.W, 1);
             weekday = defaults(w.E, 1);
+            if (weekday < 1 || weekday > 7) {
+                weekdayOverflow = true;
+            }
         } else {
             dow = config._locale._week.dow;
             doy = config._locale._week.doy;
@@ -5573,23 +3153,32 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
             if (w.d != null) {
                 // weekday -- low day numbers are considered next week
                 weekday = w.d;
-                if (weekday < dow) {
-                    ++week;
+                if (weekday < 0 || weekday > 6) {
+                    weekdayOverflow = true;
                 }
             } else if (w.e != null) {
                 // local weekday -- counting starts from begining of week
                 weekday = w.e + dow;
+                if (w.e < 0 || w.e > 6) {
+                    weekdayOverflow = true;
+                }
             } else {
                 // default to begining of week
                 weekday = dow;
             }
         }
-        temp = dayOfYearFromWeeks(weekYear, week, weekday, doy, dow);
-
-        config._a[YEAR] = temp.year;
-        config._dayOfYear = temp.dayOfYear;
+        if (week < 1 || week > weeksInYear(weekYear, dow, doy)) {
+            getParsingFlags(config)._overflowWeeks = true;
+        } else if (weekdayOverflow != null) {
+            getParsingFlags(config)._overflowWeekday = true;
+        } else {
+            temp = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy);
+            config._a[YEAR] = temp.year;
+            config._dayOfYear = temp.dayOfYear;
+        }
     }
 
+    // constant that refers to the ISO standard
     utils_hooks__hooks.ISO_8601 = function () {};
 
     // date from string and format string
@@ -5614,6 +3203,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         for (i = 0; i < tokens.length; i++) {
             token = tokens[i];
             parsedInput = (string.match(getParseRegexForToken(token, config)) || [])[0];
+            // console.log('token', token, 'parsedInput', parsedInput,
+            //         'regex', getParseRegexForToken(token, config));
             if (parsedInput) {
                 skipped = string.substr(0, string.indexOf(parsedInput));
                 if (skipped.length > 0) {
@@ -5682,6 +3273,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         }
     }
 
+    // date from string and array of format strings
     function configFromStringAndArray(config) {
         var tempConfig,
             bestMoment,
@@ -5732,7 +3324,9 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         }
 
         var i = normalizeObjectUnits(config._i);
-        config._a = [i.year, i.month, i.day || i.date, i.hour, i.minute, i.second, i.millisecond];
+        config._a = map([i.year, i.month, i.day || i.date, i.hour, i.minute, i.second, i.millisecond], function (obj) {
+            return obj && parseInt(obj, 10);
+        });
 
         configFromArray(config);
     }
@@ -5774,13 +3368,17 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
             configFromInput(config);
         }
 
+        if (!valid__isValid(config)) {
+            config._d = null;
+        }
+
         return config;
     }
 
     function configFromInput(config) {
         var input = config._i;
         if (input === undefined) {
-            config._d = new Date();
+            config._d = new Date(utils_hooks__hooks.now());
         } else if (isDate(input)) {
             config._d = new Date(+input);
         } else if (typeof input === 'string') {
@@ -5827,7 +3425,11 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
          'moment().min is deprecated, use moment.min instead. https://github.com/moment/moment/issues/1548',
          function () {
              var other = local__createLocal.apply(null, arguments);
-             return other < this ? this : other;
+             if (this.isValid() && other.isValid()) {
+                 return other < this ? this : other;
+             } else {
+                 return valid__createInvalid();
+             }
          }
      );
 
@@ -5835,7 +3437,11 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         'moment().max is deprecated, use moment.max instead. https://github.com/moment/moment/issues/1548',
         function () {
             var other = local__createLocal.apply(null, arguments);
-            return other > this ? this : other;
+            if (this.isValid() && other.isValid()) {
+                return other > this ? this : other;
+            } else {
+                return valid__createInvalid();
+            }
         }
     );
 
@@ -5873,6 +3479,10 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
         return pickBy('isAfter', args);
     }
+
+    var now = function () {
+        return Date.now ? Date.now() : +(new Date());
+    };
 
     function Duration (duration) {
         var normalizedInput = normalizeObjectUnits(duration),
@@ -5913,6 +3523,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return obj instanceof Duration;
     }
 
+    // FORMATTING
+
     function offset (token, separator) {
         addFormatToken(token, 0, 0, function () {
             var offset = this.utcOffset();
@@ -5930,11 +3542,11 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     // PARSING
 
-    addRegexToken('Z',  matchOffset);
-    addRegexToken('ZZ', matchOffset);
+    addRegexToken('Z',  matchShortOffset);
+    addRegexToken('ZZ', matchShortOffset);
     addParseToken(['Z', 'ZZ'], function (input, array, config) {
         config._useUTC = true;
-        config._tzm = offsetFromString(input);
+        config._tzm = offsetFromString(matchShortOffset, input);
     });
 
     // HELPERS
@@ -5944,8 +3556,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     // '-1530'  > ['-15', '30']
     var chunkOffset = /([\+\-]|\d\d)/gi;
 
-    function offsetFromString(string) {
-        var matches = ((string || '').match(matchOffset) || []);
+    function offsetFromString(matcher, string) {
+        var matches = ((string || '').match(matcher) || []);
         var chunk   = matches[matches.length - 1] || [];
         var parts   = (chunk + '').match(chunkOffset) || ['-', 0, 0];
         var minutes = +(parts[1] * 60) + toInt(parts[2]);
@@ -5995,11 +3607,13 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function getSetOffset (input, keepLocalTime) {
         var offset = this._offset || 0,
             localAdjust;
+        if (!this.isValid()) {
+            return input != null ? this : NaN;
+        }
         if (input != null) {
             if (typeof input === 'string') {
-                input = offsetFromString(input);
-            }
-            if (Math.abs(input) < 16) {
+                input = offsetFromString(matchShortOffset, input);
+            } else if (Math.abs(input) < 16) {
                 input = input * 60;
             }
             if (!this._isUTC && keepLocalTime) {
@@ -6059,12 +3673,15 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         if (this._tzm) {
             this.utcOffset(this._tzm);
         } else if (typeof this._i === 'string') {
-            this.utcOffset(offsetFromString(this._i));
+            this.utcOffset(offsetFromString(matchOffset, this._i));
         }
         return this;
     }
 
     function hasAlignedHourOffset (input) {
+        if (!this.isValid()) {
+            return false;
+        }
         input = input ? local__createLocal(input).utcOffset() : 0;
 
         return (this.utcOffset() - input) % 60 === 0;
@@ -6078,7 +3695,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function isDaylightSavingTimeShifted () {
-        if (typeof this._isDSTShifted !== 'undefined') {
+        if (!isUndefined(this._isDSTShifted)) {
             return this._isDSTShifted;
         }
 
@@ -6099,22 +3716,23 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function isLocal () {
-        return !this._isUTC;
+        return this.isValid() ? !this._isUTC : false;
     }
 
     function isUtcOffset () {
-        return this._isUTC;
+        return this.isValid() ? this._isUTC : false;
     }
 
     function isUtc () {
-        return this._isUTC && this._offset === 0;
+        return this.isValid() ? this._isUTC && this._offset === 0 : false;
     }
 
-    var aspNetRegex = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/;
+    // ASP.NET json date format regex
+    var aspNetRegex = /(\-)?(?:(\d*)[. ])?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/;
 
     // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
     // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
-    var create__isoRegex = /^(-)?P(?:(?:([0-9,.]*)Y)?(?:([0-9,.]*)M)?(?:([0-9,.]*)D)?(?:T(?:([0-9,.]*)H)?(?:([0-9,.]*)M)?(?:([0-9,.]*)S)?)?|([0-9,.]*)W)$/;
+    var isoRegex = /^(-)?P(?:(?:([0-9,.]*)Y)?(?:([0-9,.]*)M)?(?:([0-9,.]*)D)?(?:T(?:([0-9,.]*)H)?(?:([0-9,.]*)M)?(?:([0-9,.]*)S)?)?|([0-9,.]*)W)$/;
 
     function create__createDuration (input, key) {
         var duration = input,
@@ -6147,7 +3765,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
                 s  : toInt(match[SECOND])      * sign,
                 ms : toInt(match[MILLISECOND]) * sign
             };
-        } else if (!!(match = create__isoRegex.exec(input))) {
+        } else if (!!(match = isoRegex.exec(input))) {
             sign = (match[1] === '-') ? -1 : 1;
             duration = {
                 y : parseIso(match[2], sign),
@@ -6204,6 +3822,10 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     function momentsDifference(base, other) {
         var res;
+        if (!(base.isValid() && other.isValid())) {
+            return {milliseconds: 0, months: 0};
+        }
+
         other = cloneWithOffset(other, base);
         if (base.isBefore(other)) {
             res = positiveMomentsDifference(base, other);
@@ -6216,6 +3838,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return res;
     }
 
+    // TODO: remove 'name' arg after deprecation is removed
     function createAdder(direction, name) {
         return function (val, period) {
             var dur, tmp;
@@ -6236,6 +3859,12 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         var milliseconds = duration._milliseconds,
             days = duration._days,
             months = duration._months;
+
+        if (!mom.isValid()) {
+            // No op
+            return;
+        }
+
         updateOffset = updateOffset == null ? true : updateOffset;
 
         if (milliseconds) {
@@ -6267,7 +3896,10 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
                 diff < 1 ? 'sameDay' :
                 diff < 2 ? 'nextDay' :
                 diff < 7 ? 'nextWeek' : 'sameElse';
-        return this.format(formats && formats[format] || this.localeData().calendar(format, this, local__createLocal(now)));
+
+        var output = formats && (isFunction(formats[format]) ? formats[format]() : formats[format]);
+
+        return this.format(output || this.localeData().calendar(format, this, local__createLocal(now)));
     }
 
     function clone () {
@@ -6275,26 +3907,28 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function isAfter (input, units) {
-        var inputMs;
-        units = normalizeUnits(typeof units !== 'undefined' ? units : 'millisecond');
+        var localInput = isMoment(input) ? input : local__createLocal(input);
+        if (!(this.isValid() && localInput.isValid())) {
+            return false;
+        }
+        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
         if (units === 'millisecond') {
-            input = isMoment(input) ? input : local__createLocal(input);
-            return +this > +input;
+            return +this > +localInput;
         } else {
-            inputMs = isMoment(input) ? +input : +local__createLocal(input);
-            return inputMs < +this.clone().startOf(units);
+            return +localInput < +this.clone().startOf(units);
         }
     }
 
     function isBefore (input, units) {
-        var inputMs;
-        units = normalizeUnits(typeof units !== 'undefined' ? units : 'millisecond');
+        var localInput = isMoment(input) ? input : local__createLocal(input);
+        if (!(this.isValid() && localInput.isValid())) {
+            return false;
+        }
+        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
         if (units === 'millisecond') {
-            input = isMoment(input) ? input : local__createLocal(input);
-            return +this < +input;
+            return +this < +localInput;
         } else {
-            inputMs = isMoment(input) ? +input : +local__createLocal(input);
-            return +this.clone().endOf(units) < inputMs;
+            return +this.clone().endOf(units) < +localInput;
         }
     }
 
@@ -6303,21 +3937,44 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function isSame (input, units) {
-        var inputMs;
+        var localInput = isMoment(input) ? input : local__createLocal(input),
+            inputMs;
+        if (!(this.isValid() && localInput.isValid())) {
+            return false;
+        }
         units = normalizeUnits(units || 'millisecond');
         if (units === 'millisecond') {
-            input = isMoment(input) ? input : local__createLocal(input);
-            return +this === +input;
+            return +this === +localInput;
         } else {
-            inputMs = +local__createLocal(input);
+            inputMs = +localInput;
             return +(this.clone().startOf(units)) <= inputMs && inputMs <= +(this.clone().endOf(units));
         }
     }
 
+    function isSameOrAfter (input, units) {
+        return this.isSame(input, units) || this.isAfter(input,units);
+    }
+
+    function isSameOrBefore (input, units) {
+        return this.isSame(input, units) || this.isBefore(input,units);
+    }
+
     function diff (input, units, asFloat) {
-        var that = cloneWithOffset(input, this),
-            zoneDelta = (that.utcOffset() - this.utcOffset()) * 6e4,
+        var that,
+            zoneDelta,
             delta, output;
+
+        if (!this.isValid()) {
+            return NaN;
+        }
+
+        that = cloneWithOffset(input, this);
+
+        if (!that.isValid()) {
+            return NaN;
+        }
+
+        zoneDelta = (that.utcOffset() - this.utcOffset()) * 6e4;
 
         units = normalizeUnits(units);
 
@@ -6369,7 +4026,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function moment_format__toISOString () {
         var m = this.clone().utc();
         if (0 < m.year() && m.year() <= 9999) {
-            if ('function' === typeof Date.prototype.toISOString) {
+            if (isFunction(Date.prototype.toISOString)) {
                 // native implementation is ~50x faster, use it when we can
                 return this.toDate().toISOString();
             } else {
@@ -6386,10 +4043,13 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function from (time, withoutSuffix) {
-        if (!this.isValid()) {
+        if (this.isValid() &&
+                ((isMoment(time) && time.isValid()) ||
+                 local__createLocal(time).isValid())) {
+            return create__createDuration({to: this, from: time}).locale(this.locale()).humanize(!withoutSuffix);
+        } else {
             return this.localeData().invalidDate();
         }
-        return create__createDuration({to: this, from: time}).locale(this.locale()).humanize(!withoutSuffix);
     }
 
     function fromNow (withoutSuffix) {
@@ -6397,16 +4057,22 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function to (time, withoutSuffix) {
-        if (!this.isValid()) {
+        if (this.isValid() &&
+                ((isMoment(time) && time.isValid()) ||
+                 local__createLocal(time).isValid())) {
+            return create__createDuration({from: this, to: time}).locale(this.locale()).humanize(!withoutSuffix);
+        } else {
             return this.localeData().invalidDate();
         }
-        return create__createDuration({from: this, to: time}).locale(this.locale()).humanize(!withoutSuffix);
     }
 
     function toNow (withoutSuffix) {
         return this.to(local__createLocal(), withoutSuffix);
     }
 
+    // If passed a locale key, it will set the locale for this
+    // instance.  Otherwise, it will return the locale configuration
+    // variables for this instance.
     function locale (key) {
         var newLocaleData;
 
@@ -6517,6 +4183,11 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         };
     }
 
+    function toJSON () {
+        // JSON.stringify(new Date(NaN)) === 'null'
+        return this.isValid() ? this.toISOString() : 'null';
+    }
+
     function moment_valid__isValid () {
         return valid__isValid(this);
     }
@@ -6528,6 +4199,18 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function invalidAt () {
         return getParsingFlags(this).overflow;
     }
+
+    function creationData() {
+        return {
+            input: this._i,
+            format: this._f,
+            locale: this._locale,
+            isUTC: this._isUTC,
+            strict: this._strict
+        };
+    }
+
+    // FORMATTING
 
     addFormatToken(0, ['gg', 2], 0, function () {
         return this.weekYear() % 100;
@@ -6570,22 +4253,20 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         week[token] = utils_hooks__hooks.parseTwoDigitYear(input);
     });
 
-    // HELPERS
-
-    function weeksInYear(year, dow, doy) {
-        return weekOfYear(local__createLocal([year, 11, 31 + dow - doy]), dow, doy).week;
-    }
-
     // MOMENTS
 
     function getSetWeekYear (input) {
-        var year = weekOfYear(this, this.localeData()._week.dow, this.localeData()._week.doy).year;
-        return input == null ? year : this.add((input - year), 'y');
+        return getSetWeekYearHelper.call(this,
+                input,
+                this.week(),
+                this.weekday(),
+                this.localeData()._week.dow,
+                this.localeData()._week.doy);
     }
 
     function getSetISOWeekYear (input) {
-        var year = weekOfYear(this, 1, 4).year;
-        return input == null ? year : this.add((input - year), 'y');
+        return getSetWeekYearHelper.call(this,
+                input, this.isoWeek(), this.isoWeekday(), 1, 4);
     }
 
     function getISOWeeksInYear () {
@@ -6597,7 +4278,33 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return weeksInYear(this.year(), weekInfo.dow, weekInfo.doy);
     }
 
-    addFormatToken('Q', 0, 0, 'quarter');
+    function getSetWeekYearHelper(input, week, weekday, dow, doy) {
+        var weeksTarget;
+        if (input == null) {
+            return weekOfYear(this, dow, doy).year;
+        } else {
+            weeksTarget = weeksInYear(input, dow, doy);
+            if (week > weeksTarget) {
+                week = weeksTarget;
+            }
+            return setWeekAll.call(this, input, week, weekday, dow, doy);
+        }
+    }
+
+    function setWeekAll(weekYear, week, weekday, dow, doy) {
+        var dayOfYearData = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy),
+            date = createUTCDate(dayOfYearData.year, 0, dayOfYearData.dayOfYear);
+
+        // console.log("got", weekYear, week, weekday, "set", date.toISOString());
+        this.year(date.getUTCFullYear());
+        this.month(date.getUTCMonth());
+        this.date(date.getUTCDate());
+        return this;
+    }
+
+    // FORMATTING
+
+    addFormatToken('Q', 0, 'Qo', 'quarter');
 
     // ALIASES
 
@@ -6615,6 +4322,62 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     function getSetQuarter (input) {
         return input == null ? Math.ceil((this.month() + 1) / 3) : this.month((input - 1) * 3 + this.month() % 3);
     }
+
+    // FORMATTING
+
+    addFormatToken('w', ['ww', 2], 'wo', 'week');
+    addFormatToken('W', ['WW', 2], 'Wo', 'isoWeek');
+
+    // ALIASES
+
+    addUnitAlias('week', 'w');
+    addUnitAlias('isoWeek', 'W');
+
+    // PARSING
+
+    addRegexToken('w',  match1to2);
+    addRegexToken('ww', match1to2, match2);
+    addRegexToken('W',  match1to2);
+    addRegexToken('WW', match1to2, match2);
+
+    addWeekParseToken(['w', 'ww', 'W', 'WW'], function (input, week, config, token) {
+        week[token.substr(0, 1)] = toInt(input);
+    });
+
+    // HELPERS
+
+    // LOCALES
+
+    function localeWeek (mom) {
+        return weekOfYear(mom, this._week.dow, this._week.doy).week;
+    }
+
+    var defaultLocaleWeek = {
+        dow : 0, // Sunday is the first day of the week.
+        doy : 6  // The week that contains Jan 1st is the first week of the year.
+    };
+
+    function localeFirstDayOfWeek () {
+        return this._week.dow;
+    }
+
+    function localeFirstDayOfYear () {
+        return this._week.doy;
+    }
+
+    // MOMENTS
+
+    function getSetWeek (input) {
+        var week = this.localeData().week(this);
+        return input == null ? week : this.add((input - week) * 7, 'd');
+    }
+
+    function getSetISOWeek (input) {
+        var week = weekOfYear(this, 1, 4).week;
+        return input == null ? week : this.add((input - week) * 7, 'd');
+    }
+
+    // FORMATTING
 
     addFormatToken('D', ['DD', 2], 'Do', 'date');
 
@@ -6638,6 +4401,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     // MOMENTS
 
     var getSetDayOfMonth = makeGetSet('Date', true);
+
+    // FORMATTING
 
     addFormatToken('d', 0, 'do', 'day');
 
@@ -6671,8 +4436,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     addRegexToken('ddd',  matchWord);
     addRegexToken('dddd', matchWord);
 
-    addWeekParseToken(['dd', 'ddd', 'dddd'], function (input, week, config) {
-        var weekday = config._locale.weekdaysParse(input);
+    addWeekParseToken(['dd', 'ddd', 'dddd'], function (input, week, config, token) {
+        var weekday = config._locale.weekdaysParse(input, token, config._strict);
         // if we didn't get a weekday name, mark the date as invalid
         if (weekday != null) {
             week.d = weekday;
@@ -6707,8 +4472,9 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     // LOCALES
 
     var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_');
-    function localeWeekdays (m) {
-        return this._weekdays[m.day()];
+    function localeWeekdays (m, format) {
+        return isArray(this._weekdays) ? this._weekdays[m.day()] :
+            this._weekdays[this._weekdays.isFormat.test(format) ? 'format' : 'standalone'][m.day()];
     }
 
     var defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_');
@@ -6721,20 +4487,37 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         return this._weekdaysMin[m.day()];
     }
 
-    function localeWeekdaysParse (weekdayName) {
+    function localeWeekdaysParse (weekdayName, format, strict) {
         var i, mom, regex;
 
-        this._weekdaysParse = this._weekdaysParse || [];
+        if (!this._weekdaysParse) {
+            this._weekdaysParse = [];
+            this._minWeekdaysParse = [];
+            this._shortWeekdaysParse = [];
+            this._fullWeekdaysParse = [];
+        }
 
         for (i = 0; i < 7; i++) {
             // make the regex if we don't have it already
+
+            mom = local__createLocal([2000, 1]).day(i);
+            if (strict && !this._fullWeekdaysParse[i]) {
+                this._fullWeekdaysParse[i] = new RegExp('^' + this.weekdays(mom, '').replace('.', '\.?') + '$', 'i');
+                this._shortWeekdaysParse[i] = new RegExp('^' + this.weekdaysShort(mom, '').replace('.', '\.?') + '$', 'i');
+                this._minWeekdaysParse[i] = new RegExp('^' + this.weekdaysMin(mom, '').replace('.', '\.?') + '$', 'i');
+            }
             if (!this._weekdaysParse[i]) {
-                mom = local__createLocal([2000, 1]).day(i);
                 regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
                 this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
             }
             // test the regex
-            if (this._weekdaysParse[i].test(weekdayName)) {
+            if (strict && format === 'dddd' && this._fullWeekdaysParse[i].test(weekdayName)) {
+                return i;
+            } else if (strict && format === 'ddd' && this._shortWeekdaysParse[i].test(weekdayName)) {
+                return i;
+            } else if (strict && format === 'dd' && this._minWeekdaysParse[i].test(weekdayName)) {
+                return i;
+            } else if (!strict && this._weekdaysParse[i].test(weekdayName)) {
                 return i;
             }
         }
@@ -6743,6 +4526,9 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     // MOMENTS
 
     function getSetDayOfWeek (input) {
+        if (!this.isValid()) {
+            return input != null ? this : NaN;
+        }
         var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
         if (input != null) {
             input = parseWeekday(input, this.localeData());
@@ -6753,20 +4539,73 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     }
 
     function getSetLocaleDayOfWeek (input) {
+        if (!this.isValid()) {
+            return input != null ? this : NaN;
+        }
         var weekday = (this.day() + 7 - this.localeData()._week.dow) % 7;
         return input == null ? weekday : this.add(input - weekday, 'd');
     }
 
     function getSetISODayOfWeek (input) {
+        if (!this.isValid()) {
+            return input != null ? this : NaN;
+        }
         // behaves the same as moment#day except
         // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
         // as a setter, sunday should belong to the previous week.
         return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
     }
 
-    addFormatToken('H', ['HH', 2], 0, 'hour');
-    addFormatToken('h', ['hh', 2], 0, function () {
+    // FORMATTING
+
+    addFormatToken('DDD', ['DDDD', 3], 'DDDo', 'dayOfYear');
+
+    // ALIASES
+
+    addUnitAlias('dayOfYear', 'DDD');
+
+    // PARSING
+
+    addRegexToken('DDD',  match1to3);
+    addRegexToken('DDDD', match3);
+    addParseToken(['DDD', 'DDDD'], function (input, array, config) {
+        config._dayOfYear = toInt(input);
+    });
+
+    // HELPERS
+
+    // MOMENTS
+
+    function getSetDayOfYear (input) {
+        var dayOfYear = Math.round((this.clone().startOf('day') - this.clone().startOf('year')) / 864e5) + 1;
+        return input == null ? dayOfYear : this.add((input - dayOfYear), 'd');
+    }
+
+    // FORMATTING
+
+    function hFormat() {
         return this.hours() % 12 || 12;
+    }
+
+    addFormatToken('H', ['HH', 2], 0, 'hour');
+    addFormatToken('h', ['hh', 2], 0, hFormat);
+
+    addFormatToken('hmm', 0, 0, function () {
+        return '' + hFormat.apply(this) + zeroFill(this.minutes(), 2);
+    });
+
+    addFormatToken('hmmss', 0, 0, function () {
+        return '' + hFormat.apply(this) + zeroFill(this.minutes(), 2) +
+            zeroFill(this.seconds(), 2);
+    });
+
+    addFormatToken('Hmm', 0, 0, function () {
+        return '' + this.hours() + zeroFill(this.minutes(), 2);
+    });
+
+    addFormatToken('Hmmss', 0, 0, function () {
+        return '' + this.hours() + zeroFill(this.minutes(), 2) +
+            zeroFill(this.seconds(), 2);
     });
 
     function meridiem (token, lowercase) {
@@ -6795,6 +4634,11 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     addRegexToken('HH', match1to2, match2);
     addRegexToken('hh', match1to2, match2);
 
+    addRegexToken('hmm', match3to4);
+    addRegexToken('hmmss', match5to6);
+    addRegexToken('Hmm', match3to4);
+    addRegexToken('Hmmss', match5to6);
+
     addParseToken(['H', 'HH'], HOUR);
     addParseToken(['a', 'A'], function (input, array, config) {
         config._isPm = config._locale.isPM(input);
@@ -6803,6 +4647,32 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     addParseToken(['h', 'hh'], function (input, array, config) {
         array[HOUR] = toInt(input);
         getParsingFlags(config).bigHour = true;
+    });
+    addParseToken('hmm', function (input, array, config) {
+        var pos = input.length - 2;
+        array[HOUR] = toInt(input.substr(0, pos));
+        array[MINUTE] = toInt(input.substr(pos));
+        getParsingFlags(config).bigHour = true;
+    });
+    addParseToken('hmmss', function (input, array, config) {
+        var pos1 = input.length - 4;
+        var pos2 = input.length - 2;
+        array[HOUR] = toInt(input.substr(0, pos1));
+        array[MINUTE] = toInt(input.substr(pos1, 2));
+        array[SECOND] = toInt(input.substr(pos2));
+        getParsingFlags(config).bigHour = true;
+    });
+    addParseToken('Hmm', function (input, array, config) {
+        var pos = input.length - 2;
+        array[HOUR] = toInt(input.substr(0, pos));
+        array[MINUTE] = toInt(input.substr(pos));
+    });
+    addParseToken('Hmmss', function (input, array, config) {
+        var pos1 = input.length - 4;
+        var pos2 = input.length - 2;
+        array[HOUR] = toInt(input.substr(0, pos1));
+        array[MINUTE] = toInt(input.substr(pos1, 2));
+        array[SECOND] = toInt(input.substr(pos2));
     });
 
     // LOCALES
@@ -6831,6 +4701,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     // this rule.
     var getSetHour = makeGetSet('Hours', true);
 
+    // FORMATTING
+
     addFormatToken('m', ['mm', 2], 0, 'minute');
 
     // ALIASES
@@ -6847,6 +4719,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     var getSetMinute = makeGetSet('Minutes', false);
 
+    // FORMATTING
+
     addFormatToken('s', ['ss', 2], 0, 'second');
 
     // ALIASES
@@ -6862,6 +4736,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     // MOMENTS
 
     var getSetSecond = makeGetSet('Seconds', false);
+
+    // FORMATTING
 
     addFormatToken('S', 0, 0, function () {
         return ~~(this.millisecond() / 100);
@@ -6918,6 +4794,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     var getSetMillisecond = makeGetSet('Milliseconds', false);
 
+    // FORMATTING
+
     addFormatToken('z',  0, 0, 'zoneAbbr');
     addFormatToken('zz', 0, 0, 'zoneName');
 
@@ -6933,40 +4811,43 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     var momentPrototype__proto = Moment.prototype;
 
-    momentPrototype__proto.add          = add_subtract__add;
-    momentPrototype__proto.calendar     = moment_calendar__calendar;
-    momentPrototype__proto.clone        = clone;
-    momentPrototype__proto.diff         = diff;
-    momentPrototype__proto.endOf        = endOf;
-    momentPrototype__proto.format       = format;
-    momentPrototype__proto.from         = from;
-    momentPrototype__proto.fromNow      = fromNow;
-    momentPrototype__proto.to           = to;
-    momentPrototype__proto.toNow        = toNow;
-    momentPrototype__proto.get          = getSet;
-    momentPrototype__proto.invalidAt    = invalidAt;
-    momentPrototype__proto.isAfter      = isAfter;
-    momentPrototype__proto.isBefore     = isBefore;
-    momentPrototype__proto.isBetween    = isBetween;
-    momentPrototype__proto.isSame       = isSame;
-    momentPrototype__proto.isValid      = moment_valid__isValid;
-    momentPrototype__proto.lang         = lang;
-    momentPrototype__proto.locale       = locale;
-    momentPrototype__proto.localeData   = localeData;
-    momentPrototype__proto.max          = prototypeMax;
-    momentPrototype__proto.min          = prototypeMin;
-    momentPrototype__proto.parsingFlags = parsingFlags;
-    momentPrototype__proto.set          = getSet;
-    momentPrototype__proto.startOf      = startOf;
-    momentPrototype__proto.subtract     = add_subtract__subtract;
-    momentPrototype__proto.toArray      = toArray;
-    momentPrototype__proto.toObject     = toObject;
-    momentPrototype__proto.toDate       = toDate;
-    momentPrototype__proto.toISOString  = moment_format__toISOString;
-    momentPrototype__proto.toJSON       = moment_format__toISOString;
-    momentPrototype__proto.toString     = toString;
-    momentPrototype__proto.unix         = unix;
-    momentPrototype__proto.valueOf      = to_type__valueOf;
+    momentPrototype__proto.add               = add_subtract__add;
+    momentPrototype__proto.calendar          = moment_calendar__calendar;
+    momentPrototype__proto.clone             = clone;
+    momentPrototype__proto.diff              = diff;
+    momentPrototype__proto.endOf             = endOf;
+    momentPrototype__proto.format            = format;
+    momentPrototype__proto.from              = from;
+    momentPrototype__proto.fromNow           = fromNow;
+    momentPrototype__proto.to                = to;
+    momentPrototype__proto.toNow             = toNow;
+    momentPrototype__proto.get               = getSet;
+    momentPrototype__proto.invalidAt         = invalidAt;
+    momentPrototype__proto.isAfter           = isAfter;
+    momentPrototype__proto.isBefore          = isBefore;
+    momentPrototype__proto.isBetween         = isBetween;
+    momentPrototype__proto.isSame            = isSame;
+    momentPrototype__proto.isSameOrAfter     = isSameOrAfter;
+    momentPrototype__proto.isSameOrBefore    = isSameOrBefore;
+    momentPrototype__proto.isValid           = moment_valid__isValid;
+    momentPrototype__proto.lang              = lang;
+    momentPrototype__proto.locale            = locale;
+    momentPrototype__proto.localeData        = localeData;
+    momentPrototype__proto.max               = prototypeMax;
+    momentPrototype__proto.min               = prototypeMin;
+    momentPrototype__proto.parsingFlags      = parsingFlags;
+    momentPrototype__proto.set               = getSet;
+    momentPrototype__proto.startOf           = startOf;
+    momentPrototype__proto.subtract          = add_subtract__subtract;
+    momentPrototype__proto.toArray           = toArray;
+    momentPrototype__proto.toObject          = toObject;
+    momentPrototype__proto.toDate            = toDate;
+    momentPrototype__proto.toISOString       = moment_format__toISOString;
+    momentPrototype__proto.toJSON            = toJSON;
+    momentPrototype__proto.toString          = toString;
+    momentPrototype__proto.unix              = unix;
+    momentPrototype__proto.valueOf           = to_type__valueOf;
+    momentPrototype__proto.creationData      = creationData;
 
     // Year
     momentPrototype__proto.year       = getSetYear;
@@ -7052,7 +4933,7 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     function locale_calendar__calendar (key, mom, now) {
         var output = this._calendar[key];
-        return typeof output === 'function' ? output.call(mom, now) : output;
+        return isFunction(output) ? output.call(mom, now) : output;
     }
 
     var defaultLongDateFormat = {
@@ -7114,21 +4995,21 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     function relative__relativeTime (number, withoutSuffix, string, isFuture) {
         var output = this._relativeTime[string];
-        return (typeof output === 'function') ?
+        return (isFunction(output)) ?
             output(number, withoutSuffix, string, isFuture) :
             output.replace(/%d/i, number);
     }
 
     function pastFuture (diff, output) {
         var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
-        return typeof format === 'function' ? format(output) : format.replace(/%s/i, output);
+        return isFunction(format) ? format(output) : format.replace(/%s/i, output);
     }
 
     function locale_set__set (config) {
         var prop, i;
         for (i in config) {
             prop = config[i];
-            if (typeof prop === 'function') {
+            if (isFunction(prop)) {
                 this[i] = prop;
             } else {
                 this['_' + i] = prop;
@@ -7158,11 +5039,15 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     prototype__proto.set             = locale_set__set;
 
     // Month
-    prototype__proto.months       =        localeMonths;
-    prototype__proto._months      = defaultLocaleMonths;
-    prototype__proto.monthsShort  =        localeMonthsShort;
-    prototype__proto._monthsShort = defaultLocaleMonthsShort;
-    prototype__proto.monthsParse  =        localeMonthsParse;
+    prototype__proto.months            =        localeMonths;
+    prototype__proto._months           = defaultLocaleMonths;
+    prototype__proto.monthsShort       =        localeMonthsShort;
+    prototype__proto._monthsShort      = defaultLocaleMonthsShort;
+    prototype__proto.monthsParse       =        localeMonthsParse;
+    prototype__proto._monthsRegex      = defaultMonthsRegex;
+    prototype__proto.monthsRegex       = monthsRegex;
+    prototype__proto._monthsShortRegex = defaultMonthsShortRegex;
+    prototype__proto.monthsShortRegex  = monthsShortRegex;
 
     // Week
     prototype__proto.week = localeWeek;
@@ -7450,15 +5335,15 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
         var years    = round(duration.as('y'));
 
         var a = seconds < thresholds.s && ['s', seconds]  ||
-                minutes === 1          && ['m']           ||
+                minutes <= 1           && ['m']           ||
                 minutes < thresholds.m && ['mm', minutes] ||
-                hours   === 1          && ['h']           ||
+                hours   <= 1           && ['h']           ||
                 hours   < thresholds.h && ['hh', hours]   ||
-                days    === 1          && ['d']           ||
+                days    <= 1           && ['d']           ||
                 days    < thresholds.d && ['dd', days]    ||
-                months  === 1          && ['M']           ||
+                months  <= 1           && ['M']           ||
                 months  < thresholds.M && ['MM', months]  ||
-                years   === 1          && ['y']           || ['yy', years];
+                years   <= 1           && ['y']           || ['yy', years];
 
         a[2] = withoutSuffix;
         a[3] = +posNegDuration > 0;
@@ -7579,6 +5464,8 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
     // Side effect imports
 
+    // FORMATTING
+
     addFormatToken('X', 0, 0, 'unix');
     addFormatToken('x', 0, 0, 'valueOf');
 
@@ -7596,13 +5483,14 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     // Side effect imports
 
 
-    utils_hooks__hooks.version = '2.10.6';
+    utils_hooks__hooks.version = '2.11.1';
 
     setHookCallback(local__createLocal);
 
     utils_hooks__hooks.fn                    = momentPrototype;
     utils_hooks__hooks.min                   = min;
     utils_hooks__hooks.max                   = max;
+    utils_hooks__hooks.now                   = now;
     utils_hooks__hooks.utc                   = create_utc__createUTC;
     utils_hooks__hooks.unix                  = moment__createUnix;
     utils_hooks__hooks.months                = lists__listMonths;
@@ -7621,13 +5509,14 @@ module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
     utils_hooks__hooks.weekdaysShort         = lists__listWeekdaysShort;
     utils_hooks__hooks.normalizeUnits        = normalizeUnits;
     utils_hooks__hooks.relativeTimeThreshold = duration_humanize__getSetRelativeTimeThreshold;
+    utils_hooks__hooks.prototype             = momentPrototype;
 
     var _moment = utils_hooks__hooks;
 
     return _moment;
 
 }));
-},{}],7:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7720,7 +5609,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],8:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7753,7 +5642,7 @@ var defaultParams = {
 
 exports['default'] = defaultParams;
 module.exports = exports['default'];
-},{}],9:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7889,7 +5778,7 @@ exports['default'] = {
   handleCancel: handleCancel
 };
 module.exports = exports['default'];
-},{"./handle-dom":10,"./handle-swal-dom":12,"./utils":15}],10:[function(require,module,exports){
+},{"./handle-dom":8,"./handle-swal-dom":10,"./utils":13}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -8081,7 +5970,7 @@ exports.fadeIn = fadeIn;
 exports.fadeOut = fadeOut;
 exports.fireClick = fireClick;
 exports.stopEventPropagation = stopEventPropagation;
-},{}],11:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -8161,7 +6050,7 @@ var handleKeyDown = function handleKeyDown(event, params, modal) {
 
 exports['default'] = handleKeyDown;
 module.exports = exports['default'];
-},{"./handle-dom":10,"./handle-swal-dom":12}],12:[function(require,module,exports){
+},{"./handle-dom":8,"./handle-swal-dom":10}],10:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -8329,7 +6218,7 @@ exports.openModal = openModal;
 exports.resetInput = resetInput;
 exports.resetInputError = resetInputError;
 exports.fixVerticalPosition = fixVerticalPosition;
-},{"./default-params":8,"./handle-dom":10,"./injected-html":13,"./utils":15}],13:[function(require,module,exports){
+},{"./default-params":6,"./handle-dom":8,"./injected-html":11,"./utils":13}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8372,7 +6261,7 @@ var injectedHTML =
 
 exports["default"] = injectedHTML;
 module.exports = exports["default"];
-},{}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -8598,7 +6487,7 @@ var setParameters = function setParameters(params) {
 
 exports['default'] = setParameters;
 module.exports = exports['default'];
-},{"./handle-dom":10,"./handle-swal-dom":12,"./utils":15}],15:[function(require,module,exports){
+},{"./handle-dom":8,"./handle-swal-dom":10,"./utils":13}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -8672,7 +6561,7 @@ exports.hexToRgb = hexToRgb;
 exports.isIE8 = isIE8;
 exports.logStr = logStr;
 exports.colorLuminance = colorLuminance;
-},{}],16:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -8976,7 +6865,7 @@ if (typeof window !== 'undefined') {
   _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert is a frontend module!');
 }
 module.exports = exports['default'];
-},{"./modules/default-params":8,"./modules/handle-click":9,"./modules/handle-dom":10,"./modules/handle-key":11,"./modules/handle-swal-dom":12,"./modules/set-params":14,"./modules/utils":15}],17:[function(require,module,exports){
+},{"./modules/default-params":6,"./modules/handle-click":7,"./modules/handle-dom":8,"./modules/handle-key":9,"./modules/handle-swal-dom":10,"./modules/set-params":12,"./modules/utils":13}],15:[function(require,module,exports){
 var Vue // late bind
 var map = Object.create(null)
 var shimmed = false
@@ -9217,7 +7106,7 @@ function format (id) {
   return id.match(/[^\/]+\.vue$/)[0]
 }
 
-},{}],18:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /**
  * Default client.
  */
@@ -9232,7 +7121,7 @@ module.exports = function (_) {
 
 };
 
-},{"./xhr":20}],19:[function(require,module,exports){
+},{"./xhr":18}],17:[function(require,module,exports){
 /**
  * JSONP client.
  */
@@ -9285,7 +7174,7 @@ module.exports = function (_) {
 
 };
 
-},{"../promise":34}],20:[function(require,module,exports){
+},{"../promise":32}],18:[function(require,module,exports){
 /**
  * XMLHttp client.
  */
@@ -9381,7 +7270,7 @@ module.exports = function (_) {
 
 };
 
-},{"../promise":34}],21:[function(require,module,exports){
+},{"../promise":32}],19:[function(require,module,exports){
 /**
  * Service for sending network requests.
  */
@@ -9491,7 +7380,7 @@ module.exports = function (_) {
     return _.http = Http;
 };
 
-},{"./client/default":18,"./interceptor":26,"./interceptor/before":23,"./interceptor/cors":24,"./interceptor/header":25,"./interceptor/jsonp":27,"./interceptor/method":28,"./interceptor/mime":29,"./interceptor/timeout":30,"./promise":34}],22:[function(require,module,exports){
+},{"./client/default":16,"./interceptor":24,"./interceptor/before":21,"./interceptor/cors":22,"./interceptor/header":23,"./interceptor/jsonp":25,"./interceptor/method":26,"./interceptor/mime":27,"./interceptor/timeout":28,"./promise":32}],20:[function(require,module,exports){
 /**
  * Install plugin.
  */
@@ -9534,7 +7423,7 @@ if (window.Vue) {
 
 module.exports = install;
 
-},{"./http":21,"./lib/util":33,"./promise":34,"./resource":35,"./url":36}],23:[function(require,module,exports){
+},{"./http":19,"./lib/util":31,"./promise":32,"./resource":33,"./url":34}],21:[function(require,module,exports){
 /**
  * Before Interceptor.
  */
@@ -9556,7 +7445,7 @@ module.exports = function (_) {
 
 };
 
-},{}],24:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /**
  * CORS Interceptor.
  */
@@ -9598,7 +7487,7 @@ module.exports = function (_) {
 
 };
 
-},{"../client/jsonp":19}],25:[function(require,module,exports){
+},{"../client/jsonp":17}],23:[function(require,module,exports){
 /**
  * Header Interceptor.
  */
@@ -9628,7 +7517,7 @@ module.exports = function (_) {
 
 };
 
-},{}],26:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /**
  * Interceptor factory.
  */
@@ -9677,7 +7566,7 @@ module.exports = function (_) {
 
 };
 
-},{"../promise":34}],27:[function(require,module,exports){
+},{"../promise":32}],25:[function(require,module,exports){
 /**
  * JSONP Interceptor.
  */
@@ -9701,7 +7590,7 @@ module.exports = function (_) {
 
 };
 
-},{"../client/jsonp":19}],28:[function(require,module,exports){
+},{"../client/jsonp":17}],26:[function(require,module,exports){
 /**
  * HTTP method override Interceptor.
  */
@@ -9724,7 +7613,7 @@ module.exports = function (_) {
 
 };
 
-},{}],29:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /**
  * Mime Interceptor.
  */
@@ -9764,7 +7653,7 @@ module.exports = function (_) {
 
 };
 
-},{}],30:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /**
  * Timeout Interceptor.
  */
@@ -9800,7 +7689,7 @@ module.exports = function (_) {
 
 };
 
-},{}],31:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /**
  * Promises/A+ polyfill v1.1.4 (https://github.com/bramstein/promis)
  */
@@ -9982,7 +7871,7 @@ module.exports = function (_) {
     return Promise;
 };
 
-},{}],32:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /**
  * URL Template v2.0.6 (https://github.com/bramstein/url-template)
  */
@@ -10134,7 +8023,7 @@ exports.encodeReserved = function (str) {
     }).join('');
 };
 
-},{}],33:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * Utility functions.
  */
@@ -10236,7 +8125,7 @@ module.exports = function (Vue) {
     return _;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /**
  * Promise adapter.
  */
@@ -10349,7 +8238,7 @@ module.exports = function (_) {
     return Adapter;
 };
 
-},{"./lib/promise":31}],35:[function(require,module,exports){
+},{"./lib/promise":29}],33:[function(require,module,exports){
 /**
  * Service for interacting with RESTful services.
  */
@@ -10462,7 +8351,7 @@ module.exports = function (_) {
     return _.resource = Resource;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /**
  * Service for URL templating.
  */
@@ -10627,2546 +8516,11 @@ module.exports = function (_) {
     return _.url = Url;
 };
 
-},{"./lib/url-template":32}],37:[function(require,module,exports){
-'use strict';
-
-var babelHelpers = {};
-
-babelHelpers.classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-function Target(path, matcher, delegate) {
-  this.path = path;
-  this.matcher = matcher;
-  this.delegate = delegate;
-}
-
-Target.prototype = {
-  to: function to(target, callback) {
-    var delegate = this.delegate;
-
-    if (delegate && delegate.willAddRoute) {
-      target = delegate.willAddRoute(this.matcher.target, target);
-    }
-
-    this.matcher.add(this.path, target);
-
-    if (callback) {
-      if (callback.length === 0) {
-        throw new Error("You must have an argument in the function passed to `to`");
-      }
-      this.matcher.addChild(this.path, target, callback, this.delegate);
-    }
-    return this;
-  }
-};
-
-function Matcher(target) {
-  this.routes = {};
-  this.children = {};
-  this.target = target;
-}
-
-Matcher.prototype = {
-  add: function add(path, handler) {
-    this.routes[path] = handler;
-  },
-
-  addChild: function addChild(path, target, callback, delegate) {
-    var matcher = new Matcher(target);
-    this.children[path] = matcher;
-
-    var match = generateMatch(path, matcher, delegate);
-
-    if (delegate && delegate.contextEntered) {
-      delegate.contextEntered(target, match);
-    }
-
-    callback(match);
-  }
-};
-
-function generateMatch(startingPath, matcher, delegate) {
-  return function (path, nestedCallback) {
-    var fullPath = startingPath + path;
-
-    if (nestedCallback) {
-      nestedCallback(generateMatch(fullPath, matcher, delegate));
-    } else {
-      return new Target(startingPath + path, matcher, delegate);
-    }
-  };
-}
-
-function addRoute(routeArray, path, handler) {
-  var len = 0;
-  for (var i = 0, l = routeArray.length; i < l; i++) {
-    len += routeArray[i].path.length;
-  }
-
-  path = path.substr(len);
-  var route = { path: path, handler: handler };
-  routeArray.push(route);
-}
-
-function eachRoute(baseRoute, matcher, callback, binding) {
-  var routes = matcher.routes;
-
-  for (var path in routes) {
-    if (routes.hasOwnProperty(path)) {
-      var routeArray = baseRoute.slice();
-      addRoute(routeArray, path, routes[path]);
-
-      if (matcher.children[path]) {
-        eachRoute(routeArray, matcher.children[path], callback, binding);
-      } else {
-        callback.call(binding, routeArray);
-      }
-    }
-  }
-}
-
-function map (callback, addRouteCallback) {
-  var matcher = new Matcher();
-
-  callback(generateMatch("", matcher, this.delegate));
-
-  eachRoute([], matcher, function (route) {
-    if (addRouteCallback) {
-      addRouteCallback(this, route);
-    } else {
-      this.add(route);
-    }
-  }, this);
-}
-
-var specials = ['/', '.', '*', '+', '?', '|', '(', ')', '[', ']', '{', '}', '\\'];
-
-var escapeRegex = new RegExp('(\\' + specials.join('|\\') + ')', 'g');
-
-function isArray(test) {
-  return Object.prototype.toString.call(test) === "[object Array]";
-}
-
-// A Segment represents a segment in the original route description.
-// Each Segment type provides an `eachChar` and `regex` method.
-//
-// The `eachChar` method invokes the callback with one or more character
-// specifications. A character specification consumes one or more input
-// characters.
-//
-// The `regex` method returns a regex fragment for the segment. If the
-// segment is a dynamic of star segment, the regex fragment also includes
-// a capture.
-//
-// A character specification contains:
-//
-// * `validChars`: a String with a list of all valid characters, or
-// * `invalidChars`: a String with a list of all invalid characters
-// * `repeat`: true if the character specification can repeat
-
-function StaticSegment(string) {
-  this.string = string;
-}
-StaticSegment.prototype = {
-  eachChar: function eachChar(callback) {
-    var string = this.string,
-        ch;
-
-    for (var i = 0, l = string.length; i < l; i++) {
-      ch = string.charAt(i);
-      callback({ validChars: ch });
-    }
-  },
-
-  regex: function regex() {
-    return this.string.replace(escapeRegex, '\\$1');
-  },
-
-  generate: function generate() {
-    return this.string;
-  }
-};
-
-function DynamicSegment(name) {
-  this.name = name;
-}
-DynamicSegment.prototype = {
-  eachChar: function eachChar(callback) {
-    callback({ invalidChars: "/", repeat: true });
-  },
-
-  regex: function regex() {
-    return "([^/]+)";
-  },
-
-  generate: function generate(params) {
-    return params[this.name];
-  }
-};
-
-function StarSegment(name) {
-  this.name = name;
-}
-StarSegment.prototype = {
-  eachChar: function eachChar(callback) {
-    callback({ invalidChars: "", repeat: true });
-  },
-
-  regex: function regex() {
-    return "(.+)";
-  },
-
-  generate: function generate(params) {
-    return params[this.name];
-  }
-};
-
-function EpsilonSegment() {}
-EpsilonSegment.prototype = {
-  eachChar: function eachChar() {},
-  regex: function regex() {
-    return "";
-  },
-  generate: function generate() {
-    return "";
-  }
-};
-
-function parse(route, names, specificity) {
-  // normalize route as not starting with a "/". Recognition will
-  // also normalize.
-  if (route.charAt(0) === "/") {
-    route = route.substr(1);
-  }
-
-  var segments = route.split("/"),
-      results = [];
-
-  // A routes has specificity determined by the order that its different segments
-  // appear in. This system mirrors how the magnitude of numbers written as strings
-  // works.
-  // Consider a number written as: "abc". An example would be "200". Any other number written
-  // "xyz" will be smaller than "abc" so long as `a > z`. For instance, "199" is smaller
-  // then "200", even though "y" and "z" (which are both 9) are larger than "0" (the value
-  // of (`b` and `c`). This is because the leading symbol, "2", is larger than the other
-  // leading symbol, "1".
-  // The rule is that symbols to the left carry more weight than symbols to the right
-  // when a number is written out as a string. In the above strings, the leading digit
-  // represents how many 100's are in the number, and it carries more weight than the middle
-  // number which represents how many 10's are in the number.
-  // This system of number magnitude works well for route specificity, too. A route written as
-  // `a/b/c` will be more specific than `x/y/z` as long as `a` is more specific than
-  // `x`, irrespective of the other parts.
-  // Because of this similarity, we assign each type of segment a number value written as a
-  // string. We can find the specificity of compound routes by concatenating these strings
-  // together, from left to right. After we have looped through all of the segments,
-  // we convert the string to a number.
-  specificity.val = '';
-
-  for (var i = 0, l = segments.length; i < l; i++) {
-    var segment = segments[i],
-        match;
-
-    if (match = segment.match(/^:([^\/]+)$/)) {
-      results.push(new DynamicSegment(match[1]));
-      names.push(match[1]);
-      specificity.val += '3';
-    } else if (match = segment.match(/^\*([^\/]+)$/)) {
-      results.push(new StarSegment(match[1]));
-      specificity.val += '2';
-      names.push(match[1]);
-    } else if (segment === "") {
-      results.push(new EpsilonSegment());
-      specificity.val += '1';
-    } else {
-      results.push(new StaticSegment(segment));
-      specificity.val += '4';
-    }
-  }
-
-  specificity.val = +specificity.val;
-
-  return results;
-}
-
-// A State has a character specification and (`charSpec`) and a list of possible
-// subsequent states (`nextStates`).
-//
-// If a State is an accepting state, it will also have several additional
-// properties:
-//
-// * `regex`: A regular expression that is used to extract parameters from paths
-//   that reached this accepting state.
-// * `handlers`: Information on how to convert the list of captures into calls
-//   to registered handlers with the specified parameters
-// * `types`: How many static, dynamic or star segments in this route. Used to
-//   decide which route to use if multiple registered routes match a path.
-//
-// Currently, State is implemented naively by looping over `nextStates` and
-// comparing a character specification against a character. A more efficient
-// implementation would use a hash of keys pointing at one or more next states.
-
-function State(charSpec) {
-  this.charSpec = charSpec;
-  this.nextStates = [];
-}
-
-State.prototype = {
-  get: function get(charSpec) {
-    var nextStates = this.nextStates;
-
-    for (var i = 0, l = nextStates.length; i < l; i++) {
-      var child = nextStates[i];
-
-      var isEqual = child.charSpec.validChars === charSpec.validChars;
-      isEqual = isEqual && child.charSpec.invalidChars === charSpec.invalidChars;
-
-      if (isEqual) {
-        return child;
-      }
-    }
-  },
-
-  put: function put(charSpec) {
-    var state;
-
-    // If the character specification already exists in a child of the current
-    // state, just return that state.
-    if (state = this.get(charSpec)) {
-      return state;
-    }
-
-    // Make a new state for the character spec
-    state = new State(charSpec);
-
-    // Insert the new state as a child of the current state
-    this.nextStates.push(state);
-
-    // If this character specification repeats, insert the new state as a child
-    // of itself. Note that this will not trigger an infinite loop because each
-    // transition during recognition consumes a character.
-    if (charSpec.repeat) {
-      state.nextStates.push(state);
-    }
-
-    // Return the new state
-    return state;
-  },
-
-  // Find a list of child states matching the next character
-  match: function match(ch) {
-    // DEBUG "Processing `" + ch + "`:"
-    var nextStates = this.nextStates,
-        child,
-        charSpec,
-        chars;
-
-    // DEBUG "  " + debugState(this)
-    var returned = [];
-
-    for (var i = 0, l = nextStates.length; i < l; i++) {
-      child = nextStates[i];
-
-      charSpec = child.charSpec;
-
-      if (typeof (chars = charSpec.validChars) !== 'undefined') {
-        if (chars.indexOf(ch) !== -1) {
-          returned.push(child);
-        }
-      } else if (typeof (chars = charSpec.invalidChars) !== 'undefined') {
-        if (chars.indexOf(ch) === -1) {
-          returned.push(child);
-        }
-      }
-    }
-
-    return returned;
-  }
-
-  /** IF DEBUG
-  , debug: function() {
-    var charSpec = this.charSpec,
-        debug = "[",
-        chars = charSpec.validChars || charSpec.invalidChars;
-     if (charSpec.invalidChars) { debug += "^"; }
-    debug += chars;
-    debug += "]";
-     if (charSpec.repeat) { debug += "+"; }
-     return debug;
-  }
-  END IF **/
-};
-
-/** IF DEBUG
-function debug(log) {
-  console.log(log);
-}
-
-function debugState(state) {
-  return state.nextStates.map(function(n) {
-    if (n.nextStates.length === 0) { return "( " + n.debug() + " [accepting] )"; }
-    return "( " + n.debug() + " <then> " + n.nextStates.map(function(s) { return s.debug() }).join(" or ") + " )";
-  }).join(", ")
-}
-END IF **/
-
-// Sort the routes by specificity
-function sortSolutions(states) {
-  return states.sort(function (a, b) {
-    return b.specificity.val - a.specificity.val;
-  });
-}
-
-function recognizeChar(states, ch) {
-  var nextStates = [];
-
-  for (var i = 0, l = states.length; i < l; i++) {
-    var state = states[i];
-
-    nextStates = nextStates.concat(state.match(ch));
-  }
-
-  return nextStates;
-}
-
-var oCreate = Object.create || function (proto) {
-  function F() {}
-  F.prototype = proto;
-  return new F();
-};
-
-function RecognizeResults(queryParams) {
-  this.queryParams = queryParams || {};
-}
-RecognizeResults.prototype = oCreate({
-  splice: Array.prototype.splice,
-  slice: Array.prototype.slice,
-  push: Array.prototype.push,
-  length: 0,
-  queryParams: null
-});
-
-function findHandler(state, path, queryParams) {
-  var handlers = state.handlers,
-      regex = state.regex;
-  var captures = path.match(regex),
-      currentCapture = 1;
-  var result = new RecognizeResults(queryParams);
-
-  for (var i = 0, l = handlers.length; i < l; i++) {
-    var handler = handlers[i],
-        names = handler.names,
-        params = {};
-
-    for (var j = 0, m = names.length; j < m; j++) {
-      params[names[j]] = captures[currentCapture++];
-    }
-
-    result.push({ handler: handler.handler, params: params, isDynamic: !!names.length });
-  }
-
-  return result;
-}
-
-function addSegment(currentState, segment) {
-  segment.eachChar(function (ch) {
-    var state;
-
-    currentState = currentState.put(ch);
-  });
-
-  return currentState;
-}
-
-function decodeQueryParamPart(part) {
-  // http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1
-  part = part.replace(/\+/gm, '%20');
-  return decodeURIComponent(part);
-}
-
-// The main interface
-
-var RouteRecognizer = function RouteRecognizer() {
-  this.rootState = new State();
-  this.names = {};
-};
-
-RouteRecognizer.prototype = {
-  add: function add(routes, options) {
-    var currentState = this.rootState,
-        regex = "^",
-        specificity = {},
-        handlers = [],
-        allSegments = [],
-        name;
-
-    var isEmpty = true;
-
-    for (var i = 0, l = routes.length; i < l; i++) {
-      var route = routes[i],
-          names = [];
-
-      var segments = parse(route.path, names, specificity);
-
-      allSegments = allSegments.concat(segments);
-
-      for (var j = 0, m = segments.length; j < m; j++) {
-        var segment = segments[j];
-
-        if (segment instanceof EpsilonSegment) {
-          continue;
-        }
-
-        isEmpty = false;
-
-        // Add a "/" for the new segment
-        currentState = currentState.put({ validChars: "/" });
-        regex += "/";
-
-        // Add a representation of the segment to the NFA and regex
-        currentState = addSegment(currentState, segment);
-        regex += segment.regex();
-      }
-
-      var handler = { handler: route.handler, names: names };
-      handlers.push(handler);
-    }
-
-    if (isEmpty) {
-      currentState = currentState.put({ validChars: "/" });
-      regex += "/";
-    }
-
-    currentState.handlers = handlers;
-    currentState.regex = new RegExp(regex + "$");
-    currentState.specificity = specificity;
-
-    if (name = options && options.as) {
-      this.names[name] = {
-        segments: allSegments,
-        handlers: handlers
-      };
-    }
-  },
-
-  handlersFor: function handlersFor(name) {
-    var route = this.names[name],
-        result = [];
-    if (!route) {
-      throw new Error("There is no route named " + name);
-    }
-
-    for (var i = 0, l = route.handlers.length; i < l; i++) {
-      result.push(route.handlers[i]);
-    }
-
-    return result;
-  },
-
-  hasRoute: function hasRoute(name) {
-    return !!this.names[name];
-  },
-
-  generate: function generate(name, params) {
-    var route = this.names[name],
-        output = "";
-    if (!route) {
-      throw new Error("There is no route named " + name);
-    }
-
-    var segments = route.segments;
-
-    for (var i = 0, l = segments.length; i < l; i++) {
-      var segment = segments[i];
-
-      if (segment instanceof EpsilonSegment) {
-        continue;
-      }
-
-      output += "/";
-      output += segment.generate(params);
-    }
-
-    if (output.charAt(0) !== '/') {
-      output = '/' + output;
-    }
-
-    if (params && params.queryParams) {
-      output += this.generateQueryString(params.queryParams);
-    }
-
-    return output;
-  },
-
-  generateQueryString: function generateQueryString(params) {
-    var pairs = [];
-    var keys = [];
-    for (var key in params) {
-      if (params.hasOwnProperty(key)) {
-        keys.push(key);
-      }
-    }
-    keys.sort();
-    for (var i = 0, len = keys.length; i < len; i++) {
-      key = keys[i];
-      var value = params[key];
-      if (value == null) {
-        continue;
-      }
-      var pair = encodeURIComponent(key);
-      if (isArray(value)) {
-        for (var j = 0, l = value.length; j < l; j++) {
-          var arrayPair = key + '[]' + '=' + encodeURIComponent(value[j]);
-          pairs.push(arrayPair);
-        }
-      } else {
-        pair += "=" + encodeURIComponent(value);
-        pairs.push(pair);
-      }
-    }
-
-    if (pairs.length === 0) {
-      return '';
-    }
-
-    return "?" + pairs.join("&");
-  },
-
-  parseQueryString: function parseQueryString(queryString) {
-    var pairs = queryString.split("&"),
-        queryParams = {};
-    for (var i = 0; i < pairs.length; i++) {
-      var pair = pairs[i].split('='),
-          key = decodeQueryParamPart(pair[0]),
-          keyLength = key.length,
-          isArray = false,
-          value;
-      if (pair.length === 1) {
-        value = 'true';
-      } else {
-        //Handle arrays
-        if (keyLength > 2 && key.slice(keyLength - 2) === '[]') {
-          isArray = true;
-          key = key.slice(0, keyLength - 2);
-          if (!queryParams[key]) {
-            queryParams[key] = [];
-          }
-        }
-        value = pair[1] ? decodeQueryParamPart(pair[1]) : '';
-      }
-      if (isArray) {
-        queryParams[key].push(value);
-      } else {
-        queryParams[key] = value;
-      }
-    }
-    return queryParams;
-  },
-
-  recognize: function recognize(path) {
-    var states = [this.rootState],
-        pathLen,
-        i,
-        l,
-        queryStart,
-        queryParams = {},
-        isSlashDropped = false;
-
-    queryStart = path.indexOf('?');
-    if (queryStart !== -1) {
-      var queryString = path.substr(queryStart + 1, path.length);
-      path = path.substr(0, queryStart);
-      queryParams = this.parseQueryString(queryString);
-    }
-
-    path = decodeURI(path);
-
-    // DEBUG GROUP path
-
-    if (path.charAt(0) !== "/") {
-      path = "/" + path;
-    }
-
-    pathLen = path.length;
-    if (pathLen > 1 && path.charAt(pathLen - 1) === "/") {
-      path = path.substr(0, pathLen - 1);
-      isSlashDropped = true;
-    }
-
-    for (i = 0, l = path.length; i < l; i++) {
-      states = recognizeChar(states, path.charAt(i));
-      if (!states.length) {
-        break;
-      }
-    }
-
-    // END DEBUG GROUP
-
-    var solutions = [];
-    for (i = 0, l = states.length; i < l; i++) {
-      if (states[i].handlers) {
-        solutions.push(states[i]);
-      }
-    }
-
-    states = sortSolutions(solutions);
-
-    var state = solutions[0];
-
-    if (state && state.handlers) {
-      // if a trailing slash was dropped and a star segment is the last segment
-      // specified, put the trailing slash back
-      if (isSlashDropped && state.regex.source.slice(-5) === "(.+)$") {
-        path = path + "/";
-      }
-      return findHandler(state, path, queryParams);
-    }
-  }
-};
-
-RouteRecognizer.prototype.map = map;
-
-RouteRecognizer.VERSION = '0.1.9';
-
-var genQuery = RouteRecognizer.prototype.generateQueryString;
-
-// export default for holding the Vue reference
-var exports$1 = {};
-/**
- * Warn stuff.
- *
- * @param {String} msg
- */
-
-function warn(msg) {
-  /* istanbul ignore next */
-  if (window.console) {
-    console.warn('[vue-router] ' + msg);
-    /* istanbul ignore if */
-    if (!exports$1.Vue || exports$1.Vue.config.debug) {
-      console.warn(new Error('warning stack trace:').stack);
-    }
-  }
-}
-
-/**
- * Resolve a relative path.
- *
- * @param {String} base
- * @param {String} relative
- * @param {Boolean} append
- * @return {String}
- */
-
-function resolvePath(base, relative, append) {
-  var query = base.match(/(\?.*)$/);
-  if (query) {
-    query = query[1];
-    base = base.slice(0, -query.length);
-  }
-  // a query!
-  if (relative.charAt(0) === '?') {
-    return base + relative;
-  }
-  var stack = base.split('/');
-  // remove trailing segment if:
-  // - not appending
-  // - appending to trailing slash (last segment is empty)
-  if (!append || !stack[stack.length - 1]) {
-    stack.pop();
-  }
-  // resolve relative path
-  var segments = relative.replace(/^\//, '').split('/');
-  for (var i = 0; i < segments.length; i++) {
-    var segment = segments[i];
-    if (segment === '.') {
-      continue;
-    } else if (segment === '..') {
-      stack.pop();
-    } else {
-      stack.push(segment);
-    }
-  }
-  // ensure leading slash
-  if (stack[0] !== '') {
-    stack.unshift('');
-  }
-  return stack.join('/');
-}
-
-/**
- * Forgiving check for a promise
- *
- * @param {Object} p
- * @return {Boolean}
- */
-
-function isPromise(p) {
-  return p && typeof p.then === 'function';
-}
-
-/**
- * Retrive a route config field from a component instance
- * OR a component contructor.
- *
- * @param {Function|Vue} component
- * @param {String} name
- * @return {*}
- */
-
-function getRouteConfig(component, name) {
-  var options = component && (component.$options || component.options);
-  return options && options.route && options.route[name];
-}
-
-/**
- * Resolve an async component factory. Have to do a dirty
- * mock here because of Vue core's internal API depends on
- * an ID check.
- *
- * @param {Object} handler
- * @param {Function} cb
- */
-
-var resolver = undefined;
-
-function resolveAsyncComponent(handler, cb) {
-  if (!resolver) {
-    resolver = {
-      resolve: exports$1.Vue.prototype._resolveComponent,
-      $options: {
-        components: {
-          _: handler.component
-        }
-      }
-    };
-  } else {
-    resolver.$options.components._ = handler.component;
-  }
-  resolver.resolve('_', function (Component) {
-    handler.component = Component;
-    cb(Component);
-  });
-}
-
-/**
- * Map the dynamic segments in a path to params.
- *
- * @param {String} path
- * @param {Object} params
- * @param {Object} query
- */
-
-function mapParams(path, params, query) {
-  if (params === undefined) params = {};
-
-  path = path.replace(/:([^\/]+)/g, function (_, key) {
-    var val = params[key];
-    if (!val) {
-      warn('param "' + key + '" not found when generating ' + 'path for "' + path + '" with params ' + JSON.stringify(params));
-    }
-    return val || '';
-  });
-  if (query) {
-    path += genQuery(query);
-  }
-  return path;
-}
-
-var hashRE = /#.*$/;
-
-var HTML5History = (function () {
-  function HTML5History(_ref) {
-    var root = _ref.root;
-    var onChange = _ref.onChange;
-    babelHelpers.classCallCheck(this, HTML5History);
-
-    if (root) {
-      // make sure there's the starting slash
-      if (root.charAt(0) !== '/') {
-        root = '/' + root;
-      }
-      // remove trailing slash
-      this.root = root.replace(/\/$/, '');
-      this.rootRE = new RegExp('^\\' + this.root);
-    } else {
-      this.root = null;
-    }
-    this.onChange = onChange;
-    // check base tag
-    var baseEl = document.querySelector('base');
-    this.base = baseEl && baseEl.getAttribute('href');
-  }
-
-  HTML5History.prototype.start = function start() {
-    var _this = this;
-
-    this.listener = function (e) {
-      var url = decodeURI(location.pathname + location.search);
-      if (_this.root) {
-        url = url.replace(_this.rootRE, '');
-      }
-      _this.onChange(url, e && e.state, location.hash);
-    };
-    window.addEventListener('popstate', this.listener);
-    this.listener();
-  };
-
-  HTML5History.prototype.stop = function stop() {
-    window.removeEventListener('popstate', this.listener);
-  };
-
-  HTML5History.prototype.go = function go(path, replace, append) {
-    var url = this.formatPath(path, append);
-    if (replace) {
-      history.replaceState({}, '', url);
-    } else {
-      // record scroll position by replacing current state
-      history.replaceState({
-        pos: {
-          x: window.pageXOffset,
-          y: window.pageYOffset
-        }
-      }, '');
-      // then push new state
-      history.pushState({}, '', url);
-    }
-    var hashMatch = path.match(hashRE);
-    var hash = hashMatch && hashMatch[0];
-    path = url
-    // strip hash so it doesn't mess up params
-    .replace(hashRE, '')
-    // remove root before matching
-    .replace(this.rootRE, '');
-    this.onChange(path, null, hash);
-  };
-
-  HTML5History.prototype.formatPath = function formatPath(path, append) {
-    return path.charAt(0) === '/'
-    // absolute path
-    ? this.root ? this.root + '/' + path.replace(/^\//, '') : path : resolvePath(this.base || location.pathname, path, append);
-  };
-
-  return HTML5History;
-})();
-
-var HashHistory = (function () {
-  function HashHistory(_ref) {
-    var hashbang = _ref.hashbang;
-    var onChange = _ref.onChange;
-    babelHelpers.classCallCheck(this, HashHistory);
-
-    this.hashbang = hashbang;
-    this.onChange = onChange;
-  }
-
-  HashHistory.prototype.start = function start() {
-    var self = this;
-    this.listener = function () {
-      var path = location.hash;
-      var raw = path.replace(/^#!?/, '');
-      // always
-      if (raw.charAt(0) !== '/') {
-        raw = '/' + raw;
-      }
-      var formattedPath = self.formatPath(raw);
-      if (formattedPath !== path) {
-        location.replace(formattedPath);
-        return;
-      }
-      // determine query
-      // note it's possible to have queries in both the actual URL
-      // and the hash fragment itself.
-      var query = location.search && path.indexOf('?') > -1 ? '&' + location.search.slice(1) : location.search;
-      self.onChange(decodeURI(path.replace(/^#!?/, '') + query));
-    };
-    window.addEventListener('hashchange', this.listener);
-    this.listener();
-  };
-
-  HashHistory.prototype.stop = function stop() {
-    window.removeEventListener('hashchange', this.listener);
-  };
-
-  HashHistory.prototype.go = function go(path, replace, append) {
-    path = this.formatPath(path, append);
-    if (replace) {
-      location.replace(path);
-    } else {
-      location.hash = path;
-    }
-  };
-
-  HashHistory.prototype.formatPath = function formatPath(path, append) {
-    var isAbsoloute = path.charAt(0) === '/';
-    var prefix = '#' + (this.hashbang ? '!' : '');
-    return isAbsoloute ? prefix + path : prefix + resolvePath(location.hash.replace(/^#!?/, ''), path, append);
-  };
-
-  return HashHistory;
-})();
-
-var AbstractHistory = (function () {
-  function AbstractHistory(_ref) {
-    var onChange = _ref.onChange;
-    babelHelpers.classCallCheck(this, AbstractHistory);
-
-    this.onChange = onChange;
-    this.currentPath = '/';
-  }
-
-  AbstractHistory.prototype.start = function start() {
-    this.onChange('/');
-  };
-
-  AbstractHistory.prototype.stop = function stop() {
-    // noop
-  };
-
-  AbstractHistory.prototype.go = function go(path, replace, append) {
-    path = this.currentPath = this.formatPath(path, append);
-    this.onChange(path);
-  };
-
-  AbstractHistory.prototype.formatPath = function formatPath(path, append) {
-    return path.charAt(0) === '/' ? path : resolvePath(this.currentPath, path, append);
-  };
-
-  return AbstractHistory;
-})();
-
-/**
- * Determine the reusability of an existing router view.
- *
- * @param {Directive} view
- * @param {Object} handler
- * @param {Transition} transition
- */
-
-function canReuse(view, handler, transition) {
-  var component = view.childVM;
-  if (!component || !handler) {
-    return false;
-  }
-  // important: check view.Component here because it may
-  // have been changed in activate hook
-  if (view.Component !== handler.component) {
-    return false;
-  }
-  var canReuseFn = getRouteConfig(component, 'canReuse');
-  return typeof canReuseFn === 'boolean' ? canReuseFn : canReuseFn ? canReuseFn.call(component, {
-    to: transition.to,
-    from: transition.from
-  }) : true; // defaults to true
-}
-
-/**
- * Check if a component can deactivate.
- *
- * @param {Directive} view
- * @param {Transition} transition
- * @param {Function} next
- */
-
-function canDeactivate(view, transition, next) {
-  var fromComponent = view.childVM;
-  var hook = getRouteConfig(fromComponent, 'canDeactivate');
-  if (!hook) {
-    next();
-  } else {
-    transition.callHook(hook, fromComponent, next, {
-      expectBoolean: true
-    });
-  }
-}
-
-/**
- * Check if a component can activate.
- *
- * @param {Object} handler
- * @param {Transition} transition
- * @param {Function} next
- */
-
-function canActivate(handler, transition, next) {
-  resolveAsyncComponent(handler, function (Component) {
-    // have to check due to async-ness
-    if (transition.aborted) {
-      return;
-    }
-    // determine if this component can be activated
-    var hook = getRouteConfig(Component, 'canActivate');
-    if (!hook) {
-      next();
-    } else {
-      transition.callHook(hook, null, next, {
-        expectBoolean: true
-      });
-    }
-  });
-}
-
-/**
- * Call deactivate hooks for existing router-views.
- *
- * @param {Directive} view
- * @param {Transition} transition
- * @param {Function} next
- */
-
-function deactivate(view, transition, next) {
-  var component = view.childVM;
-  var hook = getRouteConfig(component, 'deactivate');
-  if (!hook) {
-    next();
-  } else {
-    transition.callHooks(hook, component, next);
-  }
-}
-
-/**
- * Activate / switch component for a router-view.
- *
- * @param {Directive} view
- * @param {Transition} transition
- * @param {Number} depth
- * @param {Function} [cb]
- */
-
-function activate(view, transition, depth, cb, reuse) {
-  var handler = transition.activateQueue[depth];
-  if (!handler) {
-    // fix 1.0.0-alpha.3 compat
-    if (view._bound) {
-      view.setComponent(null);
-    }
-    cb && cb();
-    return;
-  }
-
-  var Component = view.Component = handler.component;
-  var activateHook = getRouteConfig(Component, 'activate');
-  var dataHook = getRouteConfig(Component, 'data');
-  var waitForData = getRouteConfig(Component, 'waitForData');
-
-  view.depth = depth;
-  view.activated = false;
-
-  var component = undefined;
-  var loading = !!(dataHook && !waitForData);
-
-  // "reuse" is a flag passed down when the parent view is
-  // either reused via keep-alive or as a child of a kept-alive view.
-  // of course we can only reuse if the current kept-alive instance
-  // is of the correct type.
-  reuse = reuse && view.childVM && view.childVM.constructor === Component;
-
-  if (reuse) {
-    // just reuse
-    component = view.childVM;
-    component.$loadingRouteData = loading;
-  } else {
-    // unbuild current component. this step also destroys
-    // and removes all nested child views.
-    view.unbuild(true);
-    // handle keep-alive.
-    // if the view has keep-alive, the child vm is not actually
-    // destroyed - its nested views will still be in router's
-    // view list. We need to removed these child views and
-    // cache them on the child vm.
-    if (view.keepAlive) {
-      var views = transition.router._views;
-      var i = views.indexOf(view);
-      if (i > 0) {
-        transition.router._views = views.slice(i);
-        if (view.childVM) {
-          view.childVM._routerViews = views.slice(0, i);
-        }
-      }
-    }
-
-    // build the new component. this will also create the
-    // direct child view of the current one. it will register
-    // itself as view.childView.
-    component = view.build({
-      _meta: {
-        $loadingRouteData: loading
-      }
-    });
-    // handle keep-alive.
-    // when a kept-alive child vm is restored, we need to
-    // add its cached child views into the router's view list,
-    // and also properly update current view's child view.
-    if (view.keepAlive) {
-      component.$loadingRouteData = loading;
-      var cachedViews = component._routerViews;
-      if (cachedViews) {
-        transition.router._views = cachedViews.concat(transition.router._views);
-        view.childView = cachedViews[cachedViews.length - 1];
-        component._routerViews = null;
-      }
-    }
-  }
-
-  // cleanup the component in case the transition is aborted
-  // before the component is ever inserted.
-  var cleanup = function cleanup() {
-    component.$destroy();
-  };
-
-  // actually insert the component and trigger transition
-  var insert = function insert() {
-    if (reuse) {
-      cb && cb();
-      return;
-    }
-    var router = transition.router;
-    if (router._rendered || router._transitionOnLoad) {
-      view.transition(component);
-    } else {
-      // no transition on first render, manual transition
-      /* istanbul ignore if */
-      if (view.setCurrent) {
-        // 0.12 compat
-        view.setCurrent(component);
-      } else {
-        // 1.0
-        view.childVM = component;
-      }
-      component.$before(view.anchor, null, false);
-    }
-    cb && cb();
-  };
-
-  // called after activation hook is resolved
-  var afterActivate = function afterActivate() {
-    view.activated = true;
-    // activate the child view
-    if (view.childView) {
-      activate(view.childView, transition, depth + 1, null, reuse || view.keepAlive);
-    }
-    if (dataHook && waitForData) {
-      // wait until data loaded to insert
-      loadData(component, transition, dataHook, insert, cleanup);
-    } else {
-      // load data and insert at the same time
-      if (dataHook) {
-        loadData(component, transition, dataHook);
-      }
-      insert();
-    }
-  };
-
-  if (activateHook) {
-    transition.callHooks(activateHook, component, afterActivate, {
-      cleanup: cleanup
-    });
-  } else {
-    afterActivate();
-  }
-}
-
-/**
- * Reuse a view, just reload data if necessary.
- *
- * @param {Directive} view
- * @param {Transition} transition
- */
-
-function reuse(view, transition) {
-  var component = view.childVM;
-  var dataHook = getRouteConfig(component, 'data');
-  if (dataHook) {
-    loadData(component, transition, dataHook);
-  }
-}
-
-/**
- * Asynchronously load and apply data to component.
- *
- * @param {Vue} component
- * @param {Transition} transition
- * @param {Function} hook
- * @param {Function} cb
- * @param {Function} cleanup
- */
-
-function loadData(component, transition, hook, cb, cleanup) {
-  component.$loadingRouteData = true;
-  transition.callHooks(hook, component, function (data, onError) {
-    // merge data from multiple data hooks
-    if (Array.isArray(data) && data._needMerge) {
-      data = data.reduce(function (res, obj) {
-        if (isPlainObject(obj)) {
-          Object.keys(obj).forEach(function (key) {
-            res[key] = obj[key];
-          });
-        }
-        return res;
-      }, Object.create(null));
-    }
-    // handle promise sugar syntax
-    var promises = [];
-    if (isPlainObject(data)) {
-      Object.keys(data).forEach(function (key) {
-        var val = data[key];
-        if (isPromise(val)) {
-          promises.push(val.then(function (resolvedVal) {
-            component.$set(key, resolvedVal);
-          }));
-        } else {
-          component.$set(key, val);
-        }
-      });
-    }
-    if (!promises.length) {
-      component.$loadingRouteData = false;
-      cb && cb();
-    } else {
-      promises[0].constructor.all(promises).then(function (_) {
-        component.$loadingRouteData = false;
-        cb && cb();
-      }, onError);
-    }
-  }, {
-    cleanup: cleanup,
-    expectData: true
-  });
-}
-
-function isPlainObject(obj) {
-  return Object.prototype.toString.call(obj) === '[object Object]';
-}
-
-/**
- * A RouteTransition object manages the pipeline of a
- * router-view switching process. This is also the object
- * passed into user route hooks.
- *
- * @param {Router} router
- * @param {Route} to
- * @param {Route} from
- */
-
-var RouteTransition = (function () {
-  function RouteTransition(router, to, from) {
-    babelHelpers.classCallCheck(this, RouteTransition);
-
-    this.router = router;
-    this.to = to;
-    this.from = from;
-    this.next = null;
-    this.aborted = false;
-    this.done = false;
-
-    // start by determine the queues
-
-    // the deactivate queue is an array of router-view
-    // directive instances that need to be deactivated,
-    // deepest first.
-    this.deactivateQueue = router._views;
-
-    // check the default handler of the deepest match
-    var matched = to.matched ? Array.prototype.slice.call(to.matched) : [];
-
-    // the activate queue is an array of route handlers
-    // that need to be activated
-    this.activateQueue = matched.map(function (match) {
-      return match.handler;
-    });
-  }
-
-  /**
-   * Abort current transition and return to previous location.
-   */
-
-  RouteTransition.prototype.abort = function abort() {
-    if (!this.aborted) {
-      this.aborted = true;
-      // if the root path throws an error during validation
-      // on initial load, it gets caught in an infinite loop.
-      var abortingOnLoad = !this.from.path && this.to.path === '/';
-      if (!abortingOnLoad) {
-        this.router.replace(this.from.path || '/');
-      }
-    }
-  };
-
-  /**
-   * Abort current transition and redirect to a new location.
-   *
-   * @param {String} path
-   */
-
-  RouteTransition.prototype.redirect = function redirect(path) {
-    if (!this.aborted) {
-      this.aborted = true;
-      if (typeof path === 'string') {
-        path = mapParams(path, this.to.params, this.to.query);
-      } else {
-        path.params = path.params || this.to.params;
-        path.query = path.query || this.to.query;
-      }
-      this.router.replace(path);
-    }
-  };
-
-  /**
-   * A router view transition's pipeline can be described as
-   * follows, assuming we are transitioning from an existing
-   * <router-view> chain [Component A, Component B] to a new
-   * chain [Component A, Component C]:
-   *
-   *  A    A
-   *  | => |
-   *  B    C
-   *
-   * 1. Reusablity phase:
-   *   -> canReuse(A, A)
-   *   -> canReuse(B, C)
-   *   -> determine new queues:
-   *      - deactivation: [B]
-   *      - activation: [C]
-   *
-   * 2. Validation phase:
-   *   -> canDeactivate(B)
-   *   -> canActivate(C)
-   *
-   * 3. Activation phase:
-   *   -> deactivate(B)
-   *   -> activate(C)
-   *
-   * Each of these steps can be asynchronous, and any
-   * step can potentially abort the transition.
-   *
-   * @param {Function} cb
-   */
-
-  RouteTransition.prototype.start = function start(cb) {
-    var transition = this;
-    var daq = this.deactivateQueue;
-    var aq = this.activateQueue;
-    var rdaq = daq.slice().reverse();
-    var reuseQueue = undefined;
-
-    // 1. Reusability phase
-    var i = undefined;
-    for (i = 0; i < rdaq.length; i++) {
-      if (!canReuse(rdaq[i], aq[i], transition)) {
-        break;
-      }
-    }
-    if (i > 0) {
-      reuseQueue = rdaq.slice(0, i);
-      daq = rdaq.slice(i).reverse();
-      aq = aq.slice(i);
-    }
-
-    // 2. Validation phase
-    transition.runQueue(daq, canDeactivate, function () {
-      transition.runQueue(aq, canActivate, function () {
-        transition.runQueue(daq, deactivate, function () {
-          // 3. Activation phase
-
-          // Update router current route
-          transition.router._onTransitionValidated(transition);
-
-          // trigger reuse for all reused views
-          reuseQueue && reuseQueue.forEach(function (view) {
-            reuse(view, transition);
-          });
-
-          // the root of the chain that needs to be replaced
-          // is the top-most non-reusable view.
-          if (daq.length) {
-            var view = daq[daq.length - 1];
-            var depth = reuseQueue ? reuseQueue.length : 0;
-            activate(view, transition, depth, cb);
-          } else {
-            cb();
-          }
-        });
-      });
-    });
-  };
-
-  /**
-   * Asynchronously and sequentially apply a function to a
-   * queue.
-   *
-   * @param {Array} queue
-   * @param {Function} fn
-   * @param {Function} cb
-   */
-
-  RouteTransition.prototype.runQueue = function runQueue(queue, fn, cb) {
-    var transition = this;
-    step(0);
-    function step(index) {
-      if (index >= queue.length) {
-        cb();
-      } else {
-        fn(queue[index], transition, function () {
-          step(index + 1);
-        });
-      }
-    }
-  };
-
-  /**
-   * Call a user provided route transition hook and handle
-   * the response (e.g. if the user returns a promise).
-   *
-   * If the user neither expects an argument nor returns a
-   * promise, the hook is assumed to be synchronous.
-   *
-   * @param {Function} hook
-   * @param {*} [context]
-   * @param {Function} [cb]
-   * @param {Object} [options]
-   *                 - {Boolean} expectBoolean
-   *                 - {Boolean} expectData
-   *                 - {Function} cleanup
-   */
-
-  RouteTransition.prototype.callHook = function callHook(hook, context, cb) {
-    var _ref = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
-    var _ref$expectBoolean = _ref.expectBoolean;
-    var expectBoolean = _ref$expectBoolean === undefined ? false : _ref$expectBoolean;
-    var _ref$expectData = _ref.expectData;
-    var expectData = _ref$expectData === undefined ? false : _ref$expectData;
-    var cleanup = _ref.cleanup;
-
-    var transition = this;
-    var nextCalled = false;
-
-    // abort the transition
-    var abort = function abort() {
-      cleanup && cleanup();
-      transition.abort();
-    };
-
-    // handle errors
-    var onError = function onError(err) {
-      // cleanup indicates an after-activation hook,
-      // so instead of aborting we just let the transition
-      // finish.
-      cleanup ? next() : abort();
-      if (err && !transition.router._suppress) {
-        warn('Uncaught error during transition: ');
-        throw err instanceof Error ? err : new Error(err);
-      }
-    };
-
-    // advance the transition to the next step
-    var next = function next(data) {
-      if (nextCalled) {
-        warn('transition.next() should be called only once.');
-        return;
-      }
-      nextCalled = true;
-      if (transition.aborted) {
-        cleanup && cleanup();
-        return;
-      }
-      cb && cb(data, onError);
-    };
-
-    // expose a clone of the transition object, so that each
-    // hook gets a clean copy and prevent the user from
-    // messing with the internals.
-    var exposed = {
-      to: transition.to,
-      from: transition.from,
-      abort: abort,
-      next: next,
-      redirect: function redirect() {
-        transition.redirect.apply(transition, arguments);
-      }
-    };
-
-    // actually call the hook
-    var res = undefined;
-    try {
-      res = hook.call(context, exposed);
-    } catch (err) {
-      return onError(err);
-    }
-
-    // handle boolean/promise return values
-    var resIsPromise = isPromise(res);
-    if (expectBoolean) {
-      if (typeof res === 'boolean') {
-        res ? next() : abort();
-      } else if (resIsPromise) {
-        res.then(function (ok) {
-          ok ? next() : abort();
-        }, onError);
-      } else if (!hook.length) {
-        next(res);
-      }
-    } else if (resIsPromise) {
-      res.then(next, onError);
-    } else if (expectData && isPlainOjbect(res) || !hook.length) {
-      next(res);
-    }
-  };
-
-  /**
-   * Call a single hook or an array of async hooks in series.
-   *
-   * @param {Array} hooks
-   * @param {*} context
-   * @param {Function} cb
-   * @param {Object} [options]
-   */
-
-  RouteTransition.prototype.callHooks = function callHooks(hooks, context, cb, options) {
-    var _this = this;
-
-    if (Array.isArray(hooks)) {
-      (function () {
-        var res = [];
-        res._needMerge = true;
-        var onError = undefined;
-        _this.runQueue(hooks, function (hook, _, next) {
-          if (!_this.aborted) {
-            _this.callHook(hook, context, function (r, onError) {
-              if (r) res.push(r);
-              onError = onError;
-              next();
-            }, options);
-          }
-        }, function () {
-          cb(res, onError);
-        });
-      })();
-    } else {
-      this.callHook(hooks, context, cb, options);
-    }
-  };
-
-  return RouteTransition;
-})();
-
-function isPlainOjbect(val) {
-  return Object.prototype.toString.call(val) === '[object Object]';
-}
-
-var internalKeysRE = /^(component|subRoutes)$/;
-
-/**
- * Route Context Object
- *
- * @param {String} path
- * @param {Router} router
- */
-
-var Route = function Route(path, router) {
-  var _this = this;
-
-  babelHelpers.classCallCheck(this, Route);
-
-  var matched = router._recognizer.recognize(path);
-  if (matched) {
-    // copy all custom fields from route configs
-    [].forEach.call(matched, function (match) {
-      for (var key in match.handler) {
-        if (!internalKeysRE.test(key)) {
-          _this[key] = match.handler[key];
-        }
-      }
-    });
-    // set query and params
-    this.query = matched.queryParams;
-    this.params = [].reduce.call(matched, function (prev, cur) {
-      if (cur.params) {
-        for (var key in cur.params) {
-          prev[key] = cur.params[key];
-        }
-      }
-      return prev;
-    }, {});
-  }
-  // expose path and router
-  this.path = path;
-  this.router = router;
-  // for internal use
-  this.matched = matched || router._notFoundHandler;
-  // Important: freeze self to prevent observation
-  Object.freeze(this);
-};
-
-function applyOverride (Vue) {
-
-  var _ = Vue.util;
-
-  // override Vue's init and destroy process to keep track of router instances
-  var init = Vue.prototype._init;
-  Vue.prototype._init = function (options) {
-    var root = options._parent || options.parent || this;
-    var route = root.$route;
-    if (route) {
-      route.router._children.push(this);
-      if (!this.$route) {
-        /* istanbul ignore if */
-        if (this._defineMeta) {
-          // 0.12
-          this._defineMeta('$route', route);
-        } else {
-          // 1.0
-          _.defineReactive(this, '$route', route);
-        }
-      }
-    }
-    init.call(this, options);
-  };
-
-  var destroy = Vue.prototype._destroy;
-  Vue.prototype._destroy = function () {
-    if (!this._isBeingDestroyed) {
-      var route = this.$root.$route;
-      if (route) {
-        route.router._children.$remove(this);
-      }
-      destroy.apply(this, arguments);
-    }
-  };
-
-  // 1.0 only: enable route mixins
-  var strats = Vue.config.optionMergeStrategies;
-  var hooksToMergeRE = /^(data|activate|deactivate)$/;
-
-  if (strats) {
-    strats.route = function (parentVal, childVal) {
-      if (!childVal) return parentVal;
-      if (!parentVal) return childVal;
-      var ret = {};
-      _.extend(ret, parentVal);
-      for (var key in childVal) {
-        var a = ret[key];
-        var b = childVal[key];
-        // for data, activate and deactivate, we need to merge them into
-        // arrays similar to lifecycle hooks.
-        if (a && hooksToMergeRE.test(key)) {
-          ret[key] = (_.isArray(a) ? a : [a]).concat(b);
-        } else {
-          ret[key] = b;
-        }
-      }
-      return ret;
-    };
-  }
-}
-
-function View (Vue) {
-
-  var _ = Vue.util;
-  var componentDef =
-  // 0.12
-  Vue.directive('_component') ||
-  // 1.0
-  Vue.internalDirectives.component;
-  // <router-view> extends the internal component directive
-  var viewDef = _.extend({}, componentDef);
-
-  // with some overrides
-  _.extend(viewDef, {
-
-    _isRouterView: true,
-
-    bind: function bind() {
-      var route = this.vm.$route;
-      /* istanbul ignore if */
-      if (!route) {
-        warn('<router-view> can only be used inside a ' + 'router-enabled app.');
-        return;
-      }
-      // force dynamic directive so v-component doesn't
-      // attempt to build right now
-      this._isDynamicLiteral = true;
-      // finally, init by delegating to v-component
-      componentDef.bind.call(this);
-
-      // all we need to do here is registering this view
-      // in the router. actual component switching will be
-      // managed by the pipeline.
-      var router = this.router = route.router;
-      router._views.unshift(this);
-
-      // note the views are in reverse order.
-      var parentView = router._views[1];
-      if (parentView) {
-        // register self as a child of the parent view,
-        // instead of activating now. This is so that the
-        // child's activate hook is called after the
-        // parent's has resolved.
-        parentView.childView = this;
-      }
-
-      // handle late-rendered view
-      // two possibilities:
-      // 1. root view rendered after transition has been
-      //    validated;
-      // 2. child view rendered after parent view has been
-      //    activated.
-      var transition = route.router._currentTransition;
-      if (!parentView && transition.done || parentView && parentView.activated) {
-        var depth = parentView ? parentView.depth + 1 : 0;
-        activate(this, transition, depth);
-      }
-    },
-
-    unbind: function unbind() {
-      this.router._views.$remove(this);
-      componentDef.unbind.call(this);
-    }
-  });
-
-  Vue.elementDirective('router-view', viewDef);
-}
-
-var trailingSlashRE = /\/$/;
-var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
-var queryStringRE = /\?.*$/;
-
-// install v-link, which provides navigation support for
-// HTML5 history mode
-function Link (Vue) {
-
-  var _ = Vue.util;
-
-  Vue.directive('link', {
-
-    bind: function bind() {
-      var _this = this;
-
-      var vm = this.vm;
-      /* istanbul ignore if */
-      if (!vm.$route) {
-        warn('v-link can only be used inside a ' + 'router-enabled app.');
-        return;
-      }
-      // no need to handle click if link expects to be opened
-      // in a new window/tab.
-      /* istanbul ignore if */
-      if (this.el.tagName === 'A' && this.el.getAttribute('target') === '_blank') {
-        return;
-      }
-      // handle click
-      var router = vm.$route.router;
-      this.handler = function (e) {
-        // don't redirect with control keys
-        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-        // don't redirect when preventDefault called
-        if (e.defaultPrevented) return;
-        // don't redirect on right click
-        if (e.button !== 0) return;
-
-        var target = _this.target;
-        var go = function go(target) {
-          e.preventDefault();
-          if (target != null) {
-            router.go(target);
-          }
-        };
-
-        if (_this.el.tagName === 'A' || e.target === _this.el) {
-          // v-link on <a v-link="'path'">
-          go(target);
-        } else {
-          // v-link delegate on <div v-link>
-          var el = e.target;
-          while (el && el.tagName !== 'A' && el !== _this.el) {
-            el = el.parentNode;
-          }
-          if (!el) return;
-          if (el.tagName !== 'A' || !el.href) {
-            // allow not anchor
-            go(target);
-          } else if (sameOrigin(el)) {
-            go({
-              path: el.pathname,
-              replace: target && target.replace,
-              append: target && target.append
-            });
-          }
-        }
-      };
-      this.el.addEventListener('click', this.handler);
-      // manage active link class
-      this.unwatch = vm.$watch('$route.path', _.bind(this.updateClasses, this));
-    },
-
-    update: function update(path) {
-      var router = this.vm.$route.router;
-      var append = undefined;
-      this.target = path;
-      if (_.isObject(path)) {
-        append = path.append;
-        this.exact = path.exact;
-        this.prevActiveClass = this.activeClass;
-        this.activeClass = path.activeClass;
-      }
-      path = this.path = router._stringifyPath(path);
-      this.activeRE = path && !this.exact ? new RegExp('^' + path.replace(/\/$/, '').replace(regexEscapeRE, '\\$&') + '(\\/|$)') : null;
-      this.updateClasses(this.vm.$route.path);
-      var isAbsolute = path.charAt(0) === '/';
-      // do not format non-hash relative paths
-      var href = path && (router.mode === 'hash' || isAbsolute) ? router.history.formatPath(path, append) : path;
-      if (this.el.tagName === 'A') {
-        if (href) {
-          this.el.href = href;
-        } else {
-          this.el.removeAttribute('href');
-        }
-      }
-    },
-
-    updateClasses: function updateClasses(path) {
-      var el = this.el;
-      var router = this.vm.$route.router;
-      var activeClass = this.activeClass || router._linkActiveClass;
-      // clear old class
-      if (this.prevActiveClass !== activeClass) {
-        _.removeClass(el, this.prevActiveClass);
-      }
-      // remove query string before matching
-      var dest = this.path.replace(queryStringRE, '');
-      path = path.replace(queryStringRE, '');
-      // add new class
-      if (this.exact) {
-        if (dest === path ||
-        // also allow additional trailing slash
-        dest.charAt(dest.length - 1) !== '/' && dest === path.replace(trailingSlashRE, '')) {
-          _.addClass(el, activeClass);
-        } else {
-          _.removeClass(el, activeClass);
-        }
-      } else {
-        if (this.activeRE && this.activeRE.test(path)) {
-          _.addClass(el, activeClass);
-        } else {
-          _.removeClass(el, activeClass);
-        }
-      }
-    },
-
-    unbind: function unbind() {
-      this.el.removeEventListener('click', this.handler);
-      this.unwatch && this.unwatch();
-    }
-  });
-
-  function sameOrigin(link) {
-    return link.protocol === location.protocol && link.hostname === location.hostname && link.port === location.port;
-  }
-}
-
-var historyBackends = {
-  abstract: AbstractHistory,
-  hash: HashHistory,
-  html5: HTML5History
-};
-
-// late bind during install
-var Vue = undefined;
-
-/**
- * Router constructor
- *
- * @param {Object} [options]
- */
-
-var Router = (function () {
-  function Router() {
-    var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-    var _ref$hashbang = _ref.hashbang;
-    var hashbang = _ref$hashbang === undefined ? true : _ref$hashbang;
-    var _ref$abstract = _ref.abstract;
-    var abstract = _ref$abstract === undefined ? false : _ref$abstract;
-    var _ref$history = _ref.history;
-    var history = _ref$history === undefined ? false : _ref$history;
-    var _ref$saveScrollPosition = _ref.saveScrollPosition;
-    var saveScrollPosition = _ref$saveScrollPosition === undefined ? false : _ref$saveScrollPosition;
-    var _ref$transitionOnLoad = _ref.transitionOnLoad;
-    var transitionOnLoad = _ref$transitionOnLoad === undefined ? false : _ref$transitionOnLoad;
-    var _ref$suppressTransitionError = _ref.suppressTransitionError;
-    var suppressTransitionError = _ref$suppressTransitionError === undefined ? false : _ref$suppressTransitionError;
-    var _ref$root = _ref.root;
-    var root = _ref$root === undefined ? null : _ref$root;
-    var _ref$linkActiveClass = _ref.linkActiveClass;
-    var linkActiveClass = _ref$linkActiveClass === undefined ? 'v-link-active' : _ref$linkActiveClass;
-    babelHelpers.classCallCheck(this, Router);
-
-    /* istanbul ignore if */
-    if (!Router.installed) {
-      throw new Error('Please install the Router with Vue.use() before ' + 'creating an instance.');
-    }
-
-    // Vue instances
-    this.app = null;
-    this._views = [];
-    this._children = [];
-
-    // route recognizer
-    this._recognizer = new RouteRecognizer();
-    this._guardRecognizer = new RouteRecognizer();
-
-    // state
-    this._started = false;
-    this._startCb = null;
-    this._currentRoute = {};
-    this._currentTransition = null;
-    this._previousTransition = null;
-    this._notFoundHandler = null;
-    this._notFoundRedirect = null;
-    this._beforeEachHooks = [];
-    this._afterEachHooks = [];
-
-    // feature detection
-    this._hasPushState = typeof window !== 'undefined' && window.history && window.history.pushState;
-
-    // trigger transition on initial render?
-    this._rendered = false;
-    this._transitionOnLoad = transitionOnLoad;
-
-    // history mode
-    this._abstract = abstract;
-    this._hashbang = hashbang;
-    this._history = this._hasPushState && history;
-
-    // other options
-    this._saveScrollPosition = saveScrollPosition;
-    this._linkActiveClass = linkActiveClass;
-    this._suppress = suppressTransitionError;
-
-    // create history object
-    var inBrowser = Vue.util.inBrowser;
-    this.mode = !inBrowser || this._abstract ? 'abstract' : this._history ? 'html5' : 'hash';
-
-    var History = historyBackends[this.mode];
-    var self = this;
-    this.history = new History({
-      root: root,
-      hashbang: this._hashbang,
-      onChange: function onChange(path, state, anchor) {
-        self._match(path, state, anchor);
-      }
-    });
-  }
-
-  /**
-   * Allow directly passing components to a route
-   * definition.
-   *
-   * @param {String} path
-   * @param {Object} handler
-   */
-
-  // API ===================================================
-
-  /**
-  * Register a map of top-level paths.
-  *
-  * @param {Object} map
-  */
-
-  Router.prototype.map = function map(_map) {
-    for (var route in _map) {
-      this.on(route, _map[route]);
-    }
-  };
-
-  /**
-   * Register a single root-level path
-   *
-   * @param {String} rootPath
-   * @param {Object} handler
-   *                 - {String} component
-   *                 - {Object} [subRoutes]
-   *                 - {Boolean} [forceRefresh]
-   *                 - {Function} [before]
-   *                 - {Function} [after]
-   */
-
-  Router.prototype.on = function on(rootPath, handler) {
-    if (rootPath === '*') {
-      this._notFound(handler);
-    } else {
-      this._addRoute(rootPath, handler, []);
-    }
-  };
-
-  /**
-   * Set redirects.
-   *
-   * @param {Object} map
-   */
-
-  Router.prototype.redirect = function redirect(map) {
-    for (var path in map) {
-      this._addRedirect(path, map[path]);
-    }
-  };
-
-  /**
-   * Set aliases.
-   *
-   * @param {Object} map
-   */
-
-  Router.prototype.alias = function alias(map) {
-    for (var path in map) {
-      this._addAlias(path, map[path]);
-    }
-  };
-
-  /**
-   * Set global before hook.
-   *
-   * @param {Function} fn
-   */
-
-  Router.prototype.beforeEach = function beforeEach(fn) {
-    this._beforeEachHooks.push(fn);
-  };
-
-  /**
-   * Set global after hook.
-   *
-   * @param {Function} fn
-   */
-
-  Router.prototype.afterEach = function afterEach(fn) {
-    this._afterEachHooks.push(fn);
-  };
-
-  /**
-   * Navigate to a given path.
-   * The path can be an object describing a named path in
-   * the format of { name: '...', params: {}, query: {}}
-   * The path is assumed to be already decoded, and will
-   * be resolved against root (if provided)
-   *
-   * @param {String|Object} path
-   * @param {Boolean} [replace]
-   */
-
-  Router.prototype.go = function go(path) {
-    var replace = false;
-    var append = false;
-    if (Vue.util.isObject(path)) {
-      replace = path.replace;
-      append = path.append;
-    }
-    path = this._stringifyPath(path);
-    if (path) {
-      this.history.go(path, replace, append);
-    }
-  };
-
-  /**
-   * Short hand for replacing current path
-   *
-   * @param {String} path
-   */
-
-  Router.prototype.replace = function replace(path) {
-    if (typeof path === 'string') {
-      path = { path: path };
-    }
-    path.replace = true;
-    this.go(path);
-  };
-
-  /**
-   * Start the router.
-   *
-   * @param {VueConstructor} App
-   * @param {String|Element} container
-   * @param {Function} [cb]
-   */
-
-  Router.prototype.start = function start(App, container, cb) {
-    /* istanbul ignore if */
-    if (this._started) {
-      warn('already started.');
-      return;
-    }
-    this._started = true;
-    this._startCb = cb;
-    if (!this.app) {
-      /* istanbul ignore if */
-      if (!App || !container) {
-        throw new Error('Must start vue-router with a component and a ' + 'root container.');
-      }
-      this._appContainer = container;
-      var Ctor = this._appConstructor = typeof App === 'function' ? App : Vue.extend(App);
-      // give it a name for better debugging
-      Ctor.options.name = Ctor.options.name || 'RouterApp';
-    }
-    this.history.start();
-  };
-
-  /**
-   * Stop listening to route changes.
-   */
-
-  Router.prototype.stop = function stop() {
-    this.history.stop();
-    this._started = false;
-  };
-
-  // Internal methods ======================================
-
-  /**
-  * Add a route containing a list of segments to the internal
-  * route recognizer. Will be called recursively to add all
-  * possible sub-routes.
-  *
-  * @param {String} path
-  * @param {Object} handler
-  * @param {Array} segments
-  */
-
-  Router.prototype._addRoute = function _addRoute(path, handler, segments) {
-    guardComponent(path, handler);
-    handler.path = path;
-    handler.fullPath = (segments.reduce(function (path, segment) {
-      return path + segment.path;
-    }, '') + path).replace('//', '/');
-    segments.push({
-      path: path,
-      handler: handler
-    });
-    this._recognizer.add(segments, {
-      as: handler.name
-    });
-    // add sub routes
-    if (handler.subRoutes) {
-      for (var subPath in handler.subRoutes) {
-        // recursively walk all sub routes
-        this._addRoute(subPath, handler.subRoutes[subPath],
-        // pass a copy in recursion to avoid mutating
-        // across branches
-        segments.slice());
-      }
-    }
-  };
-
-  /**
-   * Set the notFound route handler.
-   *
-   * @param {Object} handler
-   */
-
-  Router.prototype._notFound = function _notFound(handler) {
-    guardComponent('*', handler);
-    this._notFoundHandler = [{ handler: handler }];
-  };
-
-  /**
-   * Add a redirect record.
-   *
-   * @param {String} path
-   * @param {String} redirectPath
-   */
-
-  Router.prototype._addRedirect = function _addRedirect(path, redirectPath) {
-    if (path === '*') {
-      this._notFoundRedirect = redirectPath;
-    } else {
-      this._addGuard(path, redirectPath, this.replace);
-    }
-  };
-
-  /**
-   * Add an alias record.
-   *
-   * @param {String} path
-   * @param {String} aliasPath
-   */
-
-  Router.prototype._addAlias = function _addAlias(path, aliasPath) {
-    this._addGuard(path, aliasPath, this._match);
-  };
-
-  /**
-   * Add a path guard.
-   *
-   * @param {String} path
-   * @param {String} mappedPath
-   * @param {Function} handler
-   */
-
-  Router.prototype._addGuard = function _addGuard(path, mappedPath, _handler) {
-    var _this = this;
-
-    this._guardRecognizer.add([{
-      path: path,
-      handler: function handler(match, query) {
-        var realPath = mapParams(mappedPath, match.params, query);
-        _handler.call(_this, realPath);
-      }
-    }]);
-  };
-
-  /**
-   * Check if a path matches any redirect records.
-   *
-   * @param {String} path
-   * @return {Boolean} - if true, will skip normal match.
-   */
-
-  Router.prototype._checkGuard = function _checkGuard(path) {
-    var matched = this._guardRecognizer.recognize(path);
-    if (matched) {
-      matched[0].handler(matched[0], matched.queryParams);
-      return true;
-    } else if (this._notFoundRedirect) {
-      matched = this._recognizer.recognize(path);
-      if (!matched) {
-        this.replace(this._notFoundRedirect);
-        return true;
-      }
-    }
-  };
-
-  /**
-   * Match a URL path and set the route context on vm,
-   * triggering view updates.
-   *
-   * @param {String} path
-   * @param {Object} [state]
-   * @param {String} [anchor]
-   */
-
-  Router.prototype._match = function _match(path, state, anchor) {
-    var _this2 = this;
-
-    if (this._checkGuard(path)) {
-      return;
-    }
-
-    var currentRoute = this._currentRoute;
-    var currentTransition = this._currentTransition;
-
-    if (currentTransition) {
-      if (currentTransition.to.path === path) {
-        // do nothing if we have an active transition going to the same path
-        return;
-      } else if (currentRoute.path === path) {
-        // We are going to the same path, but we also have an ongoing but
-        // not-yet-validated transition. Abort that transition and reset to
-        // prev transition.
-        currentTransition.aborted = true;
-        this._currentTransition = this._prevTransition;
-        return;
-      } else {
-        // going to a totally different path. abort ongoing transition.
-        currentTransition.aborted = true;
-      }
-    }
-
-    // construct new route and transition context
-    var route = new Route(path, this);
-    var transition = new RouteTransition(this, route, currentRoute);
-
-    // current transition is updated right now.
-    // however, current route will only be updated after the transition has
-    // been validated.
-    this._prevTransition = currentTransition;
-    this._currentTransition = transition;
-
-    if (!this.app) {
-      // initial render
-      this.app = new this._appConstructor({
-        el: this._appContainer,
-        _meta: {
-          $route: route
-        }
-      });
-    }
-
-    // check global before hook
-    var beforeHooks = this._beforeEachHooks;
-    var startTransition = function startTransition() {
-      transition.start(function () {
-        _this2._postTransition(route, state, anchor);
-      });
-    };
-
-    if (beforeHooks.length) {
-      transition.runQueue(beforeHooks, function (hook, _, next) {
-        if (transition === _this2._currentTransition) {
-          transition.callHook(hook, null, next, {
-            expectBoolean: true
-          });
-        }
-      }, startTransition);
-    } else {
-      startTransition();
-    }
-
-    if (!this._rendered && this._startCb) {
-      this._startCb.call(null);
-    }
-
-    // HACK:
-    // set rendered to true after the transition start, so
-    // that components that are acitvated synchronously know
-    // whether it is the initial render.
-    this._rendered = true;
-  };
-
-  /**
-   * Set current to the new transition.
-   * This is called by the transition object when the
-   * validation of a route has succeeded.
-   *
-   * @param {Transition} transition
-   */
-
-  Router.prototype._onTransitionValidated = function _onTransitionValidated(transition) {
-    // set current route
-    var route = this._currentRoute = transition.to;
-    // update route context for all children
-    if (this.app.$route !== route) {
-      this.app.$route = route;
-      this._children.forEach(function (child) {
-        child.$route = route;
-      });
-    }
-    // call global after hook
-    if (this._afterEachHooks.length) {
-      this._afterEachHooks.forEach(function (hook) {
-        return hook.call(null, {
-          to: transition.to,
-          from: transition.from
-        });
-      });
-    }
-    this._currentTransition.done = true;
-  };
-
-  /**
-   * Handle stuff after the transition.
-   *
-   * @param {Route} route
-   * @param {Object} [state]
-   * @param {String} [anchor]
-   */
-
-  Router.prototype._postTransition = function _postTransition(route, state, anchor) {
-    // handle scroll positions
-    // saved scroll positions take priority
-    // then we check if the path has an anchor
-    var pos = state && state.pos;
-    if (pos && this._saveScrollPosition) {
-      Vue.nextTick(function () {
-        window.scrollTo(pos.x, pos.y);
-      });
-    } else if (anchor) {
-      Vue.nextTick(function () {
-        var el = document.getElementById(anchor.slice(1));
-        if (el) {
-          window.scrollTo(window.scrollX, el.offsetTop);
-        }
-      });
-    }
-  };
-
-  /**
-   * Normalize named route object / string paths into
-   * a string.
-   *
-   * @param {Object|String|Number} path
-   * @return {String}
-   */
-
-  Router.prototype._stringifyPath = function _stringifyPath(path) {
-    if (path && typeof path === 'object') {
-      if (path.name) {
-        var params = path.params || {};
-        if (path.query) {
-          params.queryParams = path.query;
-        }
-        return this._recognizer.generate(path.name, params);
-      } else if (path.path) {
-        var fullPath = path.path;
-        if (path.query) {
-          var query = this._recognizer.generateQueryString(path.query);
-          if (fullPath.indexOf('?') > -1) {
-            fullPath += '&' + query.slice(1);
-          } else {
-            fullPath += query;
-          }
-        }
-        return fullPath;
-      } else {
-        return '';
-      }
-    } else {
-      return path ? path + '' : '';
-    }
-  };
-
-  return Router;
-})();
-
-function guardComponent(path, handler) {
-  var comp = handler.component;
-  if (Vue.util.isPlainObject(comp)) {
-    comp = handler.component = Vue.extend(comp);
-  }
-  /* istanbul ignore if */
-  if (typeof comp !== 'function') {
-    handler.component = null;
-    warn('invalid component for route "' + path + '".');
-  }
-}
-
-/* Installation */
-
-Router.installed = false;
-
-/**
- * Installation interface.
- * Install the necessary directives.
- */
-
-Router.install = function (externalVue) {
-  /* istanbul ignore if */
-  if (Router.installed) {
-    warn('already installed.');
-    return;
-  }
-  Vue = externalVue;
-  applyOverride(Vue);
-  View(Vue);
-  Link(Vue);
-  exports$1.Vue = Vue;
-  Router.installed = true;
-};
-
-// auto install
-/* istanbul ignore if */
-if (typeof window !== 'undefined' && window.Vue) {
-  window.Vue.use(Router);
-}
-
-module.exports = Router;
-},{}],38:[function(require,module,exports){
+},{"./lib/url-template":30}],35:[function(require,module,exports){
 (function (process){
 /*!
- * Vue.js v1.0.10
- * (c) 2015 Evan You
+ * Vue.js v1.0.15
+ * (c) 2016 Evan You
  * Released under the MIT License.
  */
 'use strict';
@@ -13195,6 +8549,7 @@ function set(obj, key, val) {
       vm._digest();
     }
   }
+  return val;
 }
 
 /**
@@ -13642,23 +8997,29 @@ var p = Cache.prototype;
  */
 
 p.put = function (key, value) {
-  var entry = {
-    key: key,
-    value: value
-  };
-  this._keymap[key] = entry;
-  if (this.tail) {
-    this.tail.newer = entry;
-    entry.older = this.tail;
-  } else {
-    this.head = entry;
-  }
-  this.tail = entry;
+  var removed;
   if (this.size === this.limit) {
-    return this.shift();
-  } else {
+    removed = this.shift();
+  }
+
+  var entry = this.get(key, true);
+  if (!entry) {
+    entry = {
+      key: key
+    };
+    this._keymap[key] = entry;
+    if (this.tail) {
+      this.tail.newer = entry;
+      entry.older = this.tail;
+    } else {
+      this.head = entry;
+    }
+    this.tail = entry;
     this.size++;
   }
+  entry.value = value;
+
+  return removed;
 };
 
 /**
@@ -13674,6 +9035,7 @@ p.shift = function () {
     this.head.older = undefined;
     entry.newer = entry.older = undefined;
     this._keymap[entry.key] = undefined;
+    this.size--;
   }
   return entry;
 };
@@ -13726,6 +9088,7 @@ var reservedArgRE = /^in$|^-?\d+/;
 var str;
 var dir;
 var c;
+var prev;
 var i;
 var l;
 var lastFilterIndex;
@@ -13811,13 +9174,14 @@ function parseDirective(s) {
   dir = {};
 
   for (i = 0, l = str.length; i < l; i++) {
+    prev = c;
     c = str.charCodeAt(i);
     if (inSingle) {
       // check single quote
-      if (c === 0x27) inSingle = !inSingle;
+      if (c === 0x27 && prev !== 0x5C) inSingle = !inSingle;
     } else if (inDouble) {
       // check double quote
-      if (c === 0x22) inDouble = !inDouble;
+      if (c === 0x22 && prev !== 0x5C) inDouble = !inDouble;
     } else if (c === 0x7C && // pipe
     str.charCodeAt(i + 1) !== 0x7C && str.charCodeAt(i - 1) !== 0x7C) {
       if (dir.expression == null) {
@@ -13955,16 +9319,17 @@ function parseText(text) {
  * into one single expression as '"a " + b + " c"'.
  *
  * @param {Array} tokens
+ * @param {Vue} [vm]
  * @return {String}
  */
 
-function tokensToExp(tokens) {
+function tokensToExp(tokens, vm) {
   if (tokens.length > 1) {
     return tokens.map(function (token) {
-      return formatToken(token);
+      return formatToken(token, vm);
     }).join('+');
   } else {
-    return formatToken(tokens[0], true);
+    return formatToken(tokens[0], vm, true);
   }
 }
 
@@ -13972,12 +9337,13 @@ function tokensToExp(tokens) {
  * Format a single token.
  *
  * @param {Object} token
- * @param {Boolean} single
+ * @param {Vue} [vm]
+ * @param {Boolean} [single]
  * @return {String}
  */
 
-function formatToken(token, single) {
-  return token.tag ? inlineFilters(token.value, single) : '"' + token.value + '"';
+function formatToken(token, vm, single) {
+  return token.tag ? token.oneTime && vm ? '"' + vm.$eval(token.value) + '"' : inlineFilters(token.value, single) : '"' + token.value + '"';
 }
 
 /**
@@ -14288,6 +9654,18 @@ function getBindAttr(node, name) {
 }
 
 /**
+ * Check the presence of a bind attribute.
+ *
+ * @param {Node} node
+ * @param {String} name
+ * @return {Boolean}
+ */
+
+function hasBindAttr(node, name) {
+  return node.hasAttribute(name) || node.hasAttribute(':' + name) || node.hasAttribute('v-bind:' + name);
+}
+
+/**
  * Insert el before target
  *
  * @param {Element} el
@@ -14377,10 +9755,29 @@ function off(el, event, cb) {
 }
 
 /**
+ * In IE9, setAttribute('class') will result in empty class
+ * if the element also has the :class attribute; However in
+ * PhantomJS, setting `className` does not work on SVG elements...
+ * So we have to do a conditional check here.
+ *
+ * @param {Element} el
+ * @param {String} cls
+ */
+
+function setClass(el, cls) {
+  /* istanbul ignore if */
+  if (isIE9 && !(el instanceof SVGElement)) {
+    el.className = cls;
+  } else {
+    el.setAttribute('class', cls);
+  }
+}
+
+/**
  * Add class with compatibility for IE & SVG
  *
  * @param {Element} el
- * @param {Strong} cls
+ * @param {String} cls
  */
 
 function addClass(el, cls) {
@@ -14389,7 +9786,7 @@ function addClass(el, cls) {
   } else {
     var cur = ' ' + (el.getAttribute('class') || '') + ' ';
     if (cur.indexOf(' ' + cls + ' ') < 0) {
-      el.setAttribute('class', (cur + cls).trim());
+      setClass(el, (cur + cls).trim());
     }
   }
 }
@@ -14398,7 +9795,7 @@ function addClass(el, cls) {
  * Remove class with compatibility for IE & SVG
  *
  * @param {Element} el
- * @param {Strong} cls
+ * @param {String} cls
  */
 
 function removeClass(el, cls) {
@@ -14410,7 +9807,7 @@ function removeClass(el, cls) {
     while (cur.indexOf(tar) >= 0) {
       cur = cur.replace(tar, ' ');
     }
-    el.setAttribute('class', cur.trim());
+    setClass(el, cur.trim());
   }
   if (!el.className) {
     el.removeAttribute('class');
@@ -14570,6 +9967,7 @@ function removeNodeRange(start, end, vm, frag, cb) {
 }
 
 var commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/;
+var reservedTagRE = /^(slot|partial|component)$/;
 
 /**
  * Check if an element is a component, if yes return its
@@ -14583,7 +9981,7 @@ var commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre
 function checkComponentAttr(el, options) {
   var tag = el.tagName.toLowerCase();
   var hasAttrs = el.hasAttributes();
-  if (!commonTagRE.test(tag) && tag !== 'component') {
+  if (!commonTagRE.test(tag) && !reservedTagRE.test(tag)) {
     if (resolveAsset(options, 'components', tag)) {
       return { id: tag };
     } else {
@@ -14634,6 +10032,7 @@ function getIsBinding(el) {
 
 function initProp(vm, prop, value) {
   var key = prop.path;
+  value = coerceProp(prop, value);
   vm[key] = vm._data[key] = assertProp(prop, value) ? value : undefined;
 }
 
@@ -14689,6 +10088,23 @@ function assertProp(prop, value) {
     }
   }
   return true;
+}
+
+/**
+ * Force parsing value with coerce option.
+ *
+ * @param {*} value
+ * @param {Object} options
+ * @return {*}
+ */
+
+function coerceProp(prop, value) {
+  var coerce = prop.options.coerce;
+  if (!coerce) {
+    return value;
+  }
+  // coerce is a function
+  return coerce(value);
 }
 
 function formatType(val) {
@@ -14876,8 +10292,8 @@ function guardComponents(options) {
     var ids = Object.keys(components);
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i];
-      if (commonTagRE.test(key)) {
-        process.env.NODE_ENV !== 'production' && warn('Do not use built-in HTML elements as component ' + 'id: ' + key);
+      if (commonTagRE.test(key) || reservedTagRE.test(key)) {
+        process.env.NODE_ENV !== 'production' && warn('Do not use built-in or reserved HTML elements as component ' + 'id: ' + key);
         continue;
       }
       def = components[key];
@@ -15064,7 +10480,7 @@ var arrayMethods = Object.create(arrayProto)
 
 def(arrayProto, '$set', function $set(index, val) {
   if (index >= this.length) {
-    this.length = index + 1;
+    this.length = Number(index) + 1;
   }
   return this.splice(index, 1, val)[0];
 });
@@ -15180,8 +10596,7 @@ function Observer(value) {
 
 Observer.prototype.walk = function (obj) {
   var keys = Object.keys(obj);
-  var i = keys.length;
-  while (i--) {
+  for (var i = 0, l = keys.length; i < l; i++) {
     this.convert(keys[i], obj[keys[i]]);
   }
 };
@@ -15193,8 +10608,7 @@ Observer.prototype.walk = function (obj) {
  */
 
 Observer.prototype.observeArray = function (items) {
-  var i = items.length;
-  while (i--) {
+  for (var i = 0, l = items.length; i < l; i++) {
     observe(items[i]);
   }
 };
@@ -15258,10 +10672,8 @@ function protoAugment(target, src) {
  */
 
 function copyAugment(target, src, keys) {
-  var i = keys.length;
-  var key;
-  while (i--) {
-    key = keys[i];
+  for (var i = 0, l = keys.length; i < l; i++) {
+    var key = keys[i];
     def(target, key, src[key]);
   }
 }
@@ -15284,7 +10696,7 @@ function observe(value, vm) {
   var ob;
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__;
-  } else if ((isArray(value) || isPlainObject(value)) && !Object.isFrozen(value) && !value._isVue) {
+  } else if ((isArray(value) || isPlainObject(value)) && Object.isExtensible(value) && !value._isVue) {
     ob = new Observer(value);
   }
   if (ob && vm) {
@@ -15389,6 +10801,7 @@ var util = Object.freeze({
 	inDoc: inDoc,
 	getAttr: getAttr,
 	getBindAttr: getBindAttr,
+	hasBindAttr: hasBindAttr,
 	before: before,
 	after: after,
 	remove: remove,
@@ -15396,6 +10809,7 @@ var util = Object.freeze({
 	replace: replace,
 	on: on$1,
 	off: off,
+	setClass: setClass,
 	addClass: addClass,
 	removeClass: removeClass,
 	extractContent: extractContent,
@@ -15411,7 +10825,9 @@ var util = Object.freeze({
 	checkComponentAttr: checkComponentAttr,
 	initProp: initProp,
 	assertProp: assertProp,
+	coerceProp: coerceProp,
 	commonTagRE: commonTagRE,
+	reservedTagRE: reservedTagRE,
 	get warn () { return warn; }
 });
 
@@ -15862,11 +11278,11 @@ var improperKeywordsRE = new RegExp('^(' + improperKeywords.replace(/,/g, '\\b|'
 
 var wsRE = /\s/g;
 var newlineRE = /\n/g;
-var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new |typeof |void /g;
+var saveRE = /[\{,]\s*[\w\$_]+\s*:|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|new |typeof |void /g;
 var restoreRE = /"(\d+)"/g;
-var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/;
-var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g;
-var booleanLiteralRE = /^(true|false)$/;
+var pathTestRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/;
+var identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g;
+var booleanLiteralRE = /^(?:true|false)$/;
 
 /**
  * Save / Rewrite / Restore
@@ -15949,7 +11365,7 @@ function compileGetter(exp) {
   var body = exp.replace(saveRE, save).replace(wsRE, '');
   // rewrite all paths
   // pad 1 space here becaue the regex matches 1 extra char
-  body = (' ' + body).replace(pathReplaceRE, rewrite).replace(restoreRE, restore);
+  body = (' ' + body).replace(identRE, rewrite).replace(restoreRE, restore);
   return makeGetterFn(body);
 }
 
@@ -16339,11 +11755,11 @@ Watcher.prototype.run = function () {
   if (this.active) {
     var value = this.get();
     if (value !== this.value ||
-    // Deep watchers and Array watchers should fire even
+    // Deep watchers and watchers on Object/Arrays should fire even
     // when the value is the same, because the value may
     // have mutated; but only do so if this is a
     // non-shallow update (caused by a vm digest).
-    (isArray(value) || this.deep) && !this.shallow) {
+    (isObject(value) || this.deep) && !this.shallow) {
       // set new value
       var oldValue = this.value;
       this.value = value;
@@ -16441,7 +11857,7 @@ function traverse(val) {
 var cloak = {
   bind: function bind() {
     var el = this.el;
-    this.vm.$once('hook:compiled', function () {
+    this.vm.$once('pre-hook:compiled', function () {
       el.removeAttribute('v-cloak');
     });
   }
@@ -16453,9 +11869,20 @@ var ref = {
   }
 };
 
+var ON = 700;
+var MODEL = 800;
+var BIND = 850;
+var TRANSITION = 1100;
+var EL = 1500;
+var COMPONENT = 1500;
+var PARTIAL = 1750;
+var FOR = 2000;
+var IF = 2000;
+var SLOT = 2100;
+
 var el = {
 
-  priority: 1500,
+  priority: EL,
 
   bind: function bind() {
     /* istanbul ignore if */
@@ -16589,13 +12016,11 @@ function prefix(prop) {
 var xlinkNS = 'http://www.w3.org/1999/xlink';
 var xlinkRE = /^xlink:/;
 
-// these input element attributes should also set their
-// corresponding properties
-var inputProps = {
-  value: 1,
-  checked: 1,
-  selected: 1
-};
+// check for attributes that prohibit interpolations
+var disallowedInterpAttrRE = /^v-|^:|^@|^(?:is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/;
+// these attributes should also set their corresponding properties
+// because they only affect the initial state of the element
+var attrWithPropsRE = /^(?:value|checked|selected|muted)$/;
 
 // these attributes should set a hidden property for
 // binding v-model to object values
@@ -16605,12 +12030,9 @@ var modelProps = {
   'false-value': '_falseValue'
 };
 
-// check for attributes that prohibit interpolations
-var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/;
-
 var bind = {
 
-  priority: 850,
+  priority: BIND,
 
   bind: function bind() {
     var attr = this.arg;
@@ -16620,17 +12042,24 @@ var bind = {
       this.deep = true;
     }
     // handle interpolation bindings
-    if (this.descriptor.interp) {
+    var descriptor = this.descriptor;
+    var tokens = descriptor.interp;
+    if (tokens) {
+      // handle interpolations with one-time tokens
+      if (descriptor.hasOneTime) {
+        this.expression = tokensToExp(tokens, this._scope || this.vm);
+      }
+
       // only allow binding on native attributes
       if (disallowedInterpAttrRE.test(attr) || attr === 'name' && (tag === 'PARTIAL' || tag === 'SLOT')) {
-        process.env.NODE_ENV !== 'production' && warn(attr + '="' + this.descriptor.raw + '": ' + 'attribute interpolation is not allowed in Vue.js ' + 'directives and special attributes.');
+        process.env.NODE_ENV !== 'production' && warn(attr + '="' + descriptor.raw + '": ' + 'attribute interpolation is not allowed in Vue.js ' + 'directives and special attributes.');
         this.el.removeAttribute(attr);
         this.invalid = true;
       }
 
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production') {
-        var raw = attr + '="' + this.descriptor.raw + '": ';
+        var raw = attr + '="' + descriptor.raw + '": ';
         // warn src
         if (attr === 'src') {
           warn(raw + 'interpolation in "src" attribute will cause ' + 'a 404 request. Use v-bind:src instead.');
@@ -16660,34 +12089,43 @@ var bind = {
   handleObject: style.handleObject,
 
   handleSingle: function handleSingle(attr, value) {
-    if (inputProps[attr] && attr in this.el) {
-      this.el[attr] = attr === 'value' ? value || '' : // IE9 will set input.value to "null" for null...
-      value;
+    var el = this.el;
+    var interp = this.descriptor.interp;
+    if (!interp && attrWithPropsRE.test(attr) && attr in el) {
+      el[attr] = attr === 'value' ? value == null // IE9 will set input.value to "null" for null...
+      ? '' : value : value;
     }
     // set model props
     var modelProp = modelProps[attr];
-    if (modelProp) {
-      this.el[modelProp] = value;
+    if (!interp && modelProp) {
+      el[modelProp] = value;
       // update v-model if present
-      var model = this.el.__v_model;
+      var model = el.__v_model;
       if (model) {
         model.listener();
       }
     }
     // do not set value attribute for textarea
-    if (attr === 'value' && this.el.tagName === 'TEXTAREA') {
-      this.el.removeAttribute(attr);
+    if (attr === 'value' && el.tagName === 'TEXTAREA') {
+      el.removeAttribute(attr);
       return;
     }
     // update attribute
     if (value != null && value !== false) {
-      if (xlinkRE.test(attr)) {
-        this.el.setAttributeNS(xlinkNS, attr, value);
+      if (attr === 'class') {
+        // handle edge case #1960:
+        // class interpolation should not overwrite Vue transition class
+        if (el.__v_trans) {
+          value += ' ' + el.__v_trans.id + '-transition';
+        }
+        setClass(el, value);
+      } else if (xlinkRE.test(attr)) {
+        el.setAttributeNS(xlinkNS, attr, value);
       } else {
-        this.el.setAttribute(attr, value);
+        el.setAttribute(attr, value);
       }
     } else {
-      this.el.removeAttribute(attr);
+      el.removeAttribute(attr);
     }
   }
 };
@@ -16743,7 +12181,7 @@ function preventFilter(handler) {
 var on = {
 
   acceptStatement: true,
-  priority: 700,
+  priority: ON,
 
   bind: function bind() {
     // deal with iframes
@@ -16843,7 +12281,7 @@ var checkbox = {
     };
 
     this.on('change', this.listener);
-    if (el.checked) {
+    if (el.hasAttribute('checked')) {
       this.afterBind = this.listener;
     }
   },
@@ -16989,7 +12427,7 @@ var radio = {
     };
     this.on('change', this.listener);
 
-    if (el.checked) {
+    if (el.hasAttribute('checked')) {
       this.afterBind = this.listener;
     }
   },
@@ -17037,19 +12475,24 @@ var text$2 = {
     // prevent messing with the input when user is typing,
     // and force update on blur.
     this.focused = false;
-    if (!isRange) {
+    if (!isRange && !lazy) {
       this.on('focus', function () {
         self.focused = true;
       });
       this.on('blur', function () {
         self.focused = false;
-        self.listener();
+        // do not sync value after fragment removal (#2017)
+        if (!self._frag || self._frag.inserted) {
+          self.rawListener();
+        }
       });
     }
 
     // Now attach the main listener
-    this.listener = function () {
-      if (composing) return;
+    this.listener = this.rawListener = function () {
+      if (composing || !self._bound) {
+        return;
+      }
       var val = number || isRange ? toNumber(el.value) : el.value;
       self.set(val);
       // force update on next tick to avoid lock & same value
@@ -17129,7 +12572,7 @@ var handlers = {
 
 var model = {
 
-  priority: 800,
+  priority: MODEL,
   twoWay: true,
   handlers: handlers,
   params: ['lazy', 'number', 'debounce'],
@@ -17213,9 +12656,14 @@ var show = {
   },
 
   apply: function apply(el, value) {
-    applyTransition(el, value ? 1 : -1, function () {
+    if (inDoc(el)) {
+      applyTransition(el, value ? 1 : -1, toggle, this.vm);
+    } else {
+      toggle();
+    }
+    function toggle() {
       el.style.display = value ? '' : 'none';
-    }, this.vm);
+    }
   }
 };
 
@@ -17250,7 +12698,7 @@ function isRealTemplate(node) {
 }
 
 var tagRE$1 = /<([\w:]+)/;
-var entityRE = /&\w+;|&#\d+;|&#x[\dA-F]+;/;
+var entityRE = /&#?\w+?;/;
 
 /**
  * Convert a string template to a DocumentFragment.
@@ -17285,10 +12733,8 @@ function stringToFragment(templateString, raw) {
     var suffix = wrap[2];
     var node = document.createElement('div');
 
-    if (!raw) {
-      templateString = templateString.trim();
-    }
-    node.innerHTML = prefix + templateString + suffix;
+    var templateStringToUse = raw ? templateString : templateString.trim();
+    node.innerHTML = prefix + templateStringToUse + suffix;
     while (depth--) {
       node = node.lastChild;
     }
@@ -17519,23 +12965,12 @@ function Fragment(linker, vm, frag, host, scope, parentFrag) {
 
 Fragment.prototype.callHook = function (hook) {
   var i, l;
-  for (i = 0, l = this.children.length; i < l; i++) {
-    hook(this.children[i]);
-  }
   for (i = 0, l = this.childFrags.length; i < l; i++) {
     this.childFrags[i].callHook(hook);
   }
-};
-
-/**
- * Destroy the fragment.
- */
-
-Fragment.prototype.destroy = function () {
-  if (this.parentFrag) {
-    this.parentFrag.childFrags.$remove(this);
+  for (i = 0, l = this.children.length; i < l; i++) {
+    hook(this.children[i]);
   }
-  this.unlink();
 };
 
 /**
@@ -17562,7 +12997,7 @@ function singleRemove() {
   this.inserted = false;
   var shouldCallRemove = inDoc(this.node);
   var self = this;
-  self.callHook(destroyChild);
+  this.beforeRemove();
   removeWithTransition(this.node, this.vm, function () {
     if (shouldCallRemove) {
       self.callHook(detach);
@@ -17598,7 +13033,7 @@ function multiRemove() {
   this.inserted = false;
   var self = this;
   var shouldCallRemove = inDoc(this.node);
-  self.callHook(destroyChild);
+  this.beforeRemove();
   removeNodeRange(this.node, this.end, this.vm, this.frag, function () {
     if (shouldCallRemove) {
       self.callHook(detach);
@@ -17606,6 +13041,46 @@ function multiRemove() {
     self.destroy();
   });
 }
+
+/**
+ * Prepare the fragment for removal.
+ */
+
+Fragment.prototype.beforeRemove = function () {
+  var i, l;
+  for (i = 0, l = this.childFrags.length; i < l; i++) {
+    // call the same method recursively on child
+    // fragments, depth-first
+    this.childFrags[i].beforeRemove(false);
+  }
+  for (i = 0, l = this.children.length; i < l; i++) {
+    // Call destroy for all contained instances,
+    // with remove:false and defer:true.
+    // Defer is necessary because we need to
+    // keep the children to call detach hooks
+    // on them.
+    this.children[i].$destroy(false, true);
+  }
+  var dirs = this.unlink.dirs;
+  for (i = 0, l = dirs.length; i < l; i++) {
+    // disable the watchers on all the directives
+    // so that the rendered content stays the same
+    // during removal.
+    dirs[i]._watcher && dirs[i]._watcher.teardown();
+  }
+};
+
+/**
+ * Destroy the fragment.
+ */
+
+Fragment.prototype.destroy = function () {
+  if (this.parentFrag) {
+    this.parentFrag.childFrags.$remove(this);
+  }
+  this.node.__vfrag__ = null;
+  this.unlink();
+};
 
 /**
  * Call attach hook for a Vue instance.
@@ -17617,20 +13092,6 @@ function attach(child) {
   if (!child._isAttached) {
     child._callHook('attached');
   }
-}
-
-/**
- * Call destroy for all contained instances,
- * with remove:false and defer:true.
- * Defer is necessary because we need to
- * keep the children to call detach hooks
- * on them.
- *
- * @param {Vue} child
- */
-
-function destroyChild(child) {
-  child.$destroy(false, true);
 }
 
 /**
@@ -17696,7 +13157,7 @@ FragmentFactory.prototype.create = function (host, scope, parentFrag) {
 
 var vIf = {
 
-  priority: 2000,
+  priority: IF,
 
   bind: function bind() {
     var el = this.el;
@@ -17759,7 +13220,7 @@ var uid$1 = 0;
 
 var vFor = {
 
-  priority: 2000,
+  priority: FOR,
 
   params: ['track-by', 'stagger', 'enter-stagger', 'leave-stagger'],
 
@@ -18078,6 +13539,14 @@ var vFor = {
    */
 
   move: function move(frag, prevEl) {
+    // fix a common issue with Sortable:
+    // if prevEl doesn't have nextSibling, this means it's
+    // been dragged after the end anchor. Just re-position
+    // the end anchor to the end of the container.
+    /* istanbul ignore if */
+    if (!prevEl.nextSibling) {
+      this.end.parentNode.appendChild(this.end);
+    }
     frag.before(prevEl.nextSibling, false);
   },
 
@@ -18413,8 +13882,8 @@ function flush() {
   return f;
 }
 
-var TYPE_TRANSITION = 1;
-var TYPE_ANIMATION = 2;
+var TYPE_TRANSITION = 'transition';
+var TYPE_ANIMATION = 'animation';
 var transDurationProp = transitionProp + 'Duration';
 var animDurationProp = animationProp + 'Duration';
 
@@ -18430,8 +13899,8 @@ var animDurationProp = animationProp + 'Duration';
 function Transition(el, id, hooks, vm) {
   this.id = id;
   this.el = el;
-  this.enterClass = id + '-enter';
-  this.leaveClass = id + '-leave';
+  this.enterClass = hooks && hooks.enterClass || id + '-enter';
+  this.leaveClass = hooks && hooks.leaveClass || id + '-leave';
   this.hooks = hooks;
   this.vm = vm;
   // async state
@@ -18439,6 +13908,14 @@ function Transition(el, id, hooks, vm) {
   this.justEntered = false;
   this.entered = this.left = false;
   this.typeCache = {};
+  // check css transition type
+  this.type = hooks && hooks.type;
+  /* istanbul ignore if */
+  if (process.env.NODE_ENV !== 'production') {
+    if (this.type && this.type !== TYPE_TRANSITION && this.type !== TYPE_ANIMATION) {
+      warn('invalid CSS transition type for transition="' + this.id + '": ' + this.type);
+    }
+  }
   // bind
   var self = this;['enterNextTick', 'enterDone', 'leaveNextTick', 'leaveDone'].forEach(function (m) {
     self[m] = bind$1(self[m], self);
@@ -18698,7 +14175,7 @@ p$1.getCssTransitionType = function (className) {
   isHidden(this.el)) {
     return;
   }
-  var type = this.typeCache[className];
+  var type = this.type || this.typeCache[className];
   if (type) return type;
   var inlineStyles = this.el.style;
   var computedStyles = window.getComputedStyle(this.el);
@@ -18754,7 +14231,7 @@ function isHidden(el) {
 
 var transition = {
 
-  priority: 1100,
+  priority: TRANSITION,
 
   update: function update(id, oldId) {
     var el = this.el;
@@ -18785,6 +14262,7 @@ var propDef = {
     var twoWay = prop.mode === bindingModes.TWO_WAY;
 
     var parentWatcher = this.parentWatcher = new Watcher(parent, parentKey, function (val) {
+      val = coerceProp(prop, val);
       if (assertProp(prop, val)) {
         child[childKey] = val;
       }
@@ -18804,7 +14282,7 @@ var propDef = {
       // important: defer the child watcher creation until
       // the created hook (after data observation)
       var self = this;
-      child.$once('hook:created', function () {
+      child.$once('pre-hook:created', function () {
         self.childWatcher = new Watcher(child, childKey, function (val) {
           parentWatcher.set(val);
         }, {
@@ -18827,7 +14305,7 @@ var propDef = {
 
 var component = {
 
-  priority: 1500,
+  priority: COMPONENT,
 
   params: ['keep-alive', 'transition-mode', 'inline-template'],
 
@@ -18952,6 +14430,9 @@ var component = {
     if (activateHook && !cached) {
       this.waitingFor = newComponent;
       activateHook.call(newComponent, function () {
+        if (self.waitingFor !== newComponent) {
+          return;
+        }
         self.waitingFor = null;
         self.transition(newComponent, cb);
       });
@@ -19236,7 +14717,7 @@ var propBindingModes = config._propBindingModes;
 var empty = {};
 
 // regexes
-var identRE = /^[$_a-zA-Z]+[\w$]*$/;
+var identRE$1 = /^[$_a-zA-Z]+[\w$]*$/;
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/;
 
 /**
@@ -19266,7 +14747,7 @@ function compileProps(el, propOptions) {
     // interpreted as minus calculations by the parser
     // so we need to camelize the path here
     path = camelize(name);
-    if (!identRE.test(path)) {
+    if (!identRE$1.test(path)) {
       process.env.NODE_ENV !== 'production' && warn('Invalid prop key: "' + name + '". Prop keys ' + 'must be valid identifiers.');
       continue;
     }
@@ -19295,7 +14776,7 @@ function compileProps(el, propOptions) {
       value = parsed.expression;
       prop.filters = parsed.filters;
       // check binding type
-      if (isLiteral(value)) {
+      if (isLiteral(value) && !parsed.filters) {
         // for expressions containing literal numbers and
         // booleans, there's no need to setup a prop binding,
         // so we can optimize them as a one-time set.
@@ -19514,12 +14995,15 @@ function directiveComparator(a, b) {
  */
 
 function makeUnlinkFn(vm, dirs, context, contextDirs) {
-  return function unlink(destroying) {
+  function unlink(destroying) {
     teardownDirs(vm, dirs, destroying);
     if (context && contextDirs) {
       teardownDirs(context, contextDirs);
     }
-  };
+  }
+  // expose linked directives
+  unlink.dirs = dirs;
+  return unlink;
 }
 
 /**
@@ -19615,6 +15099,7 @@ function compileRoot(el, options, contextOptions) {
     }
   }
 
+  options._containerAttrs = options._replacerAttrs = null;
   return function rootLinkFn(vm, el, scope) {
     // link context scope dirs
     var context = vm._context;
@@ -19874,6 +15359,11 @@ function makeChildLinkFn(linkFns) {
 function checkElementDirectives(el, options) {
   var tag = el.tagName.toLowerCase();
   if (commonTagRE.test(tag)) return;
+  // special case: give named slot a higher priority
+  // than unnamed slots
+  if (tag === 'slot' && hasBindAttr(el, 'name')) {
+    tag = '_namedSlot';
+  }
   var def = resolveAsset(options, 'elementDirectives', tag);
   if (def) {
     return makeTerminalNodeLinkFn(el, tag, '', options, def);
@@ -19937,11 +15427,10 @@ function checkTerminalDirectives(el, options) {
   var value, dirName;
   for (var i = 0, l = terminalDirectives.length; i < l; i++) {
     dirName = terminalDirectives[i];
-    /* eslint-disable no-cond-assign */
-    if (value = el.getAttribute('v-' + dirName)) {
+    value = el.getAttribute('v-' + dirName);
+    if (value != null) {
       return makeTerminalNodeLinkFn(el, dirName, value, options);
     }
-    /* eslint-enable no-cond-assign */
   }
 }
 
@@ -20013,7 +15502,7 @@ function compileDirectives(attrs, options) {
     if (tokens) {
       value = tokensToExp(tokens);
       arg = name;
-      pushDir('bind', publicDirectives.bind, true);
+      pushDir('bind', publicDirectives.bind, tokens);
       // warn against mixing mustaches with v-bind
       if (process.env.NODE_ENV !== 'production') {
         if (name === 'class' && Array.prototype.some.call(attrs, function (attr) {
@@ -20079,11 +15568,12 @@ function compileDirectives(attrs, options) {
    *
    * @param {String} dirName
    * @param {Object|Function} def
-   * @param {Boolean} [interp]
+   * @param {Array} [interpTokens]
    */
 
-  function pushDir(dirName, def, interp) {
-    var parsed = parseDirective(value);
+  function pushDir(dirName, def, interpTokens) {
+    var hasOneTimeToken = interpTokens && hasOneTime(interpTokens);
+    var parsed = !hasOneTimeToken && parseDirective(value);
     dirs.push({
       name: dirName,
       attr: rawName,
@@ -20091,9 +15581,13 @@ function compileDirectives(attrs, options) {
       def: def,
       arg: arg,
       modifiers: modifiers,
-      expression: parsed.expression,
-      filters: parsed.filters,
-      interp: interp
+      // conversion from interpolation strings with one-time token
+      // to expression is differed until directive bind time so that we
+      // have access to the actual vm context for one-time bindings.
+      expression: parsed && parsed.expression,
+      filters: parsed && parsed.filters,
+      interp: interpTokens,
+      hasOneTime: hasOneTimeToken
     });
   }
 
@@ -20136,6 +15630,20 @@ function makeNodeLinkFn(directives) {
       vm._bindDir(directives[i], el, host, scope, frag);
     }
   };
+}
+
+/**
+ * Check if an interpolation string contains one-time tokens.
+ *
+ * @param {Array} tokens
+ * @return {Boolean}
+ */
+
+function hasOneTime(tokens) {
+  var i = tokens.length;
+  while (i--) {
+    if (tokens[i].oneTime) return true;
+  }
 }
 
 var specialCharRE = /[^\w\-:\.]/;
@@ -20214,7 +15722,7 @@ function transcludeTemplate(el, options) {
       // non-element template
       replacer.nodeType !== 1 ||
       // single nested component
-      tag === 'component' || resolveAsset(options, 'components', tag) || replacer.hasAttribute('is') || replacer.hasAttribute(':is') || replacer.hasAttribute('v-bind:is') ||
+      tag === 'component' || resolveAsset(options, 'components', tag) || hasBindAttr(replacer, 'is') ||
       // element directive
       resolveAsset(options, 'elementDirectives', tag) ||
       // for block
@@ -20267,7 +15775,7 @@ function mergeAttrs(from, to) {
     value = attrs[i].value;
     if (!to.hasAttribute(name) && !specialCharRE.test(name)) {
       to.setAttribute(name, value);
-    } else if (name === 'class') {
+    } else if (name === 'class' && !parseText(value)) {
       value.split(/\s+/).forEach(function (cls) {
         addClass(to, cls);
       });
@@ -20279,6 +15787,7 @@ var compiler = Object.freeze({
 	compile: compile,
 	compileAndLinkProps: compileAndLinkProps,
 	compileRoot: compileRoot,
+	terminalDirectives: terminalDirectives,
 	transclude: transclude
 });
 
@@ -20557,6 +16066,7 @@ function eventsMixin (Vue) {
       if (eventRE.test(name)) {
         name = name.replace(eventRE, '');
         handler = (vm._scope || vm._context).$eval(attrs[i].value, true);
+        handler._fromParent = true;
         vm.$on(name.replace(eventRE), handler);
       }
     }
@@ -20674,6 +16184,7 @@ function eventsMixin (Vue) {
    */
 
   Vue.prototype._callHook = function (hook) {
+    this.$emit('pre-hook:' + hook);
     var handlers = this.$options[hook];
     if (handlers) {
       for (var i = 0, j = handlers.length; i < j; i++) {
@@ -20768,6 +16279,7 @@ Directive.prototype._bind = function () {
   if (this.bind) {
     this.bind();
   }
+  this._bound = true;
 
   if (this.literal) {
     this.update && this.update(descriptor.raw);
@@ -20803,7 +16315,6 @@ Directive.prototype._bind = function () {
       this.update(watcher.value);
     }
   }
-  this._bound = true;
 };
 
 /**
@@ -20860,7 +16371,8 @@ Directive.prototype._setupParamWatcher = function (key, expression) {
       called = true;
     }
   }, {
-    immediate: true
+    immediate: true,
+    user: false
   });(this._paramUnwatchFns || (this._paramUnwatchFns = [])).push(unwatch);
 };
 
@@ -21024,6 +16536,11 @@ function lifecycleMixin (Vue) {
     el = transclude(el, options);
     this._initElement(el);
 
+    // handle v-pre on root node (#2026)
+    if (el.nodeType === 1 && getAttr(el, 'v-pre') !== null) {
+      return;
+    }
+
     // root is always compiled per-instance, because
     // container attrs and props can be different every time.
     var contextOptions = this._context && this._context.$options;
@@ -21121,6 +16638,30 @@ function lifecycleMixin (Vue) {
       }
       return;
     }
+
+    var destroyReady;
+    var pendingRemoval;
+
+    var self = this;
+    // Cleanup should be called either synchronously or asynchronoysly as
+    // callback of this.$remove(), or if remove and deferCleanup are false.
+    // In any case it should be called after all other removing, unbinding and
+    // turning of is done
+    var cleanupIfPossible = function cleanupIfPossible() {
+      if (destroyReady && !pendingRemoval && !deferCleanup) {
+        self._cleanup();
+      }
+    };
+
+    // remove DOM element
+    if (remove && this.$el) {
+      pendingRemoval = true;
+      this.$remove(function () {
+        pendingRemoval = false;
+        cleanupIfPossible();
+      });
+    }
+
     this._callHook('beforeDestroy');
     this._isBeingDestroyed = true;
     var i;
@@ -21154,15 +16695,9 @@ function lifecycleMixin (Vue) {
     if (this.$el) {
       this.$el.__vue__ = null;
     }
-    // remove DOM element
-    var self = this;
-    if (remove && this.$el) {
-      this.$remove(function () {
-        self._cleanup();
-      });
-    } else if (!deferCleanup) {
-      this._cleanup();
-    }
+
+    destroyReady = true;
+    cleanupIfPossible();
   };
 
   /**
@@ -21343,6 +16878,12 @@ function globalAPI (Vue) {
       return extendOptions._Ctor;
     }
     var name = extendOptions.name || Super.options.name;
+    if (process.env.NODE_ENV !== 'production') {
+      if (!/^[a-zA-Z][\w-]+$/.test(name)) {
+        warn('Invalid component name: ' + name);
+        name = null;
+      }
+    }
     var Sub = createClass(name || 'VueComponent');
     Sub.prototype = Object.create(Super.prototype);
     Sub.prototype.constructor = Sub;
@@ -21427,8 +16968,8 @@ function globalAPI (Vue) {
       } else {
         /* istanbul ignore if */
         if (process.env.NODE_ENV !== 'production') {
-          if (type === 'component' && commonTagRE.test(id)) {
-            warn('Do not use built-in HTML elements as component ' + 'id: ' + id);
+          if (type === 'component' && (commonTagRE.test(id) || reservedTagRE.test(id))) {
+            warn('Do not use built-in or reserved HTML elements as component ' + 'id: ' + id);
           }
         }
         if (type === 'component' && isPlainObject(definition)) {
@@ -21460,7 +17001,10 @@ function dataAPI (Vue) {
       if (asStatement && !isSimplePath(exp)) {
         var self = this;
         return function statementHandler() {
-          res.get.call(self, self);
+          self.$arguments = toArray(arguments);
+          var result = res.get.call(self, self);
+          self.$arguments = null;
+          return result;
         };
       } else {
         try {
@@ -21517,7 +17061,9 @@ function dataAPI (Vue) {
     }
     var watcher = new Watcher(vm, expOrFn, cb, {
       deep: options && options.deep,
-      filters: parsed && parsed.filters
+      sync: options && options.sync,
+      filters: parsed && parsed.filters,
+      user: !options || options.user !== false
     });
     if (options && options.immediate) {
       cb.call(vm, watcher.value);
@@ -21878,19 +17424,32 @@ function eventsAPI (Vue) {
   /**
    * Trigger an event on self.
    *
-   * @param {String} event
+   * @param {String|Object} event
    * @return {Boolean} shouldPropagate
    */
 
   Vue.prototype.$emit = function (event) {
+    var isSource = typeof event === 'string';
+    event = isSource ? event : event.name;
     var cbs = this._events[event];
-    var shouldPropagate = !cbs;
+    var shouldPropagate = isSource || !cbs;
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs;
+      // this is a somewhat hacky solution to the question raised
+      // in #2102: for an inline component listener like <comp @test="doThis">,
+      // the propagation handling is somewhat broken. Therefore we
+      // need to treat these inline callbacks differently.
+      var hasParentCbs = isSource && cbs.some(function (cb) {
+        return cb._fromParent;
+      });
+      if (hasParentCbs) {
+        shouldPropagate = false;
+      }
       var args = toArray(arguments, 1);
       for (var i = 0, l = cbs.length; i < l; i++) {
-        var res = cbs[i].apply(this, args);
-        if (res === true) {
+        var cb = cbs[i];
+        var res = cb.apply(this, args);
+        if (res === true && (!hasParentCbs || cb._fromParent)) {
           shouldPropagate = true;
         }
       }
@@ -21901,20 +17460,28 @@ function eventsAPI (Vue) {
   /**
    * Recursively broadcast an event to all children instances.
    *
-   * @param {String} event
+   * @param {String|Object} event
    * @param {...*} additional arguments
    */
 
   Vue.prototype.$broadcast = function (event) {
+    var isSource = typeof event === 'string';
+    event = isSource ? event : event.name;
     // if no child has registered for this event,
     // then there's no need to broadcast.
     if (!this._eventsCount[event]) return;
     var children = this.$children;
+    var args = toArray(arguments);
+    if (isSource) {
+      // use object event to indicate non-source emit
+      // on children
+      args[0] = { name: event, source: this };
+    }
     for (var i = 0, l = children.length; i < l; i++) {
       var child = children[i];
-      var shouldPropagate = child.$emit.apply(child, arguments);
+      var shouldPropagate = child.$emit.apply(child, args);
       if (shouldPropagate) {
-        child.$broadcast.apply(child, arguments);
+        child.$broadcast.apply(child, args);
       }
     }
     return this;
@@ -21927,11 +17494,16 @@ function eventsAPI (Vue) {
    * @param {...*} additional arguments
    */
 
-  Vue.prototype.$dispatch = function () {
-    this.$emit.apply(this, arguments);
+  Vue.prototype.$dispatch = function (event) {
+    var shouldPropagate = this.$emit.apply(this, arguments);
+    if (!shouldPropagate) return;
     var parent = this.$parent;
+    var args = toArray(arguments);
+    // use object event to indicate non-source emit
+    // on parents
+    args[0] = { name: event, source: this };
     while (parent) {
-      var shouldPropagate = parent.$emit.apply(parent, arguments);
+      shouldPropagate = parent.$emit.apply(parent, args);
       parent = shouldPropagate ? parent.$parent : null;
     }
     return this;
@@ -22068,6 +17640,7 @@ var convertArray = vFor._postProcess;
 
 function limitBy(arr, n, offset) {
   offset = offset ? parseInt(offset, 10) : 0;
+  n = toNumber(n);
   return typeof n === 'number' ? arr.slice(offset, offset + n) : arr;
 }
 
@@ -22281,7 +17854,7 @@ var filters = {
 
 var partial = {
 
-  priority: 1750,
+  priority: PARTIAL,
 
   params: ['name'],
 
@@ -22324,55 +17897,46 @@ var partial = {
 // instance being stored as `$options._content` during
 // the transclude phase.
 
+// We are exporting two versions, one for named and one
+// for unnamed, because the unnamed slots must be compiled
+// AFTER all named slots have selected their content. So
+// we need to give them different priorities in the compilation
+// process. (See #1965)
+
 var slot = {
 
-  priority: 1750,
-
-  params: ['name'],
+  priority: SLOT,
 
   bind: function bind() {
     var host = this.vm;
     var raw = host.$options._content;
-    var content;
     if (!raw) {
       this.fallback();
       return;
     }
     var context = host._context;
-    var slotName = this.params.name;
+    var slotName = this.params && this.params.name;
     if (!slotName) {
-      // Default content
-      var self = this;
-      var compileDefaultContent = function compileDefaultContent() {
-        self.compile(extractFragment(raw.childNodes, raw, true), context, host);
-      };
-      if (!host._isCompiled) {
-        // defer until the end of instance compilation,
-        // because the default outlet must wait until all
-        // other possible outlets with selectors have picked
-        // out their contents.
-        host.$once('hook:compiled', compileDefaultContent);
-      } else {
-        compileDefaultContent();
-      }
+      // Default slot
+      this.tryCompile(extractFragment(raw.childNodes, raw, true), context, host);
     } else {
+      // Named slot
       var selector = '[slot="' + slotName + '"]';
       var nodes = raw.querySelectorAll(selector);
       if (nodes.length) {
-        content = extractFragment(nodes, raw);
-        if (content.hasChildNodes()) {
-          this.compile(content, context, host);
-        } else {
-          this.fallback();
-        }
+        this.tryCompile(extractFragment(nodes, raw), context, host);
       } else {
         this.fallback();
       }
     }
   },
 
-  fallback: function fallback() {
-    this.compile(extractContent(this.el, true), this.vm);
+  tryCompile: function tryCompile(content, context, host) {
+    if (content.hasChildNodes()) {
+      this.compile(content, context, host);
+    } else {
+      this.fallback();
+    }
   },
 
   compile: function compile(content, context, host) {
@@ -22387,12 +17951,21 @@ var slot = {
     }
   },
 
+  fallback: function fallback() {
+    this.compile(extractContent(this.el, true), this.vm);
+  },
+
   unbind: function unbind() {
     if (this.unlink) {
       this.unlink();
     }
   }
 };
+
+var namedSlot = extend(extend({}, slot), {
+  priority: slot.priority + 1,
+  params: ['name']
+});
 
 /**
  * Extract qualified content nodes from a node list.
@@ -22433,10 +18006,11 @@ function extractFragment(nodes, parent, main) {
 
 var elementDirectives = {
   slot: slot,
+  _namedSlot: namedSlot, // same as slot but with higher priority
   partial: partial
 };
 
-Vue.version = '1.0.10';
+Vue.version = '1.0.15';
 
 /**
  * Vue and every constructor that extends Vue has an
@@ -22459,55 +18033,52 @@ Vue.options = {
 
 // devtools global hook
 /* istanbul ignore if */
-if (process.env.NODE_ENV !== 'production') {
-  if (inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+if (process.env.NODE_ENV !== 'production' && inBrowser) {
+  if (window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
     window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('init', Vue);
+  } else if (/Chrome\/\d+/.test(navigator.userAgent)) {
+    console.log('Download the Vue Devtools for a better development experience:\n' + 'https://github.com/vuejs/vue-devtools');
   }
 }
 
 module.exports = Vue;
 }).call(this,require('_process'))
-},{"_process":7}],39:[function(require,module,exports){
-var inserted = exports.cache = {}
-
-exports.insert = function (css) {
-  if (inserted[css]) return
-  inserted[css] = true
-
-  var elem = document.createElement('style')
-  elem.setAttribute('type', 'text/css')
-
-  if ('textContent' in elem) {
-    elem.textContent = css
-  } else {
-    elem.styleSheet.cssText = css
-  }
-
-  document.getElementsByTagName('head')[0].appendChild(elem)
-  return elem
-}
-
-},{}],40:[function(require,module,exports){
+},{"_process":5}],36:[function(require,module,exports){
 'use strict';
 
-exports.__esModule = true;
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
 exports['default'] = {
+    el: '#Admin',
 
-    data: function data() {
-        return {
-            user: null,
-            token: null,
-            authenticated: false
-        };
+    components: {
+        // Resources
+        'posts-index': require('./components/posts/index.vue'),
+        'posts-edit': require('./components/posts/edit.vue'),
+        // Partials
+        'paginator': require('./components/partials/paginator.vue')
     },
 
     ready: function ready() {
         this.getInitialToken();
         this.registerEventListeners();
-        this.setLoginStatus();
+    },
+
+    data: {
+        authenticated: false,
+        token: '',
+        user: {}
     },
 
     methods: {
+        getInitialToken: function getInitialToken() {
+            this.token = localStorage.getItem('jwt-token');
+            if (this.token === null || this.token === 'undefined') {
+                this.token = document.getElementById('jwt').getAttribute('content');
+                localStorage.setItem('jwt-token', 'Bearer ' + this.token);
+            }
+        },
 
         registerEventListeners: function registerEventListeners() {
             this.$on('userHasLoggedOut', function () {
@@ -22516,19 +18087,6 @@ exports['default'] = {
             this.$on('userHasLoggedIn', function (user) {
                 this.setLogin(user);
             });
-        },
-
-        setLoginStatus: function setLoginStatus() {
-            var token = localStorage.getItem('jwt-token');
-            if (token !== null && token !== 'undefined') {
-                var self = this;
-                client.get('/api/auth/user/me').then(function (response) {
-                    self.setLogin(response.data.user);
-                    self.$broadcast('data-loaded');
-                }, function (response) {
-                    self.destroyLogin();
-                });
-            }
         },
 
         setLogin: function setLogin(user) {
@@ -22542,33 +18100,14 @@ exports['default'] = {
             this.token = null;
             this.authenticated = false;
             localStorage.removeItem('jwt-token');
-        },
-
-        getInitialToken: function getInitialToken() {
-            this.token = localStorage.getItem('jwt-token');
-            if (this.token === null || this.token === 'undefined') {
-                this.token = document.getElementById('jwt').getAttribute('content');
-            }
-            localStorage.setItem('jwt-token', 'Bearer ' + this.token);
         }
 
     }
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <section class=\"Main\">\n        <top-nav :current-user=\"user\"></top-nav>\n        <div class=\"Main__menu\">\n            <side-nav></side-nav>\n        </div>\n        <div class=\"Main__container\">\n            <div class=\"Main__content\">\n                <router-view :current-user=\"user\"></router-view>\n            </div>\n        </div>\n    </section>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/App.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],41:[function(require,module,exports){
+
+},{"./components/partials/paginator.vue":39,"./components/posts/edit.vue":42,"./components/posts/index.vue":43}],37:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -22577,712 +18116,23 @@ var _vue = require('vue');
 
 var _vue2 = _interopRequireDefault(_vue);
 
-_vue2['default'].use(require('vue-router'));
-_vue2['default'].use(require('vue-resource'));
-
 // Develop
 _vue2['default'].config.debug = true;
 
 // HTTP Client
+_vue2['default'].use(require('vue-resource'));
 _vue2['default'].http.interceptors.push(require('./http/interceptors/jwtAuth'));
+_vue2['default'].http.options.root = '/api';
 window.client = _vue2['default'].http;
 window.resource = _vue2['default'].resource;
-
-// Components
-_vue2['default'].component('top-nav', require('./components/partials/top-nav.vue'));
-_vue2['default'].component('side-nav', require('./components/partials/side-nav.vue'));
-_vue2['default'].component('paginator', require('./components/partials/paginator.vue'));
 
 // Directives
 _vue2['default'].directive('select', require('./directives/select'));
 _vue2['default'].directive('rich-editor', require('./directives/rich-editor'));
 
-// Start
-var router = require('./http/router');
-router.start(require('./App.vue'), '#Admin');
+new _vue2['default'](require('./App'));
 
-},{"./App.vue":40,"./components/partials/paginator.vue":52,"./components/partials/side-nav.vue":53,"./components/partials/top-nav.vue":54,"./directives/rich-editor":71,"./directives/select":72,"./http/interceptors/jwtAuth":73,"./http/router":74,"vue":38,"vue-resource":22,"vue-router":37}],42:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            author: {
-                name: '',
-                bio: ''
-            }
-        };
-    },
-
-    methods: {
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            client({
-                method: 'POST',
-                path: '/authors',
-                entity: this.author
-            }).then(function (response) {
-                self.$route.router.go('/authors');
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        }
-
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/authors'\">Authors</a></li>\n        <li class=\"active\">Create</li>\n    </ol>\n\n    <form class=\"Author\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-success\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button v-link=\"'/authors'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Cancel</button>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Author</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"name\">Name</label>\n                    <input type=\"text\" v-model=\"author.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"bio\">Bio</label>\n                    <textarea name=\"bio\" id=\"bio\" class=\"form-control rich-editor\" v-rich-editor=\"author.bio\"></textarea>\n                </div>\n            </div>\n        </div>\n    </form>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/create.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],43:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _sweetalert = require('sweetalert');
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            author: {
-                id: '',
-                name: '',
-                bio: ''
-            }
-        };
-    },
-
-    methods: {
-
-        fetch: function fetch(successHandler) {
-            var self = this;
-            client({
-                path: '/authors/' + this.$route.params.author_id
-            }).then(function (response) {
-                self.author = response.entity.data;
-                successHandler(self.author);
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            console.log(this.author);
-            client({
-                method: 'PUT',
-                path: '/authors/' + this.author.id,
-                entity: this.author
-            }).then(function (response) {
-                self.notify('success', 'Saved successfully.');
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        'delete': function _delete() {
-            var self = this;
-            _sweetalert2['default']({
-                title: 'Are you sure?',
-                text: 'You will not be able to recover this author!',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#DD6B55',
-                confirmButtonText: 'Yes, say good-bye!',
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true
-            }, function () {
-                client({
-                    method: 'DELETE',
-                    path: '/authors/' + self.author.id
-                }).then(function () {
-                    _sweetalert2['default']({
-                        html: true,
-                        title: 'Deleted!',
-                        text: '<strong>' + self.author.name + '</strong> was deleted!',
-                        type: 'success'
-                    }, function () {
-                        self.deleted = true;
-                        self.$route.router.go('/authors');
-                    });
-                }, function () {
-                    _sweetalert2['default']("Oops", "We couldn't connect to the server!", "error");
-                });
-            });
-        },
-
-        notify: function notify(type, message) {
-            if (type == 'success') {
-                var icon = "fa fa-thumbs-o-up";
-            } else if (type == 'warning') {
-                var icon = "fa fa-warning";
-            }
-            $.notify({
-                icon: icon,
-                message: message
-            }, {
-                type: type,
-                delay: 3000,
-                offset: { x: 20, y: 70 }
-            });
-        },
-
-        checkResponseStatus: function checkResponseStatus(response) {
-            if (response.status.code == 401 || response.status.code == 500) {
-                this.$dispatch('userHasLoggedOut');
-            }
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch((function (author) {
-                transition.next({ author: author });
-            }).bind(this));
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/authors'\">Authors</a></li>\n        <li class=\"active\">{{ author.name }}</li>\n    </ol>\n\n    <form class=\"Author EditForm\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                    <button v-link=\"'/authors'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</button>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Author</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"name\">Name</label>\n                    <input type=\"text\" v-model=\"author.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"bio\">Bio</label>\n                    <textarea name=\"bio\" id=\"bio\" class=\"form-control rich-editor\" v-if=\"author.bio\" v-rich-editor=\"author.bio\"></textarea>\n                </div>\n            </div>\n        </div>\n    </form>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/edit.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"babel-runtime/helpers/interop-require-default":1,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],44:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            authors: [],
-            pagination: { links: {} },
-            nameFilter: null,
-            sortKey: null,
-            sortDir: -1
-        };
-    },
-
-    methods: {
-
-        fetch: function fetch(successHandler) {
-            var self = this;
-            client({
-                path: '/authors'
-            }).then(function (response) {
-                self.authors = response.entity.data;
-                self.pagination = response.entity.meta.pagination;
-                successHandler(response.entity.data);
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch(function (data) {
-                transition.next({ authors: data });
-            });
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Authors</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n            </div>\n            <div class=\"create-button col-md-6\">\n                <button v-link=\"'/authors/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Authors table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"author in authors | filterBy nameFilter | orderBy sortKey sortDir\" class=\"Author\">\n                <td><a v-link=\"'/authors/'+author.id\">{{ author.name }}</a></td>\n            </tr>\n        </tbody>\n    </table>\n\n    <paginator :pagination=\"pagination\"></paginator>\n\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors/index.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],45:[function(require,module,exports){
-var __vueify_style__ = require("vueify-insert-css").insert("\n    .order {\n        width: 40px;\n    }\n")
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user', 'category-id', 'posts'],
-
-    methods: {
-
-        /**
-         * Reorder the posts' list_positions
-         * @param post
-         * @param e
-         */
-        reorder: function reorder(post, e) {
-            var self = this;
-
-            var new_position = parseInt(e.target.value);
-            // If the position is not a number, we are done here.
-            if (isNaN(new_position)) {
-                e.target.value = post.order;
-                return;
-            }
-
-            var max = self.posts.reduce(function (max, post) {
-                return post.order > max ? post.order : max;
-            }, 0);
-
-            new_position = new_position > 0 ? new_position : 1;
-            new_position = new_position > max ? max : new_position;
-
-            // If the position is not different, we are done here.
-            if (new_position === post.order) {
-                e.target.value = post.order;
-                return;
-            }
-
-            // Shift all the posts' between the new list position and old list position up or down by one.
-            // If we are moving the list position to a lower number, the other numbers should shift up by one,
-            // but if we are moving the list position to a higher number the others should shift down by one.
-            var increment = new_position < post.order ? +1 : -1;
-            var between = new_position < post.order ? [new_position, post.order] : [post.order, new_position];
-
-            this.posts = this.posts.map(function (post) {
-                var p = post.order;
-                if (p >= between[0] && p <= between[1]) {
-                    post.order += increment;
-                }
-                return post;
-            });
-
-            // Save the new position on the current post.
-            post.order = new_position;
-
-            // Persist the new order
-            this.save(post);
-
-            setTimeout((function () {
-                this.scrollTo($(e.target).closest('tr'));
-            }).bind(this), 0);
-        },
-
-        /**
-         * Save the post's position to the database.
-         * @param post
-         */
-        save: function save(post) {
-            var self = this;
-            client({
-                method: "PATCH",
-                path: '/posts/' + post.id + '/reorder',
-                entity: { order: post.order }
-            }).then(function () {
-                setTimeout(function () {
-                    self.notify('success', 'Saved post order.');
-                }, 1800);
-            }, function () {
-                // fail
-            });
-        },
-
-        scrollTo: function scrollTo(target) {
-            $('html,body').animate({
-                scrollTop: target.offset().top - 280
-            }, 700);
-
-            target.addClass("pulse").delay(4000).queue(function () {
-                $(this).removeClass("pulse").dequeue();
-            });
-
-            return false;
-        },
-
-        blur: function blur(e) {
-            e.target.blur();
-        },
-
-        notify: function notify(type, message) {
-            if (type == 'success') {
-                var icon = "fa fa-thumbs-o-up";
-            } else if (type == 'warning') {
-                var icon = "fa fa-warning";
-            }
-            $.notify({
-                icon: icon,
-                message: message
-            }, {
-                type: type,
-                delay: 3000,
-                offset: { x: 20, y: 70 }
-            });
-        }
-
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"panel panel-default\">\n        <div class=\"panel-heading\">Re-order posts</div>\n        <table class=\"CategoryPosts table table-striped table-hover\">\n            <tbody>\n            <tr v-for=\"post in posts | orderBy 'order'\" class=\"CategoryPosts__item\">\n                <td class=\"order\">\n                    <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n                </td>\n                <td class=\"title\">{{ post.title }}</td>\n            </tr>\n            </tbody>\n        </table>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/category-posts.vue"
-  module.hot.dispose(function () {
-    require("vueify-insert-css").cache["\n    .order {\n        width: 40px;\n    }\n"] = false
-    document.head.removeChild(__vueify_style__)
-  })
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17,"vueify-insert-css":39}],46:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _modelsCategory = require('../../models/category');
-
-var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            category: {
-                name: '',
-                description: ''
-            }
-        };
-    },
-
-    methods: {
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            _modelsCategory2['default'].create(this.category).then(function (response) {
-                self.$route.router.go('/categories');
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        }
-
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/categories'\">Categories</a></li>\n        <li class=\"active\">Create</li>\n    </ol>\n\n    <form class=\"Category\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-success\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button v-link=\"'/categories'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Cancel</button>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Category</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"name\">Name</label>\n                    <input type=\"text\" v-model=\"category.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"description\">Description</label>\n                    <input type=\"text\" v-model=\"category.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                </div>\n            </div>\n        </div>\n    </form>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/create.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"../../models/category":76,"babel-runtime/helpers/interop-require-default":1,"vue":38,"vue-hot-reload-api":17}],47:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _sweetalert = require('sweetalert');
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
-var _repositoriesCategories = require('../../repositories/categories');
-
-var _repositoriesCategories2 = _interopRequireDefault(_repositoriesCategories);
-
-var _repositoriesTags = require('../../repositories/tags');
-
-var _repositoriesTags2 = _interopRequireDefault(_repositoriesTags);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    components: {
-        'category-posts': require('./category-posts.vue'),
-        'media-input': require('../partials/media-input.vue')
-    },
-
-    data: function data() {
-        return {
-            category: {},
-            allTags: [],
-            allCategories: [],
-            orderOptions: [{ id: 'order', text: 'Order (manual)' }, { id: 'created_at', text: 'Created' }, { id: 'updated_at', text: 'Updated' }],
-            orderDirections: [{ id: 'asc', text: 'Ascending' }, { id: 'desc', text: 'Descending' }]
-        };
-    },
-
-    computed: {
-
-        showCategoryPosts: function showCategoryPosts() {
-            return this.category.order_by == 'order';
-        }
-
-    },
-
-    methods: {
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            return this.category.save().then(function () {
-                self.notify('success', 'Saved successfully.');
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        'delete': function _delete() {
-            var self = this;
-            _sweetalert2['default']({
-                title: 'Are you sure?',
-                text: 'You will not be able to recover this category!',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#DD6B55',
-                confirmButtonText: 'Yes, delete it!',
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true
-            }, function () {
-                self.category.destroy().then(function () {
-                    _sweetalert2['default']({
-                        html: true,
-                        title: 'Deleted!',
-                        text: '<strong>' + self.category.name + '</strong> was deleted!',
-                        type: 'success'
-                    }, function () {
-                        self.$route.router.go('/categories');
-                    });
-                }, function () {
-                    _sweetalert2['default']("Oops", "We couldn't connect to the server!", "error");
-                });
-            });
-        },
-
-        notify: function notify(type, message) {
-            if (type == 'success') {
-                var icon = "fa fa-thumbs-o-up";
-            } else if (type == 'warning') {
-                var icon = "fa fa-warning";
-            }
-            $.notify({
-                icon: icon,
-                message: message
-            }, {
-                type: type,
-                delay: 3000,
-                offset: { x: 20, y: 70 }
-            });
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            var categoryId = transition.to.params.category_id;
-
-            return {
-                category: _repositoriesCategories2['default']['with'](['posts', 'tags', 'media']).getById(categoryId),
-                allCategories: _repositoriesCategories2['default'].get(),
-                allTags: _repositoriesTags2['default'].get()
-            };
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/categories'\">Categories</a></li>\n        <li class=\"active\">{{ category.name }}</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <form class=\"Category EditForm\">\n\n            <section class=\"info row\">\n                <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                    <div class=\"action-buttons\">\n                        <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                        <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                        <button v-link=\"'/categories'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</button>\n                    </div>\n                </div>\n            </section>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Category</div>\n                <div class=\"panel-body\">\n                    <div class=\"form-group\">\n                        <label for=\"name\">Name</label>\n                        <input type=\"text\" v-model=\"category.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"category\">Parent category</label>\n                                <select v-model=\"category.parent_id\" name=\"category\" id=\"category\" class=\"form-control\">\n                                    <option :value=\"null\" selected=\"\">None</option>\n                                    <option v-if=\"allCategories\" v-for=\"category in allCategories\" :value=\"category.id\">{{ category.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group form-tags\">\n                                <label for=\"tags\">Tags</label>\n                                <select v-select=\"category.tags\" v-model=\"category.tags\" name=\"tags\" id=\"tags\" multiple=\"\" class=\"form-control\">\n                                    <option v-for=\"tag in allTags\" :value=\"tag.id\">{{ tag.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"description\">Description</label>\n                        <textarea v-if=\"category.description\" v-rich-editor=\"category.description\" name=\"description\" id=\"description\" class=\"form-control\"></textarea>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Media</div>\n                <div class=\"panel-body\">\n                    <media-input :type.sync=\"category.media.type\" :url.sync=\"category.media.url\" image-path=\"/img/uploads/media/\" :image-upload=\"'/categories/'+$route.params.category_id+'/image'\">\n                    </media-input>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Post Ordering</div>\n                <div class=\"panel-body\">\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"order_by\">Order posts in category by</label>\n                                <select v-model=\"category.order_by\" name=\"order_by\" id=\"order_by\" class=\"form-control\">\n                                    <option v-for=\"option in orderOptions\" value=\"{{ option.id }}\">{{ option.text }}</option>\n                                </select>\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"order_dir\">Order posts in category direction</label>\n                                <select v-model=\"category.order_dir\" name=\"order_dir\" id=\"order_dir\" class=\"form-control\">\n                                    <option v-for=\"direction in orderDirections\" value=\"{{ direction.id }}\">{{ direction.text }}</option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </form>\n\n        <category-posts v-if=\"showCategoryPosts\" :category-id=\"$route.params.category_id\" :posts=\"category.posts\"></category-posts>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/edit.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"../../repositories/categories":80,"../../repositories/tags":82,"../partials/media-input.vue":51,"./category-posts.vue":45,"babel-runtime/helpers/interop-require-default":1,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],48:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _repositoriesCategories = require('../../repositories/categories');
-
-var _repositoriesCategories2 = _interopRequireDefault(_repositoriesCategories);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            categories: [],
-            nameFilter: null,
-            sortKey: null,
-            sortDir: -1
-        };
-    },
-
-    methods: {
-
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            return {
-                categories: _repositoriesCategories2['default']['with']('tags').get()
-            };
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Categories</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                </div>\n                <div class=\"create-button col-md-6\">\n                    <button v-link=\"'/categories/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n                </div>\n            </div>\n        </div>\n\n        <table class=\"Categories table table-striped table-hover\">\n            <thead>\n                <tr>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                    <th><a>Parent</a></th>\n                    <th><a>Tags</a></th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for=\"category in categories | filterBy nameFilter | orderBy sortKey sortDir\" class=\"Category\">\n                    <td><a v-link=\"'/categories/'+category.id\">{{ category.name }}</a></td>\n                    <td>{{ category.parentName }}</td>\n                    <td><span v-for=\"tag in category.tags\" class=\"tag label label-default\">{{ tag.name }}</span></td>\n                </tr>\n            </tbody>\n        </table>\n\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/index.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"../../repositories/categories":80,"babel-runtime/helpers/interop-require-default":1,"vue":38,"vue-hot-reload-api":17}],49:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user'],
-
-    computed: {
-
-        userName: function userName() {
-            return this.currentUser ? this.currentUser.name : '';
-        }
-
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <h1>Dashboard for {{ userName }}</h1>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/home.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],50:[function(require,module,exports){
+},{"./App":36,"./directives/rich-editor":44,"./directives/select":45,"./http/interceptors/jwtAuth":46,"vue":35,"vue-resource":20}],38:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -23390,58 +18240,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/dropzone.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/dropzone.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"babel-runtime/helpers/interop-require-default":1,"dropzone":3,"js-cookie":5,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],51:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['type', 'url', 'image-path', 'image-upload'],
-
-    components: { dropzone: require('./dropzone.vue') },
-
-    data: function data() {
-        return {
-            mediaTypes: [{ id: 'image', text: 'Image' }, { id: 'youtube_video', text: 'Youtube' }, { id: 'vimeo_video', text: 'Vimeo' }, { id: 'wistia_video', text: 'Wistia' }],
-            showMediaInput: false,
-            showDropzone: false
-        };
-    },
-
-    ready: function ready() {
-        this.$nextTick(function () {
-            this.checkMediaType();
-        });
-    },
-
-    methods: {
-        checkMediaType: function checkMediaType() {
-            this.showDropzone = this.type == 'image';
-            this.showMediaInput = this.type && this.type.length > 0 && this.type != 'image';
-        }
-    }
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"form-group\">\n        <label for=\"media-type\">Media type</label>\n        <select v-model=\"type\" @change=\"checkMediaType\" name=\"media-type\" id=\"media-type\" class=\"form-control\">\n            <option :value=\"null\">Select type...</option>\n            <option v-for=\"mediaType in mediaTypes\" :value=\"mediaType.id\">{{ mediaType.text }}</option>\n        </select>\n    </div>\n    <div v-if=\"showDropzone\">\n        <dropzone :path=\"imagePath\" :image=\"url\" :to=\"imageUpload\"></dropzone>\n    </div>\n    <div v-if=\"showMediaInput\" class=\"form-group\">\n        <label for=\"media-link\">Media Link</label>\n        <input type=\"text\" v-model=\"url\" name=\"media-link\" id=\"media-link\" class=\"form-control\">\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"./dropzone.vue":50,"vue":38,"vue-hot-reload-api":17}],52:[function(require,module,exports){
+},{"babel-runtime/helpers/interop-require-default":1,"dropzone":2,"js-cookie":3,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],39:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -23468,326 +18274,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/paginator.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/paginator.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":38,"vue-hot-reload-api":17}],53:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-        props: ['current-user']
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"Side-nav panel\">\n        <div class=\"list-group\">\n            <a href=\"#\" class=\"list-group-item\" v-link=\"{ path: '/home', activeClass: 'active' }\">\n                <i class=\"fa fa-home\"></i> Home\n            </a>\n            <a href=\"#\" class=\"list-group-item\" v-link=\"{ path: '/posts', activeClass: 'active' }\">\n                <i class=\"fa fa-newspaper-o\"></i> Posts\n            </a>\n            <a href=\"#\" class=\"list-group-item\" v-link=\"{ path: '/post-fields', activeClass: 'active' }\">\n                <i class=\"fa fa-th-list\"></i> Post fields\n            </a>\n            <a href=\"#\" class=\"list-group-item\" v-link=\"{ path: '/categories', activeClass: 'active' }\">\n                <i class=\"fa fa-columns\"></i> Categories\n            </a>\n            <a href=\"#\" class=\"list-group-item\" v-link=\"{ path: '/tags', activeClass: 'active' }\">\n                <i class=\"fa fa-tags\"></i> Tags\n            </a>\n            <a href=\"#\" class=\"list-group-item\" v-link=\"{ path: '/authors', activeClass: 'active' }\">\n                <i class=\"fa fa-pencil-square-o\"></i> Authors\n            </a>\n            <a href=\"#\" class=\"list-group-item\" v-link=\"{ path: '/users', activeClass: 'active' }\">\n                <i class=\"fa fa-users\"></i> Users\n            </a>\n            <a href=\"#\" class=\"list-group-item\" v-link=\"{ path: '/settings', activeClass: 'active' }\">\n                <i class=\"fa fa-gear\"></i> Settings\n            </a>\n        </div>\n    </div>\n\n    <div class=\"flashtag\">\n        <!-- You don't have to leave this but it would be nice if you did -->\n        <div class=\"flashtag__link\"><a href=\"http://flashtag.org\" title=\"© Ryan Winchester\">FLASHTAG</a></div>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/side-nav.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],54:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user'],
-
-    computed: {
-
-        userName: function userName() {
-            return this.currentUser ? this.currentUser.name : '';
-        }
-
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <nav class=\"Top-nav navbar navbar-inverse navbar-fixed-top\">\n        <div class=\"container-fluid\">\n            <div class=\"navbar-header\">\n                <button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#main-nav\">\n                    <span class=\"sr-only\">Toggle navigation</span>\n                    <span class=\"icon-bar\"></span>\n                    <span class=\"icon-bar\"></span>\n                    <span class=\"icon-bar\"></span>\n                </button>\n                <span class=\"navbar-brand\">Acme Co.</span>\n            </div>\n            <ul class=\"nav navbar-nav navbar-right\">\n                <li class=\"dropdown\">\n                    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\" aria-haspopup=\"true\" aria-expanded=\"false\">\n                       {{ userName }} <span class=\"caret\"></span>\n                    </a>\n                    <ul class=\"dropdown-menu\">\n                        <li><a href=\"/admin/auth/logout\"><i class=\"fa fa-sign-out\"></i> Logout</a></li>\n                    </ul>\n                </li>\n            </ul>\n        </div>\n    </nav>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/top-nav.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],55:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            field: {
-                label: '',
-                name: '',
-                description: '',
-                template: ''
-            },
-            templates: [{ id: 'string', text: 'String' }, { id: 'rich_text', text: 'Rich Text' }]
-        };
-    },
-
-    methods: {
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            return client({
-                method: 'POST',
-                path: '/fields',
-                entity: this.field
-            }).then(function (response) {
-                self.$route.router.go('/post-fields');
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        }
-
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/post-fields'\">Post Fields</a></li>\n        <li class=\"active\">Create</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <form class=\"Category\">\n\n            <section class=\"info row\">\n                <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                    <div class=\"action-buttons\">\n                        <button @click.prevent=\"save\" class=\"btn btn-success\"><i class=\"fa fa-save\"></i> Save</button>\n                        <button v-link=\"'/post-fields'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Cancel</button>\n                    </div>\n                </div>\n            </section>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">POST FIELD</div>\n                <div class=\"panel-body\">\n                    <div class=\"form-group\">\n                        <label for=\"label\">Label</label>\n                        <input type=\"text\" v-model=\"field.label\" label=\"label\" id=\"label\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"name\">Name</label>\n                        <input type=\"text\" v-model=\"field.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"description\">Description</label>\n                        <input type=\"text\" v-model=\"field.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"template\">Template</label>\n                        <select v-model=\"field.template\" name=\"template\" id=\"template\" class=\"form-control\">\n                            <option value=\"\" disabled=\"\" selected=\"\">Select a template...</option>\n                            <option v-for=\"template in templates\" value=\"{{ template.id }}\">{{ template.text }}</option>\n                        </select>\n                    </div>\n                </div>\n            </div>\n        </form>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/create.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],56:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _sweetalert = require('sweetalert');
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            field: {
-                id: '',
-                label: '',
-                name: '',
-                description: '',
-                template: ''
-            },
-            templates: [{ id: 'string', text: 'String' }, { id: 'rich_text', text: 'Rich Text' }]
-        };
-    },
-
-    methods: {
-
-        fetch: function fetch() {
-            var self = this;
-            return client({
-                path: '/fields/' + this.$route.params.field_id
-            }).then(function (response) {
-                self.field = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            return client({
-                method: 'PUT',
-                path: '/fields/' + this.field.id,
-                entity: this.field
-            }).then(function (response) {
-                self.notify('success', 'Saved successfully.');
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        'delete': function _delete() {
-            var self = this;
-            _sweetalert2['default']({
-                title: 'Are you sure?',
-                text: 'You will not be able to recover this post and all of its revision history!',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#DD6B55',
-                confirmButtonText: 'Yes, delete it!',
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true
-            }, function () {
-                client({
-                    method: 'DELETE',
-                    path: '/fields/' + self.field.id
-                }).then(function () {
-                    _sweetalert2['default']({
-                        html: true,
-                        title: 'Deleted!',
-                        text: '<strong>' + self.field.name + '</strong> was deleted!',
-                        type: 'success'
-                    }, function () {
-                        self.$route.router.go('/post-fields');
-                    });
-                }, function () {
-                    _sweetalert2['default']("Oops", "We couldn't connect to the server!", "error");
-                });
-            });
-        },
-
-        notify: function notify(type, message) {
-            if (type == 'success') {
-                var icon = "fa fa-thumbs-o-up";
-            } else if (type == 'warning') {
-                var icon = "fa fa-warning";
-            }
-            $.notify({
-                icon: icon,
-                message: message
-            }, {
-                type: type,
-                delay: 3000,
-                offset: { x: 20, y: 70 }
-            });
-        },
-
-        checkResponseStatus: function checkResponseStatus(response) {
-            if (response.status.code == 401 || response.status.code == 500) {
-                this.$dispatch('userHasLoggedOut');
-            }
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch().then(transition.next);
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/post-fields'\">Post Fields</a></li>\n        <li class=\"active\">{{ field.label }}</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <form class=\"PostField EditForm\">\n\n            <section class=\"info row\">\n                <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                    <div class=\"action-buttons\">\n                        <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                        <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                        <button v-link=\"'/post-fields'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</button>\n                    </div>\n                </div>\n            </section>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">POST FIELD</div>\n                <div class=\"panel-body\">\n                    <div class=\"form-group\">\n                        <label for=\"label\">Label</label>\n                        <input type=\"text\" v-model=\"field.label\" label=\"label\" id=\"label\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"name\">Name</label>\n                        <input type=\"text\" v-model=\"field.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"description\">Description</label>\n                        <input type=\"text\" v-model=\"field.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"template\">Template</label>\n                        <select v-model=\"field.template\" name=\"template\" id=\"template\" class=\"form-control\">\n                            <option value=\"\" disabled=\"\" selected=\"\">Select a template...</option>\n                            <option v-for=\"template in templates\" value=\"{{ template.id }}\">{{ template.text }}</option>\n                        </select>\n                    </div>\n                </div>\n            </div>\n        </form>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/edit.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"babel-runtime/helpers/interop-require-default":1,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],57:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            fields: [],
-            pagination: { links: {} },
-            labelFilter: null,
-            sortKey: null,
-            sortDir: -1
-        };
-    },
-
-    methods: {
-
-        fetch: function fetch() {
-            var self = this;
-            return client({
-                path: '/fields'
-            }).then(function (response) {
-                self.fields = response.entity.data;
-                self.pagination = response.entity.meta.pagination;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch().then(transition.next);
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Post Fields</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <input type=\"text\" v-model=\"labelFilter\" placeholder=\"Filter by label...\" class=\"form-control\">\n                </div>\n                <div class=\"create-button col-md-6\">\n                    <button v-link=\"'/post-fields/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n                </div>\n            </div>\n        </div>\n\n        <table class=\"Fields table table-striped table-hover\">\n            <thead>\n                <tr>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('label')\">Label <i :class=\"orderIcon('label')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('template')\">Template <i :class=\"orderIcon('template')\"></i></a></th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for=\"field in fields | filterBy labelFilter in 'label' | orderBy sortKey sortDir\" class=\"Field\" :class=\"{ 'Field--unpublished': !field.is_published }\">\n                    <td><a v-link=\"'/post-fields/'+field.id\">{{ field.label }}</a></td>\n                    <td>{{ field.name }}</td>\n                    <td>{{ field.template }}</td>\n                </tr>\n            </tbody>\n        </table>\n\n        <paginator :pagination=\"pagination\"></paginator>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/index.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],58:[function(require,module,exports){
+},{"vue":35,"vue-hot-reload-api":15}],40:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23804,14 +18298,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/rich_text.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/rich_text.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":38,"vue-hot-reload-api":17}],59:[function(require,module,exports){
+},{"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23828,169 +18322,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/string.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-fields/templates/string.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":38,"vue-hot-reload-api":17}],60:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _moment = require('moment');
-
-var _moment2 = _interopRequireDefault(_moment);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    components: {
-        string: require('../post-fields/templates/string.vue'),
-        rich_text: require('../post-fields/templates/rich_text.vue')
-    },
-
-    data: function data() {
-        return {
-            post: {
-                body: ' ',
-                category: {},
-                tags: [],
-                fields: [],
-                revisions: [],
-                meta: {}
-            },
-            allCategories: [],
-            allTags: [],
-            allFields: [],
-            allAuthors: []
-        };
-    },
-
-    computed: {
-
-        isShowing: function isShowing() {
-            if (!this.post.is_published) {
-                return false;
-            }
-            var start = this.post.start_showing_at ? _moment2['default'](this.post.start_showing_at) : _moment2['default']("1980-01-01", "YYYY-MM-DD");
-            var end = this.post.stop_showing_at ? _moment2['default'](this.post.stop_showing_at) : _moment2['default']("2033-01-19", "YYYY-MM-DD");
-            var now = _moment2['default']();
-
-            return start <= now && now <= end;
-        }
-
-    },
-
-    methods: {
-
-        fetchCategories: function fetchCategories(successHandler) {
-            var self = this;
-            client({
-                path: '/categories'
-            }).then(function (response) {
-                self.allCategories = response.entity.data;
-                successHandler(self.allCategories);
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        fetchTags: function fetchTags() {
-            var self = this;
-            client({
-                path: '/tags'
-            }).then(function (response) {
-                self.allTags = response.entity.data.map(function (tag) {
-                    tag.text = tag.name;
-                    return tag;
-                });
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        fetchFields: function fetchFields() {
-            var self = this;
-            client({
-                path: '/fields'
-            }).then(function (response) {
-                self.allFields = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        fetchAuthors: function fetchAuthors() {
-            var self = this;
-            client({
-                path: '/authors'
-            }).then(function (response) {
-                self.allAuthors = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            client({
-                method: 'POST',
-                path: '/posts',
-                entity: self.post
-            }).then(function (response) {
-                self.$route.router.go('/posts');
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        getTemplate: function getTemplate(field) {
-            return field ? field.template : '';
-        },
-
-        checkResponseStatus: function checkResponseStatus(response) {
-            if (response.status.code == 401 || response.status.code == 500) {
-                this.$dispatch('userHasLoggedOut');
-            }
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetchTags();
-            this.fetchFields();
-            this.fetchAuthors();
-            this.fetchCategories(function (categories) {
-                transition.next({ allCategories: categories });
-            });
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/posts'\">Posts</a></li>\n        <li class=\"active\">Create</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <form class=\"Post\">\n\n            <section class=\"info row\">\n                <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                    <div class=\"action-buttons\">\n                        <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                        <button v-link=\"'/posts'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Cancel</button>\n                    </div>\n                </div>\n            </section>\n\n            <div class=\"panel panel-default\" :class=\"{ 'border-green': isShowing, 'border-red': !isShowing }\">\n                <div class=\"panel-heading\">\n                    PUBLISHING\n                    <label class=\"showing label\" :class=\"{ 'label-success': isShowing, 'label-danger': !isShowing }\">\n                        {{ isShowing ? 'Will show on website' : 'Will not show on website' }}\n                    </label>\n                </div>\n                <div class=\"panel-body\">\n                    <div class=\"row\">\n                        <div class=\"col-md-2\">\n                            <div class=\"form-group switch-wrapper\">\n                                <div class=\"publish-switch\">\n                                    <label for=\"is_published\">Published</label>\n                                    <div class=\"switch\">\n                                        <input v-model=\"post.is_published\" name=\"is_published\" id=\"is_published\" class=\"cmn-toggle cmn-toggle-round-md\" type=\"checkbox\">\n                                        <label for=\"is_published\"></label>\n                                    </div>\n                                </div>\n                            </div>\n                        </div>\n                        <div class=\"col-md-5\">\n                            <label for=\"start_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show until this date.\">\n                                Start showing\n                            </label>\n                            <input type=\"date\" v-model=\"post.start_showing_at\" name=\"start_showing_at\" id=\"start_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                        </div>\n                        <div class=\"col-md-5\">\n                            <label for=\"stop_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show after this date.\">\n                                Stop showing\n                            </label>\n                            <input type=\"date\" v-model=\"post.stop_showing_at\" name=\"stop_showing_at\" id=\"stop_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">POST</div>\n                <div class=\"panel-body\">\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"title\">Title</label>\n                                <input type=\"text\" v-model=\"post.title\" name=\"title\" id=\"title\" class=\"form-control\">\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"subtitle\">Subtitle</label>\n                                <input type=\"text\" v-model=\"post.subtitle\" name=\"subtitle\" id=\"subtitle\" class=\"form-control\">\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"category\">Category</label>\n                                <select v-model=\"post.category.id\" name=\"category\" id=\"category\" class=\"form-control\">\n                                    <option value=\"\" disabled=\"\" selected=\"\">Select a category...</option>\n                                    <option v-for=\"category in allCategories\" :value=\"category.id\">{{ category.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group form-tags\">\n                                <label for=\"tags\">Tags</label>\n                                <select v-model=\"post.tags\" name=\"tags\" id=\"tags\" multiple=\"\" class=\"form-control\" v-select=\"post.tags\">\n                                    <option v-for=\"tag in allTags\" :value=\"tag.id\">{{ tag.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"body\">Body</label>\n                        <textarea name=\"body\" id=\"body\" class=\"form-control rich-editor\" v-if=\"post.body\" v-rich-editor=\"post.body\">                        </textarea>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"author\">Author</label>\n                        <select v-select=\"post.author_id\" id=\"author\" name=\"author\" :options=\"allAuthors\">\n                            <option value=\"\" disabled=\"\" selected=\"\">Select an author...</option>\n                            <option v-for=\"author in allAuthors\" value=\"{{ author.id }}\">{{ author.name }}</option>\n                        </select>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"show_author\">Show author?</label>\n                        <div class=\"switch\">\n                            <input id=\"show_author\" class=\"cmn-toggle cmn-toggle-yes-no\" type=\"checkbox\" v-model=\"post.show_author\">\n                            <label for=\"show_author\" data-on=\"Yes\" data-off=\"No\"></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">CUSTOM FIELDS</div>\n                <div class=\"panel-body\">\n                    <div class=\"form-group\" v-for=\"field in allFields\">\n                        <component :is=\"field.template\" :field.sync=\"field\">\n                        </component>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">META</div>\n                <div class=\"panel-body\">\n                    <div class=\"form-group\">\n                        <label for=\"description\">Description</label>\n                        <input type=\"text\" v-model=\"post.meta.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"url\">Canonical Link</label>\n                        <input type=\"text\" v-model=\"post.meta.url\" name=\"url\" id=\"url\" class=\"form-control\">\n                    </div>\n                </div>\n            </div>\n\n        </form>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/create.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"../post-fields/templates/rich_text.vue":58,"../post-fields/templates/string.vue":59,"babel-runtime/helpers/interop-require-default":1,"moment":6,"vue":38,"vue-hot-reload-api":17}],61:[function(require,module,exports){
+},{"vue":35,"vue-hot-reload-api":15}],42:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -24005,13 +18344,13 @@ var _sweetalert = require('sweetalert');
 
 var _sweetalert2 = _interopRequireDefault(_sweetalert);
 
-var _repositoriesCategories = require('../../repositories/categories');
+var _modelsCategory = require('../../models/category');
 
-var _repositoriesCategories2 = _interopRequireDefault(_repositoriesCategories);
+var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
 
 exports['default'] = {
 
-    props: ['current-user'],
+    props: ['post-id'],
 
     components: {
         string: require('../post-fields/templates/string.vue'),
@@ -24039,6 +18378,21 @@ exports['default'] = {
         };
     },
 
+    created: function created() {
+        this.fetch();
+        this.fetchCategories();
+        this.fetchTags();
+        this.fetchFields();
+        this.fetchAuthors();
+    },
+
+    ready: function ready() {
+        this.$nextTick((function () {
+            this.lock();
+            this.initTooltips();
+        }).bind(this));
+    },
+
     computed: {
 
         isShowing: function isShowing() {
@@ -24058,10 +18412,8 @@ exports['default'] = {
 
         fetch: function fetch() {
             var self = this;
-            return client({
-                path: '/posts/' + this.$route.params.post_id + '?include=category,tags,fields,meta,author,media'
-            }).then(function (response) {
-                self.post = response.entity.data;
+            return this.$http.get('posts/' + this.postId + '?include=category,tags,fields,meta,author,media').then(function (response) {
+                self.post = response.data.data;
                 self.post.category = self.post.category ? self.post.category.data : {};
                 self.post.fields = self.post.fields.data;
                 self.post.meta = self.post.meta ? self.post.meta.data : {};
@@ -24077,55 +18429,37 @@ exports['default'] = {
                 if (self.post.stop_showing_at) {
                     self.post.stop_showing_at = _moment2['default'].utc(self.post.stop_showing_at, 'X').format('YYYY-MM-DD');
                 }
-            }, function (response) {
-                self.checkResponseStatus(response);
             });
         },
 
         fetchCategories: function fetchCategories() {
             var self = this;
-            return client({
-                path: '/categories'
-            }).then(function (response) {
-                self.allCategories = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
+            return this.$http.get('categories').then(function (response) {
+                self.allCategories = response.data.data;
             });
         },
 
         fetchTags: function fetchTags() {
             var self = this;
-            return client({
-                path: '/tags'
-            }).then(function (response) {
-                self.allTags = response.entity.data.map(function (tag) {
+            return this.$http.get('tags').then(function (response) {
+                self.allTags = response.data.data.map(function (tag) {
                     tag.text = tag.name;
                     return tag;
                 });
-            }, function (response) {
-                self.checkResponseStatus(response);
             });
         },
 
         fetchFields: function fetchFields() {
             var self = this;
-            return client({
-                path: '/fields'
-            }).then(function (response) {
-                self.allFields = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
+            return this.$http.get('fields').then(function (response) {
+                self.allFields = response.data.data;
             });
         },
 
         fetchAuthors: function fetchAuthors() {
             var self = this;
-            return client({
-                path: '/authors'
-            }).then(function (response) {
-                self.allAuthors = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
+            return this.$http.get('authors').then(function (response) {
+                self.allAuthors = response.data.data;
             });
         },
 
@@ -24135,14 +18469,8 @@ exports['default'] = {
         save: function save() {
             var self = this;
             this.post.fields = this.fieldValues;
-            return client({
-                method: 'PUT',
-                path: '/posts/' + this.post.id,
-                entity: self.post
-            }).then(function (response) {
+            return this.$http.put('posts/' + this.post.id, self.post).then(function (response) {
                 self.notify('success', 'Saved successfully.');
-            }, function (response) {
-                self.checkResponseStatus(response);
             });
         },
 
@@ -24158,10 +18486,7 @@ exports['default'] = {
                 closeOnConfirm: false,
                 showLoaderOnConfirm: true
             }, function () {
-                client({
-                    method: 'DELETE',
-                    path: '/posts/' + self.post.id
-                }).then(function () {
+                self.$http['delete']('posts/' + self.post.id).then(function () {
                     _sweetalert2['default']({
                         html: true,
                         title: 'Deleted!',
@@ -24169,7 +18494,7 @@ exports['default'] = {
                         type: 'success'
                     }, function () {
                         self.deleted = true;
-                        self.$route.router.go('/posts');
+                        window.location = '/admin/posts';
                     });
                 }, function () {
                     _sweetalert2['default']("Oops", "We couldn't connect to the server!", "error");
@@ -24180,17 +18505,11 @@ exports['default'] = {
         lock: function lock() {
             if (!this.post.is_locked) {
                 var self = this;
-                return client({
-                    method: 'PATCH',
-                    path: '/posts/' + self.post.id + '/lock',
-                    entity: { user_id: self.currentUser.id }
-                }).then(function (response) {
+                return this.$http.patch('posts/' + self.post.id + '/lock', { user_id: self.currentUser.id }).then(function (response) {
                     self.post.is_locked = true;
                     window.onbeforeunload = function (e) {
                         self.unlock();
                     };
-                }, function (response) {
-                    self.checkResponseStatus(response);
                 });
             }
         },
@@ -24198,11 +18517,7 @@ exports['default'] = {
         unlock: function unlock(done) {
             if (this.post.is_locked && !this.deleted) {
                 var self = this;
-                return client({
-                    method: 'PATCH',
-                    path: '/posts/' + self.post.id + '/unlock',
-                    entity: { user_id: self.currentUser.id }
-                }).then(function (response) {
+                return this.$http.patch('posts/' + self.post.id + '/unlock', { user_id: self.currentUser.id }).then(function (response) {
                     self.post.is_locked = false;
                     done();
                 }, function (response) {
@@ -24253,50 +18568,29 @@ exports['default'] = {
             return matchedField ? matchedField.value : '';
         },
 
-        checkResponseStatus: function checkResponseStatus(response) {
-            if (response.status.code == 401 || response.status.code == 500) {
-                this.$dispatch('userHasLoggedOut');
-            }
-        },
-
         initTooltips: function initTooltips() {
             this.$nextTick(function () {
                 $('[data-toggle="tooltip"]').tooltip();
             });
         }
 
-    },
-
-    route: {
-        data: function data(transition) {
-            var cat = _repositoriesCategories2['default'].get().then(function (response) {
-                console.log(response);
-            });
-            this.fetch().then(this.fetchFields).then(this.fetchTags).then(this.fetchCategories).then(this.fetchAuthors).then(this.mapFieldValues).then(transition.next).then(this.initTooltips).then(this.lock);
-        },
-
-        deactivate: function deactivate(transition) {
-            this.unlock(function () {
-                transition.next();
-            });
-        }
     }
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/posts'\">Posts</a></li>\n        <li class=\"active\">{{ post.title }}</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n        <form class=\"Post EditForm\">\n\n            <section class=\"info row\">\n                <div class=\"col-md-6 clearfix\">\n                    <a v-link=\"'/posts/'+$route.params.post_id+'/revisions'\" class=\"btn btn-link\">\n                        <i class=\"fa fa-history\"></i> Revision history\n                    </a>\n                </div>\n                <div class=\"col-md-6 clearfix\">\n                    <div class=\"action-buttons\">\n                        <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                        <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                        <button v-link=\"'/posts'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</button>\n                    </div>\n                </div>\n            </section>\n\n            <div class=\"panel panel-default\" :class=\"{ 'border-green': isShowing, 'border-red': !isShowing }\">\n                <div class=\"panel-heading\">\n                    PUBLISHING\n                    <label class=\"showing label\" :class=\"{ 'label-success': isShowing, 'label-danger': !isShowing }\">\n                        {{ isShowing ? 'Will show on website' : 'Will not show on website' }}\n                    </label>\n                </div>\n                <div class=\"panel-body\">\n                    <div class=\"row\">\n                        <div class=\"col-md-2\">\n                            <div class=\"form-group switch-wrapper\">\n                                <div class=\"publish-switch\">\n                                    <label for=\"is_published\">Published</label>\n                                    <div class=\"switch\">\n                                        <input v-model=\"post.is_published\" name=\"is_published\" id=\"is_published\" class=\"cmn-toggle cmn-toggle-round-md\" type=\"checkbox\">\n                                        <label for=\"is_published\"></label>\n                                    </div>\n                                </div>\n                            </div>\n                        </div>\n                        <div class=\"col-md-5\">\n                            <label for=\"start_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show until this date.\">\n                                Start showing\n                            </label>\n                            <input type=\"date\" v-model=\"post.start_showing_at\" name=\"start_showing_at\" id=\"start_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                        </div>\n                        <div class=\"col-md-5\">\n                            <label for=\"stop_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show after this date.\">\n                                Stop showing\n                            </label>\n                            <input type=\"date\" v-model=\"post.stop_showing_at\" name=\"stop_showing_at\" id=\"stop_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">POST</div>\n                <div class=\"panel-body\">\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"title\">Title</label>\n                                <input type=\"text\" v-model=\"post.title\" name=\"title\" id=\"title\" class=\"form-control\">\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"subtitle\">Subtitle</label>\n                                <input type=\"text\" v-model=\"post.subtitle\" name=\"subtitle\" id=\"subtitle\" class=\"form-control\">\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group\">\n                                <label for=\"category\">Category</label>\n                                <select name=\"category\" id=\"category\" class=\"form-control\" v-select=\"post.category_id\" v-model=\"post.category_id\">\n                                    <option value=\"\" disabled=\"\" selected=\"\">Select a category...</option>\n                                    <option v-for=\"category in allCategories\" :value=\"category.id\">{{ category.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"form-group form-tags\">\n                                <label for=\"tags\">Tags</label>\n                                <select name=\"tags\" id=\"tags\" multiple=\"\" class=\"form-control\" v-select=\"post.tags\" v-model=\"post.tags\" :options=\"allTags\">\n                                    <option v-for=\"tag in allTags\" :value=\"tag.id\">{{ tag.name }}</option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"body\">Body</label>\n                        <textarea name=\"body\" id=\"body\" class=\"form-control rich-editor\" v-if=\"post.body\" v-rich-editor=\"post.body\" v-model=\"post.body\">                        </textarea>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"author\">Author</label>\n                        <select v-select=\"post.author_id\" id=\"author\" name=\"author\" :options=\"allAuthors\">\n                            <option value=\"\" disabled=\"\" selected=\"\">Select an author...</option>\n                            <option v-for=\"author in allAuthors\" value=\"{{ author.id }}\">{{ author.name }}</option>\n                        </select>\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"show_author\">Show author?</label>\n                        <div class=\"switch\">\n                            <input id=\"show_author\" class=\"cmn-toggle cmn-toggle-yes-no\" type=\"checkbox\" v-model=\"post.show_author\">\n                            <label for=\"show_author\" data-on=\"Yes\" data-off=\"No\"></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div v-if=\"allFields &amp;&amp; allFields.length > 0\" class=\"panel panel-default\">\n                <div class=\"panel-heading\">CUSTOM FIELDS</div>\n                <div class=\"panel-body\">\n                    <div v-for=\"field in allFields\" class=\"form-group\">\n                        <component v-if=\"fieldValues\" :is=\"field.template\" :field.sync=\"fieldValues[field.name]\">\n                        </component>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">Image</div>\n                <div class=\"panel-body\">\n                    <dropzone path=\"/img/uploads/posts/\" :image=\"post.image\" :to=\"'/posts/'+$route.params.post_id+'/image'\">\n                    </dropzone>\n                </div>\n            </div>\n\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">META</div>\n                <div class=\"panel-body\">\n                    <div class=\"form-group\">\n                        <label for=\"description\">Description</label>\n                        <input type=\"text\" v-model=\"post.meta.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <label for=\"url\">Canonical Link</label>\n                        <input type=\"text\" v-model=\"post.meta.url\" name=\"url\" id=\"url\" class=\"form-control\">\n                    </div>\n                </div>\n            </div>\n\n        </form>\n    </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"/\">Home</a></li>\n        <li><a href=\"/admin/posts\">Posts</a></li>\n        <li class=\"active\">{{ post.title }}</li>\n    </ol>\n\n    <form class=\"Post EditForm\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 clearfix\">\n                <a href=\"/admin/posts/{{ post.id }}/revisions'\" class=\"btn btn-link\">\n                    <i class=\"fa fa-history\"></i> Revision history\n                </a>\n            </div>\n            <div class=\"col-md-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                    <a href=\"/admin/posts\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</a>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\" :class=\"{ 'border-green': isShowing, 'border-red': !isShowing }\">\n            <div class=\"panel-heading\">\n                PUBLISHING\n                <label class=\"showing label\" :class=\"{ 'label-success': isShowing, 'label-danger': !isShowing }\">\n                    {{ isShowing ? 'Will show on website' : 'Will not show on website' }}\n                </label>\n            </div>\n            <div class=\"panel-body\">\n                <div class=\"row\">\n                    <div class=\"col-md-2\">\n                        <div class=\"form-group switch-wrapper\">\n                            <div class=\"publish-switch\">\n                                <label for=\"is_published\">Published</label>\n                                <div class=\"switch\">\n                                    <input v-model=\"post.is_published\" name=\"is_published\" id=\"is_published\" class=\"cmn-toggle cmn-toggle-round-md\" type=\"checkbox\">\n                                    <label for=\"is_published\"></label>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"col-md-5\">\n                        <label for=\"start_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show until this date.\">\n                            Start showing\n                        </label>\n                        <input type=\"date\" v-model=\"post.start_showing_at\" name=\"start_showing_at\" id=\"start_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                    </div>\n                    <div class=\"col-md-5\">\n                        <label for=\"stop_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show after this date.\">\n                            Stop showing\n                        </label>\n                        <input type=\"date\" v-model=\"post.stop_showing_at\" name=\"stop_showing_at\" id=\"stop_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">POST</div>\n            <div class=\"panel-body\">\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"title\">Title</label>\n                            <input type=\"text\" v-model=\"post.title\" name=\"title\" id=\"title\" class=\"form-control\">\n                        </div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"subtitle\">Subtitle</label>\n                            <input type=\"text\" v-model=\"post.subtitle\" name=\"subtitle\" id=\"subtitle\" class=\"form-control\">\n                        </div>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"category\">Category</label>\n                            <select name=\"category\" id=\"category\" class=\"form-control\" v-select=\"post.category_id\" v-model=\"post.category_id\">\n                                <option value=\"\" disabled=\"\" selected=\"\">Select a category...</option>\n                                <option v-for=\"category in allCategories\" :value=\"category.id\">{{ category.name }}</option>\n                            </select>\n                        </div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group form-tags\">\n                            <label for=\"tags\">Tags</label>\n                            <select name=\"tags\" id=\"tags\" multiple=\"\" class=\"form-control\" v-select=\"post.tags\" v-model=\"post.tags\" :options=\"allTags\">\n                                <option v-for=\"tag in allTags\" :value=\"tag.id\">{{ tag.name }}</option>\n                            </select>\n                        </div>\n                    </div>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"body\">Body</label>\n                    <textarea name=\"body\" id=\"body\" class=\"form-control rich-editor\" v-if=\"post.body\" v-rich-editor=\"post.body\" v-model=\"post.body\">                    </textarea>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"author\">Author</label>\n                    <select v-select=\"post.author_id\" id=\"author\" name=\"author\" :options=\"allAuthors\">\n                        <option value=\"\" disabled=\"\" selected=\"\">Select an author...</option>\n                        <option v-for=\"author in allAuthors\" value=\"{{ author.id }}\">{{ author.name }}</option>\n                    </select>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"show_author\">Show author?</label>\n                    <div class=\"switch\">\n                        <input id=\"show_author\" class=\"cmn-toggle cmn-toggle-yes-no\" type=\"checkbox\" v-model=\"post.show_author\">\n                        <label for=\"show_author\" data-on=\"Yes\" data-off=\"No\"></label>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div v-if=\"allFields &amp;&amp; allFields.length > 0\" class=\"panel panel-default\">\n            <div class=\"panel-heading\">CUSTOM FIELDS</div>\n            <div class=\"panel-body\">\n                <div v-for=\"field in allFields\" class=\"form-group\">\n                    <component v-if=\"fieldValues\" :is=\"field.template\" :field.sync=\"fieldValues[field.name]\">\n                    </component>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Image</div>\n            <div class=\"panel-body\">\n                <dropzone path=\"/img/uploads/posts/\" :image=\"post.image\" :to=\"'/posts/'+$route.params.post_id+'/image'\">\n                </dropzone>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">META</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"description\">Description</label>\n                    <input type=\"text\" v-model=\"post.meta.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"url\">Canonical Link</label>\n                    <input type=\"text\" v-model=\"post.meta.url\" name=\"url\" id=\"url\" class=\"form-control\">\n                </div>\n            </div>\n        </div>\n\n    </form>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/edit.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/edit.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":80,"../partials/dropzone.vue":50,"../post-fields/templates/rich_text.vue":58,"../post-fields/templates/string.vue":59,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],62:[function(require,module,exports){
+},{"../../models/category":47,"../partials/dropzone.vue":38,"../post-fields/templates/rich_text.vue":40,"../post-fields/templates/string.vue":41,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],43:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -24311,21 +18605,19 @@ var _sweetalert = require('sweetalert');
 
 var _sweetalert2 = _interopRequireDefault(_sweetalert);
 
-var _repositoriesPosts = require('../../repositories/posts');
+var _modelsPost = require('../../models/post');
 
-var _repositoriesPosts2 = _interopRequireDefault(_repositoriesPosts);
+var _modelsPost2 = _interopRequireDefault(_modelsPost);
 
-var _repositoriesCategories = require('../../repositories/categories');
+var _modelsCategory = require('../../models/category');
 
-var _repositoriesCategories2 = _interopRequireDefault(_repositoriesCategories);
+var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
 
-var _repositoriesUsers = require('../../repositories/users');
+var _modelsUser = require('../../models/user');
 
-var _repositoriesUsers2 = _interopRequireDefault(_repositoriesUsers);
+var _modelsUser2 = _interopRequireDefault(_modelsUser);
 
 exports['default'] = {
-
-    props: ['current-user'],
 
     data: function data() {
         return {
@@ -24339,6 +18631,12 @@ exports['default'] = {
         };
     },
 
+    created: function created() {
+        this.getPosts();
+        this.getCategories();
+        this.getUsers();
+    },
+
     ready: function ready() {
         this.$nextTick((function () {
             this.initTooltips();
@@ -24347,9 +18645,33 @@ exports['default'] = {
 
     methods: {
 
+        getPosts: function getPosts() {
+            this.$http.get('posts?include=categories&orderBy=updated_at|desc').then(function (response) {
+                this.$set('posts', response.data.data.map(function (post) {
+                    return new _modelsPost2['default'](post);
+                }));
+            });
+        },
+
+        getCategories: function getCategories() {
+            this.$http.get('categories').then(function (response) {
+                this.$set('categories', response.data.data.map(function (category) {
+                    return new _modelsCategory2['default'](category);
+                }));
+            });
+        },
+
+        getUsers: function getUsers() {
+            this.$http.get('users').then(function (response) {
+                this.$set('users', response.data.data.map(function (user) {
+                    return new _modelsUser2['default'](user);
+                }));
+            });
+        },
+
         goToPost: function goToPost(post) {
             if (!post.is_locked) {
-                this.$route.router.go({ path: '/posts/' + post.id });
+                window.location = '/admin/posts/' + post.id;
             } else {
                 _sweetalert2['default']({
                     html: true,
@@ -24361,7 +18683,7 @@ exports['default'] = {
                     confirmButtonText: "Yes, unlock it!",
                     cancelButtonText: "Nevermind"
                 }, (function () {
-                    this.$route.router.go({ path: '/posts/' + post.id });
+                    window.location = '/posts/' + post.id;
                 }).bind(this));
             }
         },
@@ -24473,11 +18795,7 @@ exports['default'] = {
          * @param post
          */
         saveOrder: function saveOrder(post) {
-            return client({
-                method: "PATCH",
-                path: '/posts/' + post.id + '/reorder',
-                entity: { order: post.order }
-            });
+            return client.patch('/posts/' + post.id + '/reorder', { order: post.order });
         },
 
         scrollTo: function scrollTo(target) {
@@ -24496,933 +18814,23 @@ exports['default'] = {
             e.target.blur();
         }
 
-    },
-
-    computed: {
-
-        currentUserName: function currentUserName() {
-            return this.currentUser ? this.currentUser.name : '';
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            return {
-                posts: _repositoriesPosts2['default']['with']('category').orderBy('updated_at', 'desc').get(),
-                categories: _repositoriesCategories2['default'].get(),
-                users: _repositoriesUsers2['default'].get()
-            };
-        }
     }
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Posts</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"create-button\">\n            <button v-link=\"'/posts/create'\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</button>\n        </div>\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                </div>\n                <div class=\"col-md-6\">\n                    <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                        <option value=\"\" selected=\"\">Filter by category...</option>\n                        <option v-for=\"category in categories\" :value=\"category.name\">\n                            {{ category.name }}\n                        </option>\n                    </select>\n                </div>\n            </div>\n        </div>\n\n        <table class=\"Posts table table-striped table-hover\">\n            <thead>\n                <tr>\n                    <th v-if=\"categoryFilter\"><a href=\"#\" @click.prevent=\"sortBy('order')\">Order <i :class=\"orderIcon('order')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('category.name')\">Category <i :class=\"orderIcon('category.name')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                    <th class=\"text-centered\"><a>Showing</a></th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for=\"post in posts\n                        | filterBy titleFilter in 'title'\n                        | filterBy categoryFilter in 'category.name'\n                        | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n                    <td v-if=\"categoryFilter\" class=\"order\">\n                        <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n                    </td>\n\n                    <td>\n                        <a href=\"#!/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                        <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                    </td>\n\n                    <td>{{ post.category ? post.category.name : '' }}</td>\n\n                    <td>{{ formatTimestamp(post.created_at) }}</td>\n\n                    <td class=\"published\">\n                        <div class=\"switch\">\n                            <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish()\">\n                            <label for=\"is_published_{{post.id}}\"></label>\n                        </div>\n                    </td>\n\n                    <td class=\"text-centered\">\n                        <span v-if=\"post.isShowing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                        <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n                    </td>\n\n                </tr>\n            </tbody>\n        </table>\n\n    </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Posts</li>\n    </ol>\n\n    <div class=\"create-button\">\n        <a href=\"/posts/create\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</a>\n    </div>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n            </div>\n            <div class=\"col-md-6\">\n                <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                    <option :value=\"null\" selected=\"\">Filter by category...</option>\n                    <option v-for=\"category in categories\" :value=\"category.name\">\n                        {{ category.name }}\n                    </option>\n                </select>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Posts table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th v-if=\"categoryFilter\"><a href=\"#\" @click.prevent=\"sortBy('order')\">Order <i :class=\"orderIcon('order')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('category.name')\">Category <i :class=\"orderIcon('category.name')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                <th class=\"text-centered\"><a>Showing</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n                <td v-if=\"categoryFilter\" class=\"order\">\n                    <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n                </td>\n\n                <td>\n                    <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                    <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                </td>\n\n                <td>{{ post.category ? post.category.name : '' }}</td>\n\n                <td>{{ formatTimestamp(post.created_at) }}</td>\n\n                <td class=\"published\">\n                    <div class=\"switch\">\n                        <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish()\">\n                        <label for=\"is_published_{{post.id}}\"></label>\n                    </div>\n                </td>\n\n                <td class=\"text-centered\">\n                    <span v-if=\"post.isShowing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                    <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n                </td>\n\n            </tr>\n        </tbody>\n    </table>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../repositories/categories":80,"../../repositories/posts":81,"../../repositories/users":83,"babel-runtime/helpers/interop-require-default":1,"moment":6,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],63:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _moment = require('moment');
-
-var _moment2 = _interopRequireDefault(_moment);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            post: { revisions: { data: [] } },
-            keys: {
-                title: 'Title',
-                subtitle: 'Subtitle',
-                body: 'Body',
-                category_id: 'Category',
-                author_id: 'Author',
-                show_author: 'Show author',
-                start_showing_at: 'Start showing',
-                stop_showing_at: 'Stop showing',
-                image: 'Image',
-                order: 'Order'
-            },
-            diffKeys: ['body'],
-            pagination: { links: {} },
-            users: [],
-            categories: [],
-            authors: [],
-            fieldFilter: null
-        };
-    },
-
-    methods: {
-
-        fetch: function fetch() {
-            var self = this;
-            return client({
-                path: '/posts/' + this.$route.params.post_id + '?include=revisions'
-            }).then(function (response) {
-                self.post = response.entity.data;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        fetchUsers: function fetchUsers(successHandler) {
-            var self = this;
-            return client({
-                path: '/users'
-            }).then(function (response) {
-                self.users = response.entity.data;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        fetchCategories: function fetchCategories() {
-            var self = this;
-            return client({
-                path: '/categories'
-            }).then(function (response) {
-                self.categories = response.entity.data;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        fetchAuthors: function fetchAuthors() {
-            var self = this;
-            return client({
-                path: '/authors'
-            }).then(function (response) {
-                self.authors = response.entity.data;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        who: function who(userId) {
-            if (!userId || !this.users || !this.users.length) {
-                return 'a script';
-            }
-
-            var user = this.users.filter(function (user) {
-                return user.id == userId;
-            })[0];
-
-            return user.name;
-        },
-
-        when: function when(timestamp) {
-            return _moment2['default'].unix(timestamp).format('h:mm a on MMM D, YYYY');
-        },
-
-        shouldDiff: function shouldDiff(key) {
-            return !! ~this.diffKeys.indexOf(key);
-        },
-
-        what: function what(revision) {
-            var what = this.keys[revision.key];
-
-            if (revision.key == 'is_published') {
-                return '<strong>' + (revision.new_value > 0 ? 'Published' : 'Unpublished') + '</strong>';
-            }
-            if (!! ~this.diffKeys.indexOf(revision.key)) {
-                return '<strong>' + what + '</strong> was edited';
-            }
-            if (revision.key == 'category_id') {
-                return '<strong>' + what + '</strong> changed to <strong>' + this.categoryName(revision.new_value) + '</strong>';
-            }
-            if (revision.key == 'author_id') {
-                return '<strong>' + what + '</strong> changed to <strong>' + this.authorName(revision.new_value) + '</strong>';
-            }
-            if (revision.key == 'show_author') {
-                return '<strong>' + what + '</strong> changed to <strong>' + (revision.new_value > 0 ? 'Yes' : 'No') + '</strong>';
-            }
-
-            return '<strong>' + what + '</strong> changed to <strong>' + revision.new_value + '</strong>';
-        },
-
-        categoryName: function categoryName(id) {
-            return this.categories.filter(function (category) {
-                return id == category.id;
-            })[0].name;
-        },
-
-        authorName: function authorName(id) {
-            return this.authors.filter(function (author) {
-                return id == author.id;
-            })[0].name;
-        }
-
-    },
-
-    computed: {
-
-        currentUserName: function currentUserName() {
-            return this.currentUser ? this.currentUser.name : '';
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch().then(this.fetchUsers).then(this.fetchCategories).then(this.fetchAuthors).then(transition.next);
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/posts'\">Posts</a></li>\n        <li><a v-link=\"'/posts/'+post.id\">{{ post.title }}</a></li>\n        <li class=\"active\">Revisions</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <select v-model=\"fieldFilter\" id=\"field\" class=\"form-control\">\n                        <option value=\"\" selected=\"\">Filter by field...</option>\n                        <option v-for=\"field in keys\" :value=\"$key\">\n                            {{ field }}\n                        </option>\n                    </select>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Revision History</div>\n            <div class=\"panel-body\" v-if=\"!post.revisions.data.length > 0\"><h6>No revions</h6></div>\n            <table v-else=\"\" class=\"Revisions table table-hover\">\n                <tbody>\n                <tr v-for=\"revision in post.revisions.data\n                        | filterBy fieldFilter in 'key'\n                        | orderBy 'created_at' -1\" class=\"Revision\">\n                    <td>{{{ what(revision) }}}</td>\n                    <td>at {{ when(revision.created_at) }}</td>\n                    <td>by <em>{{ who(revision.user_id) }}</em></td>\n                    <td class=\"action-button\"><a v-if=\"shouldDiff(revision.key)\" v-link=\"'/posts/'+post.id+'/revisions/'+revision.id\" class=\"btn btn-primary btn-sm\">View</a></td>\n                </tr>\n                </tbody>\n            </table>\n        </div>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"babel-runtime/helpers/interop-require-default":1,"moment":6,"vue":38,"vue-hot-reload-api":17}],64:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _diffMatchPatch = require('diff-match-patch');
-
-var _diffMatchPatch2 = _interopRequireDefault(_diffMatchPatch);
-
-var _he = require('he');
-
-var _he2 = _interopRequireDefault(_he);
-
-var _moment = require('moment');
-
-var _moment2 = _interopRequireDefault(_moment);
-
-var _sweetalert = require('sweetalert');
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            revision: {},
-            post: {},
-            viewDiff: false,
-            users: []
-        };
-    },
-
-    computed: {
-
-        content: function content() {
-            return this.viewDiff ? this.diff : this.revision.new_value;
-        },
-
-        diff: function diff() {
-            if (!this.revision) {
-                return '';
-            }
-            var differ = new _diffMatchPatch2['default']();
-            var diffs = differ.diff_main(this.revision.old_value || '', this.revision.new_value || '');
-            differ.diff_cleanupSemantic(diffs);
-            var diff = _he2['default'].decode(differ.diff_prettyHtml(diffs));
-
-            return this.replaceAll(diff, ['<br>', '¶'], '');
-        }
-
-    },
-
-    methods: {
-
-        fetch: function fetch() {
-            var self = this;
-            return client({
-                path: '/revisions/' + this.$route.params.revision_id
-            }).then(function (response) {
-                self.revision = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        fetchPost: function fetchPost() {
-            var self = this;
-            return client({
-                path: '/posts/' + this.$route.params.post_id
-            }).then(function (response) {
-                self.post = response.entity.data;
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        fetchUsers: function fetchUsers() {
-            var self = this;
-            return client({
-                path: '/users'
-            }).then(function (response) {
-                self.users = response.entity.data;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        restore: function restore() {
-            if (this.canRestore()) {
-                var self = this;
-                _sweetalert2['default']({
-                    title: 'For reals?',
-                    text: 'This will restore the content to this state.',
-                    type: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#DD6B55',
-                    confirmButtonText: 'Yes, restore!',
-                    closeOnConfirm: false,
-                    showLoaderOnConfirm: true
-                }, function () {
-                    var entity = {};
-                    entity[self.revision.key] = self.revision.new_value;
-                    client({
-                        method: 'PATCH',
-                        path: '/posts/' + self.$route.params.post_id + '/property',
-                        entity: entity
-                    }).then(function (response) {
-                        _sweetalert2['default']({
-                            html: true,
-                            title: 'Great success!',
-                            text: '<strong>' + self.post.title + '</strong> was restored to this state!',
-                            type: 'success'
-                        }, function () {
-                            self.$route.router.go('/posts/' + self.post.id);
-                        });
-                    }, function (response) {
-                        _sweetalert2['default']("Oops", "We couldn't connect to the server!", "error");
-                        self.checkResponseStatus(response);
-                    });
-                });
-            } else {
-                _sweetalert2['default']("Well, actually...", "There is no difference between this revision and the current state.", "info");
-            }
-        },
-
-        who: function who(userId) {
-            if (!userId || !this.users || !this.users.length) {
-                return 'a script';
-            }
-
-            var user = this.users.filter(function (user) {
-                return user.id == userId;
-            })[0];
-
-            return user.name;
-        },
-
-        when: function when(timestamp) {
-            return _moment2['default'].utc(timestamp, 'X').format('h:mm a on MMM D, YYYY');
-        },
-
-        canRestore: function canRestore() {
-            return this.post[this.revision.key] != this.revision.new_value;
-        },
-
-        replaceAll: function replaceAll(str, find, replace) {
-            if (!find instanceof Array) {
-                find = [find];
-            }
-
-            return find.reduce(function (s, search) {
-                return s.replace(new RegExp(search, 'g'), replace);
-            }, str);
-        },
-
-        checkResponseStatus: function checkResponseStatus(response) {
-            if (response.status.code == 401 || response.status.code == 500) {
-                this.$dispatch('userHasLoggedOut');
-            }
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch().then(this.fetchPost).then(this.fetchUsers).then(transition.next);
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a v-link=\"'/home'\">Home</a></li>\n        <li><a v-link=\"'/posts'\">Posts</a></li>\n        <li><a v-link=\"'/posts/'+post.id\">{{ post.title }}</a></li>\n        <li><a v-link=\"'/posts/'+post.id+'/revisions'\">Revisions</a></li>\n        <li class=\"active\">{{ revision.id }}</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"Revision panel panel-default\">\n            <div class=\"panel-heading\">\n                <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <strong>{{ who(revision.user_id) }}</strong> — <em>{{ when(revision.created_at) }}</em>\n                </div>\n                <div class=\"col-md-6 clearfix\">\n                    <div class=\"view-buttons\">\n                        <button class=\"btn btn-sm\" :class=\"{ 'active': !viewDiff }\" @click.prevent=\"viewDiff = false\">Content</button>\n                        <button class=\"btn btn-sm\" :class=\"{ 'active': viewDiff }\" @click.prevent=\"viewDiff = true\">Changes</button>\n                    </div>\n                </div>\n                </div>\n            </div>\n            <div class=\"panel-body\">{{{ content }}}</div>\n            <div class=\"panel-footer\">\n                <button class=\"btn btn-warning\" :class=\"{ 'disabled': !canRestore() }\" @click.prevent=\"restore\">\n                    <i class=\"fa fa-repeat\"></i> Restore this revision\n                </button>\n            </div>\n        </div>\n    </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":4,"moment":6,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],65:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _modelsTag = require('../../models/tag');
-
-var _modelsTag2 = _interopRequireDefault(_modelsTag);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            tag: {
-                name: '',
-                description: ''
-            }
-        };
-    },
-
-    methods: {
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            _modelsTag2['default'].create(this.tag).then(function (response) {
-                self.$route.router.go('/tags');
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        }
-
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/tags'\">Tags</a></li>\n        <li class=\"active\">Create</li>\n    </ol>\n\n    <form class=\"Tag\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-success\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button v-link=\"'/tags'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Cancel</button>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Tag</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"name\">Name</label>\n                    <input type=\"text\" v-model=\"tag.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"description\">Description</label>\n                    <input type=\"text\" v-model=\"tag.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                </div>\n            </div>\n        </div>\n    </form>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/create.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"../../models/tag":79,"babel-runtime/helpers/interop-require-default":1,"vue":38,"vue-hot-reload-api":17}],66:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _repositoriesTags = require('../../repositories/tags');
-
-var _repositoriesTags2 = _interopRequireDefault(_repositoriesTags);
-
-var _sweetalert = require('sweetalert');
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            tag: {
-                id: '',
-                name: '',
-                description: ''
-            }
-        };
-    },
-
-    methods: {
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            this.tag.save().then(function (response) {
-                self.notify('success', 'Saved successfully.');
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        'delete': function _delete() {
-            var self = this;
-            _sweetalert2['default']({
-                title: 'Are you sure?',
-                text: 'You will not be able to recover this tag!',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#DD6B55',
-                confirmButtonText: 'Yes, delete it!',
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true
-            }, function () {
-                self.tag.destroy().then(function () {
-                    _sweetalert2['default']({
-                        html: true,
-                        title: 'Deleted!',
-                        text: '<strong>' + self.tag.name + '</strong> was deleted!',
-                        type: 'success'
-                    }, function () {
-                        self.deleted = true;
-                        self.$route.router.go('/tags');
-                    });
-                }, function () {
-                    _sweetalert2['default']("Oops", "We couldn't connect to the server!", "error");
-                });
-            });
-        },
-
-        notify: function notify(type, message) {
-            if (type == 'success') {
-                var icon = "fa fa-thumbs-o-up";
-            } else if (type == 'warning') {
-                var icon = "fa fa-warning";
-            }
-            $.notify({
-                icon: icon,
-                message: message
-            }, {
-                type: type,
-                delay: 3000,
-                offset: { x: 20, y: 70 }
-            });
-        },
-
-        checkResponseStatus: function checkResponseStatus(response) {
-            if (response.status.code == 401 || response.status.code == 500) {
-                this.$dispatch('userHasLoggedOut');
-            }
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            return {
-                tag: _repositoriesTags2['default'].getById(transition.to.params.tag_id)
-            };
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/tags'\">Tags</a></li>\n        <li class=\"active\">{{ tag.name }}</li>\n    </ol>\n\n    <form class=\"Tag EditForm\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                    <button v-link=\"'/tags'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</button>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Tag</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"name\">Name</label>\n                    <input type=\"text\" v-model=\"tag.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"description\">Description</label>\n                    <input type=\"text\" v-model=\"tag.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                </div>\n            </div>\n        </div>\n    </form>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/edit.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"../../repositories/tags":82,"babel-runtime/helpers/interop-require-default":1,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],67:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _repositoriesTags = require('../../repositories/tags');
-
-var _repositoriesTags2 = _interopRequireDefault(_repositoriesTags);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            tags: [],
-            pagination: { links: {} },
-            nameFilter: null,
-            sortKey: null,
-            sortDir: -1
-        };
-    },
-
-    methods: {
-
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            return {
-                tags: _repositoriesTags2['default'].get()
-            };
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Tags</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n            </div>\n            <div class=\"create-button col-md-6\">\n                <button v-link=\"'/tags/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Tags table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"tag in tags | filterBy nameFilter | orderBy sortKey sortDir\" class=\"Tag\">\n                <td><a v-link=\"'/tags/'+tag.id\">{{ tag.name }}</a></td>\n            </tr>\n        </tbody>\n    </table>\n\n    <paginator :pagination=\"pagination\"></paginator>\n\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags/index.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"../../repositories/tags":82,"babel-runtime/helpers/interop-require-default":1,"vue":38,"vue-hot-reload-api":17}],68:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            user: {
-                name: '',
-                email: '',
-                password: '',
-                password_confirmation: ''
-            }
-        };
-    },
-
-    methods: {
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            client({
-                method: 'POST',
-                path: '/users',
-                entity: this.user
-            }).then(function (response) {
-                self.$route.router.go('/users');
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        }
-
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/users'\">Users</a></li>\n        <li class=\"active\">Create</li>\n    </ol>\n\n    <form class=\"User\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-success\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button v-link=\"'/users'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Cancel</button>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">User</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"name\">Name</label>\n                    <input type=\"text\" v-model=\"user.name\" name=\"name\" id=\"name\" class=\"form-control\" required=\"\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"email\">Email</label>\n                    <input type=\"text\" v-model=\"user.email\" name=\"email\" id=\"email\" class=\"form-control\" required=\"\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"password\">Password</label>\n                    <input type=\"password\" v-model=\"user.password\" name=\"password\" id=\"password\" class=\"form-control\" required=\"\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"password_confirmation\">Confirm password</label>\n                    <input type=\"password\" v-model=\"user.password_confirmation\" name=\"password_confirmation\" id=\"password_confirmation\" class=\"form-control\" required=\"\">\n                </div>\n            </div>\n        </div>\n    </form>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/create.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],69:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-exports.__esModule = true;
-
-var _sweetalert = require('sweetalert');
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            user: {
-                id: '',
-                name: '',
-                email: ''
-            }
-        };
-    },
-
-    methods: {
-
-        fetch: function fetch(successHandler) {
-            var self = this;
-            client({
-                path: '/users/' + this.$route.params.user_id
-            }).then(function (response) {
-                self.user = response.entity.data;
-                successHandler(self.user);
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        /**
-         * Save the post.
-         */
-        save: function save() {
-            var self = this;
-            console.log(this.user);
-            client({
-                method: 'PUT',
-                path: '/users/' + this.user.id,
-                entity: this.user
-            }).then(function (response) {
-                self.notify('success', 'Saved successfully.');
-            }, function (response) {
-                self.checkResponseStatus(response);
-            });
-        },
-
-        'delete': function _delete() {
-            var self = this;
-            _sweetalert2['default']({
-                title: 'Are you sure?',
-                text: 'You will not be able to recover this user!',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#DD6B55',
-                confirmButtonText: 'Yes, say good-bye!',
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true
-            }, function () {
-                client({
-                    method: 'DELETE',
-                    path: '/users/' + self.user.id
-                }).then(function () {
-                    _sweetalert2['default']({
-                        html: true,
-                        title: 'Deleted!',
-                        text: '<strong>' + self.user.name + '</strong> was deleted!',
-                        type: 'success'
-                    }, function () {
-                        self.deleted = true;
-                        self.$route.router.go('/users');
-                    });
-                }, function () {
-                    _sweetalert2['default']("Oops", "We couldn't connect to the server!", "error");
-                });
-            });
-        },
-
-        passwordReset: function passwordReset() {
-            _sweetalert2['default']({
-                title: 'Heads up!',
-                text: 'This will email a unique password reset link to this user that will expire in <b>one hour</b>.',
-                type: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Send link',
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true,
-                html: true
-            }, (function () {
-                var data = {
-                    email: this.user.email,
-                    _token: document.getElementById('csrf').getAttribute('content')
-                };
-                $.post('/admin/password/email', data, function (response) {
-                    _sweetalert2['default']("Sent!", "The password reset link has been emailed!", "success");
-                });
-            }).bind(this));
-        },
-
-        notify: function notify(type, message) {
-            if (type == 'success') {
-                var icon = "fa fa-thumbs-o-up";
-            } else if (type == 'warning') {
-                var icon = "fa fa-warning";
-            }
-            $.notify({
-                icon: icon,
-                message: message
-            }, {
-                type: type,
-                delay: 3000,
-                offset: { x: 20, y: 70 }
-            });
-        },
-
-        checkResponseStatus: function checkResponseStatus(response) {
-            if (response.status.code == 401 || response.status.code == 500) {
-                this.$dispatch('userHasLoggedOut');
-            }
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch((function (user) {
-                transition.next({ user: user });
-            }).bind(this));
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a v-link=\"'/users'\">Users</a></li>\n        <li class=\"active\">{{ user.name }}</li>\n    </ol>\n\n    <form class=\"User EditForm\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 col-md-offset-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                    <button v-link=\"'/users'\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</button>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">User</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"name\">Name</label>\n                    <input type=\"text\" v-model=\"user.name\" name=\"name\" id=\"name\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"email\">Email</label>\n                    <input type=\"text\" v-model=\"user.email\" name=\"email\" id=\"email\" class=\"form-control\">\n                </div>\n            </div>\n            <div class=\"panel-footer\">\n                <a href=\"#\" class=\"btn btn-default\" @click.prevent=\"passwordReset\"><i class=\"fa fa-envelope\"></i> Send password reset</a>\n            </div>\n        </div>\n    </form>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/edit.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"babel-runtime/helpers/interop-require-default":1,"sweetalert":16,"vue":38,"vue-hot-reload-api":17}],70:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-exports['default'] = {
-
-    props: ['current-user'],
-
-    data: function data() {
-        return {
-            users: [],
-            pagination: { links: {} },
-            nameFilter: null,
-            sortKey: null,
-            sortDir: -1
-        };
-    },
-
-    methods: {
-
-        fetch: function fetch(successHandler) {
-            var self = this;
-            client({
-                path: '/users'
-            }).then(function (response) {
-                self.users = response.entity.data;
-                self.pagination = response.entity.meta.pagination;
-                successHandler(response.entity.data);
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
-            });
-        },
-
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
-        }
-
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch(function (data) {
-                transition.next({ users: data });
-            });
-        }
-    }
-
-};
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Users</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n            </div>\n            <div class=\"create-button col-md-6\">\n                <button v-link=\"'/users/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Users table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('email')\">Email <i :class=\"orderIcon('email')\"></i></a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"user in users | filterBy nameFilter | orderBy sortKey sortDir\" class=\"User\">\n                <td><a v-link=\"'/users/'+user.id\">{{ user.name }}</a></td>\n                <td>{{ user.email }}</td>\n            </tr>\n        </tbody>\n    </table>\n\n    <paginator :pagination=\"pagination\"></paginator>\n\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users/index.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, module.exports.template)
-  }
-})()}
-},{"vue":38,"vue-hot-reload-api":17}],71:[function(require,module,exports){
+},{"../../models/category":47,"../../models/post":49,"../../models/user":50,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -25458,7 +18866,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],72:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -25489,7 +18897,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],73:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -25499,10 +18907,9 @@ exports['default'] = {
 
     request: function request(_request) {
         var token = localStorage.getItem('jwt-token');
-        var headers = _request.headers || (_request.headers = {});
 
         if (token !== null && token !== 'undefined') {
-            headers.Authorization = token;
+            _request.headers.Authorization = token;
         }
 
         return _request;
@@ -25522,79 +18929,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],74:[function(require,module,exports){
-'use strict';
-
-var _routes = require('./routes');
-
-var VueRouter = require('vue-router');
-
-module.exports = getRouter();
-
-function getRouter() {
-    var router = new VueRouter();
-    (0, _routes.mapRoutes)(router);
-
-    router.beforeEach(function () {
-        window.scrollTo(0, 0);
-    });
-
-    return router;
-}
-
-},{"./routes":75,"vue-router":37}],75:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-
-    mapRoutes: function mapRoutes(router) {
-
-        router.map({
-
-            '/home': { component: require('../components/home.vue') },
-
-            // POSTS
-            '/posts': { component: require('../components/posts/index.vue') },
-            '/posts/create': { component: require('../components/posts/create.vue') },
-            '/posts/:post_id': { component: require('../components/posts/edit.vue') },
-            '/posts/:post_id/revisions': { component: require('../components/posts/revisions/index.vue') },
-            '/posts/:post_id/revisions/:revision_id': { component: require('../components/posts/revisions/show.vue') },
-
-            // POST FIELDS
-            '/post-fields': { component: require('../components/post-fields/index.vue') },
-            '/post-fields/create': { component: require('../components/post-fields/create.vue') },
-            '/post-fields/:field_id': { component: require('../components/post-fields/edit.vue') },
-
-            // CATEGORIES
-            '/categories': { component: require('../components/categories/index.vue') },
-            '/categories/create': { component: require('../components/categories/create.vue') },
-            '/categories/:category_id': { component: require('../components/categories/edit.vue') },
-
-            // TAGS
-            '/tags': { component: require('../components/tags/index.vue') },
-            '/tags/create': { component: require('../components/tags/create.vue') },
-            '/tags/:tag_id': { component: require('../components/tags/edit.vue') },
-
-            // AUTHORS
-            '/authors': { component: require('../components/authors/index.vue') },
-            '/authors/create': { component: require('../components/authors/create.vue') },
-            '/authors/:author_id': { component: require('../components/authors/edit.vue') },
-
-            // USERS
-            '/users': { component: require('../components/users/index.vue') },
-            '/users/create': { component: require('../components/users/create.vue') },
-            '/users/:user_id': { component: require('../components/users/edit.vue') }
-
-        });
-
-        router.redirect({
-            '/': '/home'
-        });
-    }
-
-};
-
-},{"../components/authors/create.vue":42,"../components/authors/edit.vue":43,"../components/authors/index.vue":44,"../components/categories/create.vue":46,"../components/categories/edit.vue":47,"../components/categories/index.vue":48,"../components/home.vue":49,"../components/post-fields/create.vue":55,"../components/post-fields/edit.vue":56,"../components/post-fields/index.vue":57,"../components/posts/create.vue":60,"../components/posts/edit.vue":61,"../components/posts/index.vue":62,"../components/posts/revisions/index.vue":63,"../components/posts/revisions/show.vue":64,"../components/tags/create.vue":65,"../components/tags/edit.vue":66,"../components/tags/index.vue":67,"../components/users/create.vue":68,"../components/users/edit.vue":69,"../components/users/index.vue":70}],76:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -25642,7 +18977,7 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":77}],77:[function(require,module,exports){
+},{"./model":48}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -25729,7 +19064,7 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],78:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -25785,13 +19120,9 @@ var Post = (function (_Model) {
     _createClass(Post, [{
         key: 'publish',
         value: function publish(user_id) {
-            return client({
-                method: 'PATCH',
-                path: '/posts/' + this.attributes['id'] + '/publish',
-                entity: {
-                    is_published: this.attributes['is_published'],
-                    user_id: user_id
-                }
+            return client.patch('/posts/' + this.attributes['id'] + '/publish', {
+                is_published: this.attributes['is_published'],
+                user_id: user_id
             });
         }
     }, {
@@ -25815,7 +19146,7 @@ var Post = (function (_Model) {
 exports['default'] = Post;
 module.exports = exports['default'];
 
-},{"./model":77,"moment":6}],79:[function(require,module,exports){
+},{"./model":48,"moment":4}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -25834,226 +19165,27 @@ var _model = require('./model');
 
 var _model2 = _interopRequireDefault(_model);
 
-var Tag = (function (_Model) {
-    _inherits(Tag, _Model);
+var User = (function (_Model) {
+    _inherits(User, _Model);
 
-    function Tag(data) {
-        _classCallCheck(this, Tag);
+    function User(data) {
+        _classCallCheck(this, User);
 
-        _get(Object.getPrototypeOf(Tag.prototype), 'constructor', this).call(this, 'tags', {
+        _get(Object.getPrototypeOf(User.prototype), 'constructor', this).call(this, 'posts', {
             id: data.id,
+            email: data.email,
             name: data.name,
-            slug: data.slug,
-            description: data.description,
-            posts: data.posts || [],
-            media: data.media ? data.media.data : {},
             created_at: data.created_at,
             updated_at: data.updated_at
         });
     }
 
-    return Tag;
+    return User;
 })(_model2['default']);
 
-exports['default'] = Tag;
+exports['default'] = User;
 module.exports = exports['default'];
 
-},{"./model":77}],80:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _modelsCategory = require('../models/category');
-
-var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
-
-exports['default'] = {
-
-    get: function get() {
-        return client({
-            path: '/categories' + (this.includes || '')
-        }).entity().then(function (entity) {
-            return entity.data.map(function (category) {
-                return new _modelsCategory2['default'](category);
-            });
-        });
-    },
-
-    getById: function getById(id) {
-        return client({
-            path: '/categories/' + id + (this.includes || '')
-        }).entity().then(function (entity) {
-            return new _modelsCategory2['default'](entity.data);
-        });
-    },
-
-    'with': function _with() {
-        for (var _len = arguments.length, includes = Array(_len), _key = 0; _key < _len; _key++) {
-            includes[_key] = arguments[_key];
-        }
-
-        this.includes = includes ? '?include=' + includes.join() : '';
-
-        return this;
-    }
-};
-module.exports = exports['default'];
-
-},{"../models/category":76}],81:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _modelsPost = require('../models/post');
-
-var _modelsPost2 = _interopRequireDefault(_modelsPost);
-
-exports['default'] = {
-
-    get: function get() {
-        return client({
-            path: '/posts',
-            params: this.params()
-        }).entity().then(function (entity) {
-            return entity.data.map(function (post) {
-                return new _modelsPost2['default'](post);
-            });
-        });
-    },
-
-    getById: function getById(id) {
-        return client({
-            path: '/posts/' + id,
-            params: this.params()
-        }).entity().then(function (entity) {
-            return new _modelsPost2['default'](entity.data);
-        });
-    },
-
-    params: function params() {
-        var params = {};
-        if (this.includes) {
-            params.include = this.includes;
-        }
-        if (this.orderBy) {
-            params.orderBy = this.orderBy;
-        }
-        return params;
-    },
-
-    'with': function _with() {
-        for (var _len = arguments.length, includes = Array(_len), _key = 0; _key < _len; _key++) {
-            includes[_key] = arguments[_key];
-        }
-
-        this.includes = includes ? includes.join() : '';
-
-        return this;
-    },
-
-    orderBy: function orderBy(key, dir) {
-        dir = dir ? '|' + dir : '|asc';
-        this.orderBy = key ? key + dir : '';
-
-        return this;
-    }
-};
-module.exports = exports['default'];
-
-},{"../models/post":78}],82:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _modelsTag = require('../models/tag');
-
-var _modelsTag2 = _interopRequireDefault(_modelsTag);
-
-exports['default'] = {
-
-    get: function get() {
-        return client.get('/api/tags' + (this.includes || '')).then(function (response) {
-            return response.data.data.map(function (tag) {
-                return new _modelsTag2['default'](tag);
-            });
-        });
-    },
-
-    getById: function getById(id) {
-        return client.get('/api/tags/' + id + (this.includes || '')).then(function (response) {
-            return new _modelsTag2['default'](response.data.data);
-        });
-    },
-
-    'with': function _with() {
-        for (var _len = arguments.length, includes = Array(_len), _key = 0; _key < _len; _key++) {
-            includes[_key] = arguments[_key];
-        }
-
-        this.includes = includes ? '?include=' + includes.join : '';
-
-        return this;
-    }
-};
-module.exports = exports['default'];
-
-},{"../models/tag":79}],83:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _modelsPost = require('../models/post');
-
-var _modelsPost2 = _interopRequireDefault(_modelsPost);
-
-exports['default'] = {
-
-    get: function get() {
-        return client({
-            path: '/users' + (this.includes || '')
-        }).entity().then(function (entity) {
-            return entity.data.map(function (user) {
-                return new _modelsPost2['default'](user);
-            });
-        });
-    },
-
-    getById: function getById(id) {
-        return client({
-            path: '/users/' + id + (this.includes || '')
-        }).entity().then(function (entity) {
-            return new _modelsPost2['default'](entity.data);
-        });
-    },
-
-    'with': function _with() {
-        for (var _len = arguments.length, includes = Array(_len), _key = 0; _key < _len; _key++) {
-            includes[_key] = arguments[_key];
-        }
-
-        this.includes = includes ? '?include=' + includes.join() : '';
-
-        return this;
-    }
-};
-module.exports = exports['default'];
-
-},{"../models/post":78}]},{},[41]);
+},{"./model":48}]},{},[37]);
 
 //# sourceMappingURL=admin.js.map

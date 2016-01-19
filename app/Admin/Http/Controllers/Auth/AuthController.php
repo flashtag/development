@@ -21,7 +21,7 @@ class AuthController extends Controller
     /**
      * @var string
      */
-    protected $redirectPath = '/admin';
+    protected $redirectPath = '/admin/home';
 
     /**
      * @var string

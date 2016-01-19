@@ -1,28 +1,28 @@
 <template>
     <div class="Side-nav panel">
         <div class="list-group">
-            <a href="#" class="list-group-item" v-link="{ path: '/home', activeClass: 'active' }">
+            <a href="#" class="list-group-item" href="/admin/home">
                 <i class="fa fa-home"></i> Home
             </a>
-            <a href="#" class="list-group-item" v-link="{ path: '/posts', activeClass: 'active' }">
+            <a href="#" class="list-group-item" href="/admin/posts">
                 <i class="fa fa-newspaper-o"></i> Posts
             </a>
-            <a href="#" class="list-group-item" v-link="{ path: '/post-fields', activeClass: 'active' }">
+            <a href="#" class="list-group-item" href="/admin/post-fields">
                 <i class="fa fa-th-list"></i> Post fields
             </a>
-            <a href="#" class="list-group-item" v-link="{ path: '/categories', activeClass: 'active' }">
+            <a href="#" class="list-group-item" href="/admin/categories">
                 <i class="fa fa-columns"></i> Categories
             </a>
-            <a href="#" class="list-group-item" v-link="{ path: '/tags', activeClass: 'active' }">
+            <a href="#" class="list-group-item" href="/admin/tags">
                 <i class="fa fa-tags"></i> Tags
             </a>
-            <a href="#" class="list-group-item" v-link="{ path: '/authors', activeClass: 'active' }">
+            <a href="#" class="list-group-item" href="/admin/authors">
                 <i class="fa fa-pencil-square-o"></i> Authors
             </a>
-            <a href="#" class="list-group-item" v-link="{ path: '/users', activeClass: 'active' }">
+            <a href="#" class="list-group-item" href="/admin/users">
                 <i class="fa fa-users"></i> Users
             </a>
-            <a href="#" class="list-group-item" v-link="{ path: '/settings', activeClass: 'active' }">
+            <a href="#" class="list-group-item" href="/admin/settings">
                 <i class="fa fa-gear"></i> Settings
             </a>
         </div>

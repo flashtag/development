@@ -26,13 +26,9 @@ class Post extends Model {
     }
 
     publish(user_id) {
-        return client({
-            method: 'PATCH',
-            path: '/posts/' + this.attributes['id'] + '/publish',
-            entity: {
-                is_published: this.attributes['is_published'],
-                user_id: user_id
-            }
+        return client.patch('/posts/' + this.attributes['id'] + '/publish', {
+            is_published: this.attributes['is_published'],
+            user_id: user_id
         });
     }
 

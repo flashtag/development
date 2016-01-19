@@ -37,8 +37,21 @@
 </head>
 <body>
 
-@yield('content')
+<section class="Main" id="Admin">
+    @include('admin::partials.nav-top')
+    <div class="Main__menu">
+        @include('admin::partials.nav-side')
+    </div>
+    <div class="Main__container">
+        <div class="Main__content">
+            @yield('content')
+        </div>
+    </div>
+</section>
 
+<script>window.CKEDITOR_BASEPATH = '/assets/vendor/admin/ckeditor/';</script>
+<script src="/assets/admin/vendor.js"></script>
+<script src="/assets/admin/admin.js"></script>
 @yield('scripts')
 
 </body>

@@ -7,22 +7,12 @@ use Illuminate\Support\ServiceProvider;
 
 class AdminServiceProvider extends ServiceProvider
 {
-    public function register()
-    {
-        //
-    }
-
     public function boot(Router $router)
     {
         $this->defineAdminRoutes($router);
-
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'admin');
-
         $this->publishesAssets();
-
-        view()->composer('admin::layout', function ($view) {
-            $view->with('current_user', \Auth::user());
-        });
+        $this->loadComposers();
     }
 
     private function defineAdminRoutes($router)
@@ -43,5 +33,17 @@ class AdminServiceProvider extends ServiceProvider
             __DIR__.'/../public/build' => public_path('assets/admin'),
             __DIR__.'/../public/vendor' => public_path('assets/vendor/admin'),
         ], 'public');
+    }
+
+    private function loadComposers()
+    {
+        view()->composer('admin::*', function ($view) {
+            return $view->with('current_user', \Auth::user());
+        });
+    }
+
+    public function register()
+    {
+        //
     }
 }

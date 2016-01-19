@@ -6,6 +6,6 @@ class HomeController extends Controller
 {
     public function home()
     {
-        return  view('admin::admin', ['current_user' => $this->current_user]);
+        return  view('admin::home');
     }
 }

@@ -1,23 +1,21 @@
-import User from '../models/post';
+import User from '../models/user';
 
 export default {
 
     get() {
-        return client({
-            path: '/users' + (this.includes || '')
-        }).entity().then(function(entity) {
-            return entity.data.map(function(user) {
-                return new User(user);
+        return client.get('/api/users', (this.includes || ''))
+            .then(function(response) {
+                return response.data.data.map(function(user) {
+                    return new User(user);
+                });
             });
-        });
     },
 
     getById(id) {
-        return client({
-            path: '/users/' + id + (this.includes || '')
-        }).entity().then(function(entity) {
-            return new User(entity.data);
-        });
+        return client.get('/api/users/' + id, (this.includes || ''))
+                .then(function(response) {
+                    return new User(response.data.data);
+                });
     },
 
     with(...includes) {

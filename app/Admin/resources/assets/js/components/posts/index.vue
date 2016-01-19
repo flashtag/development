@@ -4,100 +4,91 @@
         <li class="active">Posts</li>
     </ol>
 
-    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
-    <div v-if="!$loadingRouteData">
+    <div class="create-button">
+        <a href="/posts/create" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</a>
+    </div>
 
-        <div class="create-button">
-            <button v-link="'/posts/create'" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</button>
-        </div>
-
-        <div class="filters">
-            <div class="row">
-                <div class="col-md-6">
-                    <input type="text" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <select v-model="categoryFilter" @change="changeFilter" id="category" class="form-control">
-                        <option value="" selected>Filter by category...</option>
-                        <option v-for="category in categories" :value="category.name">
-                            {{ category.name }}
-                        </option>
-                    </select>
-                </div>
+    <div class="filters">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
+            </div>
+            <div class="col-md-6">
+                <select v-model="categoryFilter" @change="changeFilter" id="category" class="form-control">
+                    <option :value="null" selected>Filter by category...</option>
+                    <option v-for="category in categories" :value="category.name">
+                        {{ category.name }}
+                    </option>
+                </select>
             </div>
         </div>
-
-        <table class="Posts table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th v-if="categoryFilter"><a href="#" @click.prevent="sortBy('order')">Order <i :class="orderIcon('order')"></i></a></th>
-                    <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
-                    <th><a href="#" @click.prevent="sortBy('category.name')">Category <i :class="orderIcon('category.name')"></i></a></th>
-                    <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
-                    <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
-                    <th class="text-centered"><a>Showing</a></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="post in posts
-                        | filterBy titleFilter in 'title'
-                        | filterBy categoryFilter in 'category.name'
-                        | orderBy sortKey sortDir"
-                    class="Post" :class="{ 'Post--unpublished': !post.is_published }">
-
-                    <td v-if="categoryFilter" class="order">
-                        <input class="post__order"
-                               type="number"
-                               value="{{ post.order }}"
-                               @keyup.enter="blur"
-                               @focusout="reorder(post, $event)"
-                               number>
-                    </td>
-
-                    <td>
-                        <a href="#!/posts/{{ post.id }}" @click.prevent="goToPost(post)">{{ post.title }}</a>
-                        <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
-                              title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
-                    </td>
-
-                    <td>{{ post.category ? post.category.name : '' }}</td>
-
-                    <td>{{ formatTimestamp(post.created_at) }}</td>
-
-                    <td class="published">
-                        <div class="switch">
-                            <input class="cmn-toggle cmn-toggle-round-sm"
-                                   id="is_published_{{post.id}}"
-                                   type="checkbox"
-                                   name="is_published"
-                                   v-model="post.is_published"
-                                   @change="post.publish()">
-                            <label for="is_published_{{post.id}}"></label>
-                        </div>
-                    </td>
-
-                    <td class="text-centered">
-                        <span v-if="post.isShowing" class="showing"><i class="fa fa-check"></i></span>
-                        <span v-else class="not-showing"><i class="fa fa-times"></i></span>
-                    </td>
-
-                </tr>
-            </tbody>
-        </table>
-
     </div>
+
+    <table class="Posts table table-striped table-hover">
+        <thead>
+            <tr>
+                <th v-if="categoryFilter"><a href="#" @click.prevent="sortBy('order')">Order <i :class="orderIcon('order')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('category.name')">Category <i :class="orderIcon('category.name')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
+                <th class="text-centered"><a>Showing</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir"
+                class="Post" :class="{ 'Post--unpublished': !post.is_published }">
+
+                <td v-if="categoryFilter" class="order">
+                    <input class="post__order"
+                           type="number"
+                           value="{{ post.order }}"
+                           @keyup.enter="blur"
+                           @focusout="reorder(post, $event)"
+                           number>
+                </td>
+
+                <td>
+                    <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)">{{ post.title }}</a>
+                    <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
+                          title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
+                </td>
+
+                <td>{{ post.category ? post.category.name : '' }}</td>
+
+                <td>{{ formatTimestamp(post.created_at) }}</td>
+
+                <td class="published">
+                    <div class="switch">
+                        <input class="cmn-toggle cmn-toggle-round-sm"
+                               id="is_published_{{post.id}}"
+                               type="checkbox"
+                               name="is_published"
+                               v-model="post.is_published"
+                               @change="post.publish()">
+                        <label for="is_published_{{post.id}}"></label>
+                    </div>
+                </td>
+
+                <td class="text-centered">
+                    <span v-if="post.isShowing" class="showing"><i class="fa fa-check"></i></span>
+                    <span v-else class="not-showing"><i class="fa fa-times"></i></span>
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+
 </template>
 
 <script>
     import moment from 'moment';
     import swal from 'sweetalert';
-    import posts from '../../repositories/posts';
-    import categories from '../../repositories/categories';
-    import users from '../../repositories/users';
+    import Post from '../../models/post';
+    import Category from '../../models/category';
+    import User from '../../models/user';
 
     export default {
-
-        props: ['current-user'],
 
         data: function () {
             return {
@@ -111,7 +102,13 @@
             }
         },
 
-        ready: function() {
+        created: function() {
+            this.getPosts();
+            this.getCategories();
+            this.getUsers();
+        },
+
+        ready: function () {
             this.$nextTick(function() {
                 this.initTooltips();
             }.bind(this));
@@ -119,9 +116,33 @@
 
         methods: {
 
+            getPosts: function() {
+                this.$http.get('posts?include=categories&orderBy=updated_at|desc').then(function (response) {
+                    this.$set('posts', response.data.data.map(function (post) {
+                        return new Post(post);
+                    }));
+                });
+            },
+
+            getCategories: function () {
+                this.$http.get('categories').then(function (response) {
+                    this.$set('categories', response.data.data.map(function (category) {
+                        return new Category(category);
+                    }));
+                });
+            },
+
+            getUsers: function () {
+                this.$http.get('users').then(function (response) {
+                    this.$set('users', response.data.data.map(function (user) {
+                        return new User(user);
+                    }));
+                });
+            },
+
             goToPost: function (post) {
                 if (! post.is_locked) {
-                    this.$route.router.go({ path: '/posts/'+post.id });
+                    window.location = '/admin/posts/'+post.id;
                 } else {
                     swal({
                         html: true,
@@ -134,7 +155,7 @@
                         confirmButtonText: "Yes, unlock it!",
                         cancelButtonText: "Nevermind"
                     }, function () {
-                        this.$route.router.go({ path: '/posts/'+post.id });
+                        window.location = '/posts/'+post.id;
                     }.bind(this));
                 }
             },
@@ -246,11 +267,7 @@
              * @param post
              */
             saveOrder: function (post) {
-                return client({
-                    method: "PATCH",
-                    path: '/posts/' + post.id + '/reorder',
-                    entity: { order: post.order }
-                });
+                return client.patch('/posts/' + post.id + '/reorder', { order: post.order });
             },
 
             scrollTo: function(target) {
@@ -269,24 +286,6 @@
                 e.target.blur();
             }
 
-        },
-
-        computed: {
-
-            currentUserName: function () {
-                return this.currentUser ? this.currentUser.name : '';
-            }
-
-        },
-
-        route: {
-            data: function (transition) {
-                return {
-                    posts: posts.with('category').orderBy('updated_at', 'desc').get(),
-                    categories: categories.get(),
-                    users: users.get()
-                };
-            }
         }
 
     }

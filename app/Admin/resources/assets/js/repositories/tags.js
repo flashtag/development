@@ -3,7 +3,7 @@ import Tag from '../models/tag';
 export default {
 
     get() {
-        return client.get('/api/tags' + (this.includes || ''))
+        return client.get('/api/tags', (this.includes || ''))
             .then(function(response) {
                 return response.data.data.map(function(tag) {
                     return new Tag(tag);
@@ -12,7 +12,7 @@ export default {
     },
 
     getById(id) {
-        return client.get('/api/tags/' + id + (this.includes || ''))
+        return client.get('/api/tags/' + id, (this.includes || ''))
             .then(function(response) {
                 return new Tag(response.data.data);
             });
