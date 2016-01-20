@@ -26,22 +26,22 @@ class Post extends Model {
     }
 
     publish(user_id) {
-        return client.patch('/posts/' + this.attributes['id'] + '/publish', {
+        return client.patch('posts/' + this.attributes['id'] + '/publish', {
             is_published: this.attributes['is_published'],
             user_id: user_id
         });
     }
 
-    get isShowing() {
+    get is_showing() {
         if (! this.attributes['is_published']) {
             return false;
         }
 
-        var start = !!this.attributes['start_showing_at'] ? moment(this.attributes['start_showing_at'], "YYYY-MM-DD HH:mm:ss") : moment("1980-01-01", "YYYY-MM-DD");
-        var stop = !!this.attributes['stop_showing_at'] ? moment(this.attributes['stop_showing_at'], "YYYY-MM-DD HH:mm:ss")   : moment("2033-01-19", "YYYY-MM-DD");
+        var start = !!this.attributes['start_showing_at'] ? moment.unix(this.attributes['start_showing_at']) : moment("1980-01-01", "YYYY-MM-DD");
+        var stop = !!this.attributes['stop_showing_at'] ? moment.unix(this.attributes['stop_showing_at']) : moment("2033-01-19", "YYYY-MM-DD");
         var now = moment();
 
-        return (start <= now && now <= stop);
+        return (start <= now) && (now <= stop);
     }
 }
 

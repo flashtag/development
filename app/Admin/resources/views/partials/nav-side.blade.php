@@ -1,7 +1,7 @@
 
 <div class="Side-nav panel">
     <div class="list-group">
-        <a class="list-group-item" href="/admin/home">
+        <a class="list-group-item" href="/admin/">
             <i class="fa fa-home"></i> Home
         </a>
         <a class="list-group-item" href="/admin/posts">

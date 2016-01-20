@@ -71,7 +71,7 @@
                 </td>
 
                 <td class="text-centered">
-                    <span v-if="post.isShowing" class="showing"><i class="fa fa-check"></i></span>
+                    <span v-if="post.is_showing" class="showing"><i class="fa fa-check"></i></span>
                     <span v-else class="not-showing"><i class="fa fa-times"></i></span>
                 </td>
 
@@ -117,7 +117,7 @@
         methods: {
 
             getPosts: function() {
-                this.$http.get('posts?include=categories&orderBy=updated_at|desc').then(function (response) {
+                this.$http.get('posts?include=category&orderBy=updated_at|desc').then(function (response) {
                     this.$set('posts', response.data.data.map(function (post) {
                         return new Post(post);
                     }));

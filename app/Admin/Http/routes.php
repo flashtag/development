@@ -16,7 +16,7 @@ $router->post('password/reset', 'Auth\PasswordController@postReset');
 // Administration routes...
 $router->group(['middleware' => 'auth'], function ($router) {
     $router->get('/', 'HomeController@home');
-    $router->resource('posts', 'PostsController');
+    $router->resource('posts', 'PostsController', ['except' => ['store', 'update']]);
     $router->resource('posts/{post_id}/revisions', 'RevisionsController', ['only' => ['index', 'show']]);
     $router->resource('post-fields', 'PostFieldsController');
     $router->resource('categories', 'CategoriesController');
