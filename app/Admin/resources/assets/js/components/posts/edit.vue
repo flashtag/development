@@ -9,7 +9,7 @@
 
         <section class="info row">
             <div class="col-md-6 clearfix">
-                <a href="/admin/posts/{{ post.id }}/revisions'" class="btn btn-link">
+                <a href="/admin/posts/{{ postId }}/revisions'" class="btn btn-link">
                     <i class="fa fa-history"></i> Revision history
                 </a>
             </div>
@@ -22,11 +22,11 @@
             </div>
         </section>
 
-        <div class="panel panel-default" :class="{ 'border-green': isShowing, 'border-red': !isShowing }">
+        <div class="panel panel-default" :class="{ 'border-green': post.is_showing, 'border-red': !post.is_showing }">
             <div class="panel-heading">
                 PUBLISHING
-                <label class="showing label" :class="{ 'label-success': isShowing, 'label-danger': !isShowing }">
-                    {{ isShowing ? 'Will show on website' : 'Will not show on website' }}
+                <label class="showing label" :class="{ 'label-success': post.is_showing, 'label-danger': !post.is_showing }">
+                    {{ post.is_showing ? 'Will show on website' : 'Will not show on website' }}
                 </label>
             </div>
             <div class="panel-body">
@@ -137,7 +137,7 @@
                 <dropzone
                         path="/img/uploads/posts/"
                         :image="post.image"
-                        :to="'/posts/'+$route.params.post_id+'/image'">
+                        :to="'/posts/'+postId+'/image'">
                 </dropzone>
             </div>
         </div>
@@ -162,11 +162,12 @@
 <script>
     import moment from 'moment';
     import swal from 'sweetalert';
+    import Post from '../../models/post';
     import Category from '../../models/category';
 
     export default {
 
-        props: ['post-id'],
+        props: ['post-id', 'current-user'],
 
         components: {
             string: require('../post-fields/templates/string.vue'),
@@ -209,74 +210,41 @@
             }.bind(this));
         },
 
-        computed: {
-
-            isShowing: function () {
-                if (!this.post.is_published) {
-                    return false;
-                }
-                var start = this.post.start_showing_at ? moment(this.post.start_showing_at) : moment("1980-01-01", "YYYY-MM-DD");
-                var end = this.post.stop_showing_at ? moment(this.post.stop_showing_at) : moment("2033-01-19", "YYYY-MM-DD");
-                var now = moment();
-
-                return (start <= now && now <= end);
-            }
-
-        },
-
         methods: {
 
             fetch: function () {
-                var self = this;
                 return this.$http.get('posts/'+ this.postId +'?include=category,tags,fields,meta,author,media')
                     .then(function (response) {
-                        self.post = response.data.data;
-                        self.post.category = self.post.category ? self.post.category.data : {};
-                        self.post.fields = self.post.fields.data;
-                        self.post.meta = self.post.meta ? self.post.meta.data : {};
-                        self.post.author = self.post.author ? self.post.author.data : {};
-                        self.post.media = self.post.media ? self.post.media.data : {};
-                        self.post.tags = self.post.tags.data.reduce(function (ids, tag) {
-                            ids.push(tag.id);
-                            return ids;
-                        }, []);
-                        if  (self.post.start_showing_at) {
-                            self.post.start_showing_at = moment.utc(self.post.start_showing_at, 'X').format('YYYY-MM-DD');
-                        }
-                        if  (self.post.stop_showing_at) {
-                            self.post.stop_showing_at = moment.utc(self.post.stop_showing_at, 'X').format('YYYY-MM-DD');
-                        }
+                        this.$set('post', new Post(response.data.data));
                     });
             },
 
             fetchCategories: function () {
-                var self = this;
                 return this.$http.get('categories').then(function (response) {
-                    self.allCategories = response.data.data;
+                    this.$set('allCategories', response.data.data);
                 });
             },
 
             fetchTags: function () {
-                var self = this;
                 return this.$http.get('tags').then(function (response) {
-                    self.allTags = response.data.data.map(function (tag) {
+                    this.$set('allTags', response.data.data.map(function (tag) {
                         tag.text = tag.name;
                         return tag;
-                    });
+                    }));
                 });
             },
 
             fetchFields: function () {
-                var self = this;
                 return this.$http.get('fields').then(function (response) {
-                    self.allFields = response.data.data;
+                    this.$set('allFields', response.data.data);
+                }).then(function(){
+                    this.mapFieldValues();
                 });
             },
 
             fetchAuthors: function () {
-                var self = this;
                 return this.$http.get('authors').then(function (response) {
-                    self.allAuthors = response.data.data;
+                    this.$set('allAuthors', response.data.data);
                 });
             },
 
@@ -322,7 +290,7 @@
             lock: function() {
                 if (! this.post.is_locked) {
                     var self = this;
-                    return this.$http.patch('posts/' + self.post.id + '/lock', {user_id: self.currentUser.id})
+                    return this.$http.patch('posts/' + self.postId + '/lock', {user_id: self.currentUser.id})
                         .then(function (response) {
                             self.post.is_locked = true;
                             window.onbeforeunload = function (e) {
@@ -335,7 +303,7 @@
             unlock: function (done) {
                 if (this.post.is_locked && !this.deleted) {
                     var self = this;
-                    return this.$http.patch('posts/' + self.post.id + '/unlock', {user_id: self.currentUser.id})
+                    return this.$http.patch('posts/' + self.postId + '/unlock', {user_id: self.currentUser.id})
                         .then(function (response) {
                             self.post.is_locked = false;
                             done();

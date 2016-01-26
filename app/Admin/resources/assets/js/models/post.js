@@ -10,14 +10,19 @@ class Post extends Model {
             slug: data.slug,
             body: data.body,
             is_published: data.is_published,
-            start_showing_at: data.start_showing_at,
-            stop_showing_at: data.stop_showing_at,
+            start_showing_at: data.start_showing_at
+                ? moment.utc(data.start_showing_at, 'X').format('YYYY-MM-DD')
+                : null,
+            stop_showing_at: data.stop_showing_at
+                ? moment.utc(data.stop_showing_at, 'X').format('YYYY-MM-DD')
+                : null,
             order: data.order,
             is_locked: data.is_locked,
             locked_by_id: data.locked_by_id,
             category: data.category ? data.category.data : {},
             tags: data.tags ? data.tags.data : [],
             fields: data.fields ? data.fields.data : [],
+            meta: data.meta ? data.meta.data : [],
             revisions: data.revisions ? data.revisions.data : [],
             media: data.media ? data.media.data : {},
             created_at: data.created_at,
@@ -37,8 +42,12 @@ class Post extends Model {
             return false;
         }
 
-        var start = !!this.attributes['start_showing_at'] ? moment.unix(this.attributes['start_showing_at']) : moment("1980-01-01", "YYYY-MM-DD");
-        var stop = !!this.attributes['stop_showing_at'] ? moment.unix(this.attributes['stop_showing_at']) : moment("2033-01-19", "YYYY-MM-DD");
+        var start = this.attributes['start_showing_at']
+            ? moment(this.attributes['start_showing_at'], 'YYYY-MM-DD')
+            : moment("1980-01-01", "YYYY-MM-DD");
+        var stop = this.attributes['stop_showing_at']
+            ? moment(this.attributes['stop_showing_at'], 'YYYY-MM-DD')
+            :moment("2033-01-19", "YYYY-MM-DD");
         var now = moment();
 
         return (start <= now) && (now <= stop);

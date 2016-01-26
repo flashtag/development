@@ -18063,6 +18063,7 @@ exports['default'] = {
     ready: function ready() {
         this.getInitialToken();
         this.registerEventListeners();
+        this.setLoginStatus();
     },
 
     data: {
@@ -18087,6 +18088,17 @@ exports['default'] = {
             this.$on('userHasLoggedIn', function (user) {
                 this.setLogin(user);
             });
+        },
+
+        setLoginStatus: function setLoginStatus() {
+            if (this.token !== null && this.token !== 'undefined') {
+                this.$http.get('auth/user/me').then(function (response) {
+                    this.setLogin(response.data.user);
+                    this.$broadcast('data-loaded');
+                }, function (response) {
+                    this.destroyLogin();
+                });
+            }
         },
 
         setLogin: function setLogin(user) {
@@ -18344,13 +18356,17 @@ var _sweetalert = require('sweetalert');
 
 var _sweetalert2 = _interopRequireDefault(_sweetalert);
 
+var _modelsPost = require('../../models/post');
+
+var _modelsPost2 = _interopRequireDefault(_modelsPost);
+
 var _modelsCategory = require('../../models/category');
 
 var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
 
 exports['default'] = {
 
-    props: ['post-id'],
+    props: ['post-id', 'current-user'],
 
     components: {
         string: require('../post-fields/templates/string.vue'),
@@ -18393,73 +18409,40 @@ exports['default'] = {
         }).bind(this));
     },
 
-    computed: {
-
-        isShowing: function isShowing() {
-            if (!this.post.is_published) {
-                return false;
-            }
-            var start = this.post.start_showing_at ? _moment2['default'](this.post.start_showing_at) : _moment2['default']("1980-01-01", "YYYY-MM-DD");
-            var end = this.post.stop_showing_at ? _moment2['default'](this.post.stop_showing_at) : _moment2['default']("2033-01-19", "YYYY-MM-DD");
-            var now = _moment2['default']();
-
-            return start <= now && now <= end;
-        }
-
-    },
-
     methods: {
 
         fetch: function fetch() {
-            var self = this;
             return this.$http.get('posts/' + this.postId + '?include=category,tags,fields,meta,author,media').then(function (response) {
-                self.post = response.data.data;
-                self.post.category = self.post.category ? self.post.category.data : {};
-                self.post.fields = self.post.fields.data;
-                self.post.meta = self.post.meta ? self.post.meta.data : {};
-                self.post.author = self.post.author ? self.post.author.data : {};
-                self.post.media = self.post.media ? self.post.media.data : {};
-                self.post.tags = self.post.tags.data.reduce(function (ids, tag) {
-                    ids.push(tag.id);
-                    return ids;
-                }, []);
-                if (self.post.start_showing_at) {
-                    self.post.start_showing_at = _moment2['default'].utc(self.post.start_showing_at, 'X').format('YYYY-MM-DD');
-                }
-                if (self.post.stop_showing_at) {
-                    self.post.stop_showing_at = _moment2['default'].utc(self.post.stop_showing_at, 'X').format('YYYY-MM-DD');
-                }
+                this.$set('post', new _modelsPost2['default'](response.data.data));
             });
         },
 
         fetchCategories: function fetchCategories() {
-            var self = this;
             return this.$http.get('categories').then(function (response) {
-                self.allCategories = response.data.data;
+                this.$set('allCategories', response.data.data);
             });
         },
 
         fetchTags: function fetchTags() {
-            var self = this;
             return this.$http.get('tags').then(function (response) {
-                self.allTags = response.data.data.map(function (tag) {
+                this.$set('allTags', response.data.data.map(function (tag) {
                     tag.text = tag.name;
                     return tag;
-                });
+                }));
             });
         },
 
         fetchFields: function fetchFields() {
-            var self = this;
             return this.$http.get('fields').then(function (response) {
-                self.allFields = response.data.data;
+                this.$set('allFields', response.data.data);
+            }).then(function () {
+                this.mapFieldValues();
             });
         },
 
         fetchAuthors: function fetchAuthors() {
-            var self = this;
             return this.$http.get('authors').then(function (response) {
-                self.allAuthors = response.data.data;
+                this.$set('allAuthors', response.data.data);
             });
         },
 
@@ -18505,7 +18488,7 @@ exports['default'] = {
         lock: function lock() {
             if (!this.post.is_locked) {
                 var self = this;
-                return this.$http.patch('posts/' + self.post.id + '/lock', { user_id: self.currentUser.id }).then(function (response) {
+                return this.$http.patch('posts/' + self.postId + '/lock', { user_id: self.currentUser.id }).then(function (response) {
                     self.post.is_locked = true;
                     window.onbeforeunload = function (e) {
                         self.unlock();
@@ -18517,7 +18500,7 @@ exports['default'] = {
         unlock: function unlock(done) {
             if (this.post.is_locked && !this.deleted) {
                 var self = this;
-                return this.$http.patch('posts/' + self.post.id + '/unlock', { user_id: self.currentUser.id }).then(function (response) {
+                return this.$http.patch('posts/' + self.postId + '/unlock', { user_id: self.currentUser.id }).then(function (response) {
                     self.post.is_locked = false;
                     done();
                 }, function (response) {
@@ -18578,7 +18561,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"/\">Home</a></li>\n        <li><a href=\"/admin/posts\">Posts</a></li>\n        <li class=\"active\">{{ post.title }}</li>\n    </ol>\n\n    <form class=\"Post EditForm\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 clearfix\">\n                <a href=\"/admin/posts/{{ post.id }}/revisions'\" class=\"btn btn-link\">\n                    <i class=\"fa fa-history\"></i> Revision history\n                </a>\n            </div>\n            <div class=\"col-md-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                    <a href=\"/admin/posts\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</a>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\" :class=\"{ 'border-green': isShowing, 'border-red': !isShowing }\">\n            <div class=\"panel-heading\">\n                PUBLISHING\n                <label class=\"showing label\" :class=\"{ 'label-success': isShowing, 'label-danger': !isShowing }\">\n                    {{ isShowing ? 'Will show on website' : 'Will not show on website' }}\n                </label>\n            </div>\n            <div class=\"panel-body\">\n                <div class=\"row\">\n                    <div class=\"col-md-2\">\n                        <div class=\"form-group switch-wrapper\">\n                            <div class=\"publish-switch\">\n                                <label for=\"is_published\">Published</label>\n                                <div class=\"switch\">\n                                    <input v-model=\"post.is_published\" name=\"is_published\" id=\"is_published\" class=\"cmn-toggle cmn-toggle-round-md\" type=\"checkbox\">\n                                    <label for=\"is_published\"></label>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"col-md-5\">\n                        <label for=\"start_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show until this date.\">\n                            Start showing\n                        </label>\n                        <input type=\"date\" v-model=\"post.start_showing_at\" name=\"start_showing_at\" id=\"start_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                    </div>\n                    <div class=\"col-md-5\">\n                        <label for=\"stop_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show after this date.\">\n                            Stop showing\n                        </label>\n                        <input type=\"date\" v-model=\"post.stop_showing_at\" name=\"stop_showing_at\" id=\"stop_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">POST</div>\n            <div class=\"panel-body\">\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"title\">Title</label>\n                            <input type=\"text\" v-model=\"post.title\" name=\"title\" id=\"title\" class=\"form-control\">\n                        </div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"subtitle\">Subtitle</label>\n                            <input type=\"text\" v-model=\"post.subtitle\" name=\"subtitle\" id=\"subtitle\" class=\"form-control\">\n                        </div>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"category\">Category</label>\n                            <select name=\"category\" id=\"category\" class=\"form-control\" v-select=\"post.category_id\" v-model=\"post.category_id\">\n                                <option value=\"\" disabled=\"\" selected=\"\">Select a category...</option>\n                                <option v-for=\"category in allCategories\" :value=\"category.id\">{{ category.name }}</option>\n                            </select>\n                        </div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group form-tags\">\n                            <label for=\"tags\">Tags</label>\n                            <select name=\"tags\" id=\"tags\" multiple=\"\" class=\"form-control\" v-select=\"post.tags\" v-model=\"post.tags\" :options=\"allTags\">\n                                <option v-for=\"tag in allTags\" :value=\"tag.id\">{{ tag.name }}</option>\n                            </select>\n                        </div>\n                    </div>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"body\">Body</label>\n                    <textarea name=\"body\" id=\"body\" class=\"form-control rich-editor\" v-if=\"post.body\" v-rich-editor=\"post.body\" v-model=\"post.body\">                    </textarea>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"author\">Author</label>\n                    <select v-select=\"post.author_id\" id=\"author\" name=\"author\" :options=\"allAuthors\">\n                        <option value=\"\" disabled=\"\" selected=\"\">Select an author...</option>\n                        <option v-for=\"author in allAuthors\" value=\"{{ author.id }}\">{{ author.name }}</option>\n                    </select>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"show_author\">Show author?</label>\n                    <div class=\"switch\">\n                        <input id=\"show_author\" class=\"cmn-toggle cmn-toggle-yes-no\" type=\"checkbox\" v-model=\"post.show_author\">\n                        <label for=\"show_author\" data-on=\"Yes\" data-off=\"No\"></label>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div v-if=\"allFields &amp;&amp; allFields.length > 0\" class=\"panel panel-default\">\n            <div class=\"panel-heading\">CUSTOM FIELDS</div>\n            <div class=\"panel-body\">\n                <div v-for=\"field in allFields\" class=\"form-group\">\n                    <component v-if=\"fieldValues\" :is=\"field.template\" :field.sync=\"fieldValues[field.name]\">\n                    </component>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Image</div>\n            <div class=\"panel-body\">\n                <dropzone path=\"/img/uploads/posts/\" :image=\"post.image\" :to=\"'/posts/'+$route.params.post_id+'/image'\">\n                </dropzone>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">META</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"description\">Description</label>\n                    <input type=\"text\" v-model=\"post.meta.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"url\">Canonical Link</label>\n                    <input type=\"text\" v-model=\"post.meta.url\" name=\"url\" id=\"url\" class=\"form-control\">\n                </div>\n            </div>\n        </div>\n\n    </form>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"/\">Home</a></li>\n        <li><a href=\"/admin/posts\">Posts</a></li>\n        <li class=\"active\">{{ post.title }}</li>\n    </ol>\n\n    <form class=\"Post EditForm\">\n\n        <section class=\"info row\">\n            <div class=\"col-md-6 clearfix\">\n                <a href=\"/admin/posts/{{ postId }}/revisions'\" class=\"btn btn-link\">\n                    <i class=\"fa fa-history\"></i> Revision history\n                </a>\n            </div>\n            <div class=\"col-md-6 clearfix\">\n                <div class=\"action-buttons\">\n                    <button @click.prevent=\"save\" class=\"btn btn-primary\"><i class=\"fa fa-save\"></i> Save</button>\n                    <button @click.prevent=\"delete\" class=\"btn btn-danger\"><i class=\"fa fa-trash\"></i> Delete</button>\n                    <a href=\"/admin/posts\" class=\"btn btn-default\"><i class=\"fa fa-close\"></i> Close</a>\n                </div>\n            </div>\n        </section>\n\n        <div class=\"panel panel-default\" :class=\"{ 'border-green': post.is_showing, 'border-red': !post.is_showing }\">\n            <div class=\"panel-heading\">\n                PUBLISHING\n                <label class=\"showing label\" :class=\"{ 'label-success': post.is_showing, 'label-danger': !post.is_showing }\">\n                    {{ post.is_showing ? 'Will show on website' : 'Will not show on website' }}\n                </label>\n            </div>\n            <div class=\"panel-body\">\n                <div class=\"row\">\n                    <div class=\"col-md-2\">\n                        <div class=\"form-group switch-wrapper\">\n                            <div class=\"publish-switch\">\n                                <label for=\"is_published\">Published</label>\n                                <div class=\"switch\">\n                                    <input v-model=\"post.is_published\" name=\"is_published\" id=\"is_published\" class=\"cmn-toggle cmn-toggle-round-md\" type=\"checkbox\">\n                                    <label for=\"is_published\"></label>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"col-md-5\">\n                        <label for=\"start_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show until this date.\">\n                            Start showing\n                        </label>\n                        <input type=\"date\" v-model=\"post.start_showing_at\" name=\"start_showing_at\" id=\"start_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                    </div>\n                    <div class=\"col-md-5\">\n                        <label for=\"stop_showing_at\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"If the post is published, it will not show after this date.\">\n                            Stop showing\n                        </label>\n                        <input type=\"date\" v-model=\"post.stop_showing_at\" name=\"stop_showing_at\" id=\"stop_showing_at\" class=\"form-control\" placeholder=\"Date\">\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">POST</div>\n            <div class=\"panel-body\">\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"title\">Title</label>\n                            <input type=\"text\" v-model=\"post.title\" name=\"title\" id=\"title\" class=\"form-control\">\n                        </div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"subtitle\">Subtitle</label>\n                            <input type=\"text\" v-model=\"post.subtitle\" name=\"subtitle\" id=\"subtitle\" class=\"form-control\">\n                        </div>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group\">\n                            <label for=\"category\">Category</label>\n                            <select name=\"category\" id=\"category\" class=\"form-control\" v-select=\"post.category_id\" v-model=\"post.category_id\">\n                                <option value=\"\" disabled=\"\" selected=\"\">Select a category...</option>\n                                <option v-for=\"category in allCategories\" :value=\"category.id\">{{ category.name }}</option>\n                            </select>\n                        </div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div class=\"form-group form-tags\">\n                            <label for=\"tags\">Tags</label>\n                            <select name=\"tags\" id=\"tags\" multiple=\"\" class=\"form-control\" v-select=\"post.tags\" v-model=\"post.tags\" :options=\"allTags\">\n                                <option v-for=\"tag in allTags\" :value=\"tag.id\">{{ tag.name }}</option>\n                            </select>\n                        </div>\n                    </div>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"body\">Body</label>\n                    <textarea name=\"body\" id=\"body\" class=\"form-control rich-editor\" v-if=\"post.body\" v-rich-editor=\"post.body\" v-model=\"post.body\">                    </textarea>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"author\">Author</label>\n                    <select v-select=\"post.author_id\" id=\"author\" name=\"author\" :options=\"allAuthors\">\n                        <option value=\"\" disabled=\"\" selected=\"\">Select an author...</option>\n                        <option v-for=\"author in allAuthors\" value=\"{{ author.id }}\">{{ author.name }}</option>\n                    </select>\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"show_author\">Show author?</label>\n                    <div class=\"switch\">\n                        <input id=\"show_author\" class=\"cmn-toggle cmn-toggle-yes-no\" type=\"checkbox\" v-model=\"post.show_author\">\n                        <label for=\"show_author\" data-on=\"Yes\" data-off=\"No\"></label>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div v-if=\"allFields &amp;&amp; allFields.length > 0\" class=\"panel panel-default\">\n            <div class=\"panel-heading\">CUSTOM FIELDS</div>\n            <div class=\"panel-body\">\n                <div v-for=\"field in allFields\" class=\"form-group\">\n                    <component v-if=\"fieldValues\" :is=\"field.template\" :field.sync=\"fieldValues[field.name]\">\n                    </component>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">Image</div>\n            <div class=\"panel-body\">\n                <dropzone path=\"/img/uploads/posts/\" :image=\"post.image\" :to=\"'/posts/'+postId+'/image'\">\n                </dropzone>\n            </div>\n        </div>\n\n        <div class=\"panel panel-default\">\n            <div class=\"panel-heading\">META</div>\n            <div class=\"panel-body\">\n                <div class=\"form-group\">\n                    <label for=\"description\">Description</label>\n                    <input type=\"text\" v-model=\"post.meta.description\" name=\"description\" id=\"description\" class=\"form-control\">\n                </div>\n                <div class=\"form-group\">\n                    <label for=\"url\">Canonical Link</label>\n                    <input type=\"text\" v-model=\"post.meta.url\" name=\"url\" id=\"url\" class=\"form-control\">\n                </div>\n            </div>\n        </div>\n\n    </form>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -18590,7 +18573,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":47,"../partials/dropzone.vue":38,"../post-fields/templates/rich_text.vue":40,"../post-fields/templates/string.vue":41,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],43:[function(require,module,exports){
+},{"../../models/category":47,"../../models/post":49,"../partials/dropzone.vue":38,"../post-fields/templates/rich_text.vue":40,"../post-fields/templates/string.vue":41,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],43:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18632,9 +18615,9 @@ exports['default'] = {
     },
 
     created: function created() {
-        this.getPosts();
-        this.getCategories();
-        this.getUsers();
+        this.fetchPosts();
+        this.fetchCategories();
+        this.fetchUsers();
     },
 
     ready: function ready() {
@@ -18645,7 +18628,7 @@ exports['default'] = {
 
     methods: {
 
-        getPosts: function getPosts() {
+        fetchPosts: function fetchPosts() {
             this.$http.get('posts?include=category&orderBy=updated_at|desc').then(function (response) {
                 this.$set('posts', response.data.data.map(function (post) {
                     return new _modelsPost2['default'](post);
@@ -18653,7 +18636,7 @@ exports['default'] = {
             });
         },
 
-        getCategories: function getCategories() {
+        fetchCategories: function fetchCategories() {
             this.$http.get('categories').then(function (response) {
                 this.$set('categories', response.data.data.map(function (category) {
                     return new _modelsCategory2['default'](category);
@@ -18661,7 +18644,7 @@ exports['default'] = {
             });
         },
 
-        getUsers: function getUsers() {
+        fetchUsers: function fetchUsers() {
             this.$http.get('users').then(function (response) {
                 this.$set('users', response.data.data.map(function (user) {
                     return new _modelsUser2['default'](user);
@@ -18683,7 +18666,7 @@ exports['default'] = {
                     confirmButtonText: "Yes, unlock it!",
                     cancelButtonText: "Nevermind"
                 }, (function () {
-                    window.location = '/posts/' + post.id;
+                    window.location = '/admin/posts/' + post.id;
                 }).bind(this));
             }
         },
@@ -19102,14 +19085,15 @@ var Post = (function (_Model) {
             slug: data.slug,
             body: data.body,
             is_published: data.is_published,
-            start_showing_at: data.start_showing_at,
-            stop_showing_at: data.stop_showing_at,
+            start_showing_at: data.start_showing_at ? _moment2['default'].utc(data.start_showing_at, 'X').format('YYYY-MM-DD') : null,
+            stop_showing_at: data.stop_showing_at ? _moment2['default'].utc(data.stop_showing_at, 'X').format('YYYY-MM-DD') : null,
             order: data.order,
             is_locked: data.is_locked,
             locked_by_id: data.locked_by_id,
             category: data.category ? data.category.data : {},
             tags: data.tags ? data.tags.data : [],
             fields: data.fields ? data.fields.data : [],
+            meta: data.meta ? data.meta.data : [],
             revisions: data.revisions ? data.revisions.data : [],
             media: data.media ? data.media.data : {},
             created_at: data.created_at,
@@ -19132,8 +19116,8 @@ var Post = (function (_Model) {
                 return false;
             }
 
-            var start = !!this.attributes['start_showing_at'] ? _moment2['default'].unix(this.attributes['start_showing_at']) : (0, _moment2['default'])("1980-01-01", "YYYY-MM-DD");
-            var stop = !!this.attributes['stop_showing_at'] ? _moment2['default'].unix(this.attributes['stop_showing_at']) : (0, _moment2['default'])("2033-01-19", "YYYY-MM-DD");
+            var start = this.attributes['start_showing_at'] ? (0, _moment2['default'])(this.attributes['start_showing_at'], 'YYYY-MM-DD') : (0, _moment2['default'])("1980-01-01", "YYYY-MM-DD");
+            var stop = this.attributes['stop_showing_at'] ? (0, _moment2['default'])(this.attributes['stop_showing_at'], 'YYYY-MM-DD') : (0, _moment2['default'])("2033-01-19", "YYYY-MM-DD");
             var now = (0, _moment2['default'])();
 
             return start <= now && now <= stop;

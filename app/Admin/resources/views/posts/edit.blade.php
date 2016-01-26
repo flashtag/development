@@ -1,5 +1,5 @@
 @extends('admin::layout')
 
 @section('content')
-    <posts-edit></posts-edit>
+    <posts-edit post-id="{{ $id }}" :current-user="user"></posts-edit>
 @endsection

@@ -103,9 +103,9 @@
         },
 
         created: function() {
-            this.getPosts();
-            this.getCategories();
-            this.getUsers();
+            this.fetchPosts();
+            this.fetchCategories();
+            this.fetchUsers();
         },
 
         ready: function () {
@@ -116,7 +116,7 @@
 
         methods: {
 
-            getPosts: function() {
+            fetchPosts: function() {
                 this.$http.get('posts?include=category&orderBy=updated_at|desc').then(function (response) {
                     this.$set('posts', response.data.data.map(function (post) {
                         return new Post(post);
@@ -124,7 +124,7 @@
                 });
             },
 
-            getCategories: function () {
+            fetchCategories: function () {
                 this.$http.get('categories').then(function (response) {
                     this.$set('categories', response.data.data.map(function (category) {
                         return new Category(category);
@@ -132,7 +132,7 @@
                 });
             },
 
-            getUsers: function () {
+            fetchUsers: function () {
                 this.$http.get('users').then(function (response) {
                     this.$set('users', response.data.data.map(function (user) {
                         return new User(user);
@@ -155,7 +155,7 @@
                         confirmButtonText: "Yes, unlock it!",
                         cancelButtonText: "Nevermind"
                     }, function () {
-                        window.location = '/posts/'+post.id;
+                        window.location = '/admin/posts/'+post.id;
                     }.bind(this));
                 }
             },

@@ -12,6 +12,7 @@ export default {
     ready: function() {
         this.getInitialToken();
         this.registerEventListeners();
+        this.setLoginStatus();
     },
 
     data: {
@@ -36,6 +37,18 @@ export default {
             this.$on('userHasLoggedIn', function (user) {
                 this.setLogin(user)
             });
+        },
+
+        setLoginStatus: function () {
+            if (this.token !== null && this.token !== 'undefined') {
+                this.$http.get('auth/user/me')
+                    .then(function (response) {
+                        this.setLogin(response.data.user);
+                        this.$broadcast('data-loaded');
+                    }, function (response) {
+                        this.destroyLogin();
+                    });
+            }
         },
 
         setLogin: function (user) {
