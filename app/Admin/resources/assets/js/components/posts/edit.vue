@@ -196,7 +196,8 @@
         },
 
         created: function() {
-            this.fetch();
+            this.fetch().then(function(){
+            }.bind(this));
             this.fetchCategories();
             this.fetchTags();
             this.fetchFields();
@@ -205,7 +206,6 @@
 
         ready: function() {
             this.$nextTick(function() {
-                this.lock();
                 this.initTooltips();
             }.bind(this));
         },
@@ -216,6 +216,7 @@
                 return this.$http.get('posts/'+ this.postId +'?include=category,tags,fields,meta,author,media')
                     .then(function (response) {
                         this.$set('post', new Post(response.data.data));
+                        this.post.lock(this.currentUser);
                     });
             },
 
@@ -252,10 +253,10 @@
              * Save the post.
              */
             save: function() {
-                var self = this;
-                this.post.fields = this.fieldValues;
-                return this.$http.put('posts/'+this.post.id, self.post).then(function (response) {
-                    self.notify('success', 'Saved successfully.');
+                this.post.update({
+                    fields: this.fieldValues
+                }).then(function(response) {
+                    this.notify('success', 'Saved successfully.');
                 });
             },
 
@@ -271,7 +272,7 @@
                     closeOnConfirm: false,
                     showLoaderOnConfirm: true
                 }, function () {
-                    self.$http.delete('posts/' + self.post.id).then(function () {
+                    self.post.delete.then(function () {
                         swal({
                             html: true,
                             title: 'Deleted!',
@@ -285,34 +286,6 @@
                         swal("Oops", "We couldn't connect to the server!", "error");
                     });
                 });
-            },
-
-            lock: function() {
-                if (! this.post.is_locked) {
-                    var self = this;
-                    return this.$http.patch('posts/' + self.postId + '/lock', {user_id: self.currentUser.id})
-                        .then(function (response) {
-                            self.post.is_locked = true;
-                            window.onbeforeunload = function (e) {
-                                self.unlock();
-                            };
-                        });
-                }
-            },
-
-            unlock: function (done) {
-                if (this.post.is_locked && !this.deleted) {
-                    var self = this;
-                    return this.$http.patch('posts/' + self.postId + '/unlock', {user_id: self.currentUser.id})
-                        .then(function (response) {
-                            self.post.is_locked = false;
-                            done();
-                        }, function (response) {
-                            self.checkResponseStatus(response);
-                        });
-                } else {
-                    done();
-                }
             },
 
             notify: function (type, message) {

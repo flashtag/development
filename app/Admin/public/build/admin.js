@@ -18395,7 +18395,7 @@ exports['default'] = {
     },
 
     created: function created() {
-        this.fetch();
+        this.fetch().then((function () {}).bind(this));
         this.fetchCategories();
         this.fetchTags();
         this.fetchFields();
@@ -18404,7 +18404,6 @@ exports['default'] = {
 
     ready: function ready() {
         this.$nextTick((function () {
-            this.lock();
             this.initTooltips();
         }).bind(this));
     },
@@ -18414,6 +18413,7 @@ exports['default'] = {
         fetch: function fetch() {
             return this.$http.get('posts/' + this.postId + '?include=category,tags,fields,meta,author,media').then(function (response) {
                 this.$set('post', new _modelsPost2['default'](response.data.data));
+                this.post.lock(this.currentUser);
             });
         },
 
@@ -18450,10 +18450,10 @@ exports['default'] = {
          * Save the post.
          */
         save: function save() {
-            var self = this;
-            this.post.fields = this.fieldValues;
-            return this.$http.put('posts/' + this.post.id, self.post).then(function (response) {
-                self.notify('success', 'Saved successfully.');
+            this.post.update({
+                fields: this.fieldValues
+            }).then(function (response) {
+                this.notify('success', 'Saved successfully.');
             });
         },
 
@@ -18469,7 +18469,7 @@ exports['default'] = {
                 closeOnConfirm: false,
                 showLoaderOnConfirm: true
             }, function () {
-                self.$http['delete']('posts/' + self.post.id).then(function () {
+                self.post['delete'].then(function () {
                     _sweetalert2['default']({
                         html: true,
                         title: 'Deleted!',
@@ -18483,32 +18483,6 @@ exports['default'] = {
                     _sweetalert2['default']("Oops", "We couldn't connect to the server!", "error");
                 });
             });
-        },
-
-        lock: function lock() {
-            if (!this.post.is_locked) {
-                var self = this;
-                return this.$http.patch('posts/' + self.postId + '/lock', { user_id: self.currentUser.id }).then(function (response) {
-                    self.post.is_locked = true;
-                    window.onbeforeunload = function (e) {
-                        self.unlock();
-                    };
-                });
-            }
-        },
-
-        unlock: function unlock(done) {
-            if (this.post.is_locked && !this.deleted) {
-                var self = this;
-                return this.$http.patch('posts/' + self.postId + '/unlock', { user_id: self.currentUser.id }).then(function (response) {
-                    self.post.is_locked = false;
-                    done();
-                }, function (response) {
-                    self.checkResponseStatus(response);
-                });
-            } else {
-                done();
-            }
         },
 
         notify: function notify(type, message) {
@@ -18975,7 +18949,7 @@ var Model = (function () {
     function Model(resourcePath, attributes) {
         _classCallCheck(this, Model);
 
-        this.resourcePath = resourcePath;
+        this.resource = resource(resourcePath + '{/id}');
         this.attributes = attributes;
         this._createGettersAndSetters();
     }
@@ -18983,28 +18957,17 @@ var Model = (function () {
     _createClass(Model, [{
         key: 'save',
         value: function save() {
-            return client({
-                method: 'PUT',
-                path: '/' + this.resourcePath + '/' + this.attributes['id'],
-                entity: this.attributes
-            });
+            return this.resource.update({ id: this.attributes['id'] }, this.attributes);
         }
     }, {
         key: 'update',
         value: function update(attributes) {
-            return client({
-                method: 'PATCH',
-                path: '/' + this.resourcePath + '/' + this.attributes['id'],
-                entity: attributes
-            });
+            return this.resource.update({ id: this.attributes['id'] }, attributes);
         }
     }, {
         key: 'destroy',
         value: function destroy() {
-            return client({
-                method: 'DELETE',
-                path: '/' + this.resourcePath + '/' + this.attributes['id']
-            });
+            return this.resource['delete']({ id: this.attributes['id'] });
         }
     }, {
         key: '_createGettersAndSetters',
@@ -19033,11 +18996,7 @@ var Model = (function () {
         value: function create(attributes) {
             var model = new this(attributes);
 
-            return client({
-                method: 'POST',
-                path: '/' + model.resourcePath,
-                entity: model.attributes
-            });
+            return model.resource.save({ id: model.id }, model.attributes);
         }
     }]);
 
@@ -19103,10 +19062,26 @@ var Post = (function (_Model) {
 
     _createClass(Post, [{
         key: 'publish',
-        value: function publish(user_id) {
-            return client.patch('posts/' + this.attributes['id'] + '/publish', {
-                is_published: this.attributes['is_published'],
-                user_id: user_id
+        value: function publish() {
+            return this.update({
+                is_published: true
+            });
+        }
+    }, {
+        key: 'lock',
+        value: function lock(user) {
+            console.log(typeof user);
+            return this.update({
+                is_locked: true,
+                locked_by_id: typeof user == 'object' ? user.id : user
+            });
+        }
+    }, {
+        key: 'unlock',
+        value: function unlock() {
+            return this.update({
+                is_locked: false,
+                locked_by_id: null
             });
         }
     }, {

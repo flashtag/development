@@ -1,6 +1,7 @@
+
 class Model {
     constructor(resourcePath, attributes) {
-        this.resourcePath = resourcePath;
+        this.resource = resource(resourcePath + '{/id}');
         this.attributes = attributes;
         this._createGettersAndSetters();
     }
@@ -8,34 +9,30 @@ class Model {
     static create(attributes) {
         var model = new this(attributes);
 
-        return client({
-            method: 'POST',
-            path: '/' + model.resourcePath,
-            entity: model.attributes
-        });
+        return model.resource.save(
+            { id: model.id },
+            model.attributes
+        );
     }
 
     save() {
-        return client({
-            method: 'PUT',
-            path: '/' + this.resourcePath + '/' + this.attributes['id'],
-            entity: this.attributes
-        });
+        return this.resource.update(
+            { id: this.attributes['id'] },
+            this.attributes
+        );
     }
 
     update(attributes) {
-        return client({
-            method: 'PATCH',
-            path: '/' + this.resourcePath + '/' + this.attributes['id'],
-            entity: attributes
-        });
+        return this.resource.update(
+            { id: this.attributes['id'] },
+            attributes
+        );
     }
 
     destroy() {
-        return client({
-            method: 'DELETE',
-            path: '/' + this.resourcePath + '/' + this.attributes['id']
-        })
+        return this.resource.delete(
+            { id: this.attributes['id'] }
+        );
     }
 
     _createGettersAndSetters() {

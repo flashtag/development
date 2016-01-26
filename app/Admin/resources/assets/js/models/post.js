@@ -1,3 +1,4 @@
+
 import Model from './model';
 import moment from 'moment';
 
@@ -30,10 +31,24 @@ class Post extends Model {
         });
     }
 
-    publish(user_id) {
-        return client.patch('posts/' + this.attributes['id'] + '/publish', {
-            is_published: this.attributes['is_published'],
-            user_id: user_id
+    publish() {
+        return this.update({
+            is_published: true
+        });
+    }
+
+    lock(user) {
+        console.log(typeof user);
+        return this.update({
+            is_locked: true,
+            locked_by_id: typeof user == 'object' ? user.id : user
+        });
+    }
+
+    unlock() {
+        return this.update({
+            is_locked: false,
+            locked_by_id: null
         });
     }
 
