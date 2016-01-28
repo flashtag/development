@@ -38,10 +38,10 @@ class Post extends Model {
     }
 
     lock(user) {
-        console.log(typeof user);
+        console.log(user);
         return this.update({
             is_locked: true,
-            locked_by_id: typeof user == 'object' ? user.id : user
+            locked_by_id: user.id
         });
     }
 

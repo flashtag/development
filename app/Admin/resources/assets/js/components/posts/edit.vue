@@ -167,7 +167,10 @@
 
     export default {
 
-        props: ['post-id', 'current-user'],
+        props: {
+            postId: { required: true },
+            currentUser: { required: true }
+        },
 
         components: {
             string: require('../post-fields/templates/string.vue'),
@@ -208,6 +211,18 @@
             this.$nextTick(function() {
                 this.initTooltips();
             }.bind(this));
+
+            this.$on('user:loaded', function(){
+                alert('LOADED');
+            })
+        },
+
+        events: {
+            'user:loaded': function () {
+                this.post.lock(this.currentUser);
+                console.log('event caught');
+                return true;
+            }
         },
 
         methods: {
@@ -216,7 +231,6 @@
                 return this.$http.get('posts/'+ this.postId +'?include=category,tags,fields,meta,author,media')
                     .then(function (response) {
                         this.$set('post', new Post(response.data.data));
-                        this.post.lock(this.currentUser);
                     });
             },
 

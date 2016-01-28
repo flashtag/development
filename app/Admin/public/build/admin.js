@@ -18049,6 +18049,13 @@ module.exports = Vue;
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _modelsUser = require('./models/user');
+
+var _modelsUser2 = _interopRequireDefault(_modelsUser);
+
 exports['default'] = {
     el: '#Admin',
 
@@ -18062,14 +18069,21 @@ exports['default'] = {
 
     ready: function ready() {
         this.getInitialToken();
-        this.registerEventListeners();
         this.setLoginStatus();
     },
 
     data: {
         authenticated: false,
-        token: '',
-        user: {}
+        token: ''
+    },
+
+    events: {
+        'user:logout': function userLogout() {
+            this.destroyLogin();
+        },
+        'user:login': function userLogin(user) {
+            this.setLogin(user);
+        }
     },
 
     methods: {
@@ -18081,34 +18095,24 @@ exports['default'] = {
             }
         },
 
-        registerEventListeners: function registerEventListeners() {
-            this.$on('userHasLoggedOut', function () {
+        setLoginStatus: function setLoginStatus() {
+            this.$http.get('auth/user/me').then(function (response) {
+                this.setLogin(response.data.user);
+                this.$broadcast('user:loaded');
+                alert('YES');
+            }, function (response) {
                 this.destroyLogin();
             });
-            this.$on('userHasLoggedIn', function (user) {
-                this.setLogin(user);
-            });
-        },
-
-        setLoginStatus: function setLoginStatus() {
-            if (this.token !== null && this.token !== 'undefined') {
-                this.$http.get('auth/user/me').then(function (response) {
-                    this.setLogin(response.data.user);
-                    this.$broadcast('data-loaded');
-                }, function (response) {
-                    this.destroyLogin();
-                });
-            }
         },
 
         setLogin: function setLogin(user) {
-            this.user = user;
+            this.$set('user', new _modelsUser2['default'](user));
             this.authenticated = true;
             this.token = localStorage.getItem('jwt-token');
         },
 
         destroyLogin: function destroyLogin() {
-            this.user = null;
+            this.user = {};
             this.token = null;
             this.authenticated = false;
             localStorage.removeItem('jwt-token');
@@ -18119,7 +18123,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./components/partials/paginator.vue":39,"./components/posts/edit.vue":42,"./components/posts/index.vue":43}],37:[function(require,module,exports){
+},{"./components/partials/paginator.vue":39,"./components/posts/edit.vue":42,"./components/posts/index.vue":43,"./models/user":50}],37:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -18366,7 +18370,10 @@ var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
 
 exports['default'] = {
 
-    props: ['post-id', 'current-user'],
+    props: {
+        postId: { required: true },
+        currentUser: { required: true }
+    },
 
     components: {
         string: require('../post-fields/templates/string.vue'),
@@ -18406,6 +18413,18 @@ exports['default'] = {
         this.$nextTick((function () {
             this.initTooltips();
         }).bind(this));
+
+        this.$on('user:loaded', function () {
+            alert('LOADED');
+        });
+    },
+
+    events: {
+        'user:loaded': function userLoaded() {
+            this.post.lock(this.currentUser);
+            console.log('event caught');
+            return true;
+        }
     },
 
     methods: {
@@ -18413,7 +18432,6 @@ exports['default'] = {
         fetch: function fetch() {
             return this.$http.get('posts/' + this.postId + '?include=category,tags,fields,meta,author,media').then(function (response) {
                 this.$set('post', new _modelsPost2['default'](response.data.data));
-                this.post.lock(this.currentUser);
             });
         },
 
@@ -19070,10 +19088,10 @@ var Post = (function (_Model) {
     }, {
         key: 'lock',
         value: function lock(user) {
-            console.log(typeof user);
+            console.log(user);
             return this.update({
                 is_locked: true,
-                locked_by_id: typeof user == 'object' ? user.id : user
+                locked_by_id: user.id
             });
         }
     }, {

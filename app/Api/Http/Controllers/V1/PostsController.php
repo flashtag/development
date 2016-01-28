@@ -75,9 +75,8 @@ class PostsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $postData = $this->buildPostFromRequest($request);
         $post = $this->post->findOrFail($id);
-        $post->update($postData);
+        $post->update($request->all());
         $this->syncRelationships($post, $request);
 
         return $this->response->item($post, new PostTransformer());
@@ -225,9 +224,15 @@ class PostsController extends Controller
 
     private function syncRelationships($post, $request)
     {
-        $this->updateTags($post, $request->json('tags'));
-        $this->updateFields($post, collect($request->json('fields')));
-        $this->updateMeta($post, $request->json('meta'));
+        if ($request->has('tags')) {
+            $this->updateTags($post, $request->json('tags'));
+        }
+        if ($request->has('fields')) {
+            $this->updateFields($post, collect($request->json('fields')));
+        }
+        if ($request->has('meta')) {
+            $this->updateMeta($post, $request->json('meta'));
+        }
     }
 
     private function updateTags($post, $tags = [])

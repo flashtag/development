@@ -1,3 +1,5 @@
+import User from './models/user';
+
 export default {
     el: '#Admin',
 
@@ -11,14 +13,21 @@ export default {
 
     ready: function() {
         this.getInitialToken();
-        this.registerEventListeners();
         this.setLoginStatus();
     },
 
     data: {
         authenticated: false,
-        token: '',
-        user: {}
+        token: ''
+    },
+
+    events: {
+        'user:logout': function () {
+            this.destroyLogin()
+        },
+        'user:login': function (user) {
+            this.setLogin(user)
+        }
     },
 
     methods: {
@@ -30,35 +39,25 @@ export default {
             }
         },
 
-        registerEventListeners: function () {
-            this.$on('userHasLoggedOut', function () {
-                this.destroyLogin()
-            });
-            this.$on('userHasLoggedIn', function (user) {
-                this.setLogin(user)
-            });
-        },
-
         setLoginStatus: function () {
-            if (this.token !== null && this.token !== 'undefined') {
-                this.$http.get('auth/user/me')
-                    .then(function (response) {
-                        this.setLogin(response.data.user);
-                        this.$broadcast('data-loaded');
-                    }, function (response) {
-                        this.destroyLogin();
-                    });
-            }
+            this.$http.get('auth/user/me')
+                .then(function (response) {
+                    this.setLogin(response.data.user);
+                    this.$broadcast('user:loaded');
+                    alert('YES');
+                }, function (response) {
+                    this.destroyLogin();
+                });
         },
 
         setLogin: function (user) {
-            this.user = user;
+            this.$set('user', new User(user));
             this.authenticated = true;
             this.token = localStorage.getItem('jwt-token');
         },
 
         destroyLogin: function () {
-            this.user = null;
+            this.user = {};
             this.token = null;
             this.authenticated = false;
             localStorage.removeItem('jwt-token');
