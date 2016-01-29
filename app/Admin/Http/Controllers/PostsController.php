@@ -2,6 +2,12 @@
 
 namespace Flashtag\Admin\Http\Controllers;
 
+use Flashtag\Data\Author;
+use Flashtag\Data\Category;
+use Flashtag\Data\Field;
+use Flashtag\Data\Post;
+use Flashtag\Data\Tag;
+
 class PostsController extends Controller
 {
     public function index()
@@ -26,7 +32,15 @@ class PostsController extends Controller
 
     public function edit($id)
     {
-        return view('admin::posts.edit', ['id' => (int) $id]);
+        $post = Post::findOrFail($id);
+        $post->lock(auth()->user()->id);
+
+        $categories = Category::all(['id', 'name']);
+        $tags = Tag::all(['id', 'name']);
+        $authors = Author::all(['id', 'name']);
+        $fields = Field::all();
+
+        return view('admin::posts.edit', compact('post', 'categories', 'tags', 'authors', 'fields'));
     }
 
     public function update($id)

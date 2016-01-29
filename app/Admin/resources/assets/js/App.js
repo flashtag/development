@@ -4,10 +4,8 @@ export default {
     el: '#Admin',
 
     components: {
-        // Resources
         'posts-index': require('./components/posts/index.vue'),
-        'posts-edit': require('./components/posts/edit.vue'),
-        // Partials
+        'posts-edit': require('./components/posts/edit'),
         'paginator': require('./components/partials/paginator.vue')
     },
 
@@ -19,15 +17,6 @@ export default {
     data: {
         authenticated: false,
         token: ''
-    },
-
-    events: {
-        'user:logout': function () {
-            this.destroyLogin()
-        },
-        'user:login': function (user) {
-            this.setLogin(user)
-        }
     },
 
     methods: {
@@ -44,7 +33,6 @@ export default {
                 .then(function (response) {
                     this.setLogin(response.data.user);
                     this.$broadcast('user:loaded');
-                    alert('YES');
                 }, function (response) {
                     this.destroyLogin();
                 });

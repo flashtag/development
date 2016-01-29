@@ -2,7 +2,6 @@
 
 namespace Flashtag\Admin\Http\Controllers;
 
-use Auth;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -13,11 +12,24 @@ abstract class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function __construct()
+    protected $auth;
+
+    public function __construct(JWTAuth $auth)
     {
-        if (Auth::check()) {
-            $auth = app(JWTAuth::class);
-            session(['jwt' => $auth->fromUser(Auth::user())]);
+        $this->auth = $auth;
+
+        if (auth()->check()) {
+            $this->setTokenToSession();
         }
+    }
+
+    /**
+     * Store the JWT into the session.
+     */
+    private function setTokenToSession()
+    {
+        session([
+            'jwt' => $this->auth->fromUser($this->auth->user())
+        ]);
     }
 }
