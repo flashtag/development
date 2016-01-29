@@ -4,26 +4,18 @@
     <ol class="breadcrumb">
         <li><a href="/admin">Home</a></li>
         <li><a href="/admin/posts">Posts</a></li>
-        <li class="active">{{ $post->title }}</li>
+        <li class="active">New</li>
     </ol>
 
-    <form class="Post EditForm" action="{{ route('admin.posts.update', [$post->id]) }}" method="POST">
+    <form class="Post EditForm" action="{{ route('admin.posts.store') }}" method="POST">
         {{ csrf_field() }}
-        {{ method_field('PUT') }}
 
         <section class="info row">
-            <div class="col-md-6 clearfix">
-                <!--
-                <a href="/admin/posts/{{ $post->id }}/revisions" class="btn btn-link">
-                    <i class="fa fa-history"></i> Revision history
-                </a>
-                -->
-            </div>
+            <div class="col-md-6 clearfix"></div>
             <div class="col-md-6 clearfix">
                 <div class="action-buttons">
                     <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
-                    <a href="#" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
-                    <a href="/admin/posts" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
+                    <a href="/admin/posts" class="btn btn-default"><i class="fa fa-close"></i> Cancel</a>
                 </div>
             </div>
         </section>
@@ -56,29 +48,6 @@
                 del();
             });
         });
-
-        var del = function() {
-            var self = this;
-            swal({
-                title: 'Are you sure?',
-                text: 'You will not be able to recover this post and all of its revision history!',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#DD6B55',
-                confirmButtonText: 'Yes, delete it!',
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true
-            }, function () {
-                $.ajax({
-                    url: '/api/posts/{{ $post->id }}',
-                    method: 'DELETE',
-                    headers: { Authorization: localStorage.getItem('jwt-token') }
-                }).done(function(){
-                    self.deleted = true;
-                    window.location = '/admin/posts';
-                });
-            });
-        };
 
         var notify = function (type, message) {
             if (type == 'success') {

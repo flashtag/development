@@ -5,7 +5,7 @@
     </ol>
 
     <div class="create-button">
-        <a href="/posts/create" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</a>
+        <a href="/admin/posts/create" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</a>
     </div>
 
     <div class="filters">

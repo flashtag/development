@@ -85,21 +85,6 @@ class Post extends Model implements HasPresenter
     protected $historyLimit = 500;
 
     /**
-     * Save a new Post and return the instance.
-     *
-     * @param  array  $attributes
-     * @return static
-     */
-    public static function create(array $attributes = [])
-    {
-        $attributes['order'] = 0;
-        $post = parent::create($attributes);
-        $post->reorder(1);
-
-        return $post;
-    }
-
-    /**
      * @return string
      */
     public function getPresenterClass()

@@ -23,12 +23,24 @@ class PostsController extends Controller
 
     public function create()
     {
-        //
+        $post = new Post();
+
+        $categories = Category::all(['id', 'name']);
+        $tags = Tag::all(['id', 'name']);
+        $authors = Author::all(['id', 'name']);
+        $fields = Field::all();
+
+        return view('admin::posts.create', compact('post', 'categories', 'tags', 'authors', 'fields'));
     }
 
-    public function store()
+    public function store(Request $request)
     {
-        //
+        $post = Post::create($this->buildPostFromRequest($request));
+
+        $this->syncTags($post, $request->get('tags'));
+        $this->syncFields($post, $request->get('fields'));
+
+        return redirect()->route('admin.posts.index');
     }
 
     public function edit($id)
@@ -48,22 +60,35 @@ class PostsController extends Controller
     {
         $post = Post::findOrFail($id);
 
-        $post->update([
-            'title' => $request->get('title'),
-            'subtitle' => $request->get('subtitle'),
-            'category_id' => $request->get('category_id'),
-            'body' => $request->get('body'),
-            'author_id' => $request->get('author_id'),
-            'show_author' => $request->get('show_author', false),
-            'is_published' => $request->get('is_published', false),
-            'start_showing_at' => $request->get('start_showing_at'),
-            'stop_showing_at' => $request->get('stop_showing_at'),
-        ]);
+        $post->update($this->buildPostFromRequest($request));
 
         $this->syncTags($post, $request->get('tags'));
         $this->syncFields($post, $request->get('fields'));
 
         return back();
+    }
+
+    private function buildPostFromRequest($request)
+    {
+        $data['title'] = $request->get('title');
+        $data['subtitle'] = $request->get('subtitle');
+        $data['slug'] = str_slug($request->get('title'));
+        $data['category_id'] = $request->get('category_id');
+        $data['body'] = $request->get('body');
+        $data['author_id'] = $request->get('author_id');
+        $data['show_author'] = $request->get('show_author', false);
+        $data['is_published'] = $request->get('is_published', false);
+        $data['meta_description'] = $request->get('meta_description');
+        $data['meta_canonical'] = $request->get('meta_canonical');
+
+        if ($request->get('start_showing_at')) {
+            $data['start_showing_at'] = $request->get('start_showing_at');
+        }
+        if ($request->get('stop_showing_at')) {
+            $data['stop_showing_at'] = $request->get('stop_showing_at');
+        }
+
+        return $data;
     }
 
     private function syncTags($post, $tags = [])
@@ -80,6 +105,9 @@ class PostsController extends Controller
 
     public function destroy($id)
     {
-        //
+        $post = Post::findOrFail($id);
+        $post->delete();
+
+        return redirect()->route('admin.posts.index');
     }
 }
