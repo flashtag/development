@@ -1,7 +1,5 @@
 export default {
 
-    template: '#Post',
-
     methods: {
         /**
          * Save the post.

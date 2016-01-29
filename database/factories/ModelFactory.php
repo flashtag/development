@@ -31,7 +31,8 @@ $factory->define(Flashtag\Data\Post::class, function (Faker\Generator $faker) {
         'is_published' => $faker->boolean(80),
         'start_showing_at' => $faker->dateTimeBetween('-1 year')->format('Y-m-d'),
         'stop_showing_at' => $faker->dateTimeBetween('-1 week', '+1 year')->format('Y-m-d'),
-        'order' => 2,
+        'meta_description' => $faker->sentence(6),
+        'meta_canonical' => $faker->url,
     ];
 });
 
@@ -55,14 +56,6 @@ $factory->define(Flashtag\Data\Author::class, function (Faker\Generator $faker) 
         'link' => $faker->url,
         'photo' => $faker->imageUrl(200),
         'bio' => $faker->paragraph(3),
-    ];
-});
-
-$factory->define(Flashtag\Data\MetaTag::class, function (Faker\Generator $faker) {
-    return [
-        'url' => $faker->url,
-        'description' => $faker->sentence(6),
-        'image' => $faker->imageUrl(300),
     ];
 });
 

@@ -7,6 +7,7 @@
         <a class="list-group-item" href="/admin/posts">
             <i class="fa fa-newspaper-o"></i> Posts
         </a>
+        <!--
         <a class="list-group-item" href="/admin/post-fields">
             <i class="fa fa-th-list"></i> Post fields
         </a>
@@ -25,6 +26,7 @@
         <a class="list-group-item" href="/admin/settings">
             <i class="fa fa-gear"></i> Settings
         </a>
+        -->
     </div>
 </div>
 

@@ -16,6 +16,7 @@ export default {
 
     data: {
         authenticated: false,
+        user: {},
         token: ''
     },
 
@@ -39,7 +40,7 @@ export default {
         },
 
         setLogin: function (user) {
-            this.$set('user', new User(user));
+            this.user = new User(user);
             this.authenticated = true;
             this.token = localStorage.getItem('jwt-token');
         },

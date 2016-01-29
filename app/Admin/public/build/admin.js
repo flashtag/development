@@ -16171,6 +16171,7 @@ exports['default'] = {
 
     data: {
         authenticated: false,
+        user: {},
         token: ''
     },
 
@@ -16193,7 +16194,7 @@ exports['default'] = {
         },
 
         setLogin: function setLogin(user) {
-            this.$set('user', new _modelsUser2['default'](user));
+            this.user = new _modelsUser2['default'](user);
             this.authenticated = true;
             this.token = localStorage.getItem('jwt-token');
         },
@@ -16276,8 +16277,6 @@ Object.defineProperty(exports, '__esModule', {
     value: true
 });
 exports['default'] = {
-
-    template: '#Post',
 
     methods: {
         /**

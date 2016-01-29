@@ -47,7 +47,6 @@ class TestSeeder extends Seeder
         \DB::statement('TRUNCATE TABLE posts CASCADE;');
         \DB::statement('TRUNCATE TABLE fields CASCADE;');
         \DB::statement('TRUNCATE TABLE users CASCADE;');
-        \DB::statement('TRUNCATE TABLE meta_tags CASCADE;');
     }
 
     /**
@@ -61,7 +60,6 @@ class TestSeeder extends Seeder
         \DB::table('posts')->truncate();
         \DB::table('fields')->truncate();
         \DB::table('users')->truncate();
-        \DB::table('meta_tags')->truncate();
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
@@ -211,21 +209,12 @@ IPSUM;
             $post->save();
 
             // Additional Relationships
-            $this->addMetaTo($post);
             $this->addRatingsTo($post);
 
             event(new \Flashtag\Data\Events\PostWasCreated($post));
 
             return $post;
         });
-    }
-
-    /**
-     * @param \Illuminate\Database\Eloquent\Model $model
-     */
-    private function addMetaTo($model)
-    {
-        $model->meta()->save(factory(\Flashtag\Data\MetaTag::class)->create());
     }
 
     /**

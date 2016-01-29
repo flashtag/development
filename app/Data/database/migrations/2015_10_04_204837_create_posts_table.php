@@ -18,7 +18,6 @@ class CreatePostsTable extends Migration
             $table->string('slug');
             $table->string('subtitle')->nullable();
             $table->unsignedInteger('category_id')->nullable();
-            $table->unsignedInteger('order');
             $table->text('body')->nullable();
             $table->boolean('is_published')->default(false);
             $table->timestamp('start_showing_at')->nullable();
@@ -28,6 +27,8 @@ class CreatePostsTable extends Migration
             $table->boolean('is_locked')->default(false);
             $table->unsignedInteger('locked_by_id')->nullable();
             $table->string('image')->nullable();
+            $table->string('meta_description')->nullable();
+            $table->string('meta_canonical')->nullable();
             $table->timestamps();
         });
     }

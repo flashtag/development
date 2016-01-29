@@ -17,17 +17,17 @@ use Venturecraft\Revisionable\RevisionableTrait;
  * @property string $title
  * @property string $slug
  * @property string $subtitle
- * @property int $order
  * @property string $body
  * @property boolean $is_published
  * @property string $image
+ * @property string $meta_description
+ * @property string $meta_canonical
  * @property \Carbon\Carbon $start_showing_at
  * @property \Carbon\Carbon $stop_showing_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Illuminate\Database\Eloquent\Model $category
  * @property \Illuminate\Database\Eloquent\Model $author
- * @property \Illuminate\Database\Eloquent\Model $meta
  * @property \Illuminate\Database\Eloquent\Collection $fields
  * @property \Illuminate\Database\Eloquent\Collection $tags
  * @property \Illuminate\Database\Eloquent\Collection $ratings
@@ -137,14 +137,6 @@ class Post extends Model implements HasPresenter
     public function fields()
     {
         return $this->belongsToMany(Field::class)->withPivot('value');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
-     */
-    public function meta()
-    {
-        return $this->morphOne(MetaTag::class, 'meta_taggable');
     }
 
     /**

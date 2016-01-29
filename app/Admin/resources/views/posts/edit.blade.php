@@ -7,28 +7,32 @@
         <li class="active">{{ $post->title }}</li>
     </ol>
 
-    <form class="Post EditForm">
+    <form class="Post EditForm" action="{{ route('admin.posts.update', [$post->id]) }}" method="POST">
+        {{ csrf_field() }}
+        {{ method_field('PUT') }}
 
         <section class="info row">
             <div class="col-md-6 clearfix">
+                <!--
                 <a href="/admin/posts/{{ $post->id }}/revisions" class="btn btn-link">
                     <i class="fa fa-history"></i> Revision history
                 </a>
+                -->
             </div>
             <div class="col-md-6 clearfix">
                 <div class="action-buttons">
-                    <button @click.prevent="save" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <button @click.prevent="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                    <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
+                    <a href="#" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
                     <a href="/admin/posts" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
                 </div>
             </div>
         </section>
 
-        <div class="panel panel-default {{ $post->is_showing ? 'border-green': 'border-red' }}">
+        <div class="panel panel-default {{ $post->isShowing() ? 'border-green': 'border-red' }}">
             <div class="panel-heading">
                 PUBLISHING
-                <label class="showing label {{ $post->is_showing ? 'label-success': 'label-danger' }}">
-                    {{ $post->is_showing ? 'Will show on website' : 'Will not show on website' }}
+                <label class="showing label {{ $post->isShowing() ? 'label-success': 'label-danger' }}">
+                    {{ $post->isShowing() ? 'Will show on website' : 'Will not show on website' }}
                 </label>
             </div>
             <div class="panel-body">
@@ -38,7 +42,8 @@
                             <div class="publish-switch">
                                 <label for="is_published">Published</label>
                                 <div class="switch">
-                                    <input value="{{ $post->is_published }}" name="is_published" id="is_published" class="cmn-toggle cmn-toggle-round-md" type="checkbox">
+                                    <input value="1" name="is_published" id="is_published" class="cmn-toggle cmn-toggle-round-md" type="checkbox"
+                                        {{ $post->is_published ? 'checked' : '' }}>
                                     <label for="is_published"></label>
                                 </div>
                             </div>
@@ -81,7 +86,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="category">Category</label>
-                            <select name="category" id="category" class="form-control">
+                            <select name="category_id" id="category" class="form-control">
                                 <option value="" disabled selected>Select a category...</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
@@ -95,7 +100,7 @@
                     <div class="col-md-6">
                         <div class="form-group form-tags">
                             <label for="tags">Tags</label>
-                            <select name="tags" id="tags" multiple class="form-control">
+                            <select name="tags[]" id="tags" class="select" multiple class="form-control">
                                 @foreach ($tags as $tag)
                                     <option value="{{ $tag->id }}"
                                             {{ $post->tags->where('id', $tag->id)->first() ? 'selected' : '' }}>
@@ -114,7 +119,7 @@
                 </div>
                 <div class="form-group">
                     <label for="author">Author</label>
-                    <select id="author" name="author">
+                    <select id="author" name="author_id" class="select">
                         <option value="" disabled selected>Select an author...</option>
                         @foreach ($authors as $author)
                             <option value="{{ $author->id }}"
@@ -127,7 +132,8 @@
                 <div class="form-group">
                     <label for="show_author">Show author?</label>
                     <div class="switch">
-                        <input id="show_author" class="cmn-toggle cmn-toggle-yes-no" type="checkbox" value="{{ $post->show_author }}">
+                        <input id="show_author" name="show_author" class="cmn-toggle cmn-toggle-yes-no" type="checkbox" value="1"
+                            {{ $post->show_author ? 'checked' : '' }}>
                         <label for="show_author" data-on="Yes" data-off="No"></label>
                     </div>
                 </div>
@@ -138,7 +144,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">CUSTOM FIELDS</div>
             <div class="panel-body">
-                @foreach ($fields as $field)
+                @foreach ($fields as $i => $field)
                     <div class="form-group">
                         @include("admin::fields.templates.".$field->template)
                     </div>
@@ -158,13 +164,6 @@
                         </div>
                     </div>
                 </div>
-                {{--
-                <dropzone
-                        path="/img/uploads/posts/"
-                        :image="post.image"
-                        :to="'/posts/'+postId+'/image'">
-                </dropzone>
-                --}}
             </div>
         </div>
 
@@ -172,12 +171,12 @@
             <div class="panel-heading">META</div>
             <div class="panel-body">
                 <div class="form-group">
-                    <label for="description">Description</label>
-                    <input type="text" value="{{ $post->meta->description }}" name="description" id="description" class="form-control">
+                    <label for="meta_description">Description</label>
+                    <input type="text" value="{{ $post->meta_description }}" name="meta_description" id="meta_description" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label for="url">Canonical Link</label>
-                    <input type="text" value="{{ $post->meta->url }}" name="url" id="url" class="form-control">
+                    <label for="meta_canonical">Canonical Link</label>
+                    <input type="text" value="{{ $post->meta_canonical }}" name="meta_canonical" id="meta_canonical" class="form-control">
                 </div>
             </div>
         </div>
@@ -187,8 +186,21 @@
 
 @section('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.2.0/min/dropzone.min.js"></script>
-    {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>--}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
+        $(document).ready(function(){
+            // CKEditor
+            $('.rich-editor').each(function(){
+                CKEDITOR.replace($(this).attr('id'));
+            });
+
+            // Dropzone
+            drop.init();
+
+            // Select2
+            $('.select').select2();
+        });
+
         Dropzone.autoDiscover = false;
 
         var drop = {
@@ -198,7 +210,7 @@
                 Dropzone.confirm = this.confirm;
                 // Initialize dropzone with our config and add some even listeners
                 this.dropzone = new Dropzone('#dropzone-image', {
-                    url: "/api" + this.to,
+                    url: "/api/posts/{{ $post->id }}/image",
                     dictDefaultMessage: "Drop image file here to upload",
                     dictRemoveFileConfirmation: "Are you sure you want to delete this?",
                     paramName: "image",
@@ -258,9 +270,5 @@
                 }, accepted, rejected);
             }
         };
-
-        $(document).ready(function(){
-            drop.init();
-        });
     </script>
 @endsection
