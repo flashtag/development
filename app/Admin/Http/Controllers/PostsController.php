@@ -3,12 +3,12 @@
 namespace Flashtag\Admin\Http\Controllers;
 
 use Flashtag\Admin\Http\Requests\PostCreateRequest;
+use Flashtag\Admin\Http\Requests\PostUpdateRequest;
 use Flashtag\Data\Author;
 use Flashtag\Data\Category;
 use Flashtag\Data\Field;
 use Flashtag\Data\Post;
 use Flashtag\Data\Tag;
-use Illuminate\Http\Request;
 
 class PostsController extends Controller
 {
@@ -57,7 +57,7 @@ class PostsController extends Controller
         return view('admin::posts.edit', compact('post', 'categories', 'tags', 'authors', 'fields'));
     }
 
-    public function update(Request $request, $id)
+    public function update(PostUpdateRequest $request, $id)
     {
         $post = Post::findOrFail($id);
 
@@ -66,7 +66,7 @@ class PostsController extends Controller
         $this->syncTags($post, $request->get('tags'));
         $this->syncFields($post, $request->get('fields'));
 
-        return back();
+        return redirect()->route('admin.posts.index');
     }
 
     private function buildPostFromRequest($request)
