@@ -310,11 +310,22 @@ class Post extends Model implements HasPresenter
      */
     public function addImage($image)
     {
-        $name = 'post__'.$this->slug.'.'.$image->getExtension();
+        $name = 'post__'.$this->slug.'.'.$this->imageExtension($image);
         $image->move(public_path('img/uploads/posts'), $name);
         $this->image = $name;
 
         $this->save();
+    }
+
+    /**
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     * @return string|null
+     */
+    private function imageExtension($image)
+    {
+        $parts = explode('.', $image->getClientOriginalName());
+
+        return array_pop($parts);
     }
 
     /**
