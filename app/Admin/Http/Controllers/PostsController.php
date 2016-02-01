@@ -3,6 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers;
 
 use Flashtag\Admin\Http\Requests\PostCreateRequest;
+use Flashtag\Admin\Http\Requests\PostDestroyRequest;
 use Flashtag\Admin\Http\Requests\PostUpdateRequest;
 use Flashtag\Data\Author;
 use Flashtag\Data\Category;
@@ -104,7 +105,7 @@ class PostsController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(PostDestroyRequest $request, $id)
     {
         $post = Post::findOrFail($id);
         $post->delete();
