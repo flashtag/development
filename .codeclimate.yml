@@ -1,4 +1,25 @@
-## other configuration excluded from example...
+engines:
+  phpcodesniffer:
+    enabled: true
+  phpmd:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+        languages:
+        - php
+        - javascript
+  eslint:
+    enabled: true
+  csslint:
+    enabled: true
+
+ratings:
+  paths:
+  - app/**
+  - "**.php"
+  - "**.js"
+
 exclude_paths:
   - app/Admin/public/**/*
   - public/vendor/**/*
