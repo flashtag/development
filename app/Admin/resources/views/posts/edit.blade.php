@@ -100,6 +100,10 @@
 
         var drop = {
 
+            to: "",
+            path: "/img/uploads/posts/",
+            image: "{{ $post->image }}",
+
             init: function () {
                 // Overwrite dropzone's confirm method with our own
                 Dropzone.confirm = this.confirm;

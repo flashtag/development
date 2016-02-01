@@ -2,6 +2,7 @@
 
 namespace Flashtag\Admin\Http\Controllers;
 
+use Flashtag\Admin\Http\Requests\PostCreateRequest;
 use Flashtag\Data\Author;
 use Flashtag\Data\Category;
 use Flashtag\Data\Field;
@@ -33,7 +34,7 @@ class PostsController extends Controller
         return view('admin::posts.create', compact('post', 'categories', 'tags', 'authors', 'fields'));
     }
 
-    public function store(Request $request)
+    public function store(PostCreateRequest $request)
     {
         $post = Post::create($this->buildPostFromRequest($request));
 
@@ -93,12 +94,12 @@ class PostsController extends Controller
 
     private function syncTags($post, $tags = [])
     {
-        $post->tags()->sync($tags);
+        $post->tags()->sync((array) $tags);
     }
 
     private function syncFields($post, $fields = [])
     {
-        foreach ($fields as $id => $field) {
+        foreach ((array) $fields as $id => $field) {
             $post->fields()->sync([$id => ['value' => $field]], false);
         }
     }

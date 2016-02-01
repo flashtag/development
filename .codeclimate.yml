@@ -1,0 +1,7 @@
+## other configuration excluded from example...
+exclude_paths:
+  - app/Admin/public/**/*
+  - public/vendor/**/*
+  - public/assets/**/*
+  - public/js/**/*
+  - tests/**/*

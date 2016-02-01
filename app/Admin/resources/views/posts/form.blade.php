@@ -24,13 +24,13 @@
                 <label for="start_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show until this date.">
                     Start showing
                 </label>
-                <input type="date" value="{{ $post->start_showing_at ? $post->start_showing_at->format("Y-m-d") : null }}" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
+                <input type="date" value="{{ $post->start_showing_at ? $post->start_showing_at->format("Y-m-d") : old('start_showing_at') }}" name="start_showing_at" id="start_showing_at" class="form-control" placeholder="Date">
             </div>
             <div class="col-md-5">
                 <label for="stop_showing_at" data-toggle="tooltip" data-placement="top" title="If the post is published, it will not show after this date.">
                     Stop showing
                 </label>
-                <input type="date" value="{{ $post->stop_showing_at ? $post->stop_showing_at->format("Y-m-d") : null }}" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
+                <input type="date" value="{{ $post->stop_showing_at ? $post->stop_showing_at->format("Y-m-d") : old('stop_showing_at') }}" name="stop_showing_at" id="stop_showing_at" class="form-control" placeholder="Date">
             </div>
         </div>
     </div>
@@ -43,13 +43,13 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="title">Title</label>
-                    <input type="text" value="{{ $post->title }}" name="title" id="title" class="form-control">
+                    <input type="text" value="{{ $post->title or old('title') }}" name="title" id="title" class="form-control">
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="subtitle">Subtitle</label>
-                    <input type="text" value="{{ $post->subtitle }}" name="subtitle" id="subtitle" class="form-control">
+                    <input type="text" value="{{ $post->subtitle or old('subtitle') }}" name="subtitle" id="subtitle" class="form-control">
                 </div>
             </div>
         </div>
@@ -85,7 +85,7 @@
         <div class="form-group">
             <label for="body">Body</label>
                     <textarea name="body" id="body" class="form-control rich-editor">
-                        {!! $post->body !!}
+                        {!! $post->body or old('body') !!}
                     </textarea>
         </div>
         <div class="form-group">
@@ -143,11 +143,11 @@
     <div class="panel-body">
         <div class="form-group">
             <label for="meta_description">Description</label>
-            <input type="text" value="{{ $post->meta_description }}" name="meta_description" id="meta_description" class="form-control">
+            <input type="text" value="{{ $post->meta_description or old('meta_description') }}" name="meta_description" id="meta_description" class="form-control">
         </div>
         <div class="form-group">
             <label for="meta_canonical">Canonical Link</label>
-            <input type="text" value="{{ $post->meta_canonical }}" name="meta_canonical" id="meta_canonical" class="form-control">
+            <input type="text" value="{{ $post->meta_canonical or old('meta_canonical') }}" name="meta_canonical" id="meta_canonical" class="form-control">
         </div>
     </div>
 </div>
