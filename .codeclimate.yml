@@ -22,6 +22,9 @@ ratings:
 
 exclude_paths:
   - app/Admin/public/**/*
+  - app/Front/public/**/*
+  - app/Data/database/**/*
+  - database/**/*
   - public/vendor/**/*
   - public/assets/**/*
   - public/js/**/*
