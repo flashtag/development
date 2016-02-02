@@ -22,7 +22,8 @@ class PostsTest extends TestCase
         ]);
     }
 
-    public function testShow()
+    /** @test */
+    public function show()
     {
         $post = $this->createPost();
 
@@ -33,7 +34,8 @@ class PostsTest extends TestCase
             ->see($post->body);
     }
 
-    public function testCreateWithOnlyTitleAndBody()
+    /** @test */
+    public function create_with_only_title_and_body()
     {
         $this->actingAs(factory(User::class)->create())
             ->visit('/admin/posts/create')
@@ -44,7 +46,8 @@ class PostsTest extends TestCase
             ->seeInDatabase('posts', ['title' => 'My Test Post']);
     }
 
-    public function testCreateWithAllFields()
+    /** @test */
+    public function create_with_all_fields()
     {
         $data = factory(Post::class)->make([
             'is_published' => true,
@@ -71,7 +74,8 @@ class PostsTest extends TestCase
             ->seeInDatabase('posts', $data);
     }
 
-    public function testCreateFailsWithoutTitle()
+    /** @test */
+    public function create_fails_without_title()
     {
         $this->actingAs(factory(User::class)->create())
             ->visit('/admin/posts/create')
@@ -84,7 +88,8 @@ class PostsTest extends TestCase
             ->dontSeeInDatabase('posts', ['subtitle' => 'My subtitle']);
     }
 
-    public function testCreateFailsWithoutBody()
+    /** @test */
+    public function create_fails_without_body()
     {
         $this->actingAs(factory(User::class)->create())
             ->visit('/admin/posts/create')
@@ -95,7 +100,8 @@ class PostsTest extends TestCase
             ->dontSeeInDatabase('posts', ['title' => 'My Title']);
     }
 
-    public function testEditAllFields()
+    /** @test */
+    public function edit_all_fields()
     {
         $data = factory(Post::class)->make([
             'is_published' => true,
@@ -122,7 +128,8 @@ class PostsTest extends TestCase
             ->seeInDatabase('posts', $data);
     }
 
-    public function testEditFailsWithoutTitle()
+    /** @test */
+    public function edit_fails_without_title()
     {
         $post = $this->createPost();
         $page = "/admin/posts/{$post->id}/edit";
@@ -137,7 +144,8 @@ class PostsTest extends TestCase
             ->dontSeeInDatabase('posts', ['subtitle' => 'My subtitle']);
     }
 
-    public function testEditFailsWithoutBody()
+    /** @test */
+    public function edit_fails_without_body()
     {
         $post = $this->createPost();
         $page = "/admin/posts/{$post->id}/edit";
@@ -151,7 +159,8 @@ class PostsTest extends TestCase
             ->dontSeeInDatabase('posts', ['title' => 'My Title']);
     }
 
-    public function testDelete()
+    /** @test */
+    public function delete_through_route()
     {
         $this->withoutMiddleware();
 
@@ -162,7 +171,8 @@ class PostsTest extends TestCase
             ->dontSeeInDatabase('posts', ['id' => $post->id]);
     }
 
-    public function testDeleteFailsWhenNotAuthorized()
+    /** @test */
+    public function delete_fails_when_not_authorized()
     {
         $this->withoutMiddleware();
 
