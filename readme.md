@@ -1,4 +1,7 @@
 ## Flashtag
+ [![Build Status](https://travis-ci.org/flashtag/flashtag.svg?branch=master)](https://travis-ci.org/flashtag/flashtag)
+ [![Code Climate](https://codeclimate.com/github/flashtag/flashtag/badges/gpa.svg)](https://codeclimate.com/github/flashtag/flashtag)
+ [![Test Coverage](https://codeclimate.com/github/flashtag/flashtag/badges/coverage.svg)](https://codeclimate.com/github/flashtag/flashtag/coverage)
 
 ### Development
 
