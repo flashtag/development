@@ -166,10 +166,9 @@ class Post extends Model implements HasPresenter
     /**
      * Unlock the post.
      *
-     * @param int $user_id
      * @return bool
      */
-    public function unlock($user_id = null)
+    public function unlock()
     {
         $this->is_locked = false;
         $this->locked_by_id = null;
