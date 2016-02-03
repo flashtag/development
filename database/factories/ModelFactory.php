@@ -6,7 +6,7 @@ $factory->define(Flashtag\Data\Category::class, function (Faker\Generator $faker
     return [
         'name' => $name,
         'slug' => str_slug($name),
-        'description' => $faker->paragraph(6),
+        'description' => $faker->sentence(),
     ];
 });
 
