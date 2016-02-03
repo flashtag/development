@@ -12,7 +12,7 @@ class CategoryCreateRequest extends Request
     public function rules()
     {
         return [
-            'name' => 'required|unique:posts|max:255',
+            'name' => 'required|unique:categories|max:255',
         ];
     }
 
