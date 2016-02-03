@@ -20,10 +20,6 @@ script:
 after_script:
   - vendor/bin/test-reporter
 
-matrix:
-  allow_failures:
-    - php: 7.0
-
 addons:
   code_climate:
     repo_token: $CODE_CLIMATE_TOKEN
