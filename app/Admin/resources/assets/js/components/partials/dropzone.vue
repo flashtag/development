@@ -24,6 +24,10 @@
             }
         },
 
+        created: function () {
+            Dropzone.autoDiscover = false;
+        },
+
         ready: function () {
             this.initDropzone();
         },

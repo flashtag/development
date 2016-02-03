@@ -4,6 +4,12 @@ namespace Flashtag\Data;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Category
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $tags
+ * @property \Flashtag\Data\Media $media
+ */
 class Category extends Model
 {
     /**

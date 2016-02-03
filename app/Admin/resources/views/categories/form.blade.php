@@ -46,44 +46,11 @@
 <div class="panel panel-default">
     <div class="panel-heading">Media</div>
     <div class="panel-body">
-        <div id="dropzone-image" class="dropzone">
-            <div class="fallback">
-                <input name="image" type="file" />
-            </div>
-        </div>
-        {{--
         <media-input
-                :type.sync="category.media.type"
-                :url.sync="category.media.url"
+                type="{{ $category->media ? $category->media->type : 'image' }}"
+                url="{{ $category->media ? $category->media->url : '' }}"
                 image-path="/img/uploads/media/"
-                :image-upload="'/categories/'+$route.params.category_id+'/image'">
+                image-upload="/categories/{{  $category->id }}/image'">
         </media-input>
-        --}}
     </div>
 </div>
-
-{{--
-<div class="panel panel-default">
-    <div class="panel-heading">Post Ordering</div>
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="order_by">Order posts in category by</label>
-                    <select name="order_by" id="order_by" class="form-control">
-                        <option value="option id">option text</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="order_dir">Order posts in category direction</label>
-                    <select v-model="category.order_dir" name="order_dir" id="order_dir" class="form-control">
-                        <option value="direction id">direction text</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
---}}

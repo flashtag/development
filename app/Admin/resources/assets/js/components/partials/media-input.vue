@@ -20,7 +20,9 @@
 
         props: ['type', 'url', 'image-path', 'image-upload'],
 
-        components: {dropzone: require('./dropzone.vue')},
+        components: {
+            dropzone: require('./dropzone.vue')
+        },
 
         data: function () {
             return {
