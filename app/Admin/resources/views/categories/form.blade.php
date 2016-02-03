@@ -13,7 +13,7 @@
                     <select name="parent_id" id="category" class="form-control">
                         <option value="" selected>None</option>
                         @foreach ($categories as $option)
-                            <option value="{{ $option->id }}" {{ $category->id == $option->id ? 'selected' : '' }}>
+                            <option value="{{ $option->id }}" {{ $category->parent_id == $option->id ? 'selected' : '' }}>
                                 {{ $option->name }}
                             </option>
                         @endforeach

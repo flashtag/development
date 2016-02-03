@@ -72,10 +72,7 @@ class CategoriesController extends Controller
         $data['name'] = $request->get('name');
         $data['description'] = $request->get('description');
         $data['slug'] = str_slug($request->get('name'));
-
-	if ($request->get('parent_id')) {
-	    $data['parent_id'] = $request->get('parent_id');
-	}
+	    $data['parent_id'] = $request->get('parent_id') ?: null;
 
         return $data;
     }
