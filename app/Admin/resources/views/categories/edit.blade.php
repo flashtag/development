@@ -27,9 +27,6 @@
 
     </form>
 
-    {{--
-    <category-posts v-if="showCategoryPosts" :category-id="$route.params.category_id" :posts="category.posts"></category-posts>
-    --}}
 @endsection
 
 @section('scripts')
