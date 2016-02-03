@@ -1,13 +1,11 @@
 @extends('admin::layout')
 
-
 @section('content')
     <ol class="breadcrumb">
         <li><a href="/admin">Home</a></li>
         <li><a href="/admin/categories">Categories</a></li>
         <li class="active">{{ $category->name }}</li>
     </ol>
-
 
     <form class="Category EditForm" action="{{ route('admin.categories.update', [$category->id]) }}" method="POST">
         {{ csrf_field() }}
@@ -26,7 +24,6 @@
         @include('admin::categories.form')
 
     </form>
-
 @endsection
 
 @section('scripts')
