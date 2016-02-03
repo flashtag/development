@@ -13,6 +13,15 @@
         <label for="media-link">Media Link</label>
         <input type="text" v-model="url" name="media-link" id="media-link" class="form-control">
     </div>
+
+    <div v-if="url.length" class="media-preview" style="margin-bottom:20px;">
+        <div v-if="showDropzone" class="image-preview">
+            <img :src="url" style="max-width:100%;">
+        </div>
+        <div v-else class="video-preview embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item" :src="url"></iframe>
+        </div>
+    </div>
 </template>
 
 <script>
