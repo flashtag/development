@@ -36,9 +36,9 @@
         </div>
         <div class="form-group">
             <label for="description">Description</label>
-                    <textarea name="description" id="description" class="form-control rich-editor">
-                        {{ $category->description or old('description') }}
-                    </textarea>
+            <textarea name="description" id="description" class="form-control rich-editor">
+                {{ $category->description or old('description') }}
+            </textarea>
         </div>
     </div>
 </div>

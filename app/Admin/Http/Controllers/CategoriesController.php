@@ -34,7 +34,7 @@ class CategoriesController extends Controller
     {
         $category = Category::create($this->buildCategoryFromRequest($request));
 
-        $this->syncTags($category, $request->get('tags'));
+//        $this->syncTags($category, $request->get('tags'));
 
         return redirect()->route('admin.categories.index');
     }
@@ -73,13 +73,6 @@ class CategoriesController extends Controller
         $data['description'] = $request->get('description');
         $data['slug'] = str_slug($request->get('name'));
         $data['parent_id'] = $request->get('parent_id');
-
-        if ($request->get('start_showing_at')) {
-            $data['start_showing_at'] = $request->get('start_showing_at');
-        }
-        if ($request->get('stop_showing_at')) {
-            $data['stop_showing_at'] = $request->get('stop_showing_at');
-        }
 
         return $data;
     }

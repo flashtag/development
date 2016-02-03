@@ -27,8 +27,8 @@ class CategoriesTest extends TestCase
         $this->actingAs(factory(User::class)->create())
             ->visit("/admin/categories/{$category->id}")
             ->seePageIs("/admin/categories/{$category->id}/edit")
-            ->see($category->title)
-            ->see($category->body);
+            ->see($category->name)
+            ->see($category->description);
     }
 
     /** @test */
@@ -64,7 +64,7 @@ class CategoriesTest extends TestCase
             ->type('A cool description...', 'description')
             ->press('Save')
             ->seePageIs('/admin/categories/create')
-            ->see('A cool description...')
+            ->see('A cool description')
             ->dontSeeInDatabase('categories', ['description' => 'A cool description...']);
     }
 

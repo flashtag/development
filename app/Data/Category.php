@@ -49,14 +49,6 @@ class Category extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function meta()
-    {
-        return $this->morphOne(MetaTag::class, 'meta_taggable');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
-     */
     public function media()
     {
         return $this->morphOne(Media::class, 'media_attachable');
