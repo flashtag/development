@@ -1,37 +1,35 @@
 @extends('admin::layout')
 
+
 @section('content')
     <ol class="breadcrumb">
         <li><a href="/admin">Home</a></li>
-        <li><a href="/admin/posts">Posts</a></li>
-        <li class="active">{{ $post->title }}</li>
+        <li><a href="/admin/categories">Categories</a></li>
+        <li class="active">{{ $category->name }}</li>
     </ol>
 
-    <form class="Post EditForm" action="{{ route('admin.posts.update', [$post->id]) }}" method="POST">
+
+    <form class="Category EditForm" action="{{ route('admin.categories.update', [$category->id]) }}" method="POST">
         {{ csrf_field() }}
         {{ method_field('PUT') }}
 
         <section class="info row">
-            <div class="col-md-6 clearfix">
-                <!--
-                <a href="/admin/posts/{{ $post->id }}/revisions" class="btn btn-link">
-                    <i class="fa fa-history"></i> Revision history
-                </a>
-                -->
-            </div>
-            <div class="col-md-6 clearfix">
+            <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
-                    <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
-                    <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
-                    <a href="/admin/posts" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                    <a href="#delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                    <a href="/admin/categories" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
                 </div>
             </div>
         </section>
 
-        @include('admin::posts.form')
+        @include('admin::categories.form')
 
     </form>
 
+    {{--
+    <category-posts v-if="showCategoryPosts" :category-id="$route.params.category_id" :posts="category.posts"></category-posts>
+    --}}
 @endsection
 
 @section('scripts')
@@ -70,12 +68,12 @@
                 showLoaderOnConfirm: true
             }, function () {
                 $.ajax({
-                    url: '/api/posts/{{ $post->id }}',
+                    url: '/api/categories/{{ $category->id }}',
                     method: 'DELETE',
                     headers: { Authorization: localStorage.getItem('jwt-token') }
                 }).done(function(){
                     self.deleted = true;
-                    window.location = '/admin/posts';
+                    window.location = '/admin/categories';
                 });
             });
         };
@@ -101,15 +99,15 @@
         var drop = {
 
             to: "",
-            path: "/img/uploads/posts/",
-            image: "{{ $post->image }}",
+            path: "/img/uploads/categories/",
+            image: "{{ $category->image }}",
 
             init: function () {
                 // Overwrite dropzone's confirm method with our own
                 Dropzone.confirm = this.confirm;
                 // Initialize dropzone with our config and add some even listeners
                 this.dropzone = new Dropzone('#dropzone-image', {
-                    url: "/api/posts/{{ $post->id }}/image",
+                    url: "/api/categories/{{ $category->id }}/image",
                     dictDefaultMessage: "Drop image file here to upload",
                     dictRemoveFileConfirmation: "Are you sure you want to delete this?",
                     paramName: "image",

@@ -6,6 +6,7 @@ export default {
     components: {
         'posts-index': require('./components/posts/index.vue'),
         'posts-edit': require('./components/posts/edit'),
+        'categories-index': require('./components/categories/index.vue'),
         'paginator': require('./components/partials/paginator.vue')
     },
 

@@ -9,7 +9,7 @@ Follow the progress or vote on features on [our trello board](https://trello.com
 
 #### dev instructions
 
- - clone all the flashtag repo
+ - clone the flashtag repo
  
  - composer install
  
@@ -21,8 +21,12 @@ Follow the progress or vote on features on [our trello board](https://trello.com
 
  - set up your `Homestead.yaml` to look similar to the example.
 
- - `vagrant up`
+ - `vagrant up && vagrant ssh`
  
+ - `cd flashtag`
+
+ - `php artisan migrate --seed`
+
  . . .
  
 test

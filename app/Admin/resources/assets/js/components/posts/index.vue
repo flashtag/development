@@ -1,6 +1,6 @@
 <template>
     <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
+        <li><a href="/admin">Home</a></li>
         <li class="active">Posts</li>
     </ol>
 

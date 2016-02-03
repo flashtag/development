@@ -16161,6 +16161,7 @@ exports['default'] = {
     components: {
         'posts-index': require('./components/posts/index.vue'),
         'posts-edit': require('./components/posts/edit'),
+        'categories-index': require('./components/categories/index.vue'),
         'paginator': require('./components/partials/paginator.vue')
     },
 
@@ -16211,7 +16212,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./components/partials/paginator.vue":36,"./components/posts/edit":37,"./components/posts/index.vue":38,"./models/user":45}],35:[function(require,module,exports){
+},{"./components/categories/index.vue":36,"./components/partials/paginator.vue":37,"./components/posts/edit":38,"./components/posts/index.vue":39,"./models/user":46}],35:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -16236,7 +16237,84 @@ _vue2['default'].directive('rich-editor', require('./directives/rich-editor'));
 
 new _vue2['default'](require('./App'));
 
-},{"./App":34,"./directives/rich-editor":39,"./directives/select":40,"./http/interceptors/jwtAuth":41,"vue":33,"vue-resource":18}],36:[function(require,module,exports){
+},{"./App":34,"./directives/rich-editor":40,"./directives/select":41,"./http/interceptors/jwtAuth":42,"vue":33,"vue-resource":18}],36:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+exports.__esModule = true;
+
+var _modelsCategory = require('../../models/category');
+
+var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
+
+exports['default'] = {
+
+    data: function data() {
+        return {
+            categories: [],
+            nameFilter: null,
+            sortKey: null,
+            sortDir: -1
+        };
+    },
+
+    created: function created() {
+        this.fetchCategories();
+    },
+
+    methods: {
+
+        fetchCategories: function fetchCategories() {
+            this.$http.get('categories?include=tags,parent&orderBy=updated_at|desc').then(function (response) {
+                this.$set('categories', response.data.data.map(function (category) {
+                    return new _modelsCategory2['default'](category);
+                }));
+            });
+        },
+
+        sortBy: function sortBy(key) {
+            if (this.sortKey == key) {
+                this.sortDir = this.sortDir * -1;
+            } else {
+                this.sortKey = key;
+                this.sortDir = 1;
+            }
+        },
+
+        orderIcon: function orderIcon(key) {
+            if (key == this.sortKey) {
+                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
+            }
+
+            return 'fa fa-unsorted';
+        }
+
+    },
+
+    route: {
+        data: function data(transition) {
+            return {
+                categories: categories['with']('tags').get()
+            };
+        }
+    }
+
+};
+module.exports = exports['default'];
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"/admin/\">Home</a></li>\n        <li class=\"active\">Categories</li>\n    </ol>\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                </div>\n                <div class=\"create-button col-md-6\">\n                    <a href=\"/admin/categories/create\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</a>\n                </div>\n            </div>\n        </div>\n\n        <table class=\"Categories table table-striped table-hover\">\n            <thead>\n                <tr>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                    <th><a>Parent</a></th>\n                    <th><a>Tags</a></th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for=\"category in categories | filterBy nameFilter | orderBy sortKey sortDir\" class=\"Category\">\n                    <td><a href=\"/admin/categories/{{ category.id }}/edit\">{{ category.name }}</a></td>\n                    <td>{{ category.parent.name }}</td>\n                    <td><span v-for=\"tag in category.tags\" class=\"tag label label-default\">{{ tag.name }}</span></td>\n                </tr>\n            </tbody>\n        </table>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories/index.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, module.exports.template)
+  }
+})()}
+},{"../../models/category":43,"babel-runtime/helpers/interop-require-default":1,"vue":33,"vue-hot-reload-api":13}],37:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -16270,7 +16348,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":33,"vue-hot-reload-api":13}],37:[function(require,module,exports){
+},{"vue":33,"vue-hot-reload-api":13}],38:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16339,7 +16417,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -16567,7 +16645,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Posts</li>\n    </ol>\n\n    <div class=\"create-button\">\n        <a href=\"/admin/posts/create\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</a>\n    </div>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n            </div>\n            <div class=\"col-md-6\">\n                <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                    <option :value=\"null\" selected=\"\">Filter by category...</option>\n                    <option v-for=\"category in categories\" :value=\"category.name\">\n                        {{ category.name }}\n                    </option>\n                </select>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Posts table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th v-if=\"categoryFilter\"><a href=\"#\" @click.prevent=\"sortBy('order')\">Order <i :class=\"orderIcon('order')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('category.name')\">Category <i :class=\"orderIcon('category.name')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                <th class=\"text-centered\"><a>Showing</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n                <td v-if=\"categoryFilter\" class=\"order\">\n                    <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n                </td>\n\n                <td>\n                    <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                    <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                </td>\n\n                <td>{{ post.category ? post.category.name : '' }}</td>\n\n                <td>{{ formatTimestamp(post.created_at) }}</td>\n\n                <td class=\"published\">\n                    <div class=\"switch\">\n                        <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish()\">\n                        <label for=\"is_published_{{post.id}}\"></label>\n                    </div>\n                </td>\n\n                <td class=\"text-centered\">\n                    <span v-if=\"post.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                    <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n                </td>\n\n            </tr>\n        </tbody>\n    </table>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"/admin\">Home</a></li>\n        <li class=\"active\">Posts</li>\n    </ol>\n\n    <div class=\"create-button\">\n        <a href=\"/admin/posts/create\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</a>\n    </div>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n            </div>\n            <div class=\"col-md-6\">\n                <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                    <option :value=\"null\" selected=\"\">Filter by category...</option>\n                    <option v-for=\"category in categories\" :value=\"category.name\">\n                        {{ category.name }}\n                    </option>\n                </select>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Posts table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th v-if=\"categoryFilter\"><a href=\"#\" @click.prevent=\"sortBy('order')\">Order <i :class=\"orderIcon('order')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('category.name')\">Category <i :class=\"orderIcon('category.name')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                <th class=\"text-centered\"><a>Showing</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n                <td v-if=\"categoryFilter\" class=\"order\">\n                    <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n                </td>\n\n                <td>\n                    <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                    <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                </td>\n\n                <td>{{ post.category ? post.category.name : '' }}</td>\n\n                <td>{{ formatTimestamp(post.created_at) }}</td>\n\n                <td class=\"published\">\n                    <div class=\"switch\">\n                        <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish()\">\n                        <label for=\"is_published_{{post.id}}\"></label>\n                    </div>\n                </td>\n\n                <td class=\"text-centered\">\n                    <span v-if=\"post.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                    <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n                </td>\n\n            </tr>\n        </tbody>\n    </table>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -16579,7 +16657,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":42,"../../models/post":44,"../../models/user":45,"babel-runtime/helpers/interop-require-default":1,"moment":2,"sweetalert":12,"vue":33,"vue-hot-reload-api":13}],39:[function(require,module,exports){
+},{"../../models/category":43,"../../models/post":45,"../../models/user":46,"babel-runtime/helpers/interop-require-default":1,"moment":2,"sweetalert":12,"vue":33,"vue-hot-reload-api":13}],40:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16615,7 +16693,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16646,7 +16724,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16678,7 +16756,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16711,7 +16789,7 @@ var Category = (function (_Model) {
             parent_id: data.parent_id > 0 ? data.parent_id : null,
             order_by: data.order_by,
             order_dir: data.order_dir,
-            parent: data.parent,
+            parent: data.parent ? data.parent.data : {},
             posts: data.posts ? data.posts.data : [],
             tags: data.tags ? data.tags.data : [],
             media: data.media ? data.media.data : {},
@@ -16726,7 +16804,7 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":43}],43:[function(require,module,exports){
+},{"./model":44}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16798,7 +16876,7 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16897,7 +16975,7 @@ var Post = (function (_Model) {
 exports['default'] = Post;
 module.exports = exports['default'];
 
-},{"./model":43,"moment":2}],45:[function(require,module,exports){
+},{"./model":44,"moment":2}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16937,6 +17015,6 @@ var User = (function (_Model) {
 exports['default'] = User;
 module.exports = exports['default'];
 
-},{"./model":43}]},{},[35]);
+},{"./model":44}]},{},[35]);
 
 //# sourceMappingURL=admin.js.map

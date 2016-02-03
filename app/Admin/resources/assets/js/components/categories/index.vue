@@ -1,11 +1,8 @@
 <template>
     <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
+        <li><a href="/admin/">Home</a></li>
         <li class="active">Categories</li>
     </ol>
-
-    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
-    <div v-if="!$loadingRouteData">
 
         <div class="filters">
             <div class="row">
@@ -13,7 +10,7 @@
                     <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
                 </div>
                 <div class="create-button col-md-6">
-                    <button v-link="'/categories/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
+                    <a href="/admin/categories/create" class="btn btn-success"><i class="fa fa-plus"></i> Add new</a>
                 </div>
             </div>
         </div>
@@ -29,22 +26,18 @@
             <tbody>
                 <tr v-for="category in categories | filterBy nameFilter | orderBy sortKey sortDir"
                     class="Category">
-                    <td><a v-link="'/categories/'+category.id">{{ category.name }}</a></td>
-                    <td>{{ category.parentName }}</td>
+                    <td><a href="/admin/categories/{{ category.id }}/edit">{{ category.name }}</a></td>
+                    <td>{{ category.parent.name }}</td>
                     <td><span v-for="tag in category.tags" class="tag label label-default">{{ tag.name }}</span></td>
                 </tr>
             </tbody>
         </table>
-
-    </div>
 </template>
 
 <script>
-    import categories from '../../repositories/categories';
+    import Category from '../../models/category';
 
     export default {
-
-        props: ['current-user'],
 
         data: function () {
             return {
@@ -55,7 +48,19 @@
             }
         },
 
+        created: function(){
+            this.fetchCategories();
+        },
+
         methods: {
+
+            fetchCategories: function () {
+                this.$http.get('categories?include=tags,parent&orderBy=updated_at|desc').then(function (response) {
+                    this.$set('categories', response.data.data.map(function (category) {
+                        return new Category(category);
+                    }));
+                });
+            },
 
             sortBy: function (key) {
                 if (this.sortKey == key) {

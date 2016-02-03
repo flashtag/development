@@ -11,9 +11,11 @@
         <a class="list-group-item" href="/admin/post-fields">
             <i class="fa fa-th-list"></i> Post fields
         </a>
+        -->
         <a class="list-group-item" href="/admin/categories">
             <i class="fa fa-columns"></i> Categories
         </a>
+        <!--
         <a class="list-group-item" href="/admin/tags">
             <i class="fa fa-tags"></i> Tags
         </a>

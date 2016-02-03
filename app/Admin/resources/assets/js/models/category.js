@@ -10,7 +10,7 @@ class Category extends Model {
             parent_id: data.parent_id > 0 ? data.parent_id : null,
             order_by: data.order_by,
             order_dir: data.order_dir,
-            parent: data.parent,
+            parent: data.parent ? data.parent.data : {},
             posts: data.posts ? data.posts.data : [],
             tags: data.tags ? data.tags.data : [],
             media: data.media ? data.media.data : {},

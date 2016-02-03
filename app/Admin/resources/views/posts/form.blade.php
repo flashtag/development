@@ -71,7 +71,7 @@
             <div class="col-md-6">
                 <div class="form-group form-tags">
                     <label for="tags">Tags</label>
-                    <select name="tags[]" id="tags" class="select" multiple class="form-control">
+                    <select name="tags[]" id="tags" multiple class="select form-control">
                         @foreach ($tags as $tag)
                             <option value="{{ $tag->id }}"
                                     {{ $post->tags && $post->tags->where('id', $tag->id)->first() ? 'selected' : '' }}>
