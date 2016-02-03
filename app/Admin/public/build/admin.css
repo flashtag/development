@@ -19970,6 +19970,10 @@ body.stop-scrolling {
   opacity: 1;
 }
 
+.dropzone .dz-preview .dz-image img {
+  max-height: 100%;
+}
+
 .dropzone .dz-preview.dz-image-preview {
   background: white;
 }
