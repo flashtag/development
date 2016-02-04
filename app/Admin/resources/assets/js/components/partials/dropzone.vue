@@ -78,12 +78,14 @@
             },
 
             showExistingImage: function () {
-                var mockFile = {name: this.image, size: 432100};
-                this.dropzone.emit("addedfile", mockFile);
-                this.dropzone.emit("thumbnail", mockFile, this.path + this.image);
-                this.dropzone.emit("complete", mockFile);
-                this.dropzone.files.push(mockFile);
-                this.dropzone.options.maxFiles = this.dropzone.options.maxFiles - 1;
+                if (this.imageUrlIsValid(this.image)) {
+                    var mockFile = {name: this.image, size: 432100};
+                    this.dropzone.emit("addedfile", mockFile);
+                    this.dropzone.emit("thumbnail", mockFile, this.path + this.image);
+                    this.dropzone.emit("complete", mockFile);
+                    this.dropzone.files.push(mockFile);
+                    this.dropzone.options.maxFiles = this.dropzone.options.maxFiles - 1;
+                }
             },
 
             confirm: function(question, accepted, rejected) {
@@ -97,6 +99,17 @@
                     closeOnConfirm: false,
                     showLoaderOnConfirm: true
                 }, accepted, rejected);
+            },
+
+            imageUrlIsValid: function() {
+                var valid = false;
+                this.$http.get('/admin/media/preview/image', { url: this.image }).then(function (response) {
+                    valid = true;
+                }, function (response) {
+                    valid = false;
+                });
+
+                return valid;
             }
 
         }

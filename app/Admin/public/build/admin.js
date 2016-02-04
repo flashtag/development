@@ -18299,12 +18299,14 @@ exports['default'] = {
         },
 
         showExistingImage: function showExistingImage() {
-            var mockFile = { name: this.image, size: 432100 };
-            this.dropzone.emit("addedfile", mockFile);
-            this.dropzone.emit("thumbnail", mockFile, this.path + this.image);
-            this.dropzone.emit("complete", mockFile);
-            this.dropzone.files.push(mockFile);
-            this.dropzone.options.maxFiles = this.dropzone.options.maxFiles - 1;
+            if (this.imageUrlIsValid(this.image)) {
+                var mockFile = { name: this.image, size: 432100 };
+                this.dropzone.emit("addedfile", mockFile);
+                this.dropzone.emit("thumbnail", mockFile, this.path + this.image);
+                this.dropzone.emit("complete", mockFile);
+                this.dropzone.files.push(mockFile);
+                this.dropzone.options.maxFiles = this.dropzone.options.maxFiles - 1;
+            }
         },
 
         confirm: function confirm(question, accepted, rejected) {
@@ -18318,6 +18320,17 @@ exports['default'] = {
                 closeOnConfirm: false,
                 showLoaderOnConfirm: true
             }, accepted, rejected);
+        },
+
+        imageUrlIsValid: function imageUrlIsValid() {
+            var valid = false;
+            this.$http.get('/admin/media/preview/image', { url: this.image }).then(function (response) {
+                valid = true;
+            }, function (response) {
+                valid = false;
+            });
+
+            return valid;
         }
 
     }
@@ -18349,27 +18362,84 @@ exports['default'] = {
 
     data: function data() {
         return {
-            mediaTypes: [{ id: 'image', text: 'Image' }, { id: 'youtube_video', text: 'Youtube' }, { id: 'vimeo_video', text: 'Vimeo' }, { id: 'wistia_video', text: 'Wistia' }],
+            mediaTypes: [{ id: 'image', text: 'Image' }, { id: 'video', text: 'Video' }],
             showMediaInput: false,
-            showDropzone: false
+            showDropzone: false,
+            preview: null
         };
     },
 
     ready: function ready() {
         this.$nextTick(function () {
-            this.checkMediaType();
+            this.changeSelect();
         });
     },
 
+    computed: {
+        imageUrl: function imageUrl() {
+            return window.location.protocol + '//' + window.location.hostname + '/img/uploads/media/' + this.url;
+        }
+    },
+
     methods: {
-        checkMediaType: function checkMediaType() {
+
+        changeSelect: function changeSelect() {
             this.showDropzone = this.type == 'image';
             this.showMediaInput = this.type && this.type.length > 0 && this.type != 'image';
+
+            this.updatePreview();
+        },
+
+        updatePreview: function updatePreview() {
+            if (this.showDropzone) {
+                this.setImagePreview();
+            } else {
+                this.setVideoPreview();
+            }
+        },
+
+        setImagePreview: function setImagePreview() {
+            this.$http.get('/admin/media/preview/image', { url: this.imageUrl }).then(function (response) {
+                document.getElementById('preview-image').src = this.imageUrl;
+                console.log(this.imageUrl);
+            }, function (response) {
+                // failed
+            });
+        },
+
+        imageUrlIsValid: function imageUrlIsValid() {
+            var valid = false;
+            this.$http.get('/admin/media/preview/image', { url: this.imageUrl }).then(function (response) {
+                valid = true;
+            }, function (response) {
+                valid = false;
+            });
+
+            return valid;
+        },
+
+        videoUrlIsValid: function videoUrlIsValid() {
+            var valid = false;
+            this.$http.get('/admin/media/preview/' + this.type, { url: this.url }).then(function (response) {
+                valid = true;
+            }, function (response) {
+                valid = false;
+            });
+
+            return valid;
+        },
+
+        setVideoPreview: function setVideoPreview() {
+            this.$http.get('/admin/media/preview/' + this.type, { url: this.url }).then(function (response) {
+                document.getElementById('preview-frame').contentDocument.write(response.data);
+            }, function (response) {
+                // failed
+            });
         }
     }
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"form-group\">\n        <label for=\"media-type\">Media type</label>\n        <select v-model=\"type\" @change=\"checkMediaType\" name=\"media-type\" id=\"media-type\" class=\"form-control\">\n            <option :value=\"null\">Select type...</option>\n            <option v-for=\"mediaType in mediaTypes\" :value=\"mediaType.id\">{{ mediaType.text }}</option>\n        </select>\n    </div>\n    <div v-if=\"showDropzone\">\n        <dropzone :path=\"imagePath\" :image=\"url\" :to=\"imageUpload\"></dropzone>\n    </div>\n    <div v-if=\"showMediaInput\" class=\"form-group\">\n        <label for=\"media-link\">Media Link</label>\n        <input type=\"text\" v-model=\"url\" name=\"media-link\" id=\"media-link\" class=\"form-control\">\n    </div>\n\n    <div v-if=\"url.length\" class=\"media-preview\" style=\"margin-bottom:20px;\">\n        <div v-if=\"showDropzone\" class=\"image-preview\">\n            <img :src=\"url\" style=\"max-width:100%;\">\n        </div>\n        <div v-else=\"\" class=\"video-preview embed-responsive embed-responsive-16by9\">\n            <iframe class=\"embed-responsive-item\" :src=\"url\"></iframe>\n        </div>\n    </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"form-group\">\n        <label for=\"media-type\">Media type</label>\n        <select v-model=\"type\" @change=\"changeSelect\" name=\"media-type\" id=\"media-type\" class=\"form-control\">\n            <option :value=\"null\">Select type...</option>\n            <option v-for=\"mediaType in mediaTypes\" :value=\"mediaType.id\">{{ mediaType.text }}</option>\n        </select>\n    </div>\n    <div v-if=\"showDropzone\">\n        <dropzone :path=\"imagePath\" :image=\"url\" :to=\"imageUpload\"></dropzone>\n    </div>\n    <div v-if=\"showMediaInput\" class=\"form-group\">\n        <label for=\"media-link\">Media Link</label>\n        <input type=\"text\" v-model=\"url\" name=\"media-link\" id=\"media-link\" class=\"form-control\" @keyup=\"updatePreview | debounce 500\">\n    </div>\n\n    <div v-if=\"url.length\" class=\"media-preview\" style=\"margin-bottom:20px;\">\n        <div v-if=\"showDropzone\" class=\"image-preview\">\n            <img id=\"preview-image\" style=\"max-width:100%;\">\n        </div>\n        <div v-else=\"\" class=\"video-preview embed-responsive embed-responsive-16by9\">\n            <iframe id=\"preview-frame\" class=\"embed-responsive-item\" frameborder=\"0\" allowfullscreen=\"\"></iframe>\n        </div>\n    </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)

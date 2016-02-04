@@ -1,7 +1,7 @@
 <template>
     <div class="form-group">
         <label for="media-type">Media type</label>
-        <select v-model="type" @change="checkMediaType" name="media-type" id="media-type" class="form-control">
+        <select v-model="type" @change="changeSelect" name="media-type" id="media-type" class="form-control">
             <option :value="null">Select type...</option>
             <option v-for="mediaType in mediaTypes" :value="mediaType.id">{{ mediaType.text }}</option>
         </select>
@@ -11,15 +11,16 @@
     </div>
     <div v-if="showMediaInput" class="form-group">
         <label for="media-link">Media Link</label>
-        <input type="text" v-model="url" name="media-link" id="media-link" class="form-control">
+        <input type="text" v-model="url" name="media-link" id="media-link" class="form-control"
+               @keyup="updatePreview | debounce 500">
     </div>
 
     <div v-if="url.length" class="media-preview" style="margin-bottom:20px;">
         <div v-if="showDropzone" class="image-preview">
-            <img :src="url" style="max-width:100%;">
+            <img id="preview-image" style="max-width:100%;">
         </div>
         <div v-else class="video-preview embed-responsive embed-responsive-16by9">
-            <iframe class="embed-responsive-item" :src="url"></iframe>
+            <iframe id="preview-frame" class="embed-responsive-item" frameborder="0" allowfullscreen></iframe>
         </div>
     </div>
 </template>
@@ -37,25 +38,83 @@
             return {
                 mediaTypes: [
                     { id: 'image', text: 'Image' },
-                    { id: 'youtube_video', text: 'Youtube' },
-                    { id: 'vimeo_video', text: 'Vimeo' },
-                    { id: 'wistia_video', text: 'Wistia' }
+                    { id: 'video', text: 'Video' }
                 ],
                 showMediaInput: false,
-                showDropzone: false
+                showDropzone: false,
+                preview: null
             }
         },
 
         ready: function () {
             this.$nextTick(function () {
-                this.checkMediaType();
+                this.changeSelect();
             });
         },
 
+        computed: {
+              imageUrl: function () {
+                  return window.location.protocol + '//'
+                      + window.location.hostname
+                      + '/img/uploads/media/'
+                      + this.url;
+              }
+        },
+
         methods: {
-            checkMediaType: function () {
+
+            changeSelect: function () {
                 this.showDropzone = (this.type == 'image');
                 this.showMediaInput = this.type && (this.type.length > 0) && (this.type != 'image');
+
+                this.updatePreview();
+            },
+
+            updatePreview: function(){
+                if (this.showDropzone) {
+                    this.setImagePreview();
+                } else {
+                    this.setVideoPreview();
+                }
+            },
+
+            setImagePreview: function () {
+                this.$http.get('/admin/media/preview/image', { url: this.imageUrl }).then(function (response) {
+                    document.getElementById('preview-image').src = this.imageUrl;
+                    console.log(this.imageUrl);
+                }, function (response) {
+                    // failed
+                });
+            },
+
+            imageUrlIsValid: function() {
+                var valid = false;
+                this.$http.get('/admin/media/preview/image', { url: this.imageUrl }).then(function (response) {
+                    valid = true;
+                }, function (response) {
+                    valid = false;
+                });
+
+                return valid;
+            },
+
+            videoUrlIsValid: function() {
+                var valid = false;
+                this.$http.get('/admin/media/preview/' + this.type, { url: this.url }).then(function (response) {
+                    valid = true;
+                }, function (response) {
+                    valid = false;
+                });
+
+                return valid;
+            },
+
+            setVideoPreview: function () {
+                this.$http.get('/admin/media/preview/' + this.type, { url: this.url }).then(function (response) {
+                    document.getElementById('preview-frame').contentDocument.write(response.data);
+                }, function (response) {
+                    // failed
+                });
             }
         }
     }

@@ -23,4 +23,5 @@ $router->group(['middleware' => 'auth'], function ($router) {
     $router->resource('tags', 'TagsController');
     $router->resource('authors', 'AuthorsController');
     $router->resource('users', 'UsersController');
+    $router->get('media/preview/{type}', 'MediaController@preview');
 });
