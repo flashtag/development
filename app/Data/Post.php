@@ -366,7 +366,7 @@ class Post extends Model implements HasPresenter
      */
     public static function getBySlug($post_slug)
     {
-        return static::with('author', 'category')
+        return static::with('fields', 'author', 'category')
             ->where('slug', $post_slug)
             ->firstOrFail();
     }

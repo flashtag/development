@@ -2,9 +2,10 @@
 
 namespace Flashtag\Data\Providers;
 
-use Flashtag\Data\Presenters\Decorators\PostFieldDecorator;
+use Flashtag\Data\Presenters\Decorators\ModelDecorator;
 use Illuminate\Support\ServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
+use McCool\LaravelAutoPresenter\Decorators\AtomDecorator;
 
 class DataServiceProvider extends ServiceProvider
 {
@@ -24,7 +25,7 @@ class DataServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerServiceProviders();
-        $this->registerPresenterDecorators();
+        $this->registerBindings();
     }
 
     /**
@@ -46,11 +47,11 @@ class DataServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register decorators for auto presenter.
+     * Register container bindings.
      */
-    private function registerPresenterDecorators()
+    private function registerBindings()
     {
-        $this->app['autopresenter']->register(new PostFieldDecorator());
+        $this->app->bind(AtomDecorator::class, ModelDecorator::class);
     }
 
     /**
