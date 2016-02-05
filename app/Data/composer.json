@@ -7,10 +7,16 @@
             "email": "fungku@gmail.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:RyansForks/laravel-auto-presenter.git"
+        }
+    ],
     "require": {
         "illuminate/database": "5.1.*",
         "venturecraft/revisionable": " 1.*",
-        "mccool/laravel-auto-presenter": "~4.1",
+        "mccool/laravel-auto-presenter": "dev-master@dev",
         "doctrine/dbal": "^2.5",
         "fzaninotto/faker": "~1.4"
     },
