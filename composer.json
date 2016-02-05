@@ -10,7 +10,7 @@
         "venturecraft/revisionable": " 1.*",
         "dingo/api": "dev-master@dev",
         "tymon/jwt-auth": "0.6.*",
-        "mccool/laravel-auto-presenter": "~4.1",
+        "mccool/laravel-auto-presenter": "~4.2",
         "filp/whoops": " ~1.0",
         "doctrine/dbal": "^2.5",
         "fzaninotto/faker": "~1.4",

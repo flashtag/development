@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1143e0a883cdac4afb32f5fbffe63de8",
-    "content-hash": "d4f3d4d9a7e5c41d2ffc4e52131190bd",
+    "hash": "bbc0fced5148ecadccdb16cd862273ba",
+    "content-hash": "a35c4a25ff35a6f666ce62fed9f71313",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1179,12 +1179,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "c44b50c6eb12e2516cbbc8cad9a90a6ff3bbec8c"
+                "reference": "1cd4a97960af90a2a0b85c22b978740a73daef10"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/c44b50c6eb12e2516cbbc8cad9a90a6ff3bbec8c",
-                "reference": "c44b50c6eb12e2516cbbc8cad9a90a6ff3bbec8c",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/1cd4a97960af90a2a0b85c22b978740a73daef10",
+                "reference": "1cd4a97960af90a2a0b85c22b978740a73daef10",
                 "shasum": ""
             },
             "require": {
@@ -1299,7 +1299,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2016-02-02 16:44:55"
+            "time": "2016-02-05 14:58:29"
         },
         {
             "name": "league/flysystem",
@@ -1453,12 +1453,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel-auto-presenter/laravel-auto-presenter.git",
-                "reference": "c385b113696dfc564869c54f5c4baba5e116a3be"
+                "reference": "c2f1dde27cde6616614e31e40a2b32c62b1fa647"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel-auto-presenter/laravel-auto-presenter/zipball/c385b113696dfc564869c54f5c4baba5e116a3be",
-                "reference": "c385b113696dfc564869c54f5c4baba5e116a3be",
+                "url": "https://api.github.com/repos/laravel-auto-presenter/laravel-auto-presenter/zipball/c2f1dde27cde6616614e31e40a2b32c62b1fa647",
+                "reference": "c2f1dde27cde6616614e31e40a2b32c62b1fa647",
                 "shasum": ""
             },
             "require": {
@@ -1507,7 +1507,7 @@
                 "lpm",
                 "presenter"
             ],
-            "time": "2016-01-30 14:04:34"
+            "time": "2016-02-05 14:08:40"
         },
         {
             "name": "monolog/monolog",
@@ -4722,12 +4722,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "ef9ec82292e23c098636cbe6ca652fd4c3db9ea8"
+                "reference": "7e7f0903e26a01647ad76e53fb5f6e294da187b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/ef9ec82292e23c098636cbe6ca652fd4c3db9ea8",
-                "reference": "ef9ec82292e23c098636cbe6ca652fd4c3db9ea8",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/7e7f0903e26a01647ad76e53fb5f6e294da187b2",
+                "reference": "7e7f0903e26a01647ad76e53fb5f6e294da187b2",
                 "shasum": ""
             },
             "require": {
@@ -4763,7 +4763,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2016-02-04 12:57:09"
+            "time": "2016-02-05 07:58:37"
         }
     ],
     "aliases": [],

@@ -5,6 +5,7 @@ namespace Flashtag\Data\Presenters\Decorators;
 use Flashtag\Data\Post;
 use Flashtag\Data\Presenters\PostPresenter;
 use McCool\LaravelAutoPresenter\Decorators\DecoratorInterface;
+use McCool\LaravelAutoPresenter\Exceptions\PresenterNotFoundException;
 
 class PostFieldDecorator implements DecoratorInterface
 {
@@ -24,6 +25,7 @@ class PostFieldDecorator implements DecoratorInterface
      *
      * @param Post|PostPresenter $subject
      * @return Post|PostPresenter
+     * @throws PresenterNotFoundException
      */
     public function decorate($subject)
     {
@@ -31,10 +33,18 @@ class PostFieldDecorator implements DecoratorInterface
             $subject = clone $subject;
         }
 
+        if ($subject instanceof PostPresenter) {
+            $subject = $subject->getWrappedObject();
+        }
+
         $subject->fields->each(function ($field) use ($subject) {
             $subject->{$field->name} = $field->pivot->value;
         });
 
-        return $subject;
+        if (! class_exists($presenterClass = $subject->getPresenterClass())) {
+            throw new PresenterNotFoundException($presenterClass);
+        }
+
+        return app($presenterClass, ['resource' => $subject]);
     }
 }
