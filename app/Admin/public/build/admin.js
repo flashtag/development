@@ -18267,7 +18267,7 @@ exports['default'] = {
                 maxFiles: 1,
                 maxFilesize: 1.5,
                 uploadMultiple: false,
-                headers: { "Authorization": _jsCookie2['default'].get('jwt-token') }
+                headers: { "Authorization": localStorage.getItem('jwt-token') }
             }).on('maxfilesreached', function () {
                 //$('#dropzone-image').removeClass('dz-clickable'); // remove cursor
                 //$('#dropzone-image')[0].removeEventListener('click', this.listeners[1].events.click);
@@ -18299,14 +18299,12 @@ exports['default'] = {
         },
 
         showExistingImage: function showExistingImage() {
-            if (this.imageUrlIsValid(this.image)) {
-                var mockFile = { name: this.image, size: 432100 };
-                this.dropzone.emit("addedfile", mockFile);
-                this.dropzone.emit("thumbnail", mockFile, this.path + this.image);
-                this.dropzone.emit("complete", mockFile);
-                this.dropzone.files.push(mockFile);
-                this.dropzone.options.maxFiles = this.dropzone.options.maxFiles - 1;
-            }
+            var mockFile = { name: this.image, size: 432100 };
+            this.dropzone.emit("addedfile", mockFile);
+            this.dropzone.emit("thumbnail", mockFile, this.path + this.image);
+            this.dropzone.emit("complete", mockFile);
+            this.dropzone.files.push(mockFile);
+            this.dropzone.options.maxFiles = this.dropzone.options.maxFiles - 1;
         },
 
         confirm: function confirm(question, accepted, rejected) {

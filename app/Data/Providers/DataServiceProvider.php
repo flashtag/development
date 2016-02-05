@@ -2,6 +2,7 @@
 
 namespace Flashtag\Data\Providers;
 
+use Flashtag\Data\Presenters\Decorators\PostFieldDecorator;
 use Illuminate\Support\ServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
 
@@ -27,6 +28,8 @@ class DataServiceProvider extends ServiceProvider
         foreach ($this->providers as $provider) {
             $this->app->register($provider);
         }
+
+        $this->app['autopresenter']->register(new PostFieldDecorator());
     }
 
     private function publishesMigrations()
