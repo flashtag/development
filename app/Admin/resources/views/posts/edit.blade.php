@@ -38,6 +38,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
         $(document).ready(function(){
+
+            // Unlock the post when user leaves
+            $(window).unload(function(){
+                unlock();
+            });
+
             // CKEditor
             $('.rich-editor').each(function(){
                 CKEDITOR.replace($(this).attr('id'));
@@ -51,14 +57,9 @@
                 e.preventDefault();
                 del();
             });
-
-            // Unlock the post when user leaves
-            $(window).unload(function(){
-                unlock();
-            });
         });
 
-        var unlock = function () {
+        function unlock(){
             $.ajax({
                 url: "/api/posts/{{ $post->id }}/unlock",
                 method: "PATCH",
@@ -66,9 +67,9 @@
                     Authorization: localStorage.getItem('jwt-token')
                 }
             });
-        };
+        }
 
-        var del = function() {
+        function del(){
             var self = this;
             swal({
                 title: 'Are you sure?',
@@ -89,9 +90,9 @@
                     window.location = '/admin/posts';
                 });
             });
-        };
+        }
 
-        var notify = function (type, message) {
+        function notify(type, message){
             if (type == 'success') {
                 var icon = "fa fa-thumbs-o-up";
             } else if (type == 'warning') {
@@ -105,6 +106,6 @@
                 delay: 3000,
                 offset: { x: 20, y: 70 }
             });
-        };
+        }
     </script>
 @endsection
