@@ -51,7 +51,22 @@
                 e.preventDefault();
                 del();
             });
+
+            // Unlock the post when user leaves
+            $(window).unload(function(){
+                unlock();
+            });
         });
+
+        var unlock = function () {
+            $.ajax({
+                url: "/api/posts/{{ $post->id }}/unlock",
+                method: "PATCH",
+                headers: {
+                    Authorization: localStorage.getItem('jwt-token')
+                }
+            });
+        };
 
         var del = function() {
             var self = this;
