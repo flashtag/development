@@ -66,14 +66,25 @@ class Category extends Model
     public function addImage($image)
     {
         $name = 'category__'.$this->slug.'.'.$image->getExtension();
-        $image->move(public_path('img/uploads/media'), $name);
+        $image->move(public_path('images/media'), $name);
 
         $this->updateMedia('image', $name);
     }
 
+    /**
+     * Remove an image and delete it.
+     */
     public function removeImage()
     {
-        // TODO
+        if ($this->media && $this->media->type == 'image') {
+            $img = '/public/images/media/' . $this->media->url;
+
+            if (\Storage::exists($img)) {
+                \Storage::delete($img);
+            }
+        }
+
+        $this->updateMedia();
     }
 
     /**

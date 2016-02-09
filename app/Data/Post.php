@@ -310,7 +310,7 @@ class Post extends Model implements HasPresenter
     public function addImage($image)
     {
         $name = 'post__'.$this->slug.'.'.$this->imageExtension($image);
-        $image->move(public_path('img/uploads/posts'), $name);
+        $image->move(public_path('images/media'), $name);
         $this->image = $name;
 
         $this->save();
@@ -328,11 +328,11 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * Remove an image and delete it.
+     * Remove an image from a post and delete it.
      */
     public function removeImage()
     {
-        $img = '/public/img/uploads/posts/'.$this->image;
+        $img = '/public/images/media/'.$this->image;
 
         if (\Storage::exists($img)) {
             \Storage::delete($img);
