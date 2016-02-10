@@ -63,5 +63,10 @@ class DataServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../database/migrations/' => database_path('migrations')
         ], 'migrations');
+
+        // Model Factories
+        $this->publishes([
+            __DIR__.'/../database/factories/' => database_path('factories')
+        ], 'factories');
     }
 }
