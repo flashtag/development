@@ -15,7 +15,7 @@ export default {
             localStorage.removeItem('jwt-token');
         }
         if (response.headers('authorization')) {
-            localStorage.setItem('jwt-token', response.headers('authorization'))
+            localStorage.setItem('jwt-token', response.headers('authorization'));
         }
 
         return response;

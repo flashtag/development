@@ -18131,6 +18131,7 @@ _vue2['default'].config.debug = true;
 _vue2['default'].use(require('vue-resource'));
 _vue2['default'].http.interceptors.push(require('./http/interceptors/jwtAuth'));
 _vue2['default'].http.options.root = '/api';
+
 window.client = _vue2['default'].http;
 window.resource = _vue2['default'].resource;
 
