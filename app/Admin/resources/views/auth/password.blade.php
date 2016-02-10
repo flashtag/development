@@ -25,6 +25,11 @@
 @section('content')
     <section class="container" style="margin-top: 100px;">
         <div class="col-md-6 col-md-offset-3">
+            @if (session()->has('status'))
+                <ul class="alert alert-info list-unstyled">
+                    <li>{{ session('status') }}</li>
+                </ul>
+            @endif
             @if (count($errors) > 0)
                 <ul class="alert alert-danger list-unstyled">
                     @foreach ($errors->all() as $error)
