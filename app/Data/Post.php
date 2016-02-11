@@ -371,6 +371,31 @@ class Post extends Model implements HasPresenter
             ->firstOrFail();
     }
 
+    public static function search($query, $columns = [])
+    {
+        if (empty($columns)) {
+            $columns = ['title', 'subtitle', 'body'];
+        }
+
+        // Check if query is surrounded by double or single quotes
+        if (preg_match('/^(["\']).*\1$/m', $query) !== false) {
+            // Replace quotes with whitespace
+            $query = str_replace('"', " ", $query);
+            $query = str_replace("'", " ", $query);
+        } else {
+            // Insert wildcard between words
+            $query = str_replace(' ', '%', $query);
+        }
+
+        $query = '%'.e($query).'%';
+
+        return static::with('category', 'tags')
+            ->where('title', 'LIKE', $query)
+            ->orWhere('subtitle', 'LIKE', $query)
+            ->orWhere('body', 'LIKE', $query)
+            ->get(['title', 'subtitle', 'body', 'category_id']);
+    }
+
     /**
      * Whether or not the post is showing.
      *
