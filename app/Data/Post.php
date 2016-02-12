@@ -371,29 +371,25 @@ class Post extends Model implements HasPresenter
             ->firstOrFail();
     }
 
-    public static function search($query, $columns = [])
+    public static function search($search, $columns = [])
     {
         if (empty($columns)) {
             $columns = ['title', 'subtitle', 'body'];
         }
 
         // Check if query is surrounded by double or single quotes
-        if (preg_match('/^(["\']).*\1$/m', $query) !== false) {
-            // Replace quotes with whitespace
-            $query = str_replace('"', " ", $query);
-            $query = str_replace("'", " ", $query);
+        if (preg_match('/^(["\']).*\1$/m', $search) !== false) {
+            $search = str_replace('"', " ", $search);
+            $search = str_replace("'", " ", $search);
         } else {
-            // Insert wildcard between words
-            $query = str_replace(' ', '%', $query);
+            $search = str_replace(' ', '%', $search);
         }
 
-        $query = '%'.e($query).'%';
-
-        return static::with('category', 'tags')
-            ->where('title', 'LIKE', $query)
-            ->orWhere('subtitle', 'LIKE', $query)
-            ->orWhere('body', 'LIKE', $query)
-            ->get(['title', 'subtitle', 'body', 'category_id']);
+        return static::where(function ($query) use ($columns, $search) {
+            foreach ($columns as $column) {
+                $query->orWhere($column, 'LIKE', "%{$search}%"); 
+            }
+        })->get();
     }
 
     /**
