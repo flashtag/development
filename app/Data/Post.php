@@ -371,27 +371,6 @@ class Post extends Model implements HasPresenter
             ->firstOrFail();
     }
 
-    public static function search($search, $columns = [])
-    {
-        if (empty($columns)) {
-            $columns = ['title', 'subtitle', 'body'];
-        }
-
-        // Check if query is surrounded by double or single quotes
-        if (preg_match('/^(["\']).*\1$/m', $search) !== false) {
-            $search = str_replace('"', " ", $search);
-            $search = str_replace("'", " ", $search);
-        } else {
-            $search = str_replace(' ', '%', $search);
-        }
-
-        return static::where(function ($query) use ($columns, $search) {
-            foreach ($columns as $column) {
-                $query->orWhere($column, 'LIKE', "%{$search}%"); 
-            }
-        })->get();
-    }
-
     /**
      * Whether or not the post is showing.
      *
@@ -427,4 +406,34 @@ class Post extends Model implements HasPresenter
                     ->orWhere('stop_showing_at', null);
             });
     }
+
+    /**
+     * Scope a query to perform a very basic search of posts.
+     *
+     * @param \Iluminate\Database\Eloquent\Builder $query
+     * @param string $search
+     * @param array $columns
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearch($query, $search, $columns = [])
+    {
+        if (empty($columns)) {
+            $columns = ['title', 'subtitle', 'body'];
+        }
+
+        // Check if query is surrounded by double or single quotes
+        if (preg_match('/^(["\']).*\1$/m', $search) !== false) {
+            $search = str_replace('"', " ", $search);
+            $search = str_replace("'", " ", $search);
+        } else {
+            $search = str_replace(' ', '%', $search);
+        }
+
+        return $query->where(function ($query) use ($columns, $search) {
+            foreach ($columns as $column) {
+                $query->orWhere($column, 'LIKE', "%{$search}%"); 
+            }
+        });
+    }
 }
+
