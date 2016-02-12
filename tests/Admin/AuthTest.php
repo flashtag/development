@@ -40,4 +40,14 @@ class AuthTest extends TestCase
             ->click('Logout')
             ->seePageIs('/admin/auth/login');
     }
+
+    public function sends_password_reset()
+    {
+        // TODO
+    }
+
+    public function resets_password()
+    {
+        // TODO
+    }
 }

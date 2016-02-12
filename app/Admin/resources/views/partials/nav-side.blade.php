@@ -35,6 +35,6 @@
 </div>
 
 <div class="flashtag">
-    <!-- You don't have to leave this but it would be nice if you did -->
+    <!-- You don't have to leave this, but it would be nice if you did -->
     <div class="flashtag__link"><a href="http://flashtag.org" title="&copy; Ryan Winchester">FLASHTAG</a></div>
 </div>
