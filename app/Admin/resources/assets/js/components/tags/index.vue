@@ -10,7 +10,7 @@
                 <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
             </div>
             <div class="create-button col-md-6">
-                <button v-link="'/tags/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
+                <a href="/admin/tags/create" class="btn btn-success"><i class="fa fa-plus"></i> Add new</a>
             </div>
         </div>
     </div>
@@ -24,17 +24,15 @@
         <tbody>
             <tr v-for="tag in tags | filterBy nameFilter | orderBy sortKey sortDir"
                 class="Tag">
-                <td><a v-link="'/tags/'+tag.id">{{ tag.name }}</a></td>
+                <td><a href="/admin/tags/{{ tag.id }}">{{ tag.name }}</a></td>
             </tr>
         </tbody>
     </table>
 
-    <paginator :pagination="pagination"></paginator>
-
 </template>
 
 <script>
-    import tags from '../../repositories/tags';
+    import Tag from '../../models/tag';
 
     export default {
 
@@ -43,14 +41,25 @@
         data: function () {
             return {
                 tags: [],
-                pagination: { links: {} },
                 nameFilter: null,
                 sortKey: null,
                 sortDir: -1
             }
         },
 
+        created: function () {
+            this.fetch();
+        },
+
         methods: {
+
+            fetch: function () {
+                this.$http.get('tags?orderBy=updated_at|desc').then(function (response) {
+                    this.$set('tags', response.data.data.map(function (tag) {
+                        return new Tag(tag);
+                    }));
+                });
+            },
 
             sortBy: function (key) {
                 if (this.sortKey == key) {
@@ -69,14 +78,6 @@
                 return 'fa fa-unsorted';
             }
 
-        },
-
-        route: {
-            data: function (transition) {
-                return {
-                    tags: tags.get()
-                };
-            }
         }
 
     }

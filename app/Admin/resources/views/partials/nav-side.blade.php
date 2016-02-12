@@ -15,11 +15,9 @@
         <a class="list-group-item" href="/admin/categories">
             <i class="fa fa-columns"></i> Categories
         </a>
-        <!-- TODO: Tags
         <a class="list-group-item" href="/admin/tags">
             <i class="fa fa-tags"></i> Tags
         </a>
-        -->
         <a class="list-group-item" href="/admin/authors">
             <i class="fa fa-pencil-square-o"></i> Authors
         </a>

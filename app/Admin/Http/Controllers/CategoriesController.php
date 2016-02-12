@@ -49,6 +49,7 @@ class CategoriesController extends Controller
         $category = Category::create($this->buildCategoryFromRequest($request));
 
         $this->syncTagsFromRequest($category, $request);
+        $this->syncMediaFromRequest($category, $request);
 
         return redirect()->route('admin.categories.index');
     }
