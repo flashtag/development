@@ -24,6 +24,7 @@ class DataServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->registerBindings();
         $this->registerServiceProviders();
         $this->registerBindings();
     }

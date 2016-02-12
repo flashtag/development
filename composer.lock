@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "bbc0fced5148ecadccdb16cd862273ba",
-    "content-hash": "a35c4a25ff35a6f666ce62fed9f71313",
+    "hash": "8008ca67c848bd94a2c0c73daec4653a",
+    "content-hash": "dfd27bc5e32ffc6e49ee9aea33c3dfc2",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -123,12 +123,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/dingo/api.git",
-                "reference": "b36db17c7294e44e6ce7039952ca8f8d57caab37"
+                "reference": "fb22a2489d380d153c8d67056ce0461129a72dcb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dingo/api/zipball/b36db17c7294e44e6ce7039952ca8f8d57caab37",
-                "reference": "b36db17c7294e44e6ce7039952ca8f8d57caab37",
+                "url": "https://api.github.com/repos/dingo/api/zipball/fb22a2489d380d153c8d67056ce0461129a72dcb",
+                "reference": "fb22a2489d380d153c8d67056ce0461129a72dcb",
                 "shasum": ""
             },
             "require": {
@@ -191,7 +191,7 @@
                 "laravel",
                 "restful"
             ],
-            "time": "2015-12-23 08:26:24"
+            "time": "2016-02-08 01:26:45"
         },
         {
             "name": "dingo/blueprint",
@@ -813,12 +813,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fzaninotto/Faker.git",
-                "reference": "8d8e0e1a6151a46ea5cda344e2234b7225c61e7a"
+                "reference": "772feacf6849bf0114873e2b869bb500fccfd438"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/8d8e0e1a6151a46ea5cda344e2234b7225c61e7a",
-                "reference": "8d8e0e1a6151a46ea5cda344e2234b7225c61e7a",
+                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/772feacf6849bf0114873e2b869bb500fccfd438",
+                "reference": "772feacf6849bf0114873e2b869bb500fccfd438",
                 "shasum": ""
             },
             "require": {
@@ -855,7 +855,7 @@
                 "faker",
                 "fixtures"
             ],
-            "time": "2016-02-04 15:55:27"
+            "time": "2016-02-11 12:29:31"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -925,12 +925,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "581943b46d0736605e4ef4676e9a820bbfff7388"
+                "reference": "b59321a17f3e3ebc14f2bbbf73b4d065a88cf3f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/581943b46d0736605e4ef4676e9a820bbfff7388",
-                "reference": "581943b46d0736605e4ef4676e9a820bbfff7388",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/b59321a17f3e3ebc14f2bbbf73b4d065a88cf3f6",
+                "reference": "b59321a17f3e3ebc14f2bbbf73b4d065a88cf3f6",
                 "shasum": ""
             },
             "require": {
@@ -968,7 +968,7 @@
             "keywords": [
                 "promise"
             ],
-            "time": "2016-01-30 02:04:34"
+            "time": "2016-02-10 14:20:03"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -1179,12 +1179,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "1cd4a97960af90a2a0b85c22b978740a73daef10"
+                "reference": "5f7b677c63297c7debcbf2c9658f7af7a3e53c04"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/1cd4a97960af90a2a0b85c22b978740a73daef10",
-                "reference": "1cd4a97960af90a2a0b85c22b978740a73daef10",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/5f7b677c63297c7debcbf2c9658f7af7a3e53c04",
+                "reference": "5f7b677c63297c7debcbf2c9658f7af7a3e53c04",
                 "shasum": ""
             },
             "require": {
@@ -1299,7 +1299,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2016-02-05 14:58:29"
+            "time": "2016-02-09 23:34:11"
         },
         {
             "name": "league/flysystem",
@@ -1446,68 +1446,6 @@
                 "rest"
             ],
             "time": "2016-01-26 23:37:34"
-        },
-        {
-            "name": "mccool/laravel-auto-presenter",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel-auto-presenter/laravel-auto-presenter.git",
-                "reference": "c2f1dde27cde6616614e31e40a2b32c62b1fa647"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel-auto-presenter/laravel-auto-presenter/zipball/c2f1dde27cde6616614e31e40a2b32c62b1fa647",
-                "reference": "c2f1dde27cde6616614e31e40a2b32c62b1fa647",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/container": "5.1.*|5.2.*",
-                "illuminate/contracts": "5.1.*|5.2.*",
-                "illuminate/events": "5.1.*|5.2.*",
-                "illuminate/pagination": "5.1.*|5.2.*",
-                "illuminate/support": "5.1.*|5.2.*",
-                "illuminate/view": "5.1.*|5.2.*",
-                "php": ">=5.5.9"
-            },
-            "require-dev": {
-                "graham-campbell/testbench": "^3.1",
-                "mockery/mockery": "^0.9.4",
-                "phpunit/phpunit": "^4.8|^5.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "4.2-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "McCool\\LaravelAutoPresenter\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Shawn McCool",
-                    "email": "shawn@heybigname.com"
-                },
-                {
-                    "name": "Graham Campbell",
-                    "email": "graham@alt-three.com"
-                }
-            ],
-            "description": "A system for auto-decorating models with presenter objects.",
-            "keywords": [
-                "eloquent",
-                "laravel",
-                "lpm",
-                "presenter"
-            ],
-            "time": "2016-02-05 14:08:40"
         },
         {
             "name": "monolog/monolog",
@@ -1744,12 +1682,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "e05ef2374367ae8d96101cd6f353b2f0362ad80f"
+                "reference": "d6361136e121c8b2bd64dd3437db127b7ae0c353"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/e05ef2374367ae8d96101cd6f353b2f0362ad80f",
-                "reference": "e05ef2374367ae8d96101cd6f353b2f0362ad80f",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/d6361136e121c8b2bd64dd3437db127b7ae0c353",
+                "reference": "d6361136e121c8b2bd64dd3437db127b7ae0c353",
                 "shasum": ""
             },
             "require": {
@@ -1787,20 +1725,20 @@
                 "parser",
                 "php"
             ],
-            "time": "2016-01-28 16:03:02"
+            "time": "2016-02-09 12:30:39"
         },
         {
             "name": "paragonie/random_compat",
-            "version": "1.1.6",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/random_compat.git",
-                "reference": "e6f80ab77885151908d0ec743689ca700886e8b0"
+                "reference": "b0e69d10852716b2ccbdff69c75c477637220790"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/e6f80ab77885151908d0ec743689ca700886e8b0",
-                "reference": "e6f80ab77885151908d0ec743689ca700886e8b0",
+                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/b0e69d10852716b2ccbdff69c75c477637220790",
+                "reference": "b0e69d10852716b2ccbdff69c75c477637220790",
                 "shasum": ""
             },
             "require": {
@@ -1835,7 +1773,7 @@
                 "pseudorandom",
                 "random"
             ],
-            "time": "2016-01-29 16:19:52"
+            "time": "2016-02-06 03:52:05"
         },
         {
             "name": "phpdocumentor/reflection-docblock",
@@ -1892,12 +1830,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "bdc28b94535d24207089c0016ca9083be8bbbb4c"
+                "reference": "88a04862aeeedcd8dd593cea7e284e882f358092"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/bdc28b94535d24207089c0016ca9083be8bbbb4c",
-                "reference": "bdc28b94535d24207089c0016ca9083be8bbbb4c",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/88a04862aeeedcd8dd593cea7e284e882f358092",
+                "reference": "88a04862aeeedcd8dd593cea7e284e882f358092",
                 "shasum": ""
             },
             "require": {
@@ -1973,7 +1911,7 @@
                 "x.509",
                 "x509"
             ],
-            "time": "2016-01-21 18:41:41"
+            "time": "2016-01-27 11:13:47"
         },
         {
             "name": "psr/http-message",
@@ -2133,6 +2071,71 @@
                 "shell"
             ],
             "time": "2015-11-12 16:18:56"
+        },
+        {
+            "name": "ryanwinchester/laravel-auto-presenter",
+            "version": "4.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ryanwinchester/laravel-auto-presenter.git",
+                "reference": "542251eb4b7b8d9608dcfc359553efcb6b8a6421"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ryanwinchester/laravel-auto-presenter/zipball/542251eb4b7b8d9608dcfc359553efcb6b8a6421",
+                "reference": "542251eb4b7b8d9608dcfc359553efcb6b8a6421",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/container": "5.1.*|5.2.*",
+                "illuminate/contracts": "5.1.*|5.2.*",
+                "illuminate/events": "5.1.*|5.2.*",
+                "illuminate/pagination": "5.1.*|5.2.*",
+                "illuminate/support": "5.1.*|5.2.*",
+                "illuminate/view": "5.1.*|5.2.*",
+                "php": ">=5.5.9"
+            },
+            "require-dev": {
+                "graham-campbell/testbench": "^3.1",
+                "mockery/mockery": "^0.9.4",
+                "phpunit/phpunit": "^4.8|^5.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "McCool\\LaravelAutoPresenter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ryan Winchester",
+                    "email": "fungku@gmail.com"
+                },
+                {
+                    "name": "Shawn McCool",
+                    "email": "shawn@heybigname.com"
+                },
+                {
+                    "name": "Graham Campbell",
+                    "email": "graham@alt-three.com"
+                }
+            ],
+            "description": "A system for auto-decorating models with presenter objects.",
+            "keywords": [
+                "eloquent",
+                "laravel",
+                "presenter"
+            ],
+            "time": "2016-02-12 05:36:41"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -3016,12 +3019,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tymondesigns/jwt-auth.git",
-                "reference": "1cd664d0ea389707af1d6c548d69e7aef501dd85"
+                "reference": "9791cbda2f8243fbbbf34729ab43c56a0a193513"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/1cd664d0ea389707af1d6c548d69e7aef501dd85",
-                "reference": "1cd664d0ea389707af1d6c548d69e7aef501dd85",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/9791cbda2f8243fbbbf34729ab43c56a0a193513",
+                "reference": "9791cbda2f8243fbbbf34729ab43c56a0a193513",
                 "shasum": ""
             },
             "require": {
@@ -3073,20 +3076,20 @@
                 "jwt",
                 "laravel"
             ],
-            "time": "2016-02-04 22:09:22"
+            "time": "2016-02-06 23:06:55"
         },
         {
             "name": "venturecraft/revisionable",
-            "version": "1.26.0",
+            "version": "1.27.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/VentureCraft/revisionable.git",
-                "reference": "7a3d5304de6c10d43cfb0d9ebe0bbdbb6e5b82ee"
+                "reference": "dcf9f15f9eacee0d6df730b2155f78e859d19335"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/VentureCraft/revisionable/zipball/7a3d5304de6c10d43cfb0d9ebe0bbdbb6e5b82ee",
-                "reference": "7a3d5304de6c10d43cfb0d9ebe0bbdbb6e5b82ee",
+                "url": "https://api.github.com/repos/VentureCraft/revisionable/zipball/dcf9f15f9eacee0d6df730b2155f78e859d19335",
+                "reference": "dcf9f15f9eacee0d6df730b2155f78e859d19335",
                 "shasum": ""
             },
             "require": {
@@ -3121,7 +3124,7 @@
                 "model",
                 "revision"
             ],
-            "time": "2016-01-13 12:14:05"
+            "time": "2016-02-09 00:15:03"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -4006,12 +4009,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "1ae3a683f38fe24d4b69ef35da82bd211e1894fb"
+                "reference": "6e351261f9cd33daf205a131a1ba61c6d33bd483"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/1ae3a683f38fe24d4b69ef35da82bd211e1894fb",
-                "reference": "1ae3a683f38fe24d4b69ef35da82bd211e1894fb",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/6e351261f9cd33daf205a131a1ba61c6d33bd483",
+                "reference": "6e351261f9cd33daf205a131a1ba61c6d33bd483",
                 "shasum": ""
             },
             "require": {
@@ -4070,7 +4073,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2016-02-03 15:13:49"
+            "time": "2016-02-11 14:56:33"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -4722,12 +4725,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "7e7f0903e26a01647ad76e53fb5f6e294da187b2"
+                "reference": "05a12065aa18e049f3cf91b0038374e4b1dbcb41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/7e7f0903e26a01647ad76e53fb5f6e294da187b2",
-                "reference": "7e7f0903e26a01647ad76e53fb5f6e294da187b2",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/05a12065aa18e049f3cf91b0038374e4b1dbcb41",
+                "reference": "05a12065aa18e049f3cf91b0038374e4b1dbcb41",
                 "shasum": ""
             },
             "require": {
@@ -4763,7 +4766,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2016-02-05 07:58:37"
+            "time": "2016-02-09 20:02:42"
         }
     ],
     "aliases": [],
