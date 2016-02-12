@@ -310,7 +310,7 @@ class Post extends Model implements HasPresenter
     public function addImage($image)
     {
         $name = 'post__'.$this->slug.'.'.$this->imageExtension($image);
-        $image->move(public_path('img/uploads/posts'), $name);
+        $image->move(public_path('images/media'), $name);
         $this->image = $name;
 
         $this->save();
@@ -328,11 +328,11 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * Remove an image and delete it.
+     * Remove an image from a post and delete it.
      */
     public function removeImage()
     {
-        $img = '/public/img/uploads/posts/'.$this->image;
+        $img = '/public/images/media/'.$this->image;
 
         if (\Storage::exists($img)) {
             \Storage::delete($img);
@@ -406,4 +406,34 @@ class Post extends Model implements HasPresenter
                     ->orWhere('stop_showing_at', null);
             });
     }
+
+    /**
+     * Scope a query to perform a very basic search of posts.
+     *
+     * @param \Iluminate\Database\Eloquent\Builder $query
+     * @param string $search
+     * @param array $columns
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearch($query, $search, $columns = [])
+    {
+        if (empty($columns)) {
+            $columns = ['title', 'subtitle', 'body'];
+        }
+
+        // Check if query is surrounded by double or single quotes
+        if (preg_match('/^(["\']).*\1$/m', $search) !== false) {
+            $search = str_replace('"', " ", $search);
+            $search = str_replace("'", " ", $search);
+        } else {
+            $search = str_replace(' ', '%', $search);
+        }
+
+        return $query->where(function ($query) use ($columns, $search) {
+            foreach ($columns as $column) {
+                $query->orWhere($column, 'LIKE', "%{$search}%"); 
+            }
+        });
+    }
 }
+

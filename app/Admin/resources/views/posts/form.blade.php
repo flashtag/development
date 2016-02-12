@@ -127,14 +127,10 @@
 <div class="panel panel-default">
     <div class="panel-heading">Image</div>
     <div class="panel-body">
-        <div class="form-group">
-            <label>Image</label>
-            <div id="dropzone-image" class="dropzone">
-                <div class="fallback">
-                    <input name="image" type="file" />
-                </div>
-            </div>
-        </div>
+        <dropzone path="/images/media/"
+                  image="{{ $post->image }}"
+                  to="/api/posts/{{ $post->id }}/image">
+        </dropzone>
     </div>
 </div>
 

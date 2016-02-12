@@ -18064,6 +18064,7 @@ exports['default'] = {
         'posts-edit': require('./components/posts/edit'),
         'categories-index': require('./components/categories/index.vue'),
         'media-input': require('./components/partials/media-input.vue'),
+        'dropzone': require('./components/partials/dropzone.vue'),
         'paginator': require('./components/partials/paginator.vue')
     },
 
@@ -18114,7 +18115,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./components/categories/index.vue":38,"./components/partials/media-input.vue":40,"./components/partials/paginator.vue":41,"./components/posts/edit":42,"./components/posts/index.vue":43,"./models/user":50}],37:[function(require,module,exports){
+},{"./components/categories/index.vue":38,"./components/partials/dropzone.vue":39,"./components/partials/media-input.vue":40,"./components/partials/paginator.vue":41,"./components/posts/edit":42,"./components/posts/index.vue":43,"./models/user":50}],37:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -18130,6 +18131,7 @@ _vue2['default'].config.debug = true;
 _vue2['default'].use(require('vue-resource'));
 _vue2['default'].http.interceptors.push(require('./http/interceptors/jwtAuth'));
 _vue2['default'].http.options.root = '/api';
+
 window.client = _vue2['default'].http;
 window.resource = _vue2['default'].resource;
 
@@ -18354,9 +18356,9 @@ exports['default'] = {
 
     props: ['type', 'url', 'image-path', 'image-upload'],
 
-    components: {
-        dropzone: require('./dropzone.vue')
-    },
+    //        components: {
+    //            dropzone: require('./dropzone.vue')
+    //        },
 
     data: function data() {
         return {
@@ -18449,7 +18451,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"./dropzone.vue":39,"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
+},{"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;

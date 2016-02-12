@@ -24,8 +24,6 @@ class ApiServiceProvider extends ServiceProvider
         $this->app->register(JWTAuthServiceProvider::class);
 
         $this->configOverrides();
-
-//        $this->bindTransformer();
     }
 
     /**
@@ -38,32 +36,28 @@ class ApiServiceProvider extends ServiceProvider
     }
 
     /**
-     * Set up the transformer.
-     */
-    private function bindTransformer()
-    {
-        $this->app->bind('League\Fractal\Manager', function($app) {
-            $fractal = new \League\Fractal\Manager;
-            $fractal->setSerializer(new \League\Fractal\Serializer\ArraySerializer());
-
-            return $fractal;
-        });
-
-        $this->app->bind('Dingo\Api\Transformer\Adapter\Fractal', function($app) {
-            $fractal = $app->make('\League\Fractal\Manager');
-
-            return new \Dingo\Api\Transformer\Adapter\Fractal($fractal);
-        });
-    }
-
-    /**
      * Register routes and stuff.
+     *
+     * @param \Illuminate\Routing\Router $router
      */
-    public function boot()
+    public function boot(\Illuminate\Routing\Router $router)
     {
+        $this->addMiddlewares($router);
+
         if (! $this->app->routesAreCached()) {
             $this->apiRoutes();
         }
+    }
+
+    /**
+     * Add middleware.
+     *
+     * @param \Illuminate\Routing\Router $router
+     */
+    private function addMiddlewares($router)
+    {
+        $router->middleware('jwt.auth', \Tymon\JWTAuth\Middleware\GetUserFromToken::class);
+        $router->middleware('jwt.refresh', \Tymon\JWTAuth\Middleware\RefreshToken::class);
     }
 
     /**
