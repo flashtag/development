@@ -10,7 +10,7 @@
                 <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
             </div>
             <div class="create-button col-md-6">
-                <button v-link="'/authors/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
+                <a href="/admin/authors/create" class="btn btn-success"><i class="fa fa-plus"></i> Add new</a>
             </div>
         </div>
     </div>
@@ -24,16 +24,16 @@
         <tbody>
             <tr v-for="author in authors | filterBy nameFilter | orderBy sortKey sortDir"
                 class="Author">
-                <td><a v-link="'/authors/'+author.id">{{ author.name }}</a></td>
+                <td><a href="/admin/authors/{{ author.id }}">{{ author.name }}</a></td>
             </tr>
         </tbody>
     </table>
 
-    <paginator :pagination="pagination"></paginator>
-
 </template>
 
 <script>
+    import Author from '../../models/author';
+
     export default {
 
         props: ['current-user'],
@@ -41,27 +41,23 @@
         data: function () {
             return {
                 authors: [],
-                pagination: { links: {} },
                 nameFilter: null,
                 sortKey: null,
                 sortDir: -1
             }
         },
 
+        created: function () {
+            this.fetch();
+        },
+
         methods: {
 
-            fetch: function (successHandler) {
-                var self = this;
-                client({
-                    path: '/authors'
-                }).then(function (response) {
-                    self.authors = response.entity.data;
-                    self.pagination = response.entity.meta.pagination;
-                    successHandler(response.entity.data);
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+            fetch: function () {
+                this.$http.get('authors?orderBy=updated_at|desc').then(function (response) {
+                    this.$set('authors', response.data.data.map(function (author) {
+                        return new Author(author);
+                    }));
                 });
             },
 
@@ -82,14 +78,6 @@
                 return 'fa fa-unsorted';
             }
 
-        },
-
-        route: {
-            data: function (transition) {
-                this.fetch(function (data) {
-                    transition.next({authors: data})
-                });
-            }
         }
 
     }

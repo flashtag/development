@@ -7,6 +7,7 @@ export default {
         'posts-index': require('./components/posts/index.vue'),
         'posts-edit': require('./components/posts/edit'),
         'categories-index': require('./components/categories/index.vue'),
+        'authors-index': require('./components/authors/index.vue'),
         'media-input': require('./components/partials/media-input.vue'),
         'dropzone': require('./components/partials/dropzone.vue'),
         'paginator': require('./components/partials/paginator.vue')
