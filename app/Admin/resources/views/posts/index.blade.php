@@ -1,5 +1,5 @@
 @extends('admin::layout')
 
 @section('content')
-    <posts-index></posts-index>
+    <posts></posts>
 @endsection

@@ -32,7 +32,7 @@
 </template>
 
 <script>
-    import Author from '../../models/author';
+    import Author from '../models/author';
 
     export default {
 

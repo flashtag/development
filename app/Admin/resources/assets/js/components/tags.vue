@@ -32,7 +32,7 @@
 </template>
 
 <script>
-    import Tag from '../../models/tag';
+    import Tag from '../models/tag';
 
     export default {
 

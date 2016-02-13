@@ -4,14 +4,13 @@ export default {
     el: '#Admin',
 
     components: {
-        'posts-index': require('./components/posts/index.vue'),
-        'posts-edit': require('./components/posts/edit'),
-        'categories-index': require('./components/categories/index.vue'),
-        'tags-index': require('./components/tags/index.vue'),
-        'authors-index': require('./components/authors/index.vue'),
+        'posts': require('./components/posts/index.vue'),
+        'fields': require('./components/fields/index.vue'),
+        'categories': require('./components/categories.vue'),
+        'tags': require('./components/tags.vue'),
+        'authors': require('./components/authors.vue'),
         'media-input': require('./components/partials/media-input.vue'),
-        'dropzone': require('./components/partials/dropzone.vue'),
-        'paginator': require('./components/partials/paginator.vue')
+        'dropzone': require('./components/partials/dropzone.vue')
     },
 
     ready: function() {
