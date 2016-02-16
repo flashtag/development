@@ -50,7 +50,7 @@
             }
         },
 
-        ready: function () {
+        created: function () {
             this.fetch();
         },
 
