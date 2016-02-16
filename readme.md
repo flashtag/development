@@ -31,6 +31,10 @@ Look at our [existing issues](https://github.com/flashtag/flashtag/issues), and 
  - `cd flashtag`
 
  - `php artisan migrate --seed`
+ 
+#### Running tests:
+
+ - `vendor/bin/phpunit`
 
 #### Admin login:
  
