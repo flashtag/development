@@ -1,13 +1,16 @@
-## Flashtag
- [![Build Status](https://travis-ci.org/flashtag/flashtag.svg?branch=master)](https://travis-ci.org/flashtag/flashtag)
+## Flashtag - Development repository
+
  [![Code Climate](https://codeclimate.com/github/flashtag/flashtag/badges/gpa.svg)](https://codeclimate.com/github/flashtag/flashtag)
  [![Test Coverage](https://codeclimate.com/github/flashtag/flashtag/badges/coverage.svg)](https://codeclimate.com/github/flashtag/flashtag/coverage)
+ [![Build Status](https://travis-ci.org/flashtag/flashtag.svg?branch=master)](https://travis-ci.org/flashtag/flashtag)
 
-### Development
+### Progress 
 
 Follow the progress or vote on features on [our trello board](https://trello.com/b/KWzDShYs/flashtag).
 
-#### Install:
+Look at our [existing issues](https://github.com/flashtag/flashtag/issues), and feel free to contribute!
+
+#### Development Install:
 
  - `git clone git@github.com:flashtag/flashtag.git` then go to that directory
  
@@ -17,7 +20,7 @@ Follow the progress or vote on features on [our trello board](https://trello.com
  
  - `php artisan key:generate`
  
-#### Set up VM and seed the database:
+#### Development VM and database seeding:
 
  - `vendor/bin/homestead make`
 
@@ -32,4 +35,4 @@ Follow the progress or vote on features on [our trello board](https://trello.com
 #### Admin login:
  
  - Visit the admin page on the domain you set in `Homestead.yaml` (in my case that would be **http://app.test/admin**) and enter the seeded test user's credentials: `test@test.com`/`password`
- 
+
