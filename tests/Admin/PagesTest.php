@@ -20,7 +20,7 @@ class PagesTest extends TestCase
             ->visit("/admin")
             ->see('Dashboard')
             ->see('Posts')
-            //->see('Fields')   TODO
+            ->see('Post fields')
             ->see('Categories')
             ->see('Tags')
             ->see('Authors')

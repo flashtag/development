@@ -18125,7 +18125,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./components/authors.vue":38,"./components/categories.vue":39,"./components/fields/index.vue":40,"./components/partials/dropzone.vue":41,"./components/partials/media-input.vue":42,"./components/posts/index.vue":43,"./components/tags.vue":44,"./models/user":53}],37:[function(require,module,exports){
+},{"./components/authors.vue":38,"./components/categories.vue":39,"./components/fields/index.vue":40,"./components/partials/dropzone.vue":41,"./components/partials/media-input.vue":42,"./components/posts/index.vue":43,"./components/tags.vue":44,"./models/user":54}],37:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -18302,10 +18302,15 @@ if (module.hot) {(function () {  module.hot.accept()
 },{"../models/category":49,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],40:[function(require,module,exports){
 'use strict';
 
-exports.__esModule = true;
-exports['default'] = {
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
-    props: ['current-user'],
+exports.__esModule = true;
+
+var _modelsField = require('../../models/field');
+
+var _modelsField2 = _interopRequireDefault(_modelsField);
+
+exports['default'] = {
 
     data: function data() {
         return {
@@ -18317,19 +18322,17 @@ exports['default'] = {
         };
     },
 
+    ready: function ready() {
+        this.fetch();
+    },
+
     methods: {
 
         fetch: function fetch() {
-            var self = this;
-            return client({
-                path: '/fields'
-            }).then(function (response) {
-                self.fields = response.entity.data;
-                self.pagination = response.entity.meta.pagination;
-            }, function (response) {
-                if (response.status.code == 401 || response.status.code == 500) {
-                    self.$dispatch('userHasLoggedOut');
-                }
+            this.$http.get('fields?orderBy=updated_at|desc').then(function (response) {
+                this.$set('fields', response.data.data.map(function (field) {
+                    return new _modelsField2['default'](field);
+                }));
             });
         },
 
@@ -18350,17 +18353,11 @@ exports['default'] = {
             return 'fa fa-unsorted';
         }
 
-    },
-
-    route: {
-        data: function data(transition) {
-            this.fetch().then(transition.next);
-        }
     }
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Post Fields</li>\n    </ol>\n\n    <div v-if=\"$loadingRouteData\" class=\"content-loading\"><i class=\"fa fa-spinner fa-spin\"></i></div>\n    <div v-if=\"!$loadingRouteData\">\n\n        <div class=\"filters\">\n            <div class=\"row\">\n                <div class=\"col-md-6\">\n                    <input type=\"text\" v-model=\"labelFilter\" placeholder=\"Filter by label...\" class=\"form-control\">\n                </div>\n                <div class=\"create-button col-md-6\">\n                    <button v-link=\"'/post-fields/create'\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</button>\n                </div>\n            </div>\n        </div>\n\n        <table class=\"Fields table table-striped table-hover\">\n            <thead>\n                <tr>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('label')\">Label <i :class=\"orderIcon('label')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                    <th><a href=\"#\" @click.prevent=\"sortBy('template')\">Template <i :class=\"orderIcon('template')\"></i></a></th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for=\"field in fields | filterBy labelFilter in 'label' | orderBy sortKey sortDir\" class=\"Field\" :class=\"{ 'Field--unpublished': !field.is_published }\">\n                    <td><a v-link=\"'/post-fields/'+field.id\">{{ field.label }}</a></td>\n                    <td>{{ field.name }}</td>\n                    <td>{{ field.template }}</td>\n                </tr>\n            </tbody>\n        </table>\n\n        <paginator :pagination=\"pagination\"></paginator>\n    </div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Post Fields</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"labelFilter\" placeholder=\"Filter by label...\" class=\"form-control\">\n            </div>\n            <div class=\"create-button col-md-6\">\n                <a href=\"/admin/post-fields/create\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</a>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Fields table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('label')\">Label <i :class=\"orderIcon('label')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('template')\">Template <i :class=\"orderIcon('template')\"></i></a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"field in fields | filterBy labelFilter in 'label' | orderBy sortKey sortDir\" class=\"Field\" :class=\"{ 'Field--unpublished': !field.is_published }\">\n                <td><a href=\"/admin/post-fields/{{ field.id }}\">{{ field.label }}</a></td>\n                <td>{{ field.name }}</td>\n                <td>{{ field.template }}</td>\n            </tr>\n        </tbody>\n    </table>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -18372,7 +18369,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
+},{"../../models/field":50,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18845,7 +18842,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":49,"../../models/post":51,"../../models/user":53,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],44:[function(require,module,exports){
+},{"../../models/category":49,"../../models/post":52,"../../models/user":54,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],44:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18916,7 +18913,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/tag":52,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],45:[function(require,module,exports){
+},{"../models/tag":53,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19057,7 +19054,7 @@ var Author = (function (_Model) {
 exports['default'] = Author;
 module.exports = exports['default'];
 
-},{"./model":50}],49:[function(require,module,exports){
+},{"./model":51}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19105,7 +19102,48 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":50}],50:[function(require,module,exports){
+},{"./model":51}],50:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _model = require('./model');
+
+var _model2 = _interopRequireDefault(_model);
+
+var Field = (function (_Model) {
+    _inherits(Field, _Model);
+
+    function Field(data) {
+        _classCallCheck(this, Field);
+
+        _get(Object.getPrototypeOf(Field.prototype), 'constructor', this).call(this, 'tags', {
+            id: data.id,
+            name: data.name,
+            label: data.label,
+            description: data.description,
+            created_at: data.created_at,
+            updated_at: data.updated_at
+        });
+    }
+
+    return Field;
+})(_model2['default']);
+
+exports['default'] = Field;
+module.exports = exports['default'];
+
+},{"./model":51}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19177,7 +19215,7 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19276,7 +19314,7 @@ var Post = (function (_Model) {
 exports['default'] = Post;
 module.exports = exports['default'];
 
-},{"./model":50,"moment":4}],52:[function(require,module,exports){
+},{"./model":51,"moment":4}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19319,7 +19357,7 @@ var Tag = (function (_Model) {
 exports['default'] = Tag;
 module.exports = exports['default'];
 
-},{"./model":50}],53:[function(require,module,exports){
+},{"./model":51}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19359,6 +19397,6 @@ var User = (function (_Model) {
 exports['default'] = User;
 module.exports = exports['default'];
 
-},{"./model":50}]},{},[37]);
+},{"./model":51}]},{},[37]);
 
 //# sourceMappingURL=admin.js.map

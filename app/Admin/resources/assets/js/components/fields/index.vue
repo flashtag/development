@@ -4,46 +4,41 @@
         <li class="active">Post Fields</li>
     </ol>
 
-    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
-    <div v-if="!$loadingRouteData">
-
-        <div class="filters">
-            <div class="row">
-                <div class="col-md-6">
-                    <input type="text" v-model="labelFilter" placeholder="Filter by label..." class="form-control">
-                </div>
-                <div class="create-button col-md-6">
-                    <button v-link="'/post-fields/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
-                </div>
+    <div class="filters">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" v-model="labelFilter" placeholder="Filter by label..." class="form-control">
+            </div>
+            <div class="create-button col-md-6">
+                <a href="/admin/post-fields/create" class="btn btn-success"><i class="fa fa-plus"></i> Add new</a>
             </div>
         </div>
-
-        <table class="Fields table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th><a href="#" @click.prevent="sortBy('label')">Label <i :class="orderIcon('label')"></i></a></th>
-                    <th><a href="#" @click.prevent="sortBy('name')">Name <i :class="orderIcon('name')"></i></a></th>
-                    <th><a href="#" @click.prevent="sortBy('template')">Template <i :class="orderIcon('template')"></i></a></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="field in fields | filterBy labelFilter in 'label' | orderBy sortKey sortDir"
-                    class="Field" :class="{ 'Field--unpublished': !field.is_published }">
-                    <td><a v-link="'/post-fields/'+field.id">{{ field.label }}</a></td>
-                    <td>{{ field.name }}</td>
-                    <td>{{ field.template }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <paginator :pagination="pagination"></paginator>
     </div>
+
+    <table class="Fields table table-striped table-hover">
+        <thead>
+            <tr>
+                <th><a href="#" @click.prevent="sortBy('label')">Label <i :class="orderIcon('label')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('name')">Name <i :class="orderIcon('name')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('template')">Template <i :class="orderIcon('template')"></i></a></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="field in fields | filterBy labelFilter in 'label' | orderBy sortKey sortDir"
+                class="Field" :class="{ 'Field--unpublished': !field.is_published }">
+                <td><a href="/admin/post-fields/{{ field.id }}">{{ field.label }}</a></td>
+                <td>{{ field.name }}</td>
+                <td>{{ field.template }}</td>
+            </tr>
+        </tbody>
+    </table>
+
 </template>
 
 <script>
-    export default {
+    import Field from '../../models/field';
 
-        props: ['current-user'],
+    export default {
 
         data: function () {
             return {
@@ -55,19 +50,17 @@
             }
         },
 
+        ready: function () {
+            this.fetch();
+        },
+
         methods: {
 
             fetch: function () {
-                var self = this;
-                return client({
-                    path: '/fields'
-                }).then(function (response) {
-                    self.fields = response.entity.data;
-                    self.pagination = response.entity.meta.pagination;
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                this.$http.get('fields?orderBy=updated_at|desc').then(function (response) {
+                    this.$set('fields', response.data.data.map(function (field) {
+                        return new Field(field);
+                    }));
                 });
             },
 
@@ -88,12 +81,6 @@
                 return 'fa fa-unsorted';
             }
 
-        },
-
-        route: {
-            data: function (transition) {
-                this.fetch().then(transition.next);
-            }
         }
 
     }

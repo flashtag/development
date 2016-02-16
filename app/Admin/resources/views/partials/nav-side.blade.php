@@ -7,11 +7,9 @@
         <a class="list-group-item" href="/admin/posts">
             <i class="fa fa-newspaper-o"></i> Posts
         </a>
-        <!-- TODO: Post Fields
         <a class="list-group-item" href="/admin/post-fields">
             <i class="fa fa-th-list"></i> Post fields
         </a>
-        -->
         <a class="list-group-item" href="/admin/categories">
             <i class="fa fa-columns"></i> Categories
         </a>
