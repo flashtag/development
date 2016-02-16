@@ -18999,9 +18999,21 @@ exports['default'] = {
     },
 
     response: function response(_response) {
+        // If we get a 401, we will re-authenticate and resend the request.
+        // If that fails we will logout.
         if (_response.status == 401) {
+            var original = _response.request;
             localStorage.removeItem('jwt-token');
+
+            return client.post('auth').then(function (response) {
+                localStorage.setItem('jwt-token', 'Bearer ' + response.data.token);
+                return client[original.method.toLowerCase()](original.url, original.params);
+            }, function (response) {
+                console.log(response);
+                window.location = '/admin/auth/logout';
+            });
         }
+
         if (_response.headers('authorization')) {
             localStorage.setItem('jwt-token', _response.headers('authorization'));
         }
