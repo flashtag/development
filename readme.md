@@ -7,15 +7,17 @@
 
 Follow the progress or vote on features on [our trello board](https://trello.com/b/KWzDShYs/flashtag).
 
-#### dev instructions
+#### Install:
 
- - clone the flashtag repo
+ - `git clone git@github.com:flashtag/flashtag.git` then go to that directory
  
- - composer install
+ - `composer install`
  
- - copy `.env.example` to `.env`
+ - `cp .env.example .env`
  
  - `php artisan key:generate`
+ 
+#### Set up VM and seed the database:
 
  - `vendor/bin/homestead make`
 
@@ -27,6 +29,7 @@ Follow the progress or vote on features on [our trello board](https://trello.com
 
  - `php artisan migrate --seed`
 
- . . .
+#### Admin login:
  
-test
+ - Visit the admin page on the domain you set in `Homestead.yaml` (in my case that would be **http://app.test/admin**) and enter the seeded test user's credentials: `test@test.com`/`password`
+ 
