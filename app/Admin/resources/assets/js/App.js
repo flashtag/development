@@ -28,9 +28,19 @@ export default {
             this.token = localStorage.getItem('jwt-token');
             if (this.token === null || this.token === 'undefined') {
                 this.getUser();
+                this.getToken();
                 //this.token = document.getElementById('jwt').getAttribute('content');
                 localStorage.setItem('jwt-token', 'Bearer ' + this.token);
             }
+        },
+
+        getToken: function () {
+            this.$http.post('auth')
+                .then(function (response) {
+                    localStorage.setItem('jwt-token', 'Bearer ' + response.data.token);
+                }, function (response) {
+                    this.destroyLogin();
+                });
         },
 
         getUser: function () {
