@@ -8,9 +8,6 @@
     <title>Flashtag</title>
     <meta name="description" content="Flashtag is a simple developer-driven CMS.">
 
-    <meta name="user" id="user" content="{{ $current_user->id or '' }}">
-    <meta name="jwt" id="jwt" content="{{ Session::get('jwt') }}">
-
     @include('admin::partials.icons')
 
     @yield('meta')
