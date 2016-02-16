@@ -22,7 +22,6 @@ export default {
                     localStorage.setItem('jwt-token', 'Bearer ' + response.data.token);
                     return client[original.method.toLowerCase()](original.url, original.params);
                 }, function (response) {
-                    console.log(response);
                     window.location = '/admin/auth/logout';
                 });
         }

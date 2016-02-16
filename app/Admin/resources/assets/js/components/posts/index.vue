@@ -65,7 +65,7 @@
                                type="checkbox"
                                name="is_published"
                                v-model="post.is_published"
-                               @change="post.publish()">
+                               @change="post.publish(post.is_published)">
                         <label for="is_published_{{post.id}}"></label>
                     </div>
                 </td>

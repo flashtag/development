@@ -31,9 +31,13 @@ class Post extends Model {
         });
     }
 
-    publish() {
+    publish(published) {
+        if (typeof published === 'undefined' || published === null) {
+            published = true;
+        }
+        console.log(published);
         return this.update({
-            is_published: true
+            is_published: published
         });
     }
 
