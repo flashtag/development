@@ -15,7 +15,6 @@ export default {
 
     ready: function() {
         this.getInitialToken();
-        this.setLoginStatus();
     },
 
     data: {
@@ -28,12 +27,13 @@ export default {
         getInitialToken: function () {
             this.token = localStorage.getItem('jwt-token');
             if (this.token === null || this.token === 'undefined') {
-                this.token = document.getElementById('jwt').getAttribute('content');
+                this.getUser();
+                //this.token = document.getElementById('jwt').getAttribute('content');
                 localStorage.setItem('jwt-token', 'Bearer ' + this.token);
             }
         },
 
-        setLoginStatus: function () {
+        getUser: function () {
             this.$http.get('auth/user/me')
                 .then(function (response) {
                     this.setLogin(response.data.user);
