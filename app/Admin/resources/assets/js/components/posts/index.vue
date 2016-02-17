@@ -90,6 +90,8 @@
 
     export default {
 
+        props: ['current-user'],
+
         data: function () {
             return {
                 posts: [],

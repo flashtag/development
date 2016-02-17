@@ -16,6 +16,7 @@ class UserTransformer extends Transformer
             'id' => (int) $user->id,
             'email' => $user->email,
             'name' => $user->name,
+            'admin' => (bool) $user->admin,
             'created_at' => $user->created_at->getTimestamp(),
             'updated_at' => $user->updated_at->getTimestamp(),
         ];

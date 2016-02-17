@@ -11,17 +11,15 @@ class UsersTest extends TestCase
 {
     use DatabaseMigrations, DatabaseTransactions;
 
-    private function createUser()
+    private function createUser($properties = [])
     {
-        return factory(User::class)->create();
+        return factory(User::class)->create($properties);
     }
 
     /** @test */
     public function show()
     {
-        $user = $this->createUser([
-            'password' => 'test_word'
-        ]);
+        $user = $this->createUser(['password' => 'test_word']);
 
         $this->actingAs(factory(User::class, 'admin')->create())
             ->visit("/admin/users/{$user->id}")
@@ -30,6 +28,21 @@ class UsersTest extends TestCase
             ->see($user->email)
             ->dontSee($user->password)
             ->dontSee(bcrypt($user->password));
+    }
+
+    /** @test */
+    public function show_only_for_admin()
+    {
+        $user = $this->createUser();
+
+        $this->actingAs(factory(User::class)->create())
+            ->visit("/admin")
+            ->dontSeeLink("Users")
+            ->get("/admin/users")
+            ->seeStatusCode(403)
+            ->get("/admin/users/1/edit")
+            ->seeStatusCode(403)
+            ->dontSee($user['name']);
     }
 
     /** @test */

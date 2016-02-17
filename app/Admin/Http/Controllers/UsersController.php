@@ -10,6 +10,14 @@ use Flashtag\Data\User;
 class UsersController extends Controller
 {
     /**
+     * Register middleware and stuff.
+     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
+
+    /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index()

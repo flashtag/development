@@ -13,7 +13,7 @@
             <input type="email" value="{{ $user->email or old('email') }}" name="email" id="email" class="form-control">
         </div>
         <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password">Set Password</label>
             <input type="password" name="password" id="password" class="form-control">
         </div>
         <div class="form-group">

@@ -9,7 +9,7 @@
             <div class="col-md-6">
                 <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
             </div>
-            <div class="create-button col-md-6">
+            <div class="create-button col-md-6" style="text-align:right;">
                 <a href="/admin/users/create" class="btn btn-success"><i class="fa fa-plus"></i> Add new</a>
             </div>
         </div>
@@ -25,7 +25,9 @@
         <tbody>
             <tr v-for="user in users | filterBy nameFilter | orderBy sortKey sortDir"
                 class="User">
-                <td><a href="/admin/users/{{ user.id }}">{{ user.name }}</a></td>
+                <td>
+                    <a href="/admin/users/{{ user.id }}">{{ user.name }}</a>
+                </td>
                 <td>{{ user.email }}</td>
             </tr>
         </tbody>
@@ -36,6 +38,8 @@
     import User from '../models/user';
 
     export default {
+
+        props: ['current-user'],
 
         data: function () {
             return {

@@ -1,5 +1,5 @@
 @extends('admin::layout')
 
 @section('content')
-    <categories></categories>
+    <categories :current-user="user"></categories>
 @endsection

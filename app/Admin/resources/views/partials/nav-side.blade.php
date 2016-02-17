@@ -19,14 +19,16 @@
         <a class="list-group-item" href="/admin/authors">
             <i class="fa fa-pencil-square-o"></i> Authors
         </a>
-        <a class="list-group-item" href="/admin/users">
-            <i class="fa fa-users"></i> Users
-        </a>
-        <!-- TODO: Settings
-        <a class="list-group-item" href="/admin/settings">
-            <i class="fa fa-gear"></i> Settings
-        </a>
-        -->
+        @if ($current_user->admin)
+            <a class="list-group-item" href="/admin/users">
+                <i class="fa fa-users"></i> Users
+            </a>
+            <!-- TODO: Settings
+            <a class="list-group-item" href="/admin/settings">
+                <i class="fa fa-gear"></i> Settings
+            </a>
+            -->
+        @endif
     </div>
 </div>
 

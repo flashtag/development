@@ -40,6 +40,16 @@ class User extends Model implements AuthenticatableContract,
     protected $hidden = ['password', 'remember_token'];
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'id' => 'integer',
+        'admin' => 'boolean',
+    ];
+
+    /**
      * Get the identifier that will be stored in the subject claim of the JWT
      *
      * @return mixed

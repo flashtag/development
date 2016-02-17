@@ -14,8 +14,12 @@ export default {
         'dropzone': require('./components/partials/dropzone.vue')
     },
 
-    ready: function() {
+    created: function () {
         this.getInitialToken();
+    },
+
+    ready: function () {
+        this.getUser();
     },
 
     data: {
@@ -28,9 +32,7 @@ export default {
         getInitialToken: function () {
             this.token = localStorage.getItem('jwt-token');
             if (this.token === null || this.token === 'undefined') {
-                this.getUser();
                 this.getToken();
-                //this.token = document.getElementById('jwt').getAttribute('content');
                 localStorage.setItem('jwt-token', 'Bearer ' + this.token);
             }
         },
@@ -56,6 +58,7 @@ export default {
 
         setLogin: function (user) {
             this.user = new User(user);
+            console.log(user);
             this.authenticated = true;
             this.token = localStorage.getItem('jwt-token');
         },

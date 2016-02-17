@@ -235,12 +235,20 @@ IPSUM;
     private function createUsers()
     {
         return new Collection([
+
+            \Flashtag\Data\User::create([
+                'email' => 'admin@test.com',
+                'name' => $this->faker->name,
+                'password' => \Hash::make('password'),
+                'admin' => true,
+            ]),
+
             \Flashtag\Data\User::create([
                 'email' => 'test@test.com',
                 'name' => $this->faker->name,
                 'password' => \Hash::make('password'),
             ]),
-            factory(\Flashtag\Data\User::class)->create()
+
         ]);
     }
 }

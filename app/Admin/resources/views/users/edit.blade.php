@@ -3,7 +3,7 @@
 @section('content')
     <ol class="breadcrumb">
         <li><a href="/admin">Home</a></li>
-        <li><a href="/admin/users">Authors</a></li>
+        <li><a href="/admin/users">Users</a></li>
         <li class="active">{{ $user->name }}</li>
     </ol>
 

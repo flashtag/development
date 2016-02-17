@@ -1,5 +1,5 @@
 @extends('admin::layout')
 
 @section('content')
-    <posts></posts>
+    <posts :current-user="user"></posts>
 @endsection
