@@ -92,6 +92,7 @@ class UsersController extends Controller
     {
         $data['email'] = $request->get('email');
         $data['name'] = $request->get('name');
+        $data['admin'] = $request->get('admin', false);
         if ($request->has('password')) {
             $data['password'] = bcrypt($request->get('password'));
         }

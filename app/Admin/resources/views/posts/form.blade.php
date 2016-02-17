@@ -1,4 +1,6 @@
 
+@include('admin::partials.form-errors')
+
 <div class="panel panel-default {{ $post->isShowing() ? 'border-green': 'border-red' }}">
     <div class="panel-heading">
         PUBLISHING

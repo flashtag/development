@@ -1,4 +1,6 @@
 
+@include('admin::partials.form-errors')
+
 <div class="panel panel-default">
     <div class="panel-heading">Field</div>
     <div class="panel-body">
