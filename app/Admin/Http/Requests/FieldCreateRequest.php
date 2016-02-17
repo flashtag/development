@@ -12,7 +12,7 @@ class FieldCreateRequest extends Request
     public function rules()
     {
         return [
-            'name' => 'required|unique:authors|max:255',
+            'name' => 'required|unique:fields|max:255',
         ];
     }
 

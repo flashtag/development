@@ -10,7 +10,7 @@
                 <input type="text" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
             </div>
             <div class="create-button col-md-6">
-                <button v-link="'/users/create'" class="btn btn-success"><i class="fa fa-plus"></i> Add new</button>
+                <a href="/admin/users/create" class="btn btn-success"><i class="fa fa-plus"></i> Add new</a>
             </div>
         </div>
     </div>
@@ -25,20 +25,17 @@
         <tbody>
             <tr v-for="user in users | filterBy nameFilter | orderBy sortKey sortDir"
                 class="User">
-                <td><a v-link="'/users/'+user.id">{{ user.name }}</a></td>
+                <td><a href="/admin/users/{{ user.id }}">{{ user.name }}</a></td>
                 <td>{{ user.email }}</td>
             </tr>
         </tbody>
     </table>
-
-    <paginator :pagination="pagination"></paginator>
-
 </template>
 
 <script>
-    export default {
+    import User from '../models/user';
 
-        props: ['current-user'],
+    export default {
 
         data: function () {
             return {
@@ -50,20 +47,17 @@
             }
         },
 
+        created: function () {
+            this.fetch();
+        },
+
         methods: {
 
-            fetch: function (successHandler) {
-                var self = this;
-                client({
-                    path: '/users'
-                }).then(function (response) {
-                    self.users = response.entity.data;
-                    self.pagination = response.entity.meta.pagination;
-                    successHandler(response.entity.data);
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+            fetch: function () {
+                this.$http.get('users?orderBy=updated_at|desc').then(function (response) {
+                    this.$set('users', response.data.data.map(function (user) {
+                        return new User(user);
+                    }));
                 });
             },
 
@@ -84,14 +78,6 @@
                 return 'fa fa-unsorted';
             }
 
-        },
-
-        route: {
-            data: function (transition) {
-                this.fetch(function (data) {
-                    transition.next({users: data})
-                });
-            }
         }
 
     }

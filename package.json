@@ -5,5 +5,7 @@
     "laravel-elixir": "^4.0.0",
     "nightwatch": "^0.8.9"
   },
-  "dependencies": {}
+  "dependencies": {
+    "phantomjs": "^2.1.3"
+  }
 }

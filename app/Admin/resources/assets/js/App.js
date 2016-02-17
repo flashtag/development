@@ -9,6 +9,7 @@ export default {
         'categories': require('./components/categories.vue'),
         'tags': require('./components/tags.vue'),
         'authors': require('./components/authors.vue'),
+        'users': require('./components/users.vue'),
         'media-input': require('./components/partials/media-input.vue'),
         'dropzone': require('./components/partials/dropzone.vue')
     },

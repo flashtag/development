@@ -2,40 +2,100 @@
 
 namespace Flashtag\Admin\Http\Controllers;
 
+use Flashtag\Admin\Http\Requests\UserCreateRequest;
+use Flashtag\Admin\Http\Requests\UserDestroyRequest;
+use Flashtag\Admin\Http\Requests\UserUpdateRequest;
+use Flashtag\Data\User;
+
 class UsersController extends Controller
 {
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index()
     {
-        //
+        return view('admin::users.index');
     }
 
+    /**
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function show($id)
     {
-        //
+        return redirect()->route('admin.users.edit', [$id], 301);
     }
 
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function create()
     {
-        //
+        $user = new User();
+
+        return view('admin::users.create', compact('user'));
     }
 
-    public function store()
+    /**
+     * @param UserCreateRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(UserCreateRequest $request)
     {
-        //
+        $user = User::create($this->buildUserFromRequest($request));
+
+        return redirect()->route('admin.users.index');
     }
 
+    /**
+     * @param int $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function edit($id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        return view('admin::users.edit', compact('user'));
     }
 
-    public function update($id)
+    /**
+     * @param UserUpdateRequest $request
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(UserUpdateRequest $request, $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->update($this->buildUserFromRequest($request));
+
+        return redirect()->route('admin.users.index');
     }
 
-    public function destroy($id)
+    /**
+     * @param UserDestroyRequest $request
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(UserDestroyRequest $request, $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('admin.users.index');
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @return array
+     */
+    private function buildUserFromRequest($request)
+    {
+        $data['email'] = $request->get('email');
+        $data['name'] = $request->get('name');
+        if ($request->has('password')) {
+            $data['password'] = bcrypt($request->get('password'));
+        }
+
+        return $data;
     }
 }
