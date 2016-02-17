@@ -18322,7 +18322,7 @@ exports['default'] = {
         };
     },
 
-    ready: function ready() {
+    created: function created() {
         this.fetch();
     },
 

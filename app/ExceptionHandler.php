@@ -45,7 +45,7 @@ class ExceptionHandler extends Handler
             $e = new NotFoundHttpException($e->getMessage(), $e);
         }
 
-        if (config('app.debug') && app()->environment() != 'testing') {
+        if (config('app.debug')) {
             return $this->renderExceptionWithWhoops($request, $e);
         }
 
@@ -65,6 +65,8 @@ class ExceptionHandler extends Handler
 
         if ($request->ajax()) {
             $whoops->pushHandler(new \Whoops\Handler\JsonResponseHandler());
+        } elseif (app()->environment() == 'testing') {
+            $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
         } else {
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler());
         }
