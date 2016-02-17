@@ -120,7 +120,7 @@ class TagsTest extends TestCase
     }
 
     /** @test */
-    public function delete_fails_when_not_tagized()
+    public function delete_fails_when_not_authorized()
     {
         $this->withoutMiddleware();
 
