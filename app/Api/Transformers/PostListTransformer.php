@@ -28,8 +28,8 @@ class PostListTransformer extends Transformer
             'id' => (int) $postList->id,
             'name' => $postList->name,
             'slug' => $postList->slug,
-            'created_at' => $post->created_at,
-            'updated_at' => $post->updated_at,
+            'created_at' => $postList->created_at,
+            'updated_at' => $postList->updated_at,
         ];
     }
 
@@ -40,7 +40,7 @@ class PostListTransformer extends Transformer
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */
-    public function includeFields(PostList $postList)
+    public function includePosts(PostList $postList)
     {
         $posts = $postList->posts;
 
