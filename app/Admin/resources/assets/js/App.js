@@ -6,6 +6,7 @@ export default {
     components: {
         'posts': require('./components/posts/index.vue'),
         'fields': require('./components/fields/index.vue'),
+        'post-lists': require('./components/post-lists.vue'),
         'categories': require('./components/categories.vue'),
         'tags': require('./components/tags.vue'),
         'authors': require('./components/authors.vue'),

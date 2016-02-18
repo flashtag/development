@@ -37,5 +37,7 @@ Look at our [existing issues](https://github.com/flashtag/flashtag/issues), and 
 
 #### Admin login:
  
- - Visit the admin page on the domain you set in `Homestead.yaml` (in my case that would be **http://app.test/admin**) and enter the seeded test user's credentials: `test@test.com`/`password`
+ - Visit the admin page on the domain you set in `Homestead.yaml` (in my case that would be **http://app.test/admin**) and enter the seeded test users' credentials:
+    - `test@test.com`/`password` : normal user
+    - `admin@test.com`/`password` : admin user
 
