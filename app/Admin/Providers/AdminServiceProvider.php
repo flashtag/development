@@ -2,6 +2,7 @@
 
 namespace Flashtag\Admin\Providers;
 
+use Flashtag\Admin\Http\Middleware\Administrator as AdminMiddleware;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
@@ -10,12 +11,13 @@ class AdminServiceProvider extends ServiceProvider
     public function boot(Router $router)
     {
         $this->defineAdminRoutes($router);
+        $this->AddMiddlewares($router);
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'admin');
         $this->publishesAssets();
         $this->loadComposers();
     }
 
-    private function defineAdminRoutes($router)
+    private function defineAdminRoutes(Router $router)
     {
         if (! $this->app->routesAreCached()) {
             $router->group([
@@ -25,6 +27,11 @@ class AdminServiceProvider extends ServiceProvider
                 require __DIR__.'/../Http/routes.php';
             });
         }
+    }
+
+    private function addMiddlewares(Router $router)
+    {
+        $router->middleware('admin', AdminMiddleware::class);
     }
 
     private function publishesAssets()
