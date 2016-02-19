@@ -141,6 +141,14 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function lists()
+    {
+        return $this->belongsToMany(PostList::class);
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function lockedBy()

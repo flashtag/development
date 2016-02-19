@@ -19,6 +19,7 @@ $router->group(['middleware' => 'auth'], function ($router) {
     $router->resource('posts', 'PostsController');
     $router->resource('posts/{post_id}/revisions', 'RevisionsController', ['only' => ['index', 'show']]);
     $router->resource('post-fields', 'PostFieldsController');
+    $router->resource('post-lists', 'PostListsController');
     $router->resource('categories', 'CategoriesController');
     $router->resource('tags', 'TagsController');
     $router->resource('authors', 'AuthorsController');

@@ -18062,6 +18062,7 @@ exports['default'] = {
     components: {
         'posts': require('./components/posts/index.vue'),
         'fields': require('./components/fields/index.vue'),
+        'post-lists': require('./components/post-lists.vue'),
         'categories': require('./components/categories.vue'),
         'tags': require('./components/tags.vue'),
         'authors': require('./components/authors.vue'),
@@ -18129,7 +18130,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./components/authors.vue":38,"./components/categories.vue":39,"./components/fields/index.vue":40,"./components/partials/dropzone.vue":41,"./components/partials/media-input.vue":42,"./components/posts/index.vue":43,"./components/tags.vue":44,"./components/users.vue":45,"./models/user":55}],37:[function(require,module,exports){
+},{"./components/authors.vue":38,"./components/categories.vue":39,"./components/fields/index.vue":40,"./components/partials/dropzone.vue":41,"./components/partials/media-input.vue":42,"./components/post-lists.vue":43,"./components/posts/index.vue":44,"./components/tags.vue":45,"./components/users.vue":46,"./models/user":57}],37:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -18155,7 +18156,7 @@ _vue2['default'].directive('rich-editor', require('./directives/rich-editor'));
 
 new _vue2['default'](require('./App'));
 
-},{"./App":36,"./directives/rich-editor":46,"./directives/select":47,"./http/interceptors/jwtAuth":48,"vue":35,"vue-resource":20}],38:[function(require,module,exports){
+},{"./App":36,"./directives/rich-editor":47,"./directives/select":48,"./http/interceptors/jwtAuth":49,"vue":35,"vue-resource":20}],38:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18226,7 +18227,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/author":49,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],39:[function(require,module,exports){
+},{"../models/author":50,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],39:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18305,7 +18306,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/category":50,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],40:[function(require,module,exports){
+},{"../models/category":51,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],40:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18377,7 +18378,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/field":51,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
+},{"../../models/field":52,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18611,6 +18612,77 @@ if (module.hot) {(function () {  module.hot.accept()
   }
 })()}
 },{"vue":35,"vue-hot-reload-api":15}],43:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+exports.__esModule = true;
+
+var _modelsPostList = require('../models/post-list');
+
+var _modelsPostList2 = _interopRequireDefault(_modelsPostList);
+
+exports['default'] = {
+
+    props: ['current-user'],
+
+    data: function data() {
+        return {
+            "postLists": [],
+            nameFilter: null,
+            sortKey: null,
+            sortDir: -1
+        };
+    },
+
+    created: function created() {
+        this.fetch();
+    },
+
+    methods: {
+
+        fetch: function fetch() {
+            this.$http.get('post-lists?orderBy=updated_at|desc').then(function (response) {
+                this.$set('postLists', response.data.data.map(function (postList) {
+                    return new _modelsPostList2['default'](postList);
+                }));
+            });
+        },
+
+        sortBy: function sortBy(key) {
+            if (this.sortKey == key) {
+                this.sortDir = this.sortDir * -1;
+            } else {
+                this.sortKey = key;
+                this.sortDir = 1;
+            }
+        },
+
+        orderIcon: function orderIcon(key) {
+            if (key == this.sortKey) {
+                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
+            }
+
+            return 'fa fa-unsorted';
+        }
+
+    }
+
+};
+module.exports = exports['default'];
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li class=\"active\">Post Lists</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n            </div>\n            <div class=\"create-button col-md-6\">\n                <a href=\"/admin/post-lists/create\" class=\"btn btn-success\"><i class=\"fa fa-plus\"></i> Add new</a>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"PostLists table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('name')\">Name <i :class=\"orderIcon('name')\"></i></a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"postList in postLists | filterBy nameFilter | orderBy sortKey sortDir\" class=\"PostList\">\n                <td><a href=\"/admin/post-lists/{{ postList.id }}\">{{ postList.name }}</a></td>\n            </tr>\n        </tbody>\n    </table>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, module.exports.template)
+  }
+})()}
+},{"../models/post-list":54,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],44:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18852,7 +18924,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":50,"../../models/post":53,"../../models/user":55,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],44:[function(require,module,exports){
+},{"../../models/category":51,"../../models/post":55,"../../models/user":57,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],45:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18923,7 +18995,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/tag":54,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],45:[function(require,module,exports){
+},{"../models/tag":56,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],46:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18995,7 +19067,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/user":55,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],46:[function(require,module,exports){
+},{"../models/user":57,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19031,7 +19103,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19062,7 +19134,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19105,7 +19177,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19147,7 +19219,7 @@ var Author = (function (_Model) {
 exports['default'] = Author;
 module.exports = exports['default'];
 
-},{"./model":52}],50:[function(require,module,exports){
+},{"./model":53}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19195,7 +19267,7 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":52}],51:[function(require,module,exports){
+},{"./model":53}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19236,7 +19308,7 @@ var Field = (function (_Model) {
 exports['default'] = Field;
 module.exports = exports['default'];
 
-},{"./model":52}],52:[function(require,module,exports){
+},{"./model":53}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19308,7 +19380,48 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _model = require('./model');
+
+var _model2 = _interopRequireDefault(_model);
+
+var PostList = (function (_Model) {
+    _inherits(PostList, _Model);
+
+    function PostList(data) {
+        _classCallCheck(this, PostList);
+
+        _get(Object.getPrototypeOf(PostList.prototype), 'constructor', this).call(this, 'post-lists', {
+            id: data.id,
+            name: data.name,
+            slug: data.slug,
+            posts: data.posts ? data.posts.data : [],
+            created_at: data.created_at,
+            updated_at: data.updated_at
+        });
+    }
+
+    return PostList;
+})(_model2['default']);
+
+exports['default'] = PostList;
+module.exports = exports['default'];
+
+},{"./model":53}],55:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19411,7 +19524,7 @@ var Post = (function (_Model) {
 exports['default'] = Post;
 module.exports = exports['default'];
 
-},{"./model":52,"moment":4}],54:[function(require,module,exports){
+},{"./model":53,"moment":4}],56:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19454,7 +19567,7 @@ var Tag = (function (_Model) {
 exports['default'] = Tag;
 module.exports = exports['default'];
 
-},{"./model":52}],55:[function(require,module,exports){
+},{"./model":53}],57:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19495,6 +19608,6 @@ var User = (function (_Model) {
 exports['default'] = User;
 module.exports = exports['default'];
 
-},{"./model":52}]},{},[37]);
+},{"./model":53}]},{},[37]);
 
 //# sourceMappingURL=admin.js.map

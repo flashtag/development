@@ -51,6 +51,15 @@ $factory->define(Flashtag\Data\Field::class, function (Faker\Generator $faker) {
     ];
 });
 
+$factory->define(Flashtag\Data\PostList::class, function (Faker\Generator $faker) {
+    $name = $faker->sentence(2);
+
+    return [
+        'name' => $name,
+        'slug' => str_slug($name),
+    ];
+});
+
 $factory->define(Flashtag\Data\Author::class, function (Faker\Generator $faker) {
     $name = $faker->name;
 

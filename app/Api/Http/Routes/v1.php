@@ -29,6 +29,9 @@ $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
     // POST FIELDS
     $api->resource('fields', 'FieldsController', ['except' => ['create', 'edit']]);
 
+    // POST LISTS
+    $api->resource('post-lists', 'PostListsController', ['except' => ['create', 'edit']]);
+
     // AUTHORS
     $api->resource('authors', 'AuthorsController', ['except' => ['create', 'edit']]);
 
