@@ -15,7 +15,7 @@
             <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <a href="#delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                    <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
                     <a href="/admin/post-fields" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                 showLoaderOnConfirm: true
             }, function () {
                 $.ajax({
-                    url: '/api/post-fields/{{ $field->id }}',
+                    url: '/api/fields/{{ $field->id }}',
                     method: 'DELETE',
                     headers: { Authorization: localStorage.getItem('jwt-token') }
                 }).done(function(){

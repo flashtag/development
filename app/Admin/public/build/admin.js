@@ -18668,7 +18668,7 @@ exports['default'] = {
     methods: {
 
         fetchPosts: function fetchPosts() {
-            this.$http.get('posts?include=category&orderBy=updated_at|desc').then(function (response) {
+            this.$http.get('posts?include=category&orderBy=updated_at|desc&count=1000').then(function (response) {
                 this.$set('posts', response.data.data.map(function (post) {
                     return new _modelsPost2['default'](post);
                 }));
