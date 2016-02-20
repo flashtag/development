@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
+ * @property \Illuminate\Database\Eloquent\Collection $posts
  */
 class PostList extends Model
 {
@@ -20,6 +21,6 @@ class PostList extends Model
      */
     public function posts()
     {
-        return $this->belongsToMany(Post::class)->withPivot('order');
+        return $this->belongsToMany(Post::class, 'post_post_list')->withPivot('order');
     }
 }

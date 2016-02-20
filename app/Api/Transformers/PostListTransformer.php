@@ -38,7 +38,6 @@ class PostListTransformer extends Transformer
      *
      * @param \Flashtag\Data\PostList $postList
      * @return \League\Fractal\Resource\Collection
-     * @throws \Exception
      */
     public function includePosts(PostList $postList)
     {

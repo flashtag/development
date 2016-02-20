@@ -145,7 +145,7 @@ class Post extends Model implements HasPresenter
      */
     public function lists()
     {
-        return $this->belongsToMany(PostList::class);
+        return $this->belongsToMany(PostList::class, 'post_post_list');
     }
 
     /**

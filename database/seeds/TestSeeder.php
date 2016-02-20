@@ -48,6 +48,8 @@ class TestSeeder extends Seeder
         \DB::statement('TRUNCATE TABLE posts CASCADE;');
         \DB::statement('TRUNCATE TABLE fields CASCADE;');
         \DB::statement('TRUNCATE TABLE users CASCADE;');
+        \DB::statement('TRUNCATE TABLE post_lists CASCADE;');
+        \DB::statement('TRUNCATE TABLE post_post_list CASCADE;');
     }
 
     /**
@@ -61,6 +63,8 @@ class TestSeeder extends Seeder
         \DB::table('posts')->truncate();
         \DB::table('fields')->truncate();
         \DB::table('users')->truncate();
+        \DB::table('post_lists')->truncate();
+        \DB::table('post_post_list')->truncate();
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 

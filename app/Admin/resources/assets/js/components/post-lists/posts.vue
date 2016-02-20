@@ -11,7 +11,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir"
+        <tr v-for="post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir"
             class="Post" :class="{ 'Post--unpublished': !post.is_published }">
 
             <td class="order">
@@ -43,6 +43,7 @@
 </template>
 
 <script>
+    import moment from 'moment';
     import PostList from '../../models/post-list';
 
     export default {
@@ -65,7 +66,7 @@
 
             fetch: function () {
                 this.$http.get('post-lists/'+this.postListId+'?include=posts').then(function (response) {
-                    this.$set('postList', new PostList(response.data));
+                    this.$set('postList', new PostList(response.data.data));
                 });
             },
 
@@ -150,6 +151,10 @@
 
             blur: function (e) {
                 e.target.blur();
+            },
+
+            formatTimestamp: function (timestamp) {
+                return moment.unix(timestamp).format('MMM D, YYYY');
             }
 
         }
