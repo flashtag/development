@@ -20317,6 +20317,10 @@ label.showing {
   color: inherit;
 }
 
+.Side-nav .list-group-item.indented {
+  padding-left: 40px;
+}
+
 .Side-nav .fa {
   margin-right: 8px;
 }

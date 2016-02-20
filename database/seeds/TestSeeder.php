@@ -35,6 +35,7 @@ class TestSeeder extends Seeder
         $users = $this->createUsers();
 
         $posts = $this->createPosts($categories, $tags, $authors, $users, $fieldValues);
+        $postLists = $this->createPostLists($posts->take(10));
     }
 
     /**
@@ -226,6 +227,27 @@ IPSUM;
 
         $ratings->map(function($rating) use ($model) {
             $model->ratings()->save($rating);
+        });
+    }
+
+    private function createPostLists(Collection $posts)
+    {
+        return collect([
+            \Flashtag\Data\PostList::create([
+                'name' => 'Featured Grid',
+                'slug' => str_slug('Featured Grid'),
+            ]),
+            \Flashtag\Data\PostList::create([
+                'name' => 'Featured List',
+                'slug' => str_slug('Featured List'),
+            ]),
+        ])->map(function ($postList) use ($posts) {
+            $posts->each(function ($post) use ($postList) {
+                $postList->posts()->save($post);
+            });
+            $postList->save();
+            
+            return $postList;
         });
     }
 

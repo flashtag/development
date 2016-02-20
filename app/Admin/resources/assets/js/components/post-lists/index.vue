@@ -32,7 +32,7 @@
 </template>
 
 <script>
-    import PostList from '../models/post-list';
+    import PostList from '../../models/post-list';
 
     export default {
 

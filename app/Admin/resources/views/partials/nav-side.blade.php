@@ -7,8 +7,11 @@
         <a class="list-group-item" href="/admin/posts">
             <i class="fa fa-newspaper-o"></i> Posts
         </a>
-        <a class="list-group-item" href="/admin/post-fields">
-            <i class="fa fa-th-list"></i> Post fields
+        <a class="list-group-item indented" href="/admin/post-fields">
+            <i class="fa fa-list-alt"></i> Post fields
+        </a>
+        <a class="list-group-item indented" href="/admin/post-lists">
+            <i class="fa fa-th-list"></i> Post lists
         </a>
         <a class="list-group-item" href="/admin/categories">
             <i class="fa fa-columns"></i> Categories

@@ -10,3 +10,10 @@
         </div>
     </div>
 </div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">Posts</div>
+    <div class="panel-body">
+        <post-list :post-list-id="{{ $postList->id }}"></post-list>
+    </div>
+</div>

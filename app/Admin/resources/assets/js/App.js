@@ -6,7 +6,8 @@ export default {
     components: {
         'posts': require('./components/posts/index.vue'),
         'fields': require('./components/fields/index.vue'),
-        'post-lists': require('./components/post-lists.vue'),
+        'post-lists': require('./components/post-lists/index.vue'),
+        'post-list': require('./components/post-lists/posts.vue'),
         'categories': require('./components/categories.vue'),
         'tags': require('./components/tags.vue'),
         'authors': require('./components/authors.vue'),
@@ -59,7 +60,6 @@ export default {
 
         setLogin: function (user) {
             this.user = new User(user);
-            console.log(user);
             this.authenticated = true;
             this.token = localStorage.getItem('jwt-token');
         },

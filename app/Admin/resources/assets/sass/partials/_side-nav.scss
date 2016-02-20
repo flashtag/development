@@ -50,6 +50,10 @@ $side-nav-bg: $gray-lighter;
       background-color: darken($side-nav-bg, 6.5%);
       color: inherit;
     }
+
+    &.indented {
+      padding-left: 40px;
+    }
   }
 
   .fa {

@@ -18062,7 +18062,8 @@ exports['default'] = {
     components: {
         'posts': require('./components/posts/index.vue'),
         'fields': require('./components/fields/index.vue'),
-        'post-lists': require('./components/post-lists.vue'),
+        'post-lists': require('./components/post-lists/index.vue'),
+        'post-list': require('./components/post-lists/posts.vue'),
         'categories': require('./components/categories.vue'),
         'tags': require('./components/tags.vue'),
         'authors': require('./components/authors.vue'),
@@ -18113,7 +18114,6 @@ exports['default'] = {
 
         setLogin: function setLogin(user) {
             this.user = new _modelsUser2['default'](user);
-            console.log(user);
             this.authenticated = true;
             this.token = localStorage.getItem('jwt-token');
         },
@@ -18130,7 +18130,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./components/authors.vue":38,"./components/categories.vue":39,"./components/fields/index.vue":40,"./components/partials/dropzone.vue":41,"./components/partials/media-input.vue":42,"./components/post-lists.vue":43,"./components/posts/index.vue":44,"./components/tags.vue":45,"./components/users.vue":46,"./models/user":57}],37:[function(require,module,exports){
+},{"./components/authors.vue":38,"./components/categories.vue":39,"./components/fields/index.vue":40,"./components/partials/dropzone.vue":41,"./components/partials/media-input.vue":42,"./components/post-lists/index.vue":43,"./components/post-lists/posts.vue":44,"./components/posts/index.vue":45,"./components/tags.vue":46,"./components/users.vue":47,"./models/user":58}],37:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -18156,7 +18156,7 @@ _vue2['default'].directive('rich-editor', require('./directives/rich-editor'));
 
 new _vue2['default'](require('./App'));
 
-},{"./App":36,"./directives/rich-editor":47,"./directives/select":48,"./http/interceptors/jwtAuth":49,"vue":35,"vue-resource":20}],38:[function(require,module,exports){
+},{"./App":36,"./directives/rich-editor":48,"./directives/select":49,"./http/interceptors/jwtAuth":50,"vue":35,"vue-resource":20}],38:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18227,7 +18227,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/author":50,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],39:[function(require,module,exports){
+},{"../models/author":51,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],39:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18306,7 +18306,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/category":51,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],40:[function(require,module,exports){
+},{"../models/category":52,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],40:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18378,7 +18378,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/field":52,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
+},{"../../models/field":53,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],41:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18618,7 +18618,7 @@ var _interopRequireDefault = require('babel-runtime/helpers/interop-require-defa
 
 exports.__esModule = true;
 
-var _modelsPostList = require('../models/post-list');
+var _modelsPostList = require('../../models/post-list');
 
 var _modelsPostList2 = _interopRequireDefault(_modelsPostList);
 
@@ -18675,14 +18675,148 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/post-list":54,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],44:[function(require,module,exports){
+},{"../../models/post-list":55,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],44:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+exports.__esModule = true;
+
+var _modelsPostList = require('../../models/post-list');
+
+var _modelsPostList2 = _interopRequireDefault(_modelsPostList);
+
+exports['default'] = {
+
+    props: ['post-list-id'],
+
+    data: function data() {
+        return {
+            postList: {
+                posts: []
+            }
+        };
+    },
+
+    created: function created() {
+        this.fetch();
+    },
+
+    methods: {
+
+        fetch: function fetch() {
+            this.$http.get('post-lists/' + this.postListId + '?include=posts').then(function (response) {
+                this.$set('postList', new _modelsPostList2['default'](response.data));
+            });
+        },
+
+        /**
+         * Reorder the posts' list_positions
+         * @param post
+         * @param e
+         */
+        reorder: function reorder(post, e) {
+            var self = this;
+
+            var new_position = parseInt(e.target.value);
+            // If the position is not a number, we are done here.
+            if (isNaN(new_position)) {
+                e.target.value = post.order;
+                return;
+            }
+
+            var affectedPosts = self.posts.filter(function (p) {
+                return p.category.data.id == post.category.data.id;
+            });
+
+            var max = affectedPosts.reduce(function (max, post) {
+                return post.order > max ? post.order : max;
+            }, 0);
+
+            new_position = new_position > 0 ? new_position : 1;
+            new_position = new_position > max ? max : new_position;
+
+            // If the position is not different, we are done here.
+            if (new_position === post.order) {
+                e.target.value = post.order;
+                return;
+            }
+
+            // Shift all the posts' between the new list position and old list position up or down by one.
+            // If we are moving the list position to a lower number, the other numbers should shift up by one,
+            // but if we are moving the list position to a higher number the others should shift down by one.
+            var increment = new_position < post.order ? +1 : -1;
+            var between = new_position < post.order ? [new_position, post.order] : [post.order, new_position];
+
+            this.posts = affectedPosts.map(function (post) {
+                var p = post.order;
+                if (p >= between[0] && p <= between[1]) {
+                    post.order += increment;
+                }
+                return post;
+            });
+
+            // Save the new position on the current post.
+            post.order = new_position;
+
+            // Persist the new order
+            this.saveOrder(post);
+
+            this.sortKey = 'order';
+
+            setTimeout((function () {
+                this.scrollTo($(e.target).closest('tr'));
+            }).bind(this), 0);
+        },
+
+        /**
+         * Save the post's position to the database.
+         * @param post
+         */
+        saveOrder: function saveOrder(post) {
+            return client.patch('/posts/' + post.id + '/reorder', { order: post.order });
+        },
+
+        scrollTo: function scrollTo(target) {
+            $('html,body').animate({
+                scrollTop: target.offset().top - 280
+            }, 700);
+
+            target.addClass("pulse").delay(4000).queue(function () {
+                $(this).removeClass("pulse").dequeue();
+            });
+
+            return false;
+        },
+
+        blur: function blur(e) {
+            e.target.blur();
+        }
+
+    }
+
+};
+module.exports = exports['default'];
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th>Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n            <td class=\"order\">\n                <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"post.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/posts.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, module.exports.template)
+  }
+})()}
+},{"../../models/post-list":55,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],45:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18821,91 +18955,8 @@ exports['default'] = {
             });
         },
 
-        /**
-         * Reorder the posts' list_positions
-         * @param post
-         * @param e
-         */
-        reorder: function reorder(post, e) {
-            var self = this;
-
-            var new_position = parseInt(e.target.value);
-            // If the position is not a number, we are done here.
-            if (isNaN(new_position)) {
-                e.target.value = post.order;
-                return;
-            }
-
-            var affectedPosts = self.posts.filter(function (p) {
-                return p.category.data.id == post.category.data.id;
-            });
-
-            var max = affectedPosts.reduce(function (max, post) {
-                return post.order > max ? post.order : max;
-            }, 0);
-
-            new_position = new_position > 0 ? new_position : 1;
-            new_position = new_position > max ? max : new_position;
-
-            // If the position is not different, we are done here.
-            if (new_position === post.order) {
-                e.target.value = post.order;
-                return;
-            }
-
-            // Shift all the posts' between the new list position and old list position up or down by one.
-            // If we are moving the list position to a lower number, the other numbers should shift up by one,
-            // but if we are moving the list position to a higher number the others should shift down by one.
-            var increment = new_position < post.order ? +1 : -1;
-            var between = new_position < post.order ? [new_position, post.order] : [post.order, new_position];
-
-            this.posts = affectedPosts.map(function (post) {
-                var p = post.order;
-                if (p >= between[0] && p <= between[1]) {
-                    post.order += increment;
-                }
-                return post;
-            });
-
-            // Save the new position on the current post.
-            post.order = new_position;
-
-            // Persist the new order
-            this.saveOrder(post);
-
-            this.sortKey = 'order';
-
-            setTimeout((function () {
-                this.scrollTo($(e.target).closest('tr'));
-            }).bind(this), 0);
-        },
-
         changeFilter: function changeFilter() {
             this.initTooltips();
-        },
-
-        /**
-         * Save the post's position to the database.
-         * @param post
-         */
-        saveOrder: function saveOrder(post) {
-            return client.patch('/posts/' + post.id + '/reorder', { order: post.order });
-        },
-
-        scrollTo: function scrollTo(target) {
-            $('html,body').animate({
-                scrollTop: target.offset().top - 280
-            }, 700);
-
-            target.addClass("pulse").delay(4000).queue(function () {
-                $(this).removeClass("pulse").dequeue();
-            });
-
-            return false;
-        },
-
-        blur: function blur(e) {
-            e.target.blur();
         }
 
     }
@@ -18924,7 +18975,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":51,"../../models/post":55,"../../models/user":57,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],45:[function(require,module,exports){
+},{"../../models/category":52,"../../models/post":56,"../../models/user":58,"babel-runtime/helpers/interop-require-default":1,"moment":4,"sweetalert":14,"vue":35,"vue-hot-reload-api":15}],46:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -18995,7 +19046,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/tag":56,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],46:[function(require,module,exports){
+},{"../models/tag":57,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],47:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -19067,7 +19118,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/user":57,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],47:[function(require,module,exports){
+},{"../models/user":58,"babel-runtime/helpers/interop-require-default":1,"vue":35,"vue-hot-reload-api":15}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19103,7 +19154,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19134,7 +19185,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19177,7 +19228,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19219,7 +19270,7 @@ var Author = (function (_Model) {
 exports['default'] = Author;
 module.exports = exports['default'];
 
-},{"./model":53}],51:[function(require,module,exports){
+},{"./model":54}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19267,7 +19318,7 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":53}],52:[function(require,module,exports){
+},{"./model":54}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19308,7 +19359,7 @@ var Field = (function (_Model) {
 exports['default'] = Field;
 module.exports = exports['default'];
 
-},{"./model":53}],53:[function(require,module,exports){
+},{"./model":54}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19380,7 +19431,7 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19421,7 +19472,7 @@ var PostList = (function (_Model) {
 exports['default'] = PostList;
 module.exports = exports['default'];
 
-},{"./model":53}],55:[function(require,module,exports){
+},{"./model":54}],56:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19524,7 +19575,7 @@ var Post = (function (_Model) {
 exports['default'] = Post;
 module.exports = exports['default'];
 
-},{"./model":53,"moment":4}],56:[function(require,module,exports){
+},{"./model":54,"moment":4}],57:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19567,7 +19618,7 @@ var Tag = (function (_Model) {
 exports['default'] = Tag;
 module.exports = exports['default'];
 
-},{"./model":53}],57:[function(require,module,exports){
+},{"./model":54}],58:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -19608,6 +19659,6 @@ var User = (function (_Model) {
 exports['default'] = User;
 module.exports = exports['default'];
 
-},{"./model":53}]},{},[37]);
+},{"./model":54}]},{},[37]);
 
 //# sourceMappingURL=admin.js.map
