@@ -15,7 +15,7 @@ before_script:
 
 script:
   #- vendor/bin/phpspec run --verbose
-  - vendor/bin/phpunit --debug --verbose --coverage-clover build/logs/clover.xml
+  - vendor/bin/phpunit --testdox --verbose --coverage-clover build/logs/clover.xml
   #- vendor/bin/behat
 
 after_script:
