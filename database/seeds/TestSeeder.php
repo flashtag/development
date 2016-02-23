@@ -1,8 +1,16 @@
 <?php
 
+use Flashtag\Data\Tag;
+use Flashtag\Data\Post;
+use Flashtag\Data\User;
+use Flashtag\Data\Field;
+use Flashtag\Data\Author;
+use Flashtag\Data\Category;
 use Faker\Factory as Faker;
+use Flashtag\Data\PostRating;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
+use Flashtag\Data\Events\PostWasCreated;
 
 class TestSeeder extends Seeder
 {
@@ -43,13 +51,13 @@ class TestSeeder extends Seeder
      */
     private function truncatePgsqlTables()
     {
-        \DB::statement('TRUNCATE TABLE categories CASCADE;');
-        \DB::statement('TRUNCATE TABLE tags CASCADE;');
-        \DB::statement('TRUNCATE TABLE posts CASCADE;');
-        \DB::statement('TRUNCATE TABLE fields CASCADE;');
-        \DB::statement('TRUNCATE TABLE users CASCADE;');
-        \DB::statement('TRUNCATE TABLE post_lists CASCADE;');
-        \DB::statement('TRUNCATE TABLE post_post_list CASCADE;');
+        DB::statement('TRUNCATE TABLE categories CASCADE;');
+        DB::statement('TRUNCATE TABLE tags CASCADE;');
+        DB::statement('TRUNCATE TABLE posts CASCADE;');
+        DB::statement('TRUNCATE TABLE fields CASCADE;');
+        DB::statement('TRUNCATE TABLE users CASCADE;');
+        DB::statement('TRUNCATE TABLE post_lists CASCADE;');
+        DB::statement('TRUNCATE TABLE post_post_list CASCADE;');
     }
 
     /**
@@ -57,15 +65,15 @@ class TestSeeder extends Seeder
      */
     private function truncateMysqlTables()
     {
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        \DB::table('categories')->truncate();
-        \DB::table('tags')->truncate();
-        \DB::table('posts')->truncate();
-        \DB::table('fields')->truncate();
-        \DB::table('users')->truncate();
-        \DB::table('post_lists')->truncate();
-        \DB::table('post_post_list')->truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('categories')->truncate();
+        DB::table('tags')->truncate();
+        DB::table('posts')->truncate();
+        DB::table('fields')->truncate();
+        DB::table('users')->truncate();
+        DB::table('post_lists')->truncate();
+        DB::table('post_post_list')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
     /**
@@ -74,12 +82,12 @@ class TestSeeder extends Seeder
     private function createCategories($tags)
     {
         $categories = new Collection([
-            factory(\Flashtag\Data\Category::class)->create(['name' => 'Hardware', 'slug' => 'hardware']),
-            factory(\Flashtag\Data\Category::class)->create(['name' => 'Software', 'slug' => 'software']),
-            factory(\Flashtag\Data\Category::class)->create(['name' => 'Gaming', 'slug' => 'gaming']),
-            factory(\Flashtag\Data\Category::class)->create(['name' => 'Peripherals', 'slug' => 'peripherals']),
-            factory(\Flashtag\Data\Category::class)->create(['name' => 'Accessories', 'slug' => 'accessories']),
-            factory(\Flashtag\Data\Category::class)->create(['name' => 'Miscellaneous', 'slug' => 'miscellaneous']),
+            factory(Category::class)->create(['name' => 'Hardware', 'slug' => 'hardware']),
+            factory(Category::class)->create(['name' => 'Software', 'slug' => 'software']),
+            factory(Category::class)->create(['name' => 'Gaming', 'slug' => 'gaming']),
+            factory(Category::class)->create(['name' => 'Peripherals', 'slug' => 'peripherals']),
+            factory(Category::class)->create(['name' => 'Accessories', 'slug' => 'accessories']),
+            factory(Category::class)->create(['name' => 'Miscellaneous', 'slug' => 'miscellaneous']),
         ]);
 
         $categories->each(function ($category) use ($tags) {
@@ -95,13 +103,13 @@ class TestSeeder extends Seeder
     private function createTags()
     {
         return new Collection([
-            factory(\Flashtag\Data\Tag::class)->create(['name' => 'html', 'slug' => 'html']),
-            factory(\Flashtag\Data\Tag::class)->create(['name' => 'php', 'slug' => 'php']),
-            factory(\Flashtag\Data\Tag::class)->create(['name' => 'haskell', 'slug' => 'haskell']),
-            factory(\Flashtag\Data\Tag::class)->create(['name' => 'javascript', 'slug' => 'javascript']),
-            factory(\Flashtag\Data\Tag::class)->create(['name' => 'ruby', 'slug' => 'ruby']),
-            factory(\Flashtag\Data\Tag::class)->create(['name' => 'python', 'slug' => 'python']),
-            factory(\Flashtag\Data\Tag::class)->create(['name' => 'scala', 'slug' => 'scala']),
+            factory(Tag::class)->create(['name' => 'html', 'slug' => 'html']),
+            factory(Tag::class)->create(['name' => 'php', 'slug' => 'php']),
+            factory(Tag::class)->create(['name' => 'haskell', 'slug' => 'haskell']),
+            factory(Tag::class)->create(['name' => 'javascript', 'slug' => 'javascript']),
+            factory(Tag::class)->create(['name' => 'ruby', 'slug' => 'ruby']),
+            factory(Tag::class)->create(['name' => 'python', 'slug' => 'python']),
+            factory(Tag::class)->create(['name' => 'scala', 'slug' => 'scala']),
         ]);
     }
 
@@ -111,31 +119,31 @@ class TestSeeder extends Seeder
     private function createFields()
     {
         return new Collection([
-            \Flashtag\Data\Field::create([
+            Field::create([
                 'name'        => 'pull_quote',
                 'label'       => 'Pull quote',
                 'description' => 'Pull quotes',
                 'template'    => 'string',
             ]),
-            \Flashtag\Data\Field::create([
+            Field::create([
                 'name'        => 'copyright',
                 'label'       => 'Copyright',
                 'description' => 'Copyright',
                 'template'    => 'string',
             ]),
-            \Flashtag\Data\Field::create([
+            Field::create([
                 'name'        => 'footnotes',
                 'label'       => 'Footnotes',
                 'description' => 'Footnotes',
                 'template'    => 'rich_text',
             ]),
-            \Flashtag\Data\Field::create([
+            Field::create([
                 'name'        => 'disclaimer',
                 'label'       => 'Disclaimer',
                 'description' => 'Disclaimer',
                 'template'    => 'string',
             ]),
-            \Flashtag\Data\Field::create([
+            Field::create([
                 'name'        => 'teaser',
                 'label'       => 'Teaser',
                 'description' => 'Teaser',
@@ -163,7 +171,7 @@ class TestSeeder extends Seeder
      */
     private function createAuthors()
     {
-        return factory(\Flashtag\Data\Author::class, 5)->create();
+        return factory(Author::class, 5)->create();
     }
 
     /**
@@ -196,7 +204,7 @@ class TestSeeder extends Seeder
     <p>Placeholder text by <a href="http://spaceipsum.com/">Space Ipsum</a>. Photographs by <a href="https://www.flickr.com/photos/nasacommons/">NASA on The Commons</a>.</p>
 IPSUM;
 
-        $posts = factory(\Flashtag\Data\Post::class, 100)->create([
+        $posts = factory(Post::class, 100)->create([
             'body' => $ipsum
         ]);
 
@@ -216,7 +224,7 @@ IPSUM;
             // Additional Relationships
             $this->addRatingsTo($post);
 
-            event(new \Flashtag\Data\Events\PostWasCreated($post));
+            event(new PostWasCreated($post));
 
             return $post;
         });
@@ -227,7 +235,7 @@ IPSUM;
      */
     private function addRatingsTo($model)
     {
-        $ratings = factory(\Flashtag\Data\PostRating::class, $this->faker->numberBetween(2, 10))->create();
+        $ratings = factory(PostRating::class, $this->faker->numberBetween(2, 10))->create();
 
         $ratings->map(function($rating) use ($model) {
             $model->ratings()->save($rating);
@@ -250,7 +258,7 @@ IPSUM;
                 $postList->posts()->save($post);
             });
             $postList->save();
-            
+
             return $postList;
         });
     }
@@ -262,14 +270,14 @@ IPSUM;
     {
         return new Collection([
 
-            \Flashtag\Data\User::create([
+            User::create([
                 'email' => 'admin@test.com',
                 'name' => $this->faker->name,
                 'password' => \Hash::make('password'),
                 'admin' => true,
             ]),
 
-            \Flashtag\Data\User::create([
+            User::create([
                 'email' => 'test@test.com',
                 'name' => $this->faker->name,
                 'password' => \Hash::make('password'),
