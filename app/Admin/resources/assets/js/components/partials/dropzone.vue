@@ -11,7 +11,6 @@
 
 <script>
     import Dropzone from 'dropzone';
-    import Cookies from 'js-cookie';
     import swal from 'sweetalert';
 
     export default {
@@ -35,23 +34,25 @@
         methods: {
 
             initDropzone: function () {
-                // Overwrite dropzone's confirm method with our own
-                Dropzone.confirm = this.confirm;
+                Dropzone.confirm = this.confirm;  // Overwrite dropzone's confirm method with our own
                 // Initialize dropzone with our config and add some even listeners
                 this.dropzone = new Dropzone('#dropzone-image', {
-                    url: "/api" + this.to,
+                    url: this.to,
                     dictDefaultMessage: "Drop image file here to upload",
+                    addRemoveLinks: true,
                     dictRemoveFileConfirmation: "Are you sure you want to delete this?",
                     paramName: "image",
                     maxFiles: 1,
                     maxFilesize: 1.5,
                     uploadMultiple: false,
                     headers: { "Authorization": localStorage.getItem('jwt-token') }
+                }).on('success', function (file, response) {
+                    // response is the model
                 }).on('maxfilesreached', function() {
                     //$('#dropzone-image').removeClass('dz-clickable'); // remove cursor
                     //$('#dropzone-image')[0].removeEventListener('click', this.listeners[1].events.click);
                 }).on('maxfilesexceeded', function (file) {
-                    //this.removeFile(file);
+                    this.removeFile(file);
                 }).on('removedfile', function (file) {
                     this.delete(file);
                 }.bind(this));
@@ -62,19 +63,17 @@
             },
 
             delete: function (file) {
-                client({
-                    method: 'DELETE',
-                    path: this.to
-                }).then(function () {
-                    swal({
-                        html: true,
-                        title: 'Deleted!',
-                        text: '<strong>' + file.name + '</strong> was deleted!',
-                        type: 'success'
+                this.$http.delete(this.to)
+                    .then(function () {
+                        swal({
+                            html: true,
+                            title: 'Deleted!',
+                            text: '<strong>' + file.name + '</strong> was deleted!',
+                            type: 'success'
+                        });
+                    }, function () {
+                        swal("Oops", "We couldn't connect to the server!", "error");
                     });
-                }, function () {
-                    swal("Oops", "We couldn't connect to the server!", "error");
-                });
             },
 
             showExistingImage: function () {

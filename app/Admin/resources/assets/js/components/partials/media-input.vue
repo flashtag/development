@@ -30,10 +30,6 @@
 
         props: ['type', 'url', 'image-path', 'image-upload'],
 
-//        components: {
-//            dropzone: require('./dropzone.vue')
-//        },
-
         data: function () {
             return {
                 mediaTypes: [
@@ -64,8 +60,8 @@
         methods: {
 
             changeSelect: function () {
-                this.showDropzone = (this.type == 'image');
-                this.showMediaInput = this.type && (this.type.length > 0) && (this.type != 'image');
+                this.showDropzone = this.type == 'image';
+                this.showMediaInput = this.type == 'video';
 
                 this.updatePreview();
             },
@@ -81,7 +77,15 @@
             setImagePreview: function () {
                 this.$http.get('/admin/media/preview/image', { url: this.imageUrl }).then(function (response) {
                     document.getElementById('preview-image').src = this.imageUrl;
-                    console.log(this.imageUrl);
+                    // console.log(this.imageUrl);
+                }, function (response) {
+                    // failed
+                });
+            },
+
+            setVideoPreview: function () {
+                this.$http.get('/admin/media/preview/' + this.type, { url: this.url }).then(function (response) {
+                    document.getElementById('preview-frame').contentDocument.write(response.data);
                 }, function (response) {
                     // failed
                 });
@@ -107,14 +111,6 @@
                 });
 
                 return valid;
-            },
-
-            setVideoPreview: function () {
-                this.$http.get('/admin/media/preview/' + this.type, { url: this.url }).then(function (response) {
-                    document.getElementById('preview-frame').contentDocument.write(response.data);
-                }, function (response) {
-                    // failed
-                });
             }
         }
     }

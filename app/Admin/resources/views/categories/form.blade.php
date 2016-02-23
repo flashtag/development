@@ -52,7 +52,7 @@
                 type="{{ $category->media ? $category->media->type : 'image' }}"
                 url="{{ $category->media ? $category->media->url : '' }}"
                 image-path="/img/uploads/media/"
-                image-upload="/categories/{{  $category->id }}/image">
+                image-upload="/api/categories/{{  $category->id }}/image">
         </media-input>
     </div>
 </div>
