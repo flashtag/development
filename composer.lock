@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "69a8afda3e3f3e994036f4d738db3b74",
+    "hash": "366d3983e652d3549e85f47cc496a68c",
     "content-hash": "a83ae33e0e4c99ef5b213c2f4577c6cf",
     "packages": [
         {
@@ -813,12 +813,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fzaninotto/Faker.git",
-                "reference": "d8c0bebc230284edc91b5e7091013e7a0c55bf34"
+                "reference": "66ea6b0334813292af03ffbb8c0ee6beee65fd89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/d8c0bebc230284edc91b5e7091013e7a0c55bf34",
-                "reference": "d8c0bebc230284edc91b5e7091013e7a0c55bf34",
+                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/66ea6b0334813292af03ffbb8c0ee6beee65fd89",
+                "reference": "66ea6b0334813292af03ffbb8c0ee6beee65fd89",
                 "shasum": ""
             },
             "require": {
@@ -855,7 +855,7 @@
                 "faker",
                 "fixtures"
             ],
-            "time": "2016-02-20 14:15:56"
+            "time": "2016-02-23 15:32:04"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -925,12 +925,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "b59321a17f3e3ebc14f2bbbf73b4d065a88cf3f6"
+                "reference": "dc03e97371e37172ff94547980f898659de76ffc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/b59321a17f3e3ebc14f2bbbf73b4d065a88cf3f6",
-                "reference": "b59321a17f3e3ebc14f2bbbf73b4d065a88cf3f6",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/dc03e97371e37172ff94547980f898659de76ffc",
+                "reference": "dc03e97371e37172ff94547980f898659de76ffc",
                 "shasum": ""
             },
             "require": {
@@ -968,7 +968,7 @@
             "keywords": [
                 "promise"
             ],
-            "time": "2016-02-10 14:20:03"
+            "time": "2016-02-23 21:19:12"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -1179,12 +1179,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "6e08e8302384c69ad475855721c0976cee3d8674"
+                "reference": "d899fbda59bf3ffcde11a9b443c01043b76f40b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/6e08e8302384c69ad475855721c0976cee3d8674",
-                "reference": "6e08e8302384c69ad475855721c0976cee3d8674",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/d899fbda59bf3ffcde11a9b443c01043b76f40b3",
+                "reference": "d899fbda59bf3ffcde11a9b443c01043b76f40b3",
                 "shasum": ""
             },
             "require": {
@@ -1299,7 +1299,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2016-02-23 03:52:10"
+            "time": "2016-02-24 15:13:21"
         },
         {
             "name": "league/flysystem",
@@ -4530,12 +4530,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "6e351261f9cd33daf205a131a1ba61c6d33bd483"
+                "reference": "264188ddf4d3586c80ea615f8ec8eaea34e652a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/6e351261f9cd33daf205a131a1ba61c6d33bd483",
-                "reference": "6e351261f9cd33daf205a131a1ba61c6d33bd483",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/264188ddf4d3586c80ea615f8ec8eaea34e652a1",
+                "reference": "264188ddf4d3586c80ea615f8ec8eaea34e652a1",
                 "shasum": ""
             },
             "require": {
@@ -4594,7 +4594,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2016-02-11 14:56:33"
+            "time": "2016-02-23 11:54:56"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -5211,12 +5211,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "4f9c94a6c632cdd01f62b08f6ff10744630b1959"
+                "reference": "f1f7ccf4c17454cf14f43178624c4890cba788d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/4f9c94a6c632cdd01f62b08f6ff10744630b1959",
-                "reference": "4f9c94a6c632cdd01f62b08f6ff10744630b1959",
+                "url": "https://api.github.com/repos/symfony/config/zipball/f1f7ccf4c17454cf14f43178624c4890cba788d8",
+                "reference": "f1f7ccf4c17454cf14f43178624c4890cba788d8",
                 "shasum": ""
             },
             "require": {
@@ -5256,7 +5256,7 @@
             ],
             "description": "Symfony Config Component",
             "homepage": "https://symfony.com",
-            "time": "2016-02-18 09:00:40"
+            "time": "2016-02-23 16:17:05"
         },
         {
             "name": "symfony/dependency-injection",
@@ -5323,12 +5323,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "9d8e461c07b77d68400b88c0eb4c6fe511b9456d"
+                "reference": "c8a0b857efc7c19b087129a7d7555f866d61b557"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/9d8e461c07b77d68400b88c0eb4c6fe511b9456d",
-                "reference": "9d8e461c07b77d68400b88c0eb4c6fe511b9456d",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/c8a0b857efc7c19b087129a7d7555f866d61b557",
+                "reference": "c8a0b857efc7c19b087129a7d7555f866d61b557",
                 "shasum": ""
             },
             "require": {
@@ -5364,7 +5364,7 @@
             ],
             "description": "Symfony Filesystem Component",
             "homepage": "https://symfony.com",
-            "time": "2016-02-04 12:57:09"
+            "time": "2016-02-23 16:17:05"
         },
         {
             "name": "symfony/stopwatch",

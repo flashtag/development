@@ -24,7 +24,7 @@ class PostEventListener
     {
         $events->listen(
             'Flashtag\Data\Events\PostWasCreated',
-            'Flashtag\Data\Listeners\PostEventListener@onPostCreated'
+            self::class .'@onPostCreated'
         );
     }
 }
