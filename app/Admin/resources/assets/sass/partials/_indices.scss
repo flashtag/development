@@ -1,0 +1,15 @@
+
+.create-button {
+  @include clearfix;
+
+  button {
+    float: right;
+  }
+}
+
+.table td .tag.label {
+  margin-right: 5px;
+  &:last-child {
+    margin-right: 0px;
+  }
+}

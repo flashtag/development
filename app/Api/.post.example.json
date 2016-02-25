@@ -1,0 +1,102 @@
+
+// http://app.test/api/posts?include=category,tags,meta,fields&count=1&page=4
+
+{
+  "data": [
+    {
+      "id": 4,
+      "title": "Molestias voluptatem reiciendis ea id.",
+      "slug": "molestias-voluptatem-reiciendis-ea-id",
+      "subtitle": "Dolorum autem repellat quae.",
+      "category_id": 1,
+      "body": "Quisquam modi veniam non. Quia dolor aut ut numquam beatae. Alias rem saepe et quo quo ullam corrupti. Nihil nemo et reprehenderit rerum aut atque debitis dolores. Accusamus eos ut in necessitatibus. Sit vero itaque repellat fuga rerum reprehenderit. Facere est dignissimos culpa quia. Quos hic enim autem laudantium enim mollitia labore. Recusandae consectetur perferendis atque dolore quam rerum.",
+      "is_published": true,
+      "start_showing_at": 1421401216,
+      "stop_showing_at": 1469247594,
+      "created_at": 1446662739,
+      "updated_at": 1446662740,
+      "category": {
+        "data": {
+          "id": 1,
+          "name": "Quia aperiam maiores.",
+          "slug": "quia-aperiam-maiores",
+          "description": "Consequuntur provident voluptatibus sed tempore alias pariatur perferendis mollitia. Sint impedit voluptatum explicabo ut molestias nam. Pariatur delectus beatae repudiandae harum exercitationem. Tempora dignissimos fuga consectetur. Debitis sit officiis corrupti sint est est eaque. Architecto doloremque magni eligendi et beatae. Illo nisi ipsum consequatur provident id minima consequatur.",
+          "created_at": 1446662739,
+          "updated_at": 1446662739
+        }
+      },
+      "tags": {
+        "data": [
+          {
+            "id": 2,
+            "name": "Maiores omnis veniam sint enim earum.",
+            "slug": "maiores-omnis-veniam-sint-enim-earum",
+            "description": "Perspiciatis adipisci tenetur et voluptas iste nisi. Enim aut omnis distinctio. Autem ipsa eum eum harum. Ex labore temporibus debitis sequi modi ipsam illum. Nisi quidem labore ea libero. Sint impedit itaque voluptates maiores voluptas excepturi. Sint tempora labore consequatur inventore aut.",
+            "created_at": 1446662739,
+            "updated_at": 1446662739
+          },
+          {
+            "id": 3,
+            "name": "Laudantium et eos id.",
+            "slug": "laudantium-et-eos-id",
+            "description": "Praesentium adipisci iure ut tempore aut assumenda. Qui dolorum aut nemo dolorum quis earum. Minus voluptatibus sint perspiciatis libero dolores. Quibusdam autem praesentium tenetur voluptas magni. Id in molestiae eos et veniam. Consectetur eveniet occaecati molestias ex quia tempora. Molestiae et sint impedit illum. Voluptates aliquam maxime sapiente accusantium accusantium quasi molestiae. Commodi ipsum reiciendis et quis qui quis.",
+            "created_at": 1446662739,
+            "updated_at": 1446662739
+          }
+        ]
+      },
+      "fields": {
+        "data": [
+          {
+            "label": "Pull quote",
+            "name": "pull_quote",
+            "value": "perspiciatis"
+          },
+          {
+            "label": "Copyright",
+            "name": "copyright",
+            "value": "ut"
+          },
+          {
+            "label": "Footnotes",
+            "name": "footnotes",
+            "value": "iure"
+          },
+          {
+            "label": "Disclaimer",
+            "name": "disclaimer",
+            "value": "ipsa"
+          },
+          {
+            "label": "Teaser",
+            "name": "teaser",
+            "value": "illum"
+          }
+        ]
+      },
+      "meta": {
+        "data": {
+          "id": 4,
+          "url": "http://www.wunsch.net/totam-perspiciatis-nobis-modi-magnam",
+          "description": "Assumenda consequatur aut enim sint praesentium beatae id quia. Dolores voluptates deleniti dolorem iste illum doloremque possimus.",
+          "image": "http://lorempixel.com/300/480/?26923",
+          "created_at": 1446662740,
+          "updated_at": 1446662740
+        }
+      }
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "total": 100,
+      "count": 1,
+      "per_page": 1,
+      "current_page": 4,
+      "total_pages": 100,
+      "links": {
+        "previous": "http://app.test/api/posts/?count=1&include=category,tags,meta,fields&page=3",
+        "next": "http://app.test/api/posts/?count=1&include=category,tags,meta,fields&page=5"
+      }
+    }
+  }
+}

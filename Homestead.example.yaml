@@ -1,0 +1,27 @@
+---
+ip: "192.168.10.10"
+memory: 2048
+cpus: 1
+hostname: cms
+name: cms
+provider: virtualbox
+
+authorize: ~/.ssh/id_rsa.pub
+
+keys:
+    - ~/.ssh/id_rsa
+
+folders:
+    - map: "~/Code/flashtag/flashtag"
+      to: "/home/vagrant/flashtag"
+
+sites:
+    - map: app.test
+      to: "/home/vagrant/flashtag/public"
+
+databases:
+    - homestead
+
+variables:
+    - key: APP_ENV
+      value: local

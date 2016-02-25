@@ -1,0 +1,9 @@
+default:
+    extensions:
+        Laracasts\Behat: ~
+        Behat\MinkExtension:
+            default_session: selenium2
+            laravel: ~
+            selenium2:
+              wd_host: "http://app.test:4444/wd/hub"
+            browser_name: phantomjs

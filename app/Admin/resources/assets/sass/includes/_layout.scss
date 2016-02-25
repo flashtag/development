@@ -1,0 +1,19 @@
+
+.Main {
+  display: flex;
+  min-height: 100vh;
+}
+
+.Main__menu {
+  @include make-xs-column(2);
+  position: relative;
+  padding-left: 0px;
+  padding-right: 0px;
+  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.3);
+  z-index: 1031;
+}
+
+.Main__container {
+  @include make-md-column(10);
+  padding: 100px 40px 40px 40px !important;
+}

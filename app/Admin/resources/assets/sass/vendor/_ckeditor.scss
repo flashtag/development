@@ -1,0 +1,30 @@
+
+.cke {
+  border-top: none !important;
+  border-bottom: 1px solid #ddd;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+
+  .cke_top {
+    border: 1px solid $gray-lighter !important;
+  }
+
+  a.cke_button,
+  a.cke_combo_button {
+    opacity: 0.3;
+    transition: opacity ease-in-out 0.3s;
+    &:hover, &:focus, &:active {
+      background-image: none !important;
+    }
+  }
+
+}
+
+.cke_focus {
+  border-bottom: 2px solid #00718e !important;
+  margin-bottom: -1px !important;
+
+  a.cke_button,
+  a.cke_combo_button {
+    opacity: 0.7;
+  }
+}

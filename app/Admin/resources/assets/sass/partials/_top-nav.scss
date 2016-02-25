@@ -1,0 +1,20 @@
+
+.Top-nav {
+  z-index: 1040;
+
+  &.navbar {
+    border-radius: 0px;
+  }
+
+  &.navbar-inverse {
+    .navbar-brand,
+    .navbar-nav > li > a {
+      color: #fff;
+    }
+  }
+
+  .container-fluid {
+    //padding-left: 55px;
+    padding-right: 55px;
+  }
+}

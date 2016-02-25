@@ -1,0 +1,171 @@
+$toggle-on: $rolf-green;
+
+// --------------------------------------------------------------------------
+// CSS TOGGLE
+// - http://callmenick.com/post/css-toggle-switch-examples
+// --------------------------------------------------------------------------
+.cmn-toggle {
+  position: absolute !important;
+  margin-left: -9999px;
+  visibility: hidden;
+}
+.cmn-toggle + label {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+// ROUND TOGGLE
+input.cmn-toggle-round + label {
+  padding: 2px;
+  width: 120px;
+  height: 60px;
+  background-color: #95a5a6;
+  border-radius: 60px;
+}
+input.cmn-toggle-round + label:before,
+input.cmn-toggle-round + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: "";
+}
+input.cmn-toggle-round + label:before {
+  right: 1px;
+  background-color: #f1f1f1;
+  border-radius: 60px;
+  transition: background 0.4s;
+}
+input.cmn-toggle-round + label:after {
+  width: 58px;
+  background-color: #fff;
+  border-radius: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: margin 0.4s;
+}
+input.cmn-toggle-round:checked + label:before {
+  background-color: #18bc9c;
+}
+input.cmn-toggle-round:checked + label:after {
+  margin-left: 60px;
+}
+// ROUND TOGGLE MD
+input.cmn-toggle-round-md + label {
+  padding: 1px;
+  width: 80px;
+  height: 40px;
+  background-color: #95a5a6;
+  border-radius: 40px;
+}
+input.cmn-toggle-round-md + label:before,
+input.cmn-toggle-round-md + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: "";
+}
+input.cmn-toggle-round-md + label:before {
+  right: 1px;
+  background-color: #f1f1f1;
+  border-radius: 40px;
+  transition: background 0.4s;
+}
+input.cmn-toggle-round-md + label:after {
+  width: 38px;
+  background-color: #fff;
+  border-radius: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: margin 0.4s;
+}
+input.cmn-toggle-round-md:checked + label:before {
+  background-color: #18bc9c;
+}
+input.cmn-toggle-round-md:checked + label:after {
+  margin-left: 40px;
+}
+
+// ROUND TOGGLE SMALL
+input.cmn-toggle-round-sm {
+  position: absolute;
+}
+input.cmn-toggle-round-sm + label {
+  padding: 1px;
+  width: 40px;
+  height: 20px;
+  background-color: #95a5a6;
+  border-radius: 20px;
+}
+input.cmn-toggle-round-sm + label:before,
+input.cmn-toggle-round-sm + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: "";
+}
+input.cmn-toggle-round-sm + label:before {
+  right: 1px;
+  background-color: #f1f1f1;
+  border-radius: 20px;
+  transition: background 0.4s;
+}
+input.cmn-toggle-round-sm + label:after {
+  width: 18px;
+  background-color: #fff;
+  border-radius: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: margin 0.4s;
+}
+input.cmn-toggle-round-sm:checked + label:before {
+  background-color: $toggle-on;
+}
+input.cmn-toggle-round-sm:checked + label:after {
+  margin-left: 20px;
+}
+// YES/NO
+input.cmn-toggle-yes-no + label {
+  padding: 2px;
+  width: 90px;
+  height: 45px;
+}
+input.cmn-toggle-yes-no + label:before,
+input.cmn-toggle-yes-no + label:after {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  color: #fff;
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  text-align: center;
+  line-height: 45px;
+}
+input.cmn-toggle-yes-no + label:before {
+  background-color: #95a5a6;
+  content: attr(data-off);
+  transition: transform 0.5s;
+  backface-visibility: hidden;
+  border-radius: 4px;
+}
+input.cmn-toggle-yes-no + label:after {
+  background-color: $toggle-on;
+  content: attr(data-on);
+  transition: transform 0.5s;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  border-radius: 4px;
+}
+input.cmn-toggle-yes-no:checked + label:before {
+  transform: rotateY(180deg);
+}
+input.cmn-toggle-yes-no:checked + label:after {
+  transform: rotateY(0);
+}

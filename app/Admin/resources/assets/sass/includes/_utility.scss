@@ -1,0 +1,27 @@
+
+.content-loading {
+  margin-top: 100px;
+  text-align: center;
+  i {
+    font-size: 10rem;
+  }
+}
+
+.text-centered {
+  text-align: center;
+}
+
+.table {
+  thead, tbody, tfoot {
+    tr {
+      td, th {
+        &:first-child {
+          padding-left: 15px;
+        }
+        &:last-child {
+          padding-right: 15px;
+        }
+      }
+    }
+  }
+}

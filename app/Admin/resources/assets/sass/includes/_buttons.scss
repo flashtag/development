@@ -1,0 +1,14 @@
+
+.btn:focus,
+.btn.focus,
+.btn:active:focus,
+.btn:active.focus,
+.btn.active:focus,
+.btn.active.focus,
+a:focus {
+  outline: none;
+}
+
+.btn-link, .btn-link:hover {
+  color: $brand-primary;
+}

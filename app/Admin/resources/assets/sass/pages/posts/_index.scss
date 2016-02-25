@@ -1,0 +1,42 @@
+.Posts {
+
+  .Post {
+    a {
+      color: #666;
+    }
+  }
+
+  .Post--unpublished {
+    color: #bbb;
+    a {
+      color: #bbb;
+    }
+  }
+
+}
+
+.filters {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.Posts,
+.CategoryPosts {
+  .order {
+    width: 20px;
+  }
+  .post__order {
+    width: 48px;
+    border: none;
+    background: inherit;
+    box-shadow: none;
+    font-size: 13px;
+
+    &:focus {
+      border: thin;
+      background: transparent;
+      outline: none;
+      box-shadow: inset 0 -2px 0 $brand-primary;
+    }
+  }
+}

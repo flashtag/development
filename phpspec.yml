@@ -1,0 +1,16 @@
+suites:
+    cms:
+        namespace: Flashtag\Cms
+        psr4_prefix: Flashtag\Cms
+        src_path: app
+        spec_path: tests
+    api:
+        namespace: Flashtag\Api
+        psr4_prefix: Flashtag\Api
+        src_path: vendor/flashtag/api/src
+        spec_path: tests/api
+
+extensions:
+    - PhpSpec\Laravel\Extension\LaravelExtension
+
+formatter.name: pretty
