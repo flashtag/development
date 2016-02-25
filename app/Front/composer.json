@@ -11,5 +11,7 @@
         "psr-4": {
             "Flashtag\\Front\\": ""
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

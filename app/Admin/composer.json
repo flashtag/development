@@ -14,5 +14,7 @@
         "psr-4": {
             "Flashtag\\Admin\\": ""
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

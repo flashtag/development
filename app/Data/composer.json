@@ -20,5 +20,6 @@
         },
         "exclude-from-classmap": ["/database/"]
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
