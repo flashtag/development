@@ -2,10 +2,14 @@
 
 namespace Flashtag\Data\Providers;
 
-use Flashtag\Data\Presenters\Decorators\ModelDecorator;
+use Flashtag\Data\Setting;
+use Flashtag\Data\Settings\Settings;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider;
-use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
+use Flashtag\Data\Settings\SettingsMiddleware;
+use Flashtag\Data\Presenters\Decorators\ModelDecorator;
 use McCool\LaravelAutoPresenter\Decorators\AtomDecorator;
+use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
 
 class DataServiceProvider extends ServiceProvider
 {
@@ -26,15 +30,16 @@ class DataServiceProvider extends ServiceProvider
     {
         $this->registerBindings();
         $this->registerServiceProviders();
-        $this->registerBindings();
     }
 
     /**
      * Perform post-registration booting of services.
      */
-    public function boot()
+    public function boot(Kernel $kernel)
     {
         $this->registerPublishes();
+
+        $kernel->pushMiddleware(SettingsMiddleware::class);
     }
 
     /**
@@ -53,6 +58,12 @@ class DataServiceProvider extends ServiceProvider
     private function registerBindings()
     {
         $this->app->bind(AtomDecorator::class, ModelDecorator::class);
+
+        $this->app->singleton('settings', function ($app) {
+            return new Settings($app['cache.store'], $app['config'], $app['events'], new Setting);
+        });
+
+        $this->app->alias('settings', Settings::class);
     }
 
     /**

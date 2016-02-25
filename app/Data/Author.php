@@ -2,6 +2,7 @@
 
 namespace Flashtag\Data;
 
+use Storage;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -56,7 +57,7 @@ class Author extends Model
     public function setPhotoAttribute($value)
     {
         if ($this->photo == $value) {
-            return;
+            return $value;
         }
 
         if (! empty($this->photo)) {
@@ -73,11 +74,11 @@ class Author extends Model
      */
     private function deletePhoto()
     {
-        if (! \Storage::exists($this->photo)) {
+        if (! Storage::exists($this->photo)) {
             return false;
         }
 
-        return \Storage::delete($this->photo);
+        return Storage::delete($this->photo);
     }
 
     public static function getBySlug($author_slug)

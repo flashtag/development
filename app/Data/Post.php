@@ -439,7 +439,7 @@ class Post extends Model implements HasPresenter
 
         return $query->where(function ($query) use ($columns, $search) {
             foreach ($columns as $column) {
-                $query->orWhere($column, 'LIKE', "%{$search}%"); 
+                $query->orWhere($column, 'LIKE', "%{$search}%");
             }
         });
     }
