@@ -20,10 +20,12 @@ class TestSeeder extends Seeder
     {
         $this->faker = $faker::create();
 
-        if (config('database.default') == 'pgsql') {
-            $this->truncatePgsqlTables();
+        $driver = config('database.connection.'. config('database.default') .'.driver');
+
+        if (in_array($driver, ['pgsql', 'mysql'])) {
+            $this->{'truncate'. ucfirst($driver) .'Tables'}();
         } else {
-            $this->truncateMysqlTables();
+            $this->truncateTables();
         }
     }
 
@@ -47,7 +49,7 @@ class TestSeeder extends Seeder
     }
 
     /**
-     * Truncate the database tables.
+     * Truncate the database tables for postgres.
      */
     private function truncatePgsqlTables()
     {
@@ -61,11 +63,22 @@ class TestSeeder extends Seeder
     }
 
     /**
-     * Truncate the database tables.
+     * Truncate the database tables for mysql.
      */
     private function truncateMysqlTables()
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        $this->truncateTables();
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+    }
+
+    /**
+     * Truncate the database tables.
+     */
+    private function truncateTables()
+    {
         DB::table('categories')->truncate();
         DB::table('tags')->truncate();
         DB::table('posts')->truncate();
@@ -73,7 +86,6 @@ class TestSeeder extends Seeder
         DB::table('users')->truncate();
         DB::table('post_lists')->truncate();
         DB::table('post_post_list')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
     /**
