@@ -1,16 +1,17 @@
 <?php
 
-use Flashtag\Data\Tag;
-use Flashtag\Data\Post;
-use Flashtag\Data\User;
-use Flashtag\Data\Field;
+use Faker\Factory as Faker;
 use Flashtag\Data\Author;
 use Flashtag\Data\Category;
-use Faker\Factory as Faker;
+use Flashtag\Data\Events\PostWasCreated;
+use Flashtag\Data\Field;
+use Flashtag\Data\Post;
 use Flashtag\Data\PostRating;
+use Flashtag\Data\Tag;
+use Flashtag\Data\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
-use Flashtag\Data\Events\PostWasCreated;
+use Illuminate\Support\Facades\DB;
 
 class TestSeeder extends Seeder
 {
@@ -20,12 +21,18 @@ class TestSeeder extends Seeder
     {
         $this->faker = $faker::create();
 
-        $driver = config('database.connection.'. config('database.default') .'.driver');
+        $db = config('database.default');
 
-        if (in_array($driver, ['pgsql', 'mysql'])) {
-            $this->{'truncate'. ucfirst($driver) .'Tables'}();
-        } else {
-            $this->truncateTables();
+        switch ($db) {
+            case 'mysql':
+                $this->truncateMysqlTables();
+                break;
+            case 'pgsql':
+                $this->truncatePgsqlTables();
+                break;
+            default:
+                $this->truncateTables();
+                break;
         }
     }
 
@@ -53,13 +60,11 @@ class TestSeeder extends Seeder
      */
     private function truncatePgsqlTables()
     {
-        DB::statement('TRUNCATE TABLE categories CASCADE;');
-        DB::statement('TRUNCATE TABLE tags CASCADE;');
-        DB::statement('TRUNCATE TABLE posts CASCADE;');
-        DB::statement('TRUNCATE TABLE fields CASCADE;');
-        DB::statement('TRUNCATE TABLE users CASCADE;');
-        DB::statement('TRUNCATE TABLE post_lists CASCADE;');
-        DB::statement('TRUNCATE TABLE post_post_list CASCADE;');
+        DB::statement(
+            'TRUNCATE TABLE
+                categories, tags, field_post, posts, fields, users, post_post_list, post_lists
+            RESTART IDENTITY CASCADE;'
+        );
     }
 
     /**
