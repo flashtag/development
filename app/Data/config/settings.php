@@ -6,4 +6,6 @@ return [
 
     'site_tagline' => 'The simple CMS',
 
+    'template' => 'clean-blog',
+
 ];
