@@ -6,6 +6,7 @@ use Flashtag\Data\User;
 use Flashtag\Data\Field;
 use Flashtag\Data\Author;
 use Flashtag\Data\Category;
+use Flashtag\Data\PostList;
 use Faker\Factory as Faker;
 use Flashtag\Data\PostRating;
 use Illuminate\Database\Seeder;
@@ -257,11 +258,11 @@ IPSUM;
     private function createPostLists(Collection $posts)
     {
         return collect([
-            \Flashtag\Data\PostList::create([
+            PostList::create([
                 'name' => 'Featured Grid',
                 'slug' => str_slug('Featured Grid'),
             ]),
-            \Flashtag\Data\PostList::create([
+            PostList::create([
                 'name' => 'Featured List',
                 'slug' => str_slug('Featured List'),
             ]),

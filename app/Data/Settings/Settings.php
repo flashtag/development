@@ -35,31 +35,31 @@ class Settings
     protected $setting;
 
     /**
-     * The instance cache of settings
+     * The instance cache of settings.
      * @var array
      */
     protected $settings = [];
 
     /**
-     * Have we loaded the cached settings
+     * Have we loaded the cached settings.
      * @var boolean
      */
     protected $grabbedCache = false;
 
     /**
-     * The dirty settings count
+     * The dirty settings count.
      * @var integer
      */
     protected $dirtyCount = 0;
 
     /**
-     * The names of the dirty settings
+     * The names of the dirty settings.
      * @var array
      */
     protected $dirty = [];
 
     /**
-     * Da construcdor
+     * Da construcdor.
      *
      * @param Illuminate\Contracts\Cache\Repository   $cache
      * @param Illuminate\Contracts\Config\Repository  $config
@@ -75,19 +75,44 @@ class Settings
     }
 
     /**
-     * Get all settings from local cache or cache repository/query.
+     * Get all settings from local cache or cache repository/query with
+     * optional config settings.
      *
+     * @param  bool $withConfig
      * @return array
      */
-    public function all($forceCached = false)
+    public function all($withConfig = true)
     {
         // If we have not yet grabbed the settings from the cache we will
         // do that now and merge it into any previously set settings
-        if (! $this->grabbedCache || $forceCached) {
+        if (! $this->grabbedCache) {
             $this->getCached();
         }
 
+        if ($withConfig) {
+            // Merge in the settings defined in the config
+            return array_merge(
+                array_dot($this->config->get('settings', [])),
+                $this->settings
+            );
+        }
+
         return $this->settings;
+    }
+
+    /**
+     * Force merging the cache in.
+     *
+     * @param  bool $mergeCache
+     * @return void
+     */
+    public function snagThatCache($mergeCache = true)
+    {
+        if ($mergeCache) {
+            $this->getCached();
+        }
+
+        $this->grabbedCache = true;
     }
 
     /**
@@ -104,7 +129,7 @@ class Settings
             return $this->settings[$key];
         }
 
-        // if we have not yet grabbed le cache
+        // If we have not yet grabbed le cache
         if (! $this->grabbedCache) {
             // Grab the settings from the cache, or query;
             $this->getCached();
@@ -138,7 +163,7 @@ class Settings
     }
 
     /**
-     * Remove a setting by name
+     * Remove a setting by name.
      *
      * @param  string $key
      * @return void
@@ -171,7 +196,7 @@ class Settings
     }
 
     /**
-     * Locally caches a setting for later use.
+     * Locally caches a setting and dirties it up real good like.
      *
      * @param  array  $setting
      * @return void
@@ -183,7 +208,7 @@ class Settings
     }
 
     /**
-     * Forget a local cached setting by name
+     * Forget a local cached setting by name.
      *
      * @param  string $key
      * @return void
@@ -213,9 +238,9 @@ class Settings
     }
 
     /**
-     * Do we have some dirty dirty settings
+     * Do we have some dirty dirty settings?
      *
-     * @return boolean da dirt
+     * @return bool da dirt
      */
     public function isDirty()
     {
@@ -223,7 +248,7 @@ class Settings
     }
 
     /**
-     * Get the name of dirty settings
+     * Get the name of dirty settings.
      *
      * @return array
      */
@@ -233,7 +258,7 @@ class Settings
     }
 
     /**
-     * Persist our dirty dirty settings
+     * Persist our dirty dirty settings.
      *
      * @return void
      */
@@ -267,8 +292,14 @@ class Settings
      */
     public function __invoke($key = null, $default = null)
     {
+        // If nothing passed use all (with config)
         if (is_null($key)) {
-            return $this->settings;
+            return $this->all();
+        }
+
+        // If false return settings (without config)
+        if ($key === false) {
+            return $this->all(false);
         }
 
         if (is_array($key)) {
