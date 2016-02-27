@@ -9,7 +9,7 @@
     </ol>
 
 
-    <form class="Category EditForm" action="{{ route('admin.categories.store') }}" method="POST">
+    <form class="Category EditForm" action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
         {{ csrf_field() }}
 
         <section class="info row">

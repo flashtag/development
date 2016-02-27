@@ -130,11 +130,22 @@ class CategoriesController extends Controller
         $type = $request->get('media-type');
         $url = $request->get('media-link');
 
+        if ($type == 'image') {
+            $this->handleImageUpload($category, $request->file('image'));
+        }
+
         if ($type && $url) {
             $media = $category->media ?: new Media();
             $media->type = $type;
             $media->url = $url;
             $category->media()->save($media);
+        }
+    }
+
+    private function handleImageUpload(Category $category, $image)
+    {
+        if (! empty($image)) {
+            $category->addImage($image);
         }
     }
 }

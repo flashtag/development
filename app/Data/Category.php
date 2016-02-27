@@ -3,10 +3,12 @@
 namespace Flashtag\Data;
 
 use Illuminate\Database\Eloquent\Model;
+use Storage;
 
 /**
  * Class Category
  *
+ * @property int $id
  * @property \Illuminate\Database\Eloquent\Collection $tags
  * @property \Flashtag\Data\Media $media
  */
@@ -65,10 +67,24 @@ class Category extends Model
      */
     public function addImage($image)
     {
-        $name = 'category__'.$this->slug.'.'.$image->getExtension();
+        $this->removeImage();
+        $name = 'category__'.$this->id.'__'.$this->slug.'.'.$this->imageExtension($image);
         $image->move(public_path('images/media'), $name);
 
+        // TODO: generate thumbnails
+
         $this->updateMedia('image', $name);
+    }
+
+    /**
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     * @return string|null
+     */
+    private function imageExtension($image)
+    {
+        $parts = explode('.', $image->getClientOriginalName());
+
+        return array_pop($parts);
     }
 
     /**
@@ -76,11 +92,11 @@ class Category extends Model
      */
     public function removeImage()
     {
-        if ($this->media && $this->media->type == 'image') {
+        if ($this->media && $this->media->type == 'image' && $this->media->url) {
             $img = '/public/images/media/' . $this->media->url;
 
-            if (\Storage::exists($img)) {
-                \Storage::delete($img);
+            if (is_file(base_path($img))) {
+                Storage::delete($img);
             }
         }
 

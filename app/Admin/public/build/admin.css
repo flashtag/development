@@ -20378,6 +20378,12 @@ label {
   text-transform: uppercase;
 }
 
+/* TODO: create more thumbnail classes based on generated thumbnail heights */
+
+.Image__thumbnail--200 img {
+  max-height: 200px;
+}
+
 .panel-heading {
   text-transform: uppercase;
 }

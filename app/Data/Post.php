@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Flashtag\Data\Presenters\PostPresenter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use McCool\LaravelAutoPresenter\HasPresenter;
 use Venturecraft\Revisionable\RevisionableTrait;
 
@@ -22,6 +24,8 @@ use Venturecraft\Revisionable\RevisionableTrait;
  * @property string $image
  * @property string $meta_description
  * @property string $meta_canonical
+ * @property boolean $is_locked
+ * @property int $locked_by_id
  * @property \Carbon\Carbon $start_showing_at
  * @property \Carbon\Carbon $stop_showing_at
  * @property \Carbon\Carbon $created_at
@@ -307,7 +311,7 @@ class Post extends Model implements HasPresenter
             $increment
         );
 
-        return \DB::update(\DB::raw($query), array_merge([$categoryId], $whereBetween));
+        return DB::update(DB::raw($query), array_merge([$categoryId], $whereBetween));
     }
 
     /**
@@ -317,9 +321,12 @@ class Post extends Model implements HasPresenter
      */
     public function addImage($image)
     {
-        $name = 'post__'.$this->slug.'.'.$this->imageExtension($image);
+        $this->removeImage();
+        $name = 'post__'.$this->id.'__'.$this->slug.'.'.$this->imageExtension($image);
         $image->move(public_path('images/media'), $name);
         $this->image = $name;
+
+        // TODO: Generate thumbnails
 
         $this->save();
     }
@@ -340,14 +347,16 @@ class Post extends Model implements HasPresenter
      */
     public function removeImage()
     {
-        $img = '/public/images/media/'.$this->image;
+        if (! is_null($this->image)) {
+            $img = '/public/images/media/' . $this->image;
 
-        if (\Storage::exists($img)) {
-            \Storage::delete($img);
+            if (is_file(base_path($img))) {
+                Storage::delete($img);
+            }
+
+            $this->image = null;
+            $this->save();
         }
-
-        $this->image = null;
-        $this->save();
     }
 
     /**
@@ -418,7 +427,7 @@ class Post extends Model implements HasPresenter
     /**
      * Scope a query to perform a very basic search of posts.
      *
-     * @param \Iluminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $search
      * @param array $columns
      * @return \Illuminate\Database\Eloquent\Builder
@@ -431,9 +440,11 @@ class Post extends Model implements HasPresenter
 
         // Check if query is surrounded by double or single quotes
         if (preg_match('/^(["\']).*\1$/m', $search) !== false) {
-            $search = str_replace('"', " ", $search);
-            $search = str_replace("'", " ", $search);
+            // Remove quotes
+            $search = str_replace('"', "", $search);
+            $search = str_replace("'", "", $search);
         } else {
+            // If not surrounded by quotes, replace all spaces with wildcard
             $search = str_replace(' ', '%', $search);
         }
 

@@ -6,8 +6,8 @@
             <option v-for="mediaType in mediaTypes" :value="mediaType.id">{{ mediaType.text }}</option>
         </select>
     </div>
-    <div v-if="showDropzone">
-        <dropzone :path="imagePath" :image="url" :to="imageUpload"></dropzone>
+    <div v-if="showImage">
+        <input type="file" name="image" id="image" class="file form-control" accept="image/*">
     </div>
     <div v-if="showMediaInput" class="form-group">
         <label for="media-link">Media Link</label>
@@ -16,8 +16,8 @@
     </div>
 
     <div v-if="url.length" class="media-preview" style="margin-bottom:20px;">
-        <div v-if="showDropzone" class="image-preview">
-            <img id="preview-image" style="max-width:100%;">
+        <div v-if="showImage" class="image-preview">
+            <image-preview :path="imagePath" :image="url" height="200"></image-preview>
         </div>
         <div v-else class="video-preview embed-responsive embed-responsive-16by9">
             <iframe id="preview-frame" class="embed-responsive-item" frameborder="0" allowfullscreen></iframe>
@@ -37,7 +37,7 @@
                     { id: 'video', text: 'Video' }
                 ],
                 showMediaInput: false,
-                showDropzone: false,
+                showImage: false,
                 preview: null
             }
         },
@@ -60,14 +60,14 @@
         methods: {
 
             changeSelect: function () {
-                this.showDropzone = this.type == 'image';
+                this.showImage = this.type == 'image';
                 this.showMediaInput = this.type == 'video';
 
                 this.updatePreview();
             },
 
             updatePreview: function(){
-                if (this.showDropzone) {
+                if (this.showImage) {
                     this.setImagePreview();
                 } else {
                     this.setVideoPreview();
@@ -75,12 +75,12 @@
             },
 
             setImagePreview: function () {
-                this.$http.get('/admin/media/preview/image', { url: this.imageUrl }).then(function (response) {
-                    document.getElementById('preview-image').src = this.imageUrl;
-                    // console.log(this.imageUrl);
-                }, function (response) {
-                    // failed
-                });
+//                this.$http.get('/admin/media/preview/image', { url: this.imageUrl }).then(function (response) {
+//                    document.getElementById('preview-image').src = this.imageUrl;
+//                    // console.log(this.imageUrl);
+//                }, function (response) {
+//                    // failed
+//                });
             },
 
             setVideoPreview: function () {

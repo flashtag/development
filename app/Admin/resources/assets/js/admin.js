@@ -20,7 +20,7 @@ Vue.directive('rich-editor', require('./directives/rich-editor'));
 
 // Global Components
 Vue.component('media-input', require('./components/partials/media-input.vue'));
-Vue.component('dropzone', require('./components/partials/dropzone.vue'));
+Vue.component('image-preview', require('./components/partials/image-preview.vue'));
 
 
 new Vue(require('./App'));
