@@ -36,7 +36,7 @@
         ],
         "psr-4": { "Flashtag\\": "app/" },
         "files": [
-            "app/helpers.php"
+            "app/Data/helpers.php"
         ]
     },
     "autoload-dev": {

@@ -18,6 +18,9 @@
         "psr-4": {
             "Flashtag\\Data\\": ""
         },
+        "files": [
+            "helpers.php"
+        ],
         "exclude-from-classmap": ["/database/"]
     },
     "minimum-stability": "dev",
