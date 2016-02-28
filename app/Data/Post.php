@@ -197,6 +197,10 @@ class Post extends Model implements HasPresenter
     {
         $ratings = $this->ratings;
 
+        if (! $ratings->count()) {
+            return "0.0";
+        }
+
         return number_format($ratings->sum('value') / $ratings->count());
     }
 
