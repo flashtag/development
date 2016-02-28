@@ -1,16 +1,17 @@
 <?php
 
-use Flashtag\Data\Tag;
-use Flashtag\Data\Post;
-use Flashtag\Data\User;
-use Flashtag\Data\Field;
+use Faker\Factory as Faker;
 use Flashtag\Data\Author;
 use Flashtag\Data\Category;
-use Faker\Factory as Faker;
+use Flashtag\Data\Events\PostWasCreated;
+use Flashtag\Data\Field;
+use Flashtag\Data\Post;
 use Flashtag\Data\PostRating;
+use Flashtag\Data\Tag;
+use Flashtag\Data\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
-use Flashtag\Data\Events\PostWasCreated;
+use Illuminate\Support\Facades\DB;
 
 class TestSeeder extends Seeder
 {
@@ -20,10 +21,18 @@ class TestSeeder extends Seeder
     {
         $this->faker = $faker::create();
 
-        if (config('database.default') == 'pgsql') {
-            $this->truncatePgsqlTables();
-        } else {
-            $this->truncateMysqlTables();
+        $db = config('database.default');
+
+        switch ($db) {
+            case 'mysql':
+                $this->truncateMysqlTables();
+                break;
+            case 'pgsql':
+                $this->truncatePgsqlTables();
+                break;
+            default:
+                $this->truncateTables();
+                break;
         }
     }
 
@@ -47,25 +56,34 @@ class TestSeeder extends Seeder
     }
 
     /**
-     * Truncate the database tables.
+     * Truncate the database tables for postgres.
      */
     private function truncatePgsqlTables()
     {
-        DB::statement('TRUNCATE TABLE categories CASCADE;');
-        DB::statement('TRUNCATE TABLE tags CASCADE;');
-        DB::statement('TRUNCATE TABLE posts CASCADE;');
-        DB::statement('TRUNCATE TABLE fields CASCADE;');
-        DB::statement('TRUNCATE TABLE users CASCADE;');
-        DB::statement('TRUNCATE TABLE post_lists CASCADE;');
-        DB::statement('TRUNCATE TABLE post_post_list CASCADE;');
+        DB::statement(
+            'TRUNCATE TABLE
+                categories, tags, field_post, posts, fields, users, post_post_list, post_lists
+            RESTART IDENTITY CASCADE;'
+        );
+    }
+
+    /**
+     * Truncate the database tables for mysql.
+     */
+    private function truncateMysqlTables()
+    {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        $this->truncateTables();
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
     /**
      * Truncate the database tables.
      */
-    private function truncateMysqlTables()
+    private function truncateTables()
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('categories')->truncate();
         DB::table('tags')->truncate();
         DB::table('posts')->truncate();
@@ -73,7 +91,6 @@ class TestSeeder extends Seeder
         DB::table('users')->truncate();
         DB::table('post_lists')->truncate();
         DB::table('post_post_list')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
     /**

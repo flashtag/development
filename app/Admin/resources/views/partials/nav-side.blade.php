@@ -26,11 +26,9 @@
             <a class="list-group-item" href="/admin/users">
                 <i class="fa fa-users"></i> Users
             </a>
-            <!-- TODO: Settings
             <a class="list-group-item" href="/admin/settings">
                 <i class="fa fa-gear"></i> Settings
             </a>
-            -->
         @endif
     </div>
 </div>

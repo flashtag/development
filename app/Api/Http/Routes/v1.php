@@ -38,6 +38,9 @@ $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
     // USERS
     $api->resource('users', 'UsersController', ['except' => ['create', 'edit']]);
 
+    // SETTINGS
+    $api->resource('settings', 'SettingsController', ['except' => ['create', 'edit']]);
+
     // REVISIONS
     $api->get('revisions/{id}', 'RevisionsController@show');
 

@@ -8,7 +8,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <span class="navbar-brand">Acme Co.</span>
+            <span class="navbar-brand">{{ settings('site_name') }}</span>
         </div>
         <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">

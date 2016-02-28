@@ -86,9 +86,9 @@
         </div>
         <div class="form-group">
             <label for="body">Body</label>
-                    <textarea name="body" id="body" class="form-control rich-editor">
-                        {!! $post->body or old('body') !!}
-                    </textarea>
+            <textarea name="body" id="body" class="form-control rich-editor">
+                {!! $post->body or old('body') !!}
+            </textarea>
         </div>
         <div class="form-group">
             <label for="author">Author</label>
@@ -129,10 +129,11 @@
 <div class="panel panel-default">
     <div class="panel-heading">Image</div>
     <div class="panel-body">
-        <dropzone path="/images/media/"
-                  image="{{ $post->image }}"
-                  to="/api/posts/{{ $post->id }}/image">
-        </dropzone>
+        <div class="form-group">
+            <input type="file" name="image" id="image" class="file form-control" accept="image/*">
+            <br>
+            <image-preview path="/images/media/" image="{{ $post->image }}" height="200"></image-preview>
+        </div>
     </div>
 </div>
 

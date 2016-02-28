@@ -7,7 +7,7 @@
         <li class="active">{{ $category->name }}</li>
     </ol>
 
-    <form class="Category EditForm" action="{{ route('admin.categories.update', [$category->id]) }}" method="POST">
+    <form class="Category EditForm" action="{{ route('admin.categories.update', [$category->id]) }}" method="POST" enctype="multipart/form-data">
         {{ csrf_field() }}
         {{ method_field('PUT') }}
 

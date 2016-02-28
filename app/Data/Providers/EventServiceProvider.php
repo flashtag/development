@@ -14,7 +14,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        //
+        \Flashtag\Data\Events\SettingsSaved::class => [
+            \Flashtag\Data\Listeners\SettingsEventListener::class,
+        ],
     ];
 
     /**

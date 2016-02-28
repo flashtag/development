@@ -39,6 +39,7 @@ class PostsController extends Controller
     {
         $post = Post::create($this->buildPostFromRequest($request));
 
+        $this->handleImageUpload($post, $request->file('image'));
         $this->syncTags($post, $request->get('tags'));
         $this->syncFields($post, $request->get('fields'));
 
@@ -64,6 +65,7 @@ class PostsController extends Controller
 
         $post->update($this->buildPostFromRequest($request));
 
+        $this->handleImageUpload($post, $request->file('image'));
         $this->syncTags($post, $request->get('tags'));
         $this->syncFields($post, $request->get('fields'));
 
@@ -91,6 +93,13 @@ class PostsController extends Controller
         }
 
         return $data;
+    }
+
+    private function handleImageUpload(Post $post, $image)
+    {
+        if (! empty($image)) {
+            $post->addImage($image);
+        }
     }
 
     private function syncTags($post, $tags = [])

@@ -3,47 +3,33 @@
 @section('content')
     <ol class="breadcrumb">
         <li><a href="/admin">Home</a></li>
-        <li><a href="/admin/posts">Posts</a></li>
-        <li class="active">{{ $post->title }}</li>
+        <li><a href="/admin/settings">Settings</a></li>
+        <li class="active">{{ $setting->name }}</li>
     </ol>
 
-    <form class="Post EditForm" action="{{ route('admin.posts.update', [$post->id]) }}" method="POST" enctype="multipart/form-data">
+    <form class="Category EditForm" action="{{ route('admin.settings.update', [$setting->id]) }}" method="POST">
         {{ csrf_field() }}
         {{ method_field('PUT') }}
 
         <section class="info row">
-            <div class="col-md-6 clearfix">
-                <!--
-                <a href="/admin/posts/{{ $post->id }}/revisions" class="btn btn-link">
-                    <i class="fa fa-history"></i> Revision history
-                </a>
-                -->
-            </div>
-            <div class="col-md-6 clearfix">
+            <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
-                    <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
                     <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
-                    <a href="/admin/posts" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
+                    <a href="/admin/settings" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
                 </div>
             </div>
         </section>
 
-        @include('admin::posts.form')
+        @include('admin::settings.form')
 
     </form>
-
 @endsection
 
 @section('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
         $(document).ready(function(){
-
-            // Unlock the post when user leaves
-            $(window).unload(function(){
-                unlock();
-            });
-
             // CKEditor
             $('.rich-editor').each(function(){
                 CKEDITOR.replace($(this).attr('id'));
@@ -59,21 +45,11 @@
             });
         });
 
-        function unlock(){
-            $.ajax({
-                url: "/api/posts/{{ $post->id }}/unlock",
-                method: "PATCH",
-                headers: {
-                    Authorization: localStorage.getItem('jwt-token')
-                }
-            });
-        }
-
-        function del(){
+        var del = function() {
             var self = this;
             swal({
                 title: 'Are you sure?',
-                text: 'You will not be able to recover this post and all of its revision history!',
+                text: 'You will not be able to recover this setting!',
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#DD6B55',
@@ -82,17 +58,17 @@
                 showLoaderOnConfirm: true
             }, function () {
                 $.ajax({
-                    url: '/api/posts/{{ $post->id }}',
+                    url: '/api/settings/{{ $setting->id }}',
                     method: 'DELETE',
                     headers: { Authorization: localStorage.getItem('jwt-token') }
                 }).done(function(){
                     self.deleted = true;
-                    window.location = '/admin/posts';
+                    window.location = '/admin/settings';
                 });
             });
-        }
+        };
 
-        function notify(type, message){
+        var notify = function (type, message) {
             if (type == 'success') {
                 var icon = "fa fa-thumbs-o-up";
             } else if (type == 'warning') {
@@ -106,6 +82,6 @@
                 delay: 3000,
                 offset: { x: 20, y: 70 }
             });
-        }
+        };
     </script>
 @endsection

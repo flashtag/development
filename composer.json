@@ -34,7 +34,10 @@
         "classmap": [
             "database/"
         ],
-        "psr-4": { "Flashtag\\": "app/" }
+        "psr-4": { "Flashtag\\": "app/" },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": { "Tests\\": "tests" }
