@@ -12,6 +12,15 @@ class SettingsTest extends TestCase
 {
     use DatabaseMigrations, DatabaseTransactions;
 
+    public function setUp()
+    {
+        parent::setUp();
+
+        // Lets clear this so we dont have to worry about our config settings
+        // ... which could be anything.
+        $this->app['config']['settings'] = [];
+    }
+
     public function testSetAndGetASetting()
     {
         $settings = $this();
@@ -91,15 +100,22 @@ class SettingsTest extends TestCase
         // event has cleared the cache
         $this->assertNull(with($cache = $this->app['cache'])->get('settings'));
 
-        $settings->all(true);
 
         // forget them locally
         $settings->forget(array_keys($sts));
 
+        // we don't want to bring in the cache
+        // making it think the cache has already been grabbed
+        $settings->snagThatCache(false);
+
+        // assert we cleared the previously set settings
         $this->assertEquals([], $settings->all());
 
         // force hit cache and merge
-        $this->assertEquals($sts, $settings->all(true));
+        $settings->snagThatCache();
+
+        // assert with cache that our previously saved settings are there
+        $this->assertEquals($sts, $settings->all());
 
         // see that it set the cache
         $this->assertEquals($sts, $cache->get('settings'));
