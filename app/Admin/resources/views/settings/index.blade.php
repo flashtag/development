@@ -3,7 +3,7 @@
 @section('content')
     @include('admin::partials.form-errors')
 
-    <h4 style="text-align:right;"><small>Flashtag v{{ \Flashtag\Data\Flashtag::VERSION }}</small></h4>
+    <h4 style="text-align:right;"><small>Flashtag v{{ \Flashtag\Core\Flashtag::VERSION }}</small></h4>
 
     <div class="panel panel-default">
         <div class="panel-heading">Site Settings</div>
