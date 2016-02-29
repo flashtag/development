@@ -1,5 +1,5 @@
 {
-    "name": "flashtag/admin",
+    "name": "flashtag/core",
     "license": "MIT",
     "authors": [
         {
@@ -8,15 +8,10 @@
         }
     ],
     "require": {
-        "flashtag/api": "*@dev",
-        "flashtag/core": "*@dev",
-        "flashtag/data": "*@dev",
-        "guzzlehttp/guzzle": "^6.1"
+        "illuminate/console": "5.1.*"
     },
     "autoload": {
-        "psr-4": {
-            "Flashtag\\Admin\\": ""
-        }
+        "psr-4": {"Flashtag\\Core\\": ""}
     },
     "minimum-stability": "dev",
     "prefer-stable": true
