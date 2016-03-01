@@ -54,7 +54,7 @@ class Update extends Command
     {
         $this->call('flashtag:publish', [
             '--packages' => $this->option('publish'),
-            '--force' => !empty($this->option('force')),
+            '--force' => $this->option('force'),
         ]);
     }
 }

@@ -72,7 +72,7 @@ class Publish extends Command
         if (class_exists($providerClass)) {
             $this->call('vendor:publish', [
                 '--provider' => $providerClass,
-                '--force' => !empty($this->option('force')),
+                '--force' => $this->option('force'),
             ]);
         } else {
             $this->comment("Provider {$providerClass} does not exist. Ignoring.");
