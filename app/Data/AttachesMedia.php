@@ -54,14 +54,14 @@ trait AttachesMedia
             }
         }
 
-        $this->updateMedia();
+        $this->updateMedia(null, null);
     }
 
     /**
      * @param string $type
      * @param string $url
      */
-    public function updateMedia($type = null, $url = null)
+    public function updateMedia($type, $url)
     {
         $media = Media::firstOrNew([
             'media_attachable_id' => $this->id,
