@@ -71,6 +71,11 @@ class DataServiceProvider extends ServiceProvider
      */
     private function registerPublishes()
     {
+        // Config
+        $this->publishes([
+            __DIR__.'/../config/' => config_path('settings.php')
+        ], 'config');
+
         // Migrations
         $this->publishes([
             __DIR__.'/../database/migrations/' => database_path('migrations')
