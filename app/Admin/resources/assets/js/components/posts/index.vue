@@ -27,7 +27,6 @@
     <table class="Posts table table-striped table-hover">
         <thead>
             <tr>
-                <th v-if="categoryFilter"><a href="#" @click.prevent="sortBy('order')">Order <i :class="orderIcon('order')"></i></a></th>
                 <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
                 <th><a href="#" @click.prevent="sortBy('category.name')">Category <i :class="orderIcon('category.name')"></i></a></th>
                 <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
@@ -39,15 +38,6 @@
             <tr v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir"
                 class="Post" :class="{ 'Post--unpublished': !post.is_published }">
 
-                <td v-if="categoryFilter" class="order">
-                    <input class="post__order"
-                           type="number"
-                           value="{{ post.order }}"
-                           @keyup.enter="blur"
-                           @focusout="reorder(post, $event)"
-                           number>
-                </td>
-
                 <td>
                     <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)">{{ post.title }}</a>
                     <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
@@ -56,7 +46,7 @@
 
                 <td>{{ post.category ? post.category.name : '' }}</td>
 
-                <td>{{ formatTimestamp(post.created_at) }}</td>
+                <td>{{ formatTime(post.created_at) }}</td>
 
                 <td class="published">
                     <div class="switch">
@@ -82,8 +72,6 @@
 </template>
 
 <script>
-    import moment from 'moment';
-    import swal from 'sweetalert';
     import Post from '../../models/post';
     import Category from '../../models/category';
     import User from '../../models/user';
@@ -119,8 +107,8 @@
         methods: {
 
             fetchPosts: function() {
-                this.$http.get('posts?include=category&orderBy=updated_at|desc&count=1000').then(function (response) {
-                    this.$set('posts', response.data.data.map(function (post) {
+                this.$http.get('posts').then(function (response) {
+                    this.$set('posts', response.data.map(function (post) {
                         return new Post(post);
                     }));
                 });
@@ -128,7 +116,7 @@
 
             fetchCategories: function () {
                 this.$http.get('categories').then(function (response) {
-                    this.$set('categories', response.data.data.map(function (category) {
+                    this.$set('categories', response.data.map(function (category) {
                         return new Category(category);
                     }));
                 });
@@ -136,7 +124,7 @@
 
             fetchUsers: function () {
                 this.$http.get('users').then(function (response) {
-                    this.$set('users', response.data.data.map(function (user) {
+                    this.$set('users', response.data.map(function (user) {
                         return new User(user);
                     }));
                 });
@@ -163,7 +151,7 @@
             },
 
             userName: function (userId) {
-                if (! userId || ! this.users || !this.users.length) {
+                if (!userId || !this.users || !this.users.length) {
                     return '';
                 }
 
@@ -174,8 +162,8 @@
                 return user.name;
             },
 
-            formatTimestamp: function (timestamp) {
-                return moment.unix(timestamp).format('MMM D, YYYY');
+            formatTime: function (time) {
+                return moment(time, "YYYY-MM-DD").format('MMM D, YYYY');
             },
 
             sortBy: function (key) {

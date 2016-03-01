@@ -54,8 +54,8 @@
         methods: {
 
             fetch: function () {
-                this.$http.get('post-lists?orderBy=updated_at|desc').then(function (response) {
-                    this.$set('postLists', response.data.data.map(function (postList) {
+                this.$http.get('post-lists').then(function (response) {
+                    this.$set('postLists', response.data.map(function (postList) {
                         return new PostList(postList);
                     }));
                 });

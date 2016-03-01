@@ -59,8 +59,8 @@
         methods: {
 
             fetch: function () {
-                this.$http.get('fields?orderBy=updated_at|desc').then(function (response) {
-                    this.$set('fields', response.data.data.map(function (field) {
+                this.$http.get('post-fields').then(function (response) {
+                    this.$set('fields', response.data.map(function (field) {
                         return new Field(field);
                     }));
                 });

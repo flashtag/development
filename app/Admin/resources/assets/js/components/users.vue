@@ -58,8 +58,8 @@
         methods: {
 
             fetch: function () {
-                this.$http.get('users?orderBy=updated_at|desc').then(function (response) {
-                    this.$set('users', response.data.data.map(function (user) {
+                this.$http.get('users').then(function (response) {
+                    this.$set('users', response.data.map(function (user) {
                         return new User(user);
                     }));
                 });

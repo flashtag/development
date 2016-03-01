@@ -27,8 +27,9 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
+        var csrf = "{{ csrf_token() }}";
+
         $(document).ready(function(){
             // CKEditor
             $('.rich-editor').each(function(){
@@ -58,9 +59,9 @@
                 showLoaderOnConfirm: true
             }, function () {
                 $.ajax({
-                    url: '/api/users/{{ $user->id }}',
+                    url: '/admin/api/users/{{ $user->id }}',
                     method: 'DELETE',
-                    headers: { Authorization: localStorage.getItem('jwt-token') }
+                    headers: { "X-CSRF-TOKEN": csrf }
                 }).done(function(){
                     self.deleted = true;
                     window.location = '/admin/users';

@@ -8,7 +8,6 @@
         }
     ],
     "require": {
-        "flashtag/api": "*@dev",
         "flashtag/core": "*@dev",
         "flashtag/data": "*@dev",
         "guzzlehttp/guzzle": "^6.1"

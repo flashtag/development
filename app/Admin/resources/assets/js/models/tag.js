@@ -8,7 +8,7 @@ class Tag extends Model {
             slug: data.slug,
             description: data.description,
             posts: data.posts || [],
-            media: data.media ? data.media.data : {},
+            media: data.media ? data.media : {},
             created_at: data.created_at,
             updated_at: data.updated_at
         })

@@ -75,12 +75,7 @@
             },
 
             setImagePreview: function () {
-//                this.$http.get('/admin/media/preview/image', { url: this.imageUrl }).then(function (response) {
-//                    document.getElementById('preview-image').src = this.imageUrl;
-//                    // console.log(this.imageUrl);
-//                }, function (response) {
-//                    // failed
-//                });
+                //
             },
 
             setVideoPreview: function () {

@@ -15,7 +15,7 @@
             <div class="col-md-6 col-md-offset-6 clearfix">
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <a href="#delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                    <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
                     <a href="/admin/post-lists" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
                 </div>
             </div>
@@ -27,8 +27,9 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
+        var csrf = "{{ csrf_token() }}";
+
         $(document).ready(function(){
             // CKEditor
             $('.rich-editor').each(function(){
@@ -58,9 +59,9 @@
                 showLoaderOnConfirm: true
             }, function () {
                 $.ajax({
-                    url: '/api/post-lists/{{ $postList->id }}',
+                    url: '/admin/api/post-lists/{{ $postList->id }}',
                     method: 'DELETE',
-                    headers: { Authorization: localStorage.getItem('jwt-token') }
+                    headers: { "X-CSRF-TOKEN": csrf }
                 }).done(function(){
                     self.deleted = true;
                     window.location = '/admin/post-lists';

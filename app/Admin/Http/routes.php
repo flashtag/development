@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @var \Illuminate\Routing\Router $router
+ */
+
+// ----------------------------------------------------------------------------------------
+// Public routes
+// ----------------------------------------------------------------------------------------
+
 // Authentication routes
 $router->get('auth/login', 'Auth\AuthController@getLogin');
 $router->post('auth/login', 'Auth\AuthController@postLogin');
@@ -13,7 +21,11 @@ $router->post('password/email', 'Auth\PasswordController@postEmail');
 $router->get('password/reset/{token}', 'Auth\PasswordController@getReset');
 $router->post('password/reset', 'Auth\PasswordController@postReset');
 
-// Administration routes
+// ----------------------------------------------------------------------------------------
+// Authenticated routes
+// ----------------------------------------------------------------------------------------
+
+// Admin routes
 $router->group(['middleware' => 'auth'], function ($router) {
     $router->get('/', 'HomeController@home');
     $router->resource('posts', 'PostsController');
@@ -26,4 +38,17 @@ $router->group(['middleware' => 'auth'], function ($router) {
     $router->resource('users', 'UsersController');
     $router->resource('settings', 'SettingsController');
     $router->get('media/preview/{type}', 'MediaController@preview');
+});
+
+// Admin API
+$router->group(['prefix' => 'api', 'middleware' => 'auth'], function ($router) {
+    $router->patch('posts/{post}/lock', 'Api\PostsController@lock');
+    $router->patch('posts/{post}/unlock', 'Api\PostsController@unlock');
+    $router->resource('posts', 'Api\PostsController', ['except' => ['edit', 'create']]);
+    $router->resource('post-fields', 'Api\PostFieldsController', ['except' => ['edit', 'create']]);
+    $router->resource('post-lists', 'Api\PostListsController', ['except' => ['edit', 'create']]);
+    $router->resource('tags', 'Api\TagsController', ['except' => ['edit', 'create']]);
+    $router->resource('categories', 'Api\CategoriesController', ['except' => ['edit', 'create']]);
+    $router->resource('authors', 'Api\AuthorsController', ['except' => ['edit', 'create']]);
+    $router->resource('users', 'Api\UsersController', ['except' => ['edit', 'create']]);
 });

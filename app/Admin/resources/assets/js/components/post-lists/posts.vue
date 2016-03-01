@@ -43,7 +43,6 @@
 </template>
 
 <script>
-    import moment from 'moment';
     import PostList from '../../models/post-list';
 
     export default {

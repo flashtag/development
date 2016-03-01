@@ -1,6 +1,5 @@
 
 import Model from './model';
-import moment from 'moment';
 
 class Post extends Model {
     constructor(data) {
@@ -12,20 +11,19 @@ class Post extends Model {
             body: data.body,
             is_published: data.is_published,
             start_showing_at: data.start_showing_at
-                ? moment.utc(data.start_showing_at, 'X').format('YYYY-MM-DD')
+                ? moment.utc(data.start_showing_at).format('YYYY-MM-DD')
                 : null,
             stop_showing_at: data.stop_showing_at
-                ? moment.utc(data.stop_showing_at, 'X').format('YYYY-MM-DD')
+                ? moment.utc(data.stop_showing_at).format('YYYY-MM-DD')
                 : null,
-            order: data.order,
             is_locked: data.is_locked,
             locked_by_id: data.locked_by_id,
-            category: data.category ? data.category.data : {},
-            tags: data.tags ? data.tags.data : [],
-            fields: data.fields ? data.fields.data : [],
-            meta: data.meta ? data.meta.data : [],
-            revisions: data.revisions ? data.revisions.data : [],
-            media: data.media ? data.media.data : {},
+            category: data.category ? data.category : {},
+            tags: data.tags ? data.tags : [],
+            fields: data.fields ? data.fields : [],
+            meta: data.meta ? data.meta : [],
+            revisions: data.revisions ? data.revisions : [],
+            media: data.media ? data.media : {},
             created_at: data.created_at,
             updated_at: data.updated_at
         });

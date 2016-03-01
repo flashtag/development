@@ -54,8 +54,8 @@
         methods: {
 
             fetch: function () {
-                this.$http.get('authors?orderBy=updated_at|desc').then(function (response) {
-                    this.$set('authors', response.data.data.map(function (author) {
+                this.$http.get('authors').then(function (response) {
+                    this.$set('authors', response.data.map(function (author) {
                         return new Author(author);
                     }));
                 });

@@ -1,7 +1,7 @@
 
 class Model {
     constructor(resourcePath, attributes) {
-        this.resource = resource(resourcePath + '{/id}');
+        this.resource = resource('/admin/api/'+resourcePath + '{/id}');
         this.attributes = attributes;
         this._createGettersAndSetters();
     }
