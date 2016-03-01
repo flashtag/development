@@ -63,17 +63,14 @@ trait AttachesMedia
      */
     public function updateMedia($type = null, $url = null)
     {
-        // iteration 1 million
-        if (! $this->media) {
-            $media = new Media();
-            $media->type = $type;
-            $media->url = $url;
-            $this->media()->save($media);
-        } else {
-            $this->media->type = $type;
-            $this->media->url = $url;
-            $this->media->save();
-        }
+        $media = Media::firstOrNew([
+            'media_attachable_id' => $this->id,
+            'media_attachable_type' => static::class,
+        ]);
+        $media->type = $type;
+        $media->url = $url;
+
+        $this->media()->save($media);
     }
 
     /**
