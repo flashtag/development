@@ -2,7 +2,7 @@
 
 namespace Flashtag\Data;
 
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 trait AttachesMedia
 {
@@ -63,12 +63,17 @@ trait AttachesMedia
      */
     public function updateMedia($type = null, $url = null)
     {
-        $media = $this->media ?: new Media();
-
-        $media->type = $type;
-        $media->url = $url;
-
-        $this->media()->save($media);
+        // iteration 1 million
+        if (! $this->media) {
+            $media = new Media();
+            $media->type = $type;
+            $media->url = $url;
+            $this->media()->save($media);
+        } else {
+            $this->media->type = $type;
+            $this->media->url = $url;
+            $this->media->save();
+        }
     }
 
     /**

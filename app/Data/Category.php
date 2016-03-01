@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Category
+ * @package Flashtag\Data
  *
  * @property int $id
  * @property \Illuminate\Database\Eloquent\Collection $tags

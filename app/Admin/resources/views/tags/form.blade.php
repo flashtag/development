@@ -23,8 +23,8 @@
         <media-input
                 type="{{ $tag->media ? $tag->media->type : 'image' }}"
                 url="{{ $tag->media ? $tag->media->url : '' }}"
-                image-path="/img/uploads/media/"
-                image-upload="/tags/{{  $tag->id }}/image">
+                image-path="/images/media/"
+                image-upload="/api/tags/{{  $tag->id }}/image">
         </media-input>
     </div>
 </div>

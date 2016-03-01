@@ -4,6 +4,12 @@ namespace Flashtag\Data;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Tag
+ * @package Flashtag\Data
+ *
+ * @property \Flashtag\Data\Media $media
+ */
 class Tag extends Model
 {
     use AttachesMedia;

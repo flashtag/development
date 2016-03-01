@@ -2,15 +2,17 @@
 
 namespace Flashtag\Admin\Http\Controllers;
 
+use Flashtag\Admin\Http\Controllers\Traits\SyncsMedia;
 use Flashtag\Admin\Http\Requests\CategoryCreateRequest;
 use Flashtag\Admin\Http\Requests\CategoryDestroyRequest;
 use Flashtag\Admin\Http\Requests\CategoryUpdateRequest;
 use Flashtag\Data\Category;
-use Flashtag\Data\Media;
 use Flashtag\Data\Tag;
 
 class CategoriesController extends Controller
 {
+    use SyncsMedia;
+
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -119,33 +121,5 @@ class CategoriesController extends Controller
         $tags = $request->get('tags', []);
 
         $category->tags()->sync($tags);
-    }
-
-    /**
-     * @param Category $category
-     * @param \Illuminate\Http\Request $request
-     */
-    private function syncMediaFromRequest(Category $category, $request)
-    {
-        $type = $request->get('media-type');
-        $url = $request->get('media-link');
-
-        if ($type == 'image') {
-            $this->handleImageUpload($category, $request->file('image'));
-        }
-
-        if ($type && $url) {
-            $media = $category->media ?: new Media();
-            $media->type = $type;
-            $media->url = $url;
-            $category->media()->save($media);
-        }
-    }
-
-    private function handleImageUpload(Category $category, $image)
-    {
-        if (! empty($image)) {
-            $category->addImage($image);
-        }
     }
 }
