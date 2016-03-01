@@ -326,7 +326,7 @@ class Post extends Model implements HasPresenter
     public function addImage($image)
     {
         $this->removeImage();
-        $name = 'post__'.$this->id.'__'.$this->slug.'.'.$this->imageExtension($image);
+        $name = 'post-'.$this->id.'__'.$this->slug.'.'.$this->imageExtension($image);
         $image->move(public_path('images/media'), $name);
         $this->image = $name;
 

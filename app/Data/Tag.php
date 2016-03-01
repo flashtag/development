@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tag extends Model
 {
+    use AttachesMedia;
+
     /**
      * Properties guarded from mass assignment.
      *
