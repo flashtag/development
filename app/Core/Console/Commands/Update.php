@@ -13,7 +13,7 @@ class Update extends Command
      * @var string
      */
     protected $signature = 'flashtag:update
-                            {--publish=all : All package resources published by default, "none" for none, or specify with a comma-separated list.}
+                            {--publish=none : All package resources published by default, "none" for none, or specify with a comma-separated list.}
                             {--force : Whether or not existing published resources should be overwritten.}';
 
     /**
