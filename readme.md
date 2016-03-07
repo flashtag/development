@@ -1,5 +1,7 @@
 ## Flashtag - Development repository
 
+[![Join the chat at https://gitter.im/flashtag/flashtag](https://badges.gitter.im/flashtag/flashtag.svg)](https://gitter.im/flashtag/flashtag?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
  [![Code Climate](https://codeclimate.com/github/flashtag/flashtag/badges/gpa.svg)](https://codeclimate.com/github/flashtag/flashtag)
  [![Build Status](https://travis-ci.org/flashtag/flashtag.svg?branch=master)](https://travis-ci.org/flashtag/flashtag)
 
