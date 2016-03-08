@@ -13,8 +13,7 @@ class PostListsController extends Controller
      */
     public function index()
     {
-        $lists = PostList::with('posts.category')
-            ->orderBy('created_at', 'desc')
+        $lists = PostList::orderBy('created_at', 'desc')
             ->get();
 
         return response()->json($lists);
