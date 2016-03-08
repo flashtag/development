@@ -1,5 +1,12 @@
 <template>
 
+    <div class="form-group">
+        <label>Add post</label>
+        <select class="Post-select form-control" multiple>
+            <option v-for="post in postList.posts">{{ post.title }}</option>
+        </select>
+    </div>
+
     <table v-if="postList.posts.length" class="Posts table table-striped table-hover">
         <thead>
         <tr>
@@ -61,11 +68,15 @@
             this.fetch();
         },
 
+        ready: function() {
+            this.initSelect();
+        },
+
         methods: {
 
             fetch: function () {
-                this.$http.get('post-lists/'+this.postListId+'?include=posts').then(function (response) {
-                    this.$set('postList', new PostList(response.data.data));
+                this.$http.get('post-lists/'+this.postListId).then(function (response) {
+                    this.$set('postList', new PostList(response.data));
                 });
             },
 
@@ -154,6 +165,52 @@
 
             formatTimestamp: function (timestamp) {
                 return moment.unix(timestamp).format('MMM D, YYYY');
+            },
+
+            initSelect: function() {
+                var self = this;
+                this.postSelect = $(".Post-select").select2({
+                    ajax: {
+                        url: "/admin/api/posts/search",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                q: params.term, // search term
+                                page: params.page
+                            };
+                        },
+                        processResults: function (data, params) {
+                            // parse the results into the format expected by Select2
+                            // since we are using custom formatting functions we do not need to
+                            // alter the remote JSON data, except to indicate that infinite
+                            // scrolling can be used
+                            params.page = params.page || 1;
+
+                            return {
+                                results: data.map(function (result) {
+                                    return {
+                                        id: result.id,
+                                        text: result.title
+                                    }
+                                }),
+                                pagination: {
+                                    more: (params.page * 30) < data.total_count
+                                }
+                            };
+                        },
+                        cache: true
+                    },
+                    //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+                    minimumInputLength: 1
+//                    templateResult: formatRepo, // omitted for brevity, see the source of this page
+//                    templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                }).on("select2:select", function (e) {
+//                    console.log(e.params.data.id);
+//                    console.log(e.params.data.text);
+                    self.postList.addPost(e.params.data.id);
+                    $(this).val(null).trigger("change");
+                });
             }
 
         }

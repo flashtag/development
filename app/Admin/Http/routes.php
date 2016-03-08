@@ -44,8 +44,10 @@ $router->group(['middleware' => 'auth'], function ($router) {
 $router->group(['prefix' => 'api', 'middleware' => 'auth'], function ($router) {
     $router->patch('posts/{post}/lock', 'Api\PostsController@lock');
     $router->patch('posts/{post}/unlock', 'Api\PostsController@unlock');
+    $router->get('posts/search', 'Api\PostsController@search');
     $router->resource('posts', 'Api\PostsController', ['except' => ['edit', 'create']]);
     $router->resource('post-fields', 'Api\PostFieldsController', ['except' => ['edit', 'create']]);
+    $router->post('post-lists/{postList}/posts', 'Api\PostListsController@addPost');
     $router->resource('post-lists', 'Api\PostListsController', ['except' => ['edit', 'create']]);
     $router->resource('tags', 'Api\TagsController', ['except' => ['edit', 'create']]);
     $router->resource('categories', 'Api\CategoriesController', ['except' => ['edit', 'create']]);

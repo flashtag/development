@@ -11882,11 +11882,15 @@ exports['default'] = {
         this.fetch();
     },
 
+    ready: function ready() {
+        this.initSelect();
+    },
+
     methods: {
 
         fetch: function fetch() {
-            this.$http.get('post-lists/' + this.postListId + '?include=posts').then(function (response) {
-                this.$set('postList', new _modelsPostList2['default'](response.data.data));
+            this.$http.get('post-lists/' + this.postListId).then(function (response) {
+                this.$set('postList', new _modelsPostList2['default'](response.data));
             });
         },
 
@@ -11975,13 +11979,59 @@ exports['default'] = {
 
         formatTimestamp: function formatTimestamp(timestamp) {
             return moment.unix(timestamp).format('MMM D, YYYY');
+        },
+
+        initSelect: function initSelect() {
+            var self = this;
+            this.postSelect = $(".Post-select").select2({
+                ajax: {
+                    url: "/admin/api/posts/search",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function data(params) {
+                        return {
+                            q: params.term, // search term
+                            page: params.page
+                        };
+                    },
+                    processResults: function processResults(data, params) {
+                        // parse the results into the format expected by Select2
+                        // since we are using custom formatting functions we do not need to
+                        // alter the remote JSON data, except to indicate that infinite
+                        // scrolling can be used
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.map(function (result) {
+                                return {
+                                    id: result.id,
+                                    text: result.title
+                                };
+                            }),
+                            pagination: {
+                                more: params.page * 30 < data.total_count
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+                minimumInputLength: 1
+                //                    templateResult: formatRepo, // omitted for brevity, see the source of this page
+                //                    templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+            }).on("select2:select", function (e) {
+                //                    console.log(e.params.data.id);
+                //                    console.log(e.params.data.text);
+                self.postList.addPost(e.params.data.id);
+                $(this).val(null).trigger("change");
+            });
         }
 
     }
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th>Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n            <td class=\"order\">\n                <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"post.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"form-group\">\n        <label>Add post</label>\n        <select class=\"Post-select form-control\" multiple=\"\">\n            <option v-for=\"post in postList.posts\">{{ post.title }}</option>\n        </select>\n    </div>\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th>Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n            <td class=\"order\">\n                <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"post.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -12564,6 +12614,8 @@ Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -12591,6 +12643,30 @@ var PostList = (function (_Model) {
             updated_at: data.updated_at
         });
     }
+
+    _createClass(PostList, [{
+        key: 'addPost',
+        value: function addPost(post) {
+            var self = this;
+
+            return client.get('/admin/api/posts/' + (post.id || post)).then(function (response) {
+                var post = response.data;
+                self.savePost(post).then(function (response) {
+                    var existing = self.attributes.posts.filter(function (p) {
+                        return p.id == post.id;
+                    })[0];
+                    if (typeof existing === 'undefined') {
+                        self.attributes.posts.push(post);
+                    }
+                });
+            });
+        }
+    }, {
+        key: 'savePost',
+        value: function savePost(post) {
+            return client.post('/admin/api/post-lists/' + this.attributes.id + '/posts', { post: post });
+        }
+    }]);
 
     return PostList;
 })(_model2['default']);

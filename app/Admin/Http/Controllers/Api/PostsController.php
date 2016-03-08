@@ -21,6 +21,18 @@ class PostsController extends Controller
     }
 
     /**
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show($id)
+    {
+        $post = Post::with('category')
+            ->findOrFail($id);
+
+        return response()->json($post);
+    }
+
+    /**
      * @param Request $request
      */
     public function store(Request $request)
@@ -58,6 +70,16 @@ class PostsController extends Controller
         $post->is_locked = false;
         $post->locked_by_id = null;
         $post->save();
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('q');
+
+        $posts = Post::where('title', 'like', str_replace(' ', '%', ' '.$query.' '))
+            ->get();
+
+        return response()->json($posts);
     }
 
     /**

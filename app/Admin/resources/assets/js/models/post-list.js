@@ -11,6 +11,26 @@ class PostList extends Model {
             updated_at: data.updated_at
         })
     }
+
+    addPost(post) {
+        var self = this;
+
+        return client.get('/admin/api/posts/'+(post.id || post)).then(function (response) {
+            var post = response.data;
+            self.savePost(post).then(function(response) {
+                var existing = self.attributes.posts.filter(function (p) {
+                    return p.id == post.id;
+                })[0];
+                if (typeof existing === 'undefined') {
+                    self.attributes.posts.push(post);
+                }
+            });
+        });
+    }
+
+    savePost(post) {
+        return client.post('/admin/api/post-lists/'+this.attributes.id+'/posts', {post: post});
+    }
 }
 
 export default PostList;
