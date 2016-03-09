@@ -9,7 +9,7 @@ CKEDITOR.editorConfig = function( config ) {
 	// http://docs.ckeditor.com/#!/api/CKEDITOR.config
 
 	// Extra plugins
-	config.extraPlugins = 'codemirror,autogrow,markdown';
+	config.extraPlugins = 'codemirror,autogrow';
 
 	// Code Mirror
 	config.codemirror = {
