@@ -23,7 +23,18 @@
 
         @include('admin::post-lists.form')
 
+        <div class="panel panel-default">
+            <div class="panel-heading">Posts</div>
+            <div class="panel-body">
+                <post-list :post-list-id="{{ $postList->id }}"
+                           sort-key="{{ $postList->order_by or 'order' }}"
+                           order-dir="{{ $postList->order_dir or 'asc' }}">
+                </post-list>
+            </div>
+        </div>
+
     </form>
+
 @endsection
 
 @section('scripts')

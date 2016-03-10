@@ -272,8 +272,10 @@ IPSUM;
                 'slug' => str_slug('Featured List'),
             ]),
         ])->map(function ($postList) use ($posts) {
-            $posts->each(function ($post) use ($postList) {
-                $postList->posts()->save($post);
+            $order = 0;
+            $posts->each(function ($post) use ($postList, &$order) {
+                $order++;
+                $postList->posts()->save($post, ['order' => $order]);
             });
             $postList->save();
 

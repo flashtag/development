@@ -2,6 +2,16 @@ import Model from './model';
 
 class PostList extends Model {
     constructor(data) {
+
+        if (data.posts) {
+            data.posts = data.posts.map(function (post) {
+                if (post.pivot && post.pivot.order >= 0) {
+                    post.order = post.pivot.order;
+                    return post;
+                }
+            });
+        }
+
         super('post-lists', {
             id: data.id,
             name: data.name,
@@ -12,24 +22,11 @@ class PostList extends Model {
         })
     }
 
-    addPost(post) {
-        var self = this;
-
-        return client.get('/admin/api/posts/'+(post.id || post)).then(function (response) {
-            var post = response.data;
-            self.savePost(post).then(function(response) {
-                var existing = self.attributes.posts.filter(function (p) {
-                    return p.id == post.id;
-                })[0];
-                if (typeof existing === 'undefined') {
-                    self.attributes.posts.push(post);
-                }
-            });
-        });
-    }
-
     savePost(post) {
-        return client.post('/admin/api/post-lists/'+this.attributes.id+'/posts', {post: post});
+        return client.post('/admin/api/post-lists/'+this.attributes.id+'/posts', {
+            post_id: post.id,
+            position: 1
+        });
     }
 }
 

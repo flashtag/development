@@ -45,8 +45,8 @@ class PostListsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $field = PostList::findOrFail($id);
-        $field->update($request->all());
+        $list = PostList::findOrFail($id);
+        $list->update($request->all());
     }
 
     /**
@@ -54,15 +54,33 @@ class PostListsController extends Controller
      */
     public function destroy($id)
     {
-        $field = PostList::findOrFail($id);
-        $field->delete();
+        $list = PostList::findOrFail($id);
+        $list->delete();
     }
 
+    /**
+     * @param Request $request
+     * @param int $id
+     */
     public function addPost(Request $request, $id)
     {
         $list = PostList::findOrFail($id);
-        $post = $request->json('post');
+        $list->addPost(
+            $request->get('post_id'),
+            $request->get('position', 1)
+        );
+    }
 
-        $list->posts()->sync([$post['id']], false);
+    /**
+     * @param Request $request
+     * @param int $id
+     */
+    public function reorder(Request $request, $id)
+    {
+        $list = PostList::findOrFail($id);
+        $list->reorder(
+            $request->get('post_id'),
+            $request->get('order')
+        );
     }
 }

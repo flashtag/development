@@ -11868,14 +11868,21 @@ var _modelsPostList2 = _interopRequireDefault(_modelsPostList);
 
 exports['default'] = {
 
-    props: ['post-list-id'],
+    props: ['post-list-id', 'sort-key', 'order-dir'],
 
     data: function data() {
         return {
             postList: {
                 posts: []
-            }
+            },
+            sortKeys: [{ value: "created_at", text: "Create date" }, { value: "updated_at", text: "Update date" }, { value: "order", text: "Custom" }]
         };
+    },
+
+    computed: {
+        sortDir: function sortDir() {
+            return this.orderDir == "asc" ? 1 : -1;
+        }
     },
 
     created: function created() {
@@ -11894,28 +11901,47 @@ exports['default'] = {
             });
         },
 
+        addPost: function addPost(post, position) {
+            var self = this;
+            position = position || 1;
+
+            return this.$http.get('/admin/api/posts/' + post.id).then(function (response) {
+                var post = response.data;
+                self.postList.savePost(post).then(function (response) {
+                    var existing = self.postList.posts.filter(function (p) {
+                        return p.id == post.id;
+                    })[0];
+                    if (typeof existing === 'undefined') {
+                        post.order = self.postList.posts.length + 1;
+                        self.postList.posts.push(post);
+                    }
+                    self.reorder(post, position);
+                });
+            });
+        },
+
         /**
          * Reorder the posts' list_positions
          * @param post
          * @param e
          */
         reorder: function reorder(post, e) {
-            var self = this;
-
-            var new_position = parseInt(e.target.value);
-            // If the position is not a number, we are done here.
-            if (isNaN(new_position)) {
-                e.target.value = post.order;
-                return;
+            var new_position;
+            if (typeof e == 'number') {
+                new_position = e;
+            } else {
+                new_position = parseInt(e.target.value);
+                // If the position is not a number, we are done here.
+                if (isNaN(new_position)) {
+                    e.target.value = post.order;
+                    return;
+                }
             }
 
-            var affectedPosts = self.posts.filter(function (p) {
-                return p.category.data.id == post.category.data.id;
-            });
-
-            var max = affectedPosts.reduce(function (max, post) {
-                return post.order > max ? post.order : max;
-            }, 0);
+            var max = this.postList.posts.length;
+            // var max = this.postList.posts.reduce(function (max, post) {
+            //     return (post.order > max) ? post.order : max;
+            // }, 0);
 
             new_position = new_position > 0 ? new_position : 1;
             new_position = new_position > max ? max : new_position;
@@ -11932,9 +11958,8 @@ exports['default'] = {
             var increment = new_position < post.order ? +1 : -1;
             var between = new_position < post.order ? [new_position, post.order] : [post.order, new_position];
 
-            this.posts = affectedPosts.map(function (post) {
-                var p = post.order;
-                if (p >= between[0] && p <= between[1]) {
+            this.postList.posts = this.postList.posts.map(function (post) {
+                if (post.order >= between[0] && post.order <= between[1]) {
                     post.order += increment;
                 }
                 return post;
@@ -11949,8 +11974,19 @@ exports['default'] = {
             this.sortKey = 'order';
 
             setTimeout((function () {
-                this.scrollTo($(e.target).closest('tr'));
+                var row;
+                if (typeof e == 'number') {
+                    row = this.getAddedPostRow(post);
+                } else {
+                    row = $(e.target).closest('tr');
+                }
+
+                this.scrollTo(row);
             }).bind(this), 0);
+        },
+
+        getAddedPostRow: function getAddedPostRow(post) {
+            return $('.Posts').find('#Post-' + post.id);
         },
 
         /**
@@ -11958,13 +11994,16 @@ exports['default'] = {
          * @param post
          */
         saveOrder: function saveOrder(post) {
-            return client.patch('/posts/' + post.id + '/reorder', { order: post.order });
+            return this.$http.patch('post-lists/' + this.postList.id + '/reorder', {
+                post_id: post.id,
+                order: post.order
+            });
         },
 
         scrollTo: function scrollTo(target) {
             $('html,body').animate({
                 scrollTop: target.offset().top - 280
-            }, 700);
+            }, 500);
 
             target.addClass("pulse").delay(4000).queue(function () {
                 $(this).removeClass("pulse").dequeue();
@@ -11978,7 +12017,19 @@ exports['default'] = {
         },
 
         formatTimestamp: function formatTimestamp(timestamp) {
-            return moment.unix(timestamp).format('MMM D, YYYY');
+            return moment(timestamp, "YYYY-MM-DD").format('MMM D, YYYY');
+        },
+
+        isShowing: function isShowing(post) {
+            if (!post['is_published']) {
+                return false;
+            }
+
+            var start = post['start_showing_at'] ? moment(post['start_showing_at'], 'YYYY-MM-DD') : moment("1980-01-01", "YYYY-MM-DD");
+            var stop = post['stop_showing_at'] ? moment(post['stop_showing_at'], 'YYYY-MM-DD') : moment("2033-01-19", "YYYY-MM-DD");
+            var now = moment();
+
+            return start <= now && now <= stop;
         },
 
         initSelect: function initSelect() {
@@ -12022,7 +12073,7 @@ exports['default'] = {
             }).on("select2:select", function (e) {
                 //                    console.log(e.params.data.id);
                 //                    console.log(e.params.data.text);
-                self.postList.addPost(e.params.data.id);
+                self.addPost(e.params.data);
                 $(this).val(null).trigger("change");
             });
         }
@@ -12031,7 +12082,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"form-group\">\n        <label>Add post</label>\n        <select class=\"Post-select form-control\" multiple=\"\">\n            <option v-for=\"post in postList.posts\">{{ post.title }}</option>\n        </select>\n    </div>\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th>Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n            <td class=\"order\">\n                <input class=\"post__order\" type=\"number\" value=\"{{ post.order }}\" @keyup.enter=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"post.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"row\">\n        <div class=\"col-md-6\">\n            <div class=\"form-group\">\n                <label for=\"order_by\">Sort by</label>\n                <select name=\"order_by\" id=\"order_by\" v-model=\"sortKey\" class=\"form-control\">\n                    <option v-for=\"key in sortKeys\" value=\"{{ key.value }}\">{{ key.text }}</option>\n                </select>\n            </div>\n        </div>\n        <div class=\"col-md-6\">\n            <label for=\"order_dir\">Sort direction</label>\n            <select name=\"order_dir\" id=\"order_dir\" v-model=\"orderDir\" class=\"form-control\">\n                <option value=\"asc\">Ascending</option>\n                <option value=\"desc\">Descending</option>\n            </select>\n        </div>\n    </div>\n\n    <div class=\"form-group\">\n        <label for=\"add-post\">Add post</label>\n        <select id=\"add-post\" class=\"Post-select form-control\" multiple=\"\">\n            <option></option>\n        </select>\n    </div>\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th v-if=\"sortKey == 'order'\">Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !isShowing(post) }\" id=\"Post-{{post.id}}\">\n\n            <td v-if=\"sortKey == 'order'\" class=\"order\">\n                <input class=\"post__order\" type=\"number\" :value=\"post.order\" @keydown.enter.prevent=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"isShowing(post)\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -12634,6 +12685,15 @@ var PostList = (function (_Model) {
     function PostList(data) {
         _classCallCheck(this, PostList);
 
+        if (data.posts) {
+            data.posts = data.posts.map(function (post) {
+                if (post.pivot && post.pivot.order >= 0) {
+                    post.order = post.pivot.order;
+                    return post;
+                }
+            });
+        }
+
         _get(Object.getPrototypeOf(PostList.prototype), 'constructor', this).call(this, 'post-lists', {
             id: data.id,
             name: data.name,
@@ -12645,26 +12705,12 @@ var PostList = (function (_Model) {
     }
 
     _createClass(PostList, [{
-        key: 'addPost',
-        value: function addPost(post) {
-            var self = this;
-
-            return client.get('/admin/api/posts/' + (post.id || post)).then(function (response) {
-                var post = response.data;
-                self.savePost(post).then(function (response) {
-                    var existing = self.attributes.posts.filter(function (p) {
-                        return p.id == post.id;
-                    })[0];
-                    if (typeof existing === 'undefined') {
-                        self.attributes.posts.push(post);
-                    }
-                });
-            });
-        }
-    }, {
         key: 'savePost',
         value: function savePost(post) {
-            return client.post('/admin/api/post-lists/' + this.attributes.id + '/posts', { post: post });
+            return client.post('/admin/api/post-lists/' + this.attributes.id + '/posts', {
+                post_id: post.id,
+                position: 1
+            });
         }
     }]);
 
