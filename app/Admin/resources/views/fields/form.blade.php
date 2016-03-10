@@ -13,9 +13,9 @@
             <input type="text" value="{{ $field->name or old('name') }}" name="name" id="name" class="form-control">
         </div>
         <div class="form-group">
-            <label for="template">Template</label>
+            <label for="template">Type</label>
             <select name="template" id="template" class="form-control">
-                <option value="" disabled selected>Select a template...</option>
+                <option value="" disabled selected>Select a type...</option>
                     <option value="string" {{ $field->template == 'string' ? 'selected' : '' }}>
                         String
                     </option>
