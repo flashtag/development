@@ -75,8 +75,9 @@ class PostsController extends Controller
     public function search(Request $request)
     {
         $query = $request->get('q');
+        $query = str_replace(' ', '%', ' '.$query.' ');
 
-        $posts = Post::where('title', 'like', str_replace(' ', '%', ' '.$query.' '))
+        $posts = Post::whereRaw('lower(title) like ?', [$query])
             ->get();
 
         return response()->json($posts);
