@@ -1,4 +1,4 @@
-@extends('front::clean-blog.master')
+@extends('flashtag::layout')
 
 @section('content')
     <!-- Page Header -->

@@ -1,4 +1,4 @@
-@extends('front::clean-blog.master')
+@extends('flashtag::layout')
 
 @section('content')
 <!-- Page Header -->
@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <div class="site-heading">
-                    <h1>{{ $category->name }}</h1>
+                    <h1>{{ $tag->name }}</h1>
                     <hr class="small">
                     <span class="subheading">Brought to you by Flashtag</span>
                 </div>
@@ -22,7 +22,7 @@
     <div class="row">
         <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-            @include('front::clean-blog.partials.post-list')
+            @include('flashtag::partials.post-list')
 
             <ul class="pager">
                 <li class="next">

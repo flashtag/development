@@ -24,13 +24,13 @@
 </head>
 
 <body>
-    @include('front::clean-blog.partials.nav')
+    @include('flashtag::partials.nav')
 
     @yield('content')
 
     <hr>
 
-    @include('front::clean-blog.partials.footer')
+    @include('flashtag::partials.footer')
 
     <script src="/assets/front/clean-blog/js/jquery.js"></script>
     <script src="/assets/front/clean-blog/js/bootstrap.min.js"></script>

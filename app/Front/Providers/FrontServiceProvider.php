@@ -7,14 +7,20 @@ use Illuminate\Support\ServiceProvider;
 
 class FrontServiceProvider extends ServiceProvider
 {
-    public function register()
-    {
-        //
-    }
+    /**
+     * The default theme to fall back to.
+     *
+     * @var string
+     */
+    private $defaultTheme = 'clean-creative';
+
 
     public function boot(Router $router)
     {
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'front');
+        $this->app['view']->prependNamespace('flashtag', [
+            base_path('resources/views/vendor/themes/'.settings('theme')),
+            base_path('resources/views/vendor/themes/'.$this->defaultTheme),
+        ]);
 
         if (! $this->app->routesAreCached()) {
             $router->group([
@@ -28,5 +34,10 @@ class FrontServiceProvider extends ServiceProvider
             __DIR__.'/../resources/views' => base_path('resources/views/vendor/front'),
             __DIR__.'/../public/assets' => public_path('assets/front')
         ], 'public');
+    }
+
+    public function register()
+    {
+        //
     }
 }

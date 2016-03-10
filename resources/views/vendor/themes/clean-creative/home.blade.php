@@ -1,4 +1,4 @@
-@extends('front::creative.master')
+@extends('flashtag::layout-home')
 
 @section('content')
 <header>

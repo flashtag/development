@@ -36,7 +36,9 @@
 
 <body id="page-top">
 
-@include('front::creative.partials.nav')
+
+@include('flashtag::partials.nav-home')
+
 
 @yield('content')
 

@@ -9,7 +9,7 @@
     ],
     "require": {
         "illuminate/database": "5.1.*",
-        "flashtag/core": "dev-develop@dev",
+        "flashtag/core": "*@dev",
         "venturecraft/revisionable": " 1.*",
         "ryanwinchester/laravel-auto-presenter": "^4.3",
         "doctrine/dbal": "^2.5",
