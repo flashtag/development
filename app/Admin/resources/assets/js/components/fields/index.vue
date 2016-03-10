@@ -20,7 +20,7 @@
             <tr>
                 <th><a href="#" @click.prevent="sortBy('label')">Label <i :class="orderIcon('label')"></i></a></th>
                 <th><a href="#" @click.prevent="sortBy('name')">Name <i :class="orderIcon('name')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('template')">Template <i :class="orderIcon('template')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('template')">Type <i :class="orderIcon('template')"></i></a></th>
             </tr>
         </thead>
         <tbody>
@@ -59,8 +59,8 @@
         methods: {
 
             fetch: function () {
-                this.$http.get('fields?orderBy=updated_at|desc').then(function (response) {
-                    this.$set('fields', response.data.data.map(function (field) {
+                this.$http.get('post-fields').then(function (response) {
+                    this.$set('fields', response.data.map(function (field) {
                         return new Field(field);
                     }));
                 });

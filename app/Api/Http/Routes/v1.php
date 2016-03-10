@@ -1,14 +1,24 @@
 <?php
 
+/**
+ * @var \Dingo\Api\Routing\Router $api
+ */
+
+// ----------------------------------------------------------------------------------------
+// Public routes
+// ----------------------------------------------------------------------------------------
+
 $api->group(['prefix' => 'auth'], function ($api) {
     $api->post('/', 'AuthController@authenticate');
     $api->get('user/me', 'AuthController@me');
 });
 
+// ----------------------------------------------------------------------------------------
+// Authenticated routes
+// ----------------------------------------------------------------------------------------
 
 $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
-
-    // POSTS
+    // Posts
     $api->patch('posts/{id}/publish', 'PostsController@publish');
     $api->patch('posts/{id}/lock', 'PostsController@lock');
     $api->patch('posts/{id}/unlock', 'PostsController@unlock');
@@ -17,31 +27,22 @@ $api->group(['middleware' => ['api.auth', 'jwt.refresh']], function ($api) {
     $api->post('posts/{id}/image', 'PostsController@addImage');
     $api->delete('posts/{id}/image', 'PostsController@deleteImage');
     $api->resource('posts', 'PostsController', ['except' => ['create', 'edit']]);
-
-    // TAGS
+    // Tags
     $api->resource('tags', 'TagsController', ['except' => ['create', 'edit']]);
-
-    // CATEGORIES
+    // Categories
     $api->post('categories/{id}/image', 'CategoriesController@addImage');
     $api->delete('categories/{id}/image', 'CategoriesController@deleteImage');
     $api->resource('categories', 'CategoriesController', ['except' => ['create', 'edit']]);
-
-    // POST FIELDS
+    // Post fields
     $api->resource('fields', 'FieldsController', ['except' => ['create', 'edit']]);
-
-    // POST LISTS
+    // Post lists
     $api->resource('post-lists', 'PostListsController', ['except' => ['create', 'edit']]);
-
-    // AUTHORS
+    // Authors
     $api->resource('authors', 'AuthorsController', ['except' => ['create', 'edit']]);
-
-    // USERS
+    // Users
     $api->resource('users', 'UsersController', ['except' => ['create', 'edit']]);
-
-    // SETTINGS
+    // Settings
     $api->resource('settings', 'SettingsController', ['except' => ['create', 'edit']]);
-
-    // REVISIONS
+    // Revisions
     $api->get('revisions/{id}', 'RevisionsController@show');
-
 });

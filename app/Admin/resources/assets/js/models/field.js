@@ -6,6 +6,7 @@ class Field extends Model {
             id: data.id,
             name: data.name,
             label: data.label,
+            template: data.template,
             description: data.description,
             created_at: data.created_at,
             updated_at: data.updated_at

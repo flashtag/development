@@ -57,8 +57,8 @@
         methods: {
 
             fetchCategories: function () {
-                this.$http.get('categories?include=tags,parent&orderBy=updated_at|desc').then(function (response) {
-                    this.$set('categories', response.data.data.map(function (category) {
+                this.$http.get('categories').then(function (response) {
+                    this.$set('categories', response.data.map(function (category) {
                         return new Category(category);
                     }));
                 });

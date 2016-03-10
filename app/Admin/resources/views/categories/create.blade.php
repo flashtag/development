@@ -9,7 +9,7 @@
     </ol>
 
 
-    <form class="Category EditForm" action="{{ route('admin.categories.store') }}" method="POST">
+    <form class="Category EditForm" action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
         {{ csrf_field() }}
 
         <section class="info row">
@@ -28,7 +28,6 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
         $(document).ready(function(){
             // CKEditor

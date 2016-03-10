@@ -10,6 +10,8 @@ elixir(function(mix) {
             '../../../node_modules/bootstrap-sass/assets/javascripts/bootstrap.js',
             '../../../node_modules/select2/dist/js/select2.js',
             '../../../node_modules/bootstrap-notify/bootstrap-notify.js',
+            '../../../node_modules/sweetalert/dist/sweetalert.min.js',
+            '../../../node_modules/moment/moment.js',
             '../../../public/vendor/ckeditor/ckeditor.js'
         ], 'public/build/vendor.js');
 });

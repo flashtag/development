@@ -16,6 +16,8 @@ class CreatePostListsTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('slug');
+            $table->string('order_by')->default('order');
+            $table->string('order_dir')->default('asc');
             $table->timestamps();
         });
     }

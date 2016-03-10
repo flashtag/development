@@ -7,6 +7,10 @@
             "email": "fungku@gmail.com"
         }
     ],
+    "require": {
+        "flashtag/core": "*@dev",
+        "flashtag/data": "*@dev"
+    },
     "autoload": {
         "psr-4": {
             "Flashtag\\Front\\": ""

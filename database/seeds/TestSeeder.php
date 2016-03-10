@@ -6,6 +6,7 @@ use Flashtag\Data\Category;
 use Flashtag\Data\Events\PostWasCreated;
 use Flashtag\Data\Field;
 use Flashtag\Data\Post;
+use Flashtag\Data\PostList;
 use Flashtag\Data\PostRating;
 use Flashtag\Data\Tag;
 use Flashtag\Data\User;
@@ -262,17 +263,19 @@ IPSUM;
     private function createPostLists(Collection $posts)
     {
         return collect([
-            \Flashtag\Data\PostList::create([
+            PostList::create([
                 'name' => 'Featured Grid',
                 'slug' => str_slug('Featured Grid'),
             ]),
-            \Flashtag\Data\PostList::create([
+            PostList::create([
                 'name' => 'Featured List',
                 'slug' => str_slug('Featured List'),
             ]),
         ])->map(function ($postList) use ($posts) {
-            $posts->each(function ($post) use ($postList) {
-                $postList->posts()->save($post);
+            $order = 0;
+            $posts->each(function ($post) use ($postList, &$order) {
+                $order++;
+                $postList->posts()->save($post, ['order' => $order]);
             });
             $postList->save();
 

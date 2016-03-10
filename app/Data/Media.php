@@ -34,7 +34,7 @@ class Media extends Model
      *
      * @var array
      */
-    public static $types = ['image', 'youtube_video', 'vimeo_video', 'wistia_video'];
+    public static $types = ['image', 'video'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo

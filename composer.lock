@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "8c7f2085311f188236046df8ec498220",
+    "hash": "2188f84659641a86aa4fcc6afb104328",
     "content-hash": "bbdef76a5c06ecb92c7ffdee78d60888",
     "packages": [
         {
@@ -127,7 +127,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dingo/api/zipball/9bf29beb501613d0eee342ac3e962113debddbce",
+                "url": "https://api.github.com/repos/dingo/api/zipball/3062aac74327d589e0fed92d276225ee7aaab377",
                 "reference": "9bf29beb501613d0eee342ac3e962113debddbce",
                 "shasum": ""
             },
@@ -3024,7 +3024,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/ec94405be9e0620cf474c54f8c78a29327a2e5f1",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/1a44d0ef9783a8e76678b0b6608e3850df795d71",
                 "reference": "ec94405be9e0620cf474c54f8c78a29327a2e5f1",
                 "shasum": ""
             },

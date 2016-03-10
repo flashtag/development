@@ -8,6 +8,8 @@
         }
     ],
     "require": {
+        "flashtag/core": "*@dev",
+        "flashtag/data": "*@dev",
         "guzzlehttp/guzzle": "^6.1"
     },
     "autoload": {

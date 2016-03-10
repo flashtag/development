@@ -54,8 +54,8 @@
         methods: {
 
             fetch: function () {
-                this.$http.get('tags?orderBy=updated_at|desc').then(function (response) {
-                    this.$set('tags', response.data.data.map(function (tag) {
+                this.$http.get('tags').then(function (response) {
+                    this.$set('tags', response.data.map(function (tag) {
                         return new Tag(tag);
                     }));
                 });

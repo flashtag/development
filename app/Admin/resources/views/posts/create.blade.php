@@ -7,7 +7,7 @@
         <li class="active">New</li>
     </ol>
 
-    <form class="Post EditForm" action="{{ route('admin.posts.store') }}" method="POST">
+    <form class="Post EditForm" action="{{ route('admin.posts.store') }}" method="POST" enctype="multipart/form-data">
         {{ csrf_field() }}
 
         <section class="info row">
@@ -27,7 +27,6 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
         $(document).ready(function(){
             // CKEditor

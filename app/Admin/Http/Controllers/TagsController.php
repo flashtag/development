@@ -2,14 +2,16 @@
 
 namespace Flashtag\Admin\Http\Controllers;
 
+use Flashtag\Admin\Http\Controllers\Traits\SyncsMedia;
 use Flashtag\Admin\Http\Requests\TagCreateRequest;
 use Flashtag\Admin\Http\Requests\TagDestroyRequest;
 use Flashtag\Admin\Http\Requests\TagUpdateRequest;
-use Flashtag\Data\Media;
 use Flashtag\Data\Tag;
 
 class TagsController extends Controller
 {
+    use SyncsMedia;
+
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -100,22 +102,5 @@ class TagsController extends Controller
         $data['description'] = $request->get('description');
 
         return $data;
-    }
-
-    /**
-     * @param Tag $tag
-     * @param \Illuminate\Http\Request $request
-     */
-    private function syncMediaFromRequest(Tag $tag, $request)
-    {
-        $type = $request->get('media-type');
-        $url = $request->get('media-link');
-
-        if ($type && $url) {
-            $media = $tag->media ?: new Media();
-            $media->type = $type;
-            $media->url = $url;
-            $tag->media()->save($media);
-        }
     }
 }

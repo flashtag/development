@@ -9,6 +9,7 @@
     ],
     "require": {
         "illuminate/database": "5.1.*",
+        "flashtag/core": "dev-develop@dev",
         "venturecraft/revisionable": " 1.*",
         "ryanwinchester/laravel-auto-presenter": "^4.3",
         "doctrine/dbal": "^2.5",
@@ -18,6 +19,9 @@
         "psr-4": {
             "Flashtag\\Data\\": ""
         },
+        "files": [
+            "helpers.php"
+        ],
         "exclude-from-classmap": ["/database/"]
     },
     "minimum-stability": "dev",

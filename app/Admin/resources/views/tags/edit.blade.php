@@ -7,7 +7,7 @@
         <li class="active">{{ $tag->name }}</li>
     </ol>
 
-    <form class="Category EditForm" action="{{ route('admin.tags.update', [$tag->id]) }}" method="POST">
+    <form class="Category EditForm" action="{{ route('admin.tags.update', [$tag->id]) }}" method="POST" enctype="multipart/form-data">
         {{ csrf_field() }}
         {{ method_field('PUT') }}
 
@@ -27,8 +27,9 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script>
+        var csrf = "{{ csrf_token() }}";
+
         $(document).ready(function(){
             // CKEditor
             $('.rich-editor').each(function(){
@@ -58,9 +59,9 @@
                 showLoaderOnConfirm: true
             }, function () {
                 $.ajax({
-                    url: '/api/tags/{{ $tag->id }}',
+                    url: '/admin/api/tags/{{ $tag->id }}',
                     method: 'DELETE',
-                    headers: { Authorization: localStorage.getItem('jwt-token') }
+                    headers: { "X-CSRF-TOKEN": csrf }
                 }).done(function(){
                     self.deleted = true;
                     window.location = '/admin/tags';
