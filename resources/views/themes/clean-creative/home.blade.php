@@ -75,7 +75,7 @@
             @foreach ($categories as $i => $category)
             <div class="col-lg-4 col-sm-6">
                 <a href="/{{ $category->slug }}" class="portfolio-box">
-                    <img src="/assets/front/creative/img/portfolio/{{$i+1}}.jpg" class="img-responsive" alt="">
+                    <img src="/assets/themes/clean-creative/img/portfolio/{{$i+1}}.jpg" class="img-responsive" alt="">
                     <div class="portfolio-box-caption">
                         <div class="portfolio-box-caption-content">
                             <div class="project-category text-faded">
