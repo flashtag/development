@@ -15,7 +15,7 @@
         "doctrine/dbal": "^2.5",
         "fzaninotto/faker": "~1.4",
         "guzzlehttp/guzzle": "^6.1",
-        "flashtag/theme-clean-creative": "*@dev"
+        "flashtag/theme-clean-creative": "dev-master"
     },
     "require-dev": {
         "laravel/homestead": "^2.1",

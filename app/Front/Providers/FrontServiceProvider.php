@@ -2,6 +2,7 @@
 
 namespace Flashtag\Front\Providers;
 
+use Flashtag\Front\Console\Commands;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,6 +33,8 @@ class FrontServiceProvider extends ServiceProvider
 
     public function register()
     {
-        //
+        $this->commands([
+            Commands\InstallTheme::class,
+        ]);
     }
 }

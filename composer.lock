@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "29b5f5e074577ec516cd1adf633e28e5",
-    "content-hash": "36a00ade205c70c7beed1d74771d5677",
+    "hash": "4fabd9610f0bde3be18904368c19b7e7",
+    "content-hash": "6b18556b8b8660ef590bb12dc4a804b7",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -814,15 +814,20 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/flashtag/theme-clean-creative.git",
-                "reference": "63e789a720245145362d35da29788ba9db8efaa5"
+                "reference": "787b8dff3ece864727f5d6924968299ba3a78254"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flashtag/theme-clean-creative/zipball/63e789a720245145362d35da29788ba9db8efaa5",
-                "reference": "63e789a720245145362d35da29788ba9db8efaa5",
+                "url": "https://api.github.com/repos/flashtag/theme-clean-creative/zipball/787b8dff3ece864727f5d6924968299ba3a78254",
+                "reference": "787b8dff3ece864727f5d6924968299ba3a78254",
                 "shasum": ""
             },
             "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Flashtag\\Themes\\CleanCreative\\": "src/"
+                }
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -833,7 +838,7 @@
                     "email": "fungku@gmail.com"
                 }
             ],
-            "time": "2016-03-12 03:21:03"
+            "time": "2016-03-12 03:56:55"
         },
         {
             "name": "fzaninotto/faker",
