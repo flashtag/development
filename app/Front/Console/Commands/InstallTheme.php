@@ -59,6 +59,7 @@ class InstallTheme extends Command
     private function addServiceProvider()
     {
         // TODO: Add the service provider to some persisted collection
+        // OR just publish the files...
         $this->info("TODO: Persist service provider...");
     }
 }
