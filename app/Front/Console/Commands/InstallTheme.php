@@ -2,6 +2,7 @@
 
 namespace Flashtag\Front\Console\Commands;
 
+use Flashtag\Front\Theme;
 use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
 
@@ -30,8 +31,10 @@ class InstallTheme extends Command
      */
     public function handle()
     {
-        $this->install($this->getTheme());
-        $this->addServiceProvider();
+        $theme = $this->getTheme();
+
+        $this->install($theme);
+        $this->publish($theme);
     }
 
     private function getTheme()
@@ -56,9 +59,14 @@ class InstallTheme extends Command
         });
     }
 
-    private function addServiceProvider()
+    private function publish($theme)
     {
-        // TODO: Add the service provider to some persisted collection
-        $this->info("TODO: Persist service provider...");
+        // TODO: just publish the files...
+        $this->info("TODO: publish the assets...");
+
+        $config = require base_path('vendor/'.$theme.'/theme.php');
+        $theme = new Theme($config);
+
+        dd($theme->publishes());
     }
 }
