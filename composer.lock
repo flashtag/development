@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "2188f84659641a86aa4fcc6afb104328",
-    "content-hash": "bbdef76a5c06ecb92c7ffdee78d60888",
+    "hash": "29b5f5e074577ec516cd1adf633e28e5",
+    "content-hash": "36a00ade205c70c7beed1d74771d5677",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -127,7 +127,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dingo/api/zipball/3062aac74327d589e0fed92d276225ee7aaab377",
+                "url": "https://api.github.com/repos/dingo/api/zipball/b9ff594eedea42d5cd78f09b20cbb66dd46b1204",
                 "reference": "9bf29beb501613d0eee342ac3e962113debddbce",
                 "shasum": ""
             },
@@ -807,6 +807,33 @@
                 "zf2"
             ],
             "time": "2015-06-29 05:42:04"
+        },
+        {
+            "name": "flashtag/theme-clean-creative",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/flashtag/theme-clean-creative.git",
+                "reference": "63e789a720245145362d35da29788ba9db8efaa5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/flashtag/theme-clean-creative/zipball/63e789a720245145362d35da29788ba9db8efaa5",
+                "reference": "63e789a720245145362d35da29788ba9db8efaa5",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ryan Winchester",
+                    "email": "fungku@gmail.com"
+                }
+            ],
+            "time": "2016-03-12 03:21:03"
         },
         {
             "name": "fzaninotto/faker",
@@ -3024,7 +3051,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/1a44d0ef9783a8e76678b0b6608e3850df795d71",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/130a672629ce0f668497001b0f8664f6611c6093",
                 "reference": "ec94405be9e0620cf474c54f8c78a29327a2e5f1",
                 "shasum": ""
             },
@@ -5459,6 +5486,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "dingo/api": 20,
+        "flashtag/theme-clean-creative": 20,
         "codeclimate/php-test-reporter": 20
     },
     "prefer-stable": true,

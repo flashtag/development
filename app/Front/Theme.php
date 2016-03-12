@@ -29,6 +29,14 @@ class Theme
         }, $themes);
     }
 
+    public function publishes()
+    {
+        return [
+            $this->viewPath() => base_path($this->views()),
+            $this->assetPath() => public_path($this->assets()),
+        ];
+    }
+
     public function views()
     {
         return sprintf(
@@ -43,16 +51,13 @@ class Theme
         return sprintf('assets/themes/%s', $this->config['name']);
     }
 
-    public function vendorPath()
+    public function viewPath()
     {
-        return $this->config['path'];
+        return $this->config['views'];
     }
 
-    public function publishes()
+    public function assetPath()
     {
-        return [
-            $this->vendorPath().'/resources/views' => base_path($this->views()),
-            $this->vendorPath().'/public/assets' => public_path($this->assets()),
-        ];
+        return $this->config['assets'];
     }
 }

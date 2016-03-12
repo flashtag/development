@@ -9,7 +9,8 @@
     ],
     "require": {
         "flashtag/core": "*@dev",
-        "flashtag/data": "*@dev"
+        "flashtag/data": "*@dev",
+        "flashtag/theme-clean-creative": "*@dev"
     },
     "autoload": {
         "psr-4": {

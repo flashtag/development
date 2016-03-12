@@ -14,7 +14,6 @@ class FrontServiceProvider extends ServiceProvider
      */
     private $defaultTheme = 'clean-creative';
 
-
     public function boot(Router $router)
     {
         $this->app['view']->prependNamespace('flashtag', [
@@ -29,11 +28,6 @@ class FrontServiceProvider extends ServiceProvider
                 require __DIR__.'/../Http/routes.php';
             });
         }
-
-        $this->publishes([
-            __DIR__.'/../resources/views' => base_path('resources/views/vendor/front'),
-            __DIR__.'/../public/assets' => public_path('assets/front')
-        ], 'public');
     }
 
     public function register()
