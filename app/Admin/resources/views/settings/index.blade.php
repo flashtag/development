@@ -28,16 +28,16 @@
     </div>
 
     {{-- Only show template select if using flashtag/front --}}
-    @if (class_exists(\Flashtag\Front\Template::class))
+    @if (class_exists(\Flashtag\Front\Theme::class))
         <div class="panel panel-default">
             <div class="panel-heading">Display</div>
             <div class="panel-body">
                 <div class="form-group">
-                    <label for="site_template">Site Template</label>
-                    <select name="site_template" id="site_template" class="form-control">
-                        @foreach (\Flashtag\Front\Template::lists() as $template)
+                    <label for="theme">Theme</label>
+                    <select name="theme" id="theme" class="form-control">
+                        @foreach (\Flashtag\Front\Theme::lists() as $template)
                             <option value="{{ $template }}"
-                                    {{ settings('site_template') == $template ? 'selected' : '' }}>
+                                    {{ settings('theme') == $template ? 'selected' : '' }}>
                                 {{ $template }}
                             </option>
                         @endforeach
