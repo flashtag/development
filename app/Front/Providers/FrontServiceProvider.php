@@ -18,8 +18,9 @@ class FrontServiceProvider extends ServiceProvider
     public function boot(Router $router)
     {
         $this->app['view']->prependNamespace('flashtag', [
-            base_path('resources/views/vendor/themes/'.settings('theme')),
-            base_path('resources/views/vendor/themes/'.$this->defaultTheme),
+            base_path('resources/views/overrides/'.settings('theme')),
+            base_path('resources/views/themes/'.settings('theme')),
+            base_path('resources/views/themes/'.$this->defaultTheme),
         ]);
 
         if (! $this->app->routesAreCached()) {

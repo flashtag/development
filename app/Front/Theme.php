@@ -22,7 +22,7 @@ class Theme
 
     public static function lists()
     {
-        $themes = Storage::directories('resources/views/vendor/themes');
+        $themes = Storage::directories('resources/views/themes');
 
         return array_map(function ($theme) {
             return basename($theme);
@@ -40,7 +40,7 @@ class Theme
     public function views()
     {
         return sprintf(
-            'resources/views/vendor/themes/%s/%s',
+            'resources/views/themes/%s/%s',
             $this->config['name'],
             $this->config['version']
         );
