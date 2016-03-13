@@ -4,6 +4,7 @@ namespace Flashtag\Front\Console\Commands;
 
 use Flashtag\Front\Theme;
 use Illuminate\Console\Command;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
 class InstallTheme extends Command
@@ -25,6 +26,22 @@ class InstallTheme extends Command
     protected $description = 'Install a theme package from packagist.';
 
     /**
+     * @var \Symfony\Component\Filesystem\Filesystem
+     */
+    private $filesystem;
+
+    /**
+     * Create command instance.
+     *
+     * @param \Symfony\Component\Filesystem\Filesystem $filesystem
+     */
+    public function __construct(Filesystem $filesystem)
+    {
+        parent::__construct();
+        $this->filesystem = $filesystem;
+    }
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -35,8 +52,13 @@ class InstallTheme extends Command
 
         $this->install($theme);
         $this->publish($theme);
+
+        $this->info("Done!");
     }
 
+    /**
+     * @return array|string
+     */
     private function getTheme()
     {
         if ($this->option('tag')) {
@@ -46,8 +68,13 @@ class InstallTheme extends Command
         return $this->argument('theme');
     }
 
+    /**
+     * @param string $theme
+     */
     private function install($theme)
     {
+        $this->info(sprintf("Installing theme %s", $theme));
+
         $process = new Process(sprintf('composer require "%s"', $theme));
         $process->setTty(true);
         $process->run(function ($type, $buffer) {
@@ -59,14 +86,18 @@ class InstallTheme extends Command
         });
     }
 
+    /**
+     * @param string $theme
+     */
     private function publish($theme)
     {
-        // TODO: just publish the files...
-        $this->info("TODO: publish the assets...");
+        $this->info("Publishing Assets...");
 
         $config = require base_path('vendor/'.$theme.'/theme.php');
         $theme = new Theme($config);
 
-        dd($theme->publishes());
+        foreach ($theme->publishes() as $from => $to) {
+            $this->filesystem->mirror($from, $to);
+        }
     }
 }

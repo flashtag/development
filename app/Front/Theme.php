@@ -36,6 +36,21 @@ class Theme
         }, $themes);
     }
 
+    public static function viewLocations()
+    {
+        if (getenv('APP_ENV') == 'testing') {
+            $theme = 'clean-creative';
+        } else {
+            $theme = settings('theme');
+        }
+
+        return [
+            base_path('resources/views/overrides/'.$theme),
+            base_path('resources/views/themes/'.$theme),
+            base_path('resources/views/themes/clean-creative'),
+        ];
+    }
+
     /**
      * Get an array of assets to publish.
      * @return array
@@ -54,11 +69,7 @@ class Theme
      */
     public function views()
     {
-        return sprintf(
-            'resources/views/themes/%s/%s',
-            $this->config['name'],
-            $this->config['version']
-        );
+        return sprintf('resources/views/themes/%s', $this->name);
     }
 
     /**
@@ -67,7 +78,7 @@ class Theme
      */
     public function assets()
     {
-        return sprintf('assets/themes/%s', $this->config['name']);
+        return sprintf('assets/themes/%s', $this->name);
     }
 
     /**
@@ -76,7 +87,7 @@ class Theme
      */
     public function viewPath()
     {
-        return $this->config['views'];
+        return $this->views;
     }
 
     /**
@@ -85,6 +96,6 @@ class Theme
      */
     public function assetPath()
     {
-        return $this->config['assets'];
+        return $this->assets;
     }
 }

@@ -3,25 +3,15 @@
 namespace Flashtag\Front\Providers;
 
 use Flashtag\Front\Console\Commands;
+use Flashtag\Front\Theme;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 class FrontServiceProvider extends ServiceProvider
 {
-    /**
-     * The default theme to fall back to.
-     *
-     * @var string
-     */
-    private $defaultTheme = 'clean-creative';
-
     public function boot(Router $router)
     {
-        $this->app['view']->prependNamespace('flashtag', [
-            base_path('resources/views/overrides/'.settings('theme')),
-            base_path('resources/views/themes/'.settings('theme')),
-            base_path('resources/views/themes/'.$this->defaultTheme),
-        ]);
+        $this->app['view']->prependNamespace('flashtag', Theme::viewLocations());
 
         if (! $this->app->routesAreCached()) {
             $router->group([

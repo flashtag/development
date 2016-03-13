@@ -3058,7 +3058,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/130a672629ce0f668497001b0f8664f6611c6093",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/cabc89e8f667d8e3a29d7161b5d56ebb1cf59f56",
                 "reference": "130a672629ce0f668497001b0f8664f6611c6093",
                 "shasum": ""
             },
