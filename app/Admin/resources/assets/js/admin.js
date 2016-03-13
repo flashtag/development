@@ -21,6 +21,8 @@ new Vue({
     el: '#Admin',
     components: {
         'posts': require('./components/posts/index.vue'),
+        'post-revisions': require('./components/posts/revisions/index.vue'),
+        'post-revision': require('./components/posts/revisions/show.vue'),
         'fields': require('./components/fields/index.vue'),
         'post-lists': require('./components/post-lists/index.vue'),
         'post-list': require('./components/post-lists/posts.vue'),

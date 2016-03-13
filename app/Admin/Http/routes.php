@@ -28,8 +28,8 @@ $router->post('password/reset', 'Auth\PasswordController@postReset');
 // Admin routes
 $router->group(['middleware' => 'auth'], function ($router) {
     $router->get('/', 'HomeController@home');
+    $router->resource('posts/{post_id}/revisions', 'PostRevisionsController', ['only' => ['index', 'show']]);
     $router->resource('posts', 'PostsController');
-    $router->resource('posts/{post_id}/revisions', 'RevisionsController', ['only' => ['index', 'show']]);
     $router->resource('post-fields', 'PostFieldsController');
     $router->resource('post-lists', 'PostListsController');
     $router->resource('categories', 'CategoriesController');
@@ -45,6 +45,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function ($router) {
     $router->patch('posts/{post}/lock', 'Api\PostsController@lock');
     $router->patch('posts/{post}/unlock', 'Api\PostsController@unlock');
     $router->get('posts/search', 'Api\PostsController@search');
+    $router->resource('posts/{post_id}/revisions', 'Api\PostRevisionsController', ['only' => ['index', 'show']]);
     $router->resource('posts', 'Api\PostsController', ['except' => ['edit', 'create']]);
     $router->resource('post-fields', 'Api\PostFieldsController', ['except' => ['edit', 'create']]);
     $router->post('post-lists/{postList}/posts', 'Api\PostListsController@addPost');

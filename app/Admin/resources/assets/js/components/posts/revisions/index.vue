@@ -1,55 +1,49 @@
 <template>
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
-        <li><a v-link="'/posts'">Posts</a></li>
-        <li><a v-link="'/posts/'+post.id">{{ post.title }}</a></li>
+        <li><a href="/admin/posts">Posts</a></li>
+        <li><a href="/admin/posts/{{ postId }}">{{ post.title }}</a></li>
         <li class="active">Revisions</li>
     </ol>
 
-    <div v-if="$loadingRouteData" class="content-loading"><i class="fa fa-spinner fa-spin"></i></div>
-    <div v-if="!$loadingRouteData">
-
-        <div class="filters">
-            <div class="row">
-                <div class="col-md-6">
-                    <select v-model="fieldFilter" id="field" class="form-control">
-                        <option value="" selected>Filter by field...</option>
-                        <option v-for="field in keys" :value="$key">
-                            {{ field }}
-                        </option>
-                    </select>
-                </div>
+    <div class="filters">
+        <div class="row">
+            <div class="col-md-6">
+                <select v-model="fieldFilter" id="field" class="form-control">
+                    <option value="" selected>Filter by field...</option>
+                    <option v-for="field in keys" :value="$key">
+                        {{ field }}
+                    </option>
+                </select>
             </div>
         </div>
+    </div>
 
-        <div class="panel panel-default">
-            <div class="panel-heading">Revision History</div>
-            <div class="panel-body" v-if="!post.revisions.data.length > 0"><h6>No revions</h6></div>
-            <table v-else class="Revisions table table-hover">
-                <tbody>
-                <tr v-for="revision in post.revisions.data
-                        | filterBy fieldFilter in 'key'
-                        | orderBy 'created_at' -1"
-                    class="Revision">
-                    <td>{{{ what(revision) }}}</td>
-                    <td>at {{ when(revision.created_at) }}</td>
-                    <td>by <em>{{ who(revision.user_id) }}</em></td>
-                    <td class="action-button"><a v-if="shouldDiff(revision.key)"
-                           v-link="'/posts/'+post.id+'/revisions/'+revision.id"
-                           class="btn btn-primary btn-sm">View</a></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Revision History</div>
+        <div class="panel-body" v-if="!post.revisions.length > 0"><h6>No revisions</h6></div>
+        <table v-else class="Revisions table table-hover">
+            <tbody>
+            <tr v-for="revision in post.revisions
+                    | filterBy fieldFilter in 'key'
+                    | orderBy 'created_at' -1"
+                class="Revision">
+                <td>{{{ what(revision) }}}</td>
+                <td>at {{ when(revision.created_at) }}</td>
+                <td>by <em>{{ who(revision.user_id) }}</em></td>
+                <td class="action-button"><a v-if="shouldDiff(revision.key)"
+                       href="/admin/posts/{{post.id}}/revisions/{{revision.id}}"
+                       class="btn btn-primary btn-sm">View</a></td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </template>
 
 <script>
-    import moment from 'moment';
-
     export default {
 
-        props: ['current-user'],
+        props: ['post-id'],
 
         data: function () {
             return {
@@ -75,57 +69,36 @@
             }
         },
 
+        created: function() {
+            this.fetch();
+            this.fetchUsers();
+            this.fetchCategories();
+            this.fetchAuthors();
+        },
+
         methods: {
 
             fetch: function () {
-                var self = this;
-                return client({
-                    path: '/posts/' + this.$route.params.post_id + '?include=revisions'
-                }).then(function (response) {
-                    self.post = response.entity.data;
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                return this.$http.get('posts/'+this.postId+'/revisions').then(function (response) {
+                    this.$set('post', response.data);
                 });
             },
 
             fetchUsers: function (successHandler) {
-                var self = this;
-                return client({
-                    path: '/users'
-                }).then(function (response) {
-                    self.users = response.entity.data;
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                return this.$http.get('users').then(function (response) {
+                    this.$set('users', response.data);
                 });
             },
 
             fetchCategories: function () {
-                var self = this;
-                return client({
-                    path: '/categories'
-                }).then(function (response) {
-                    self.categories = response.entity.data;
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                return this.$http.get('categories').then(function (response) {
+                    this.$set('categories', response.data);
                 });
             },
 
             fetchAuthors: function () {
-                var self = this;
-                return client({
-                    path: '/authors'
-                }).then(function (response) {
-                    self.authors = response.entity.data;
-                }, function (response) {
-                    if (response.status.code == 401 || response.status.code == 500) {
-                        self.$dispatch('userHasLoggedOut')
-                    }
+                return this.$http.get('authors').then(function (response) {
+                    this.$set('authors', response.data);
                 });
             },
 
@@ -142,7 +115,7 @@
             },
 
             when: function (timestamp) {
-                return moment.unix(timestamp).format('h:mm a on MMM D, YYYY');
+                return moment(timestamp, "YYYY-MM-DD").format('h:mm a on MMM D, YYYY');
             },
 
             shouldDiff: function (key) {
@@ -191,16 +164,6 @@
                 return this.currentUser ? this.currentUser.name : '';
             }
 
-        },
-
-        route: {
-            data: function (transition) {
-                this.fetch()
-                    .then(this.fetchUsers)
-                    .then(this.fetchCategories)
-                    .then(this.fetchAuthors)
-                    .then(transition.next);
-            }
         }
 
     }
