@@ -38,10 +38,10 @@ class Theme
 
     public static function viewLocations()
     {
-        if (getenv('APP_ENV') == 'testing') {
-            $theme = 'clean-creative';
-        } else {
+        try {
             $theme = settings('theme');
+        } catch (\PDOException $e) {
+            $theme = 'clean-creative';
         }
 
         return [
