@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "9ff2499194f55f0522682799e11bf5b7",
-    "content-hash": "f5cc47405da3eceacbb3badd69e4feb5",
+    "hash": "87d5464e4cabb6496afed59d172bf09c",
+    "content-hash": "bc22fc46cacc437c893c497dc66002f3",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -809,17 +809,17 @@
             "time": "2015-06-29 05:42:04"
         },
         {
-            "name": "flashtag/theme-clean-creative",
+            "name": "flashtag-themes/clean-creative",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/flashtag/theme-clean-creative.git",
-                "reference": "c83c2d31cc6aee84b038f1769da49e7a7bcf93d0"
+                "url": "https://github.com/flashtag-themes/clean-creative.git",
+                "reference": "c7e12caf8cbea2bbb4000ac6a42336f5e42daf2b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flashtag/theme-clean-creative/zipball/c83c2d31cc6aee84b038f1769da49e7a7bcf93d0",
-                "reference": "c83c2d31cc6aee84b038f1769da49e7a7bcf93d0",
+                "url": "https://api.github.com/repos/flashtag-themes/clean-creative/zipball/c7e12caf8cbea2bbb4000ac6a42336f5e42daf2b",
+                "reference": "c7e12caf8cbea2bbb4000ac6a42336f5e42daf2b",
                 "shasum": ""
             },
             "type": "library",
@@ -837,7 +837,7 @@
                     "email": "feedback@startbootstrap.com"
                 }
             ],
-            "time": "2016-03-13 03:39:45"
+            "time": "2016-03-14 05:26:12"
         },
         {
             "name": "fzaninotto/faker",
@@ -1483,16 +1483,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "1.18.0",
+            "version": "1.18.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "e19b764b5c855580e8ffa7e615f72c10fd2f99cc"
+                "reference": "a5f2734e8c16f3aa21b3da09715d10e15b4d2d45"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/e19b764b5c855580e8ffa7e615f72c10fd2f99cc",
-                "reference": "e19b764b5c855580e8ffa7e615f72c10fd2f99cc",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/a5f2734e8c16f3aa21b3da09715d10e15b4d2d45",
+                "reference": "a5f2734e8c16f3aa21b3da09715d10e15b4d2d45",
                 "shasum": ""
             },
             "require": {
@@ -1557,7 +1557,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2016-03-01 18:00:40"
+            "time": "2016-03-13 16:08:35"
         },
         {
             "name": "mtdowling/cron-expression",
@@ -3102,12 +3102,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tymondesigns/jwt-auth.git",
-                "reference": "130a672629ce0f668497001b0f8664f6611c6093"
+                "reference": "e8cc5204d5cd7d80a98ab1897735681414b9d45f"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/e8cc5204d5cd7d80a98ab1897735681414b9d45f",
-                "reference": "130a672629ce0f668497001b0f8664f6611c6093",
+                "reference": "e8cc5204d5cd7d80a98ab1897735681414b9d45f",
                 "shasum": ""
             },
             "require": {
@@ -3160,7 +3160,7 @@
                 "jwt",
                 "laravel"
             ],
-            "time": "2016-03-11 22:00:45"
+            "time": "2016-03-13 09:31:48"
         },
         {
             "name": "venturecraft/revisionable",
@@ -5549,7 +5549,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "dingo/api": 20,
-        "flashtag/theme-clean-creative": 20,
+        "flashtag-themes/clean-creative": 20,
         "codeclimate/php-test-reporter": 20
     },
     "prefer-stable": true,
