@@ -97,6 +97,7 @@ class InstallTheme extends Command
         $theme = new Theme($config);
 
         foreach ($theme->publishes() as $from => $to) {
+            $this->comment(sprintf("Publishing files from %s to %s", $from, $to));
             $this->filesystem->mirror($from, $to);
         }
     }

@@ -45,7 +45,7 @@ class Theme
         }
 
         return [
-            base_path('resources/views/overrides/'.$theme),
+            base_path('resources/views/theme-overrides/'.$theme),
             base_path('resources/views/themes/'.$theme),
             base_path('resources/views/themes/clean-creative'),
         ];

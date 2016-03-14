@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4fabd9610f0bde3be18904368c19b7e7",
-    "content-hash": "6b18556b8b8660ef590bb12dc4a804b7",
+    "hash": "9ff2499194f55f0522682799e11bf5b7",
+    "content-hash": "f5cc47405da3eceacbb3badd69e4feb5",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -814,20 +814,15 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/flashtag/theme-clean-creative.git",
-                "reference": "857265ee5a22cd7359264098af446d8d25e660c9"
+                "reference": "c83c2d31cc6aee84b038f1769da49e7a7bcf93d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flashtag/theme-clean-creative/zipball/857265ee5a22cd7359264098af446d8d25e660c9",
-                "reference": "857265ee5a22cd7359264098af446d8d25e660c9",
+                "url": "https://api.github.com/repos/flashtag/theme-clean-creative/zipball/c83c2d31cc6aee84b038f1769da49e7a7bcf93d0",
+                "reference": "c83c2d31cc6aee84b038f1769da49e7a7bcf93d0",
                 "shasum": ""
             },
             "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Flashtag\\Themes\\CleanCreative\\": "src/"
-                }
-            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -836,9 +831,13 @@
                 {
                     "name": "Ryan Winchester",
                     "email": "fungku@gmail.com"
+                },
+                {
+                    "name": "Start Bootstrap",
+                    "email": "feedback@startbootstrap.com"
                 }
             ],
-            "time": "2016-03-12 06:03:05"
+            "time": "2016-03-13 03:39:45"
         },
         {
             "name": "fzaninotto/faker",
@@ -2510,6 +2509,55 @@
             "time": "2016-01-27 05:14:19"
         },
         {
+            "name": "symfony/filesystem",
+            "version": "v3.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/filesystem.git",
+                "reference": "23ae8f9648d0a7fe94a47c8e20e5bf37c489a451"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/23ae8f9648d0a7fe94a47c8e20e5bf37c489a451",
+                "reference": "23ae8f9648d0a7fe94a47c8e20e5bf37c489a451",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.9"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Filesystem\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Filesystem Component",
+            "homepage": "https://symfony.com",
+            "time": "2016-02-23 15:16:06"
+        },
+        {
             "name": "symfony/finder",
             "version": "v2.7.10",
             "source": {
@@ -3058,7 +3106,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/cabc89e8f667d8e3a29d7161b5d56ebb1cf59f56",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/e8cc5204d5cd7d80a98ab1897735681414b9d45f",
                 "reference": "130a672629ce0f668497001b0f8664f6611c6093",
                 "shasum": ""
             },
@@ -5344,55 +5392,6 @@
             "description": "Symfony DependencyInjection Component",
             "homepage": "https://symfony.com",
             "time": "2016-02-28 16:34:46"
-        },
-        {
-            "name": "symfony/filesystem",
-            "version": "v3.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/filesystem.git",
-                "reference": "23ae8f9648d0a7fe94a47c8e20e5bf37c489a451"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/23ae8f9648d0a7fe94a47c8e20e5bf37c489a451",
-                "reference": "23ae8f9648d0a7fe94a47c8e20e5bf37c489a451",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.5.9"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\Filesystem\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony Filesystem Component",
-            "homepage": "https://symfony.com",
-            "time": "2016-02-23 15:16:06"
         },
         {
             "name": "symfony/polyfill-apcu",
