@@ -20,6 +20,7 @@
         <thead>
             <tr>
                 <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('title')">Url slug <i :class="orderIcon('slug')"></i></a></th>
                 <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
                 <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
                 <th class="text-centered"><a>Showing</a></th>
@@ -34,6 +35,8 @@
                     <span v-if="page.is_locked" data-toggle="tooltip" data-placement="top"
                           title="Locked by {{ userName(page.locked_by_id) }}"><i class="fa fa-lock"></i></span>
                 </td>
+
+                <td>/{{ page.slug }}</td>
 
                 <td>{{ formatTime(page.created_at) }}</td>
 

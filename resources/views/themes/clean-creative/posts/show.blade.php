@@ -16,13 +16,13 @@
                         <h2 class="subheading">{{ $post->subtitle }}</h2>
                         <span class="meta">
                             Published
-                            @if ($post->show_author && $post->author) by <a href="/authors/{{ $post->author->slug }}">{{ $post->author->name or 'Flashtag' }}</a> @endif
+                            @if ($post->show_author && $post->author) by <a href="{{ route('authors.show', [$post->author->slug]) }}">{{ $post->author->name or 'Flashtag' }}</a> @endif
                             on {{ $post->publishedOn() }}
-                            @if ($post->category) in <a href="/{{ $post->category->slug }}">{{ $post->category->name }}</a> @endif
+                            @if ($post->category) in <a href="{{ route('categories.show', [$post->category->slug]) }}">{{ $post->category->name }}</a> @endif
                         </span>
                         <span class="tags">
                             @foreach ($post->tags as $tag)
-                                <a href="/topics/{{ $tag->slug }}" class="label label-default">{{ $tag->name }}</a>
+                                <a href="{{ route('topics.show', [$tag->slug]) }}" class="label label-default">{{ $tag->name }}</a>
                             @endforeach
                         </span>
                     </div>

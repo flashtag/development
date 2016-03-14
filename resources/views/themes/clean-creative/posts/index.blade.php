@@ -24,11 +24,6 @@
 
             @include('flashtag::partials.post-list')
 
-            <ul class="pager">
-                <li class="next">
-                    <a href="#">Older Posts &rarr;</a>
-                </li>
-            </ul>
         </div>
     </div>
 </div>

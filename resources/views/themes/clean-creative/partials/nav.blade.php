@@ -23,7 +23,7 @@
                     <a href="/#features">Features</a>
                 </li>
                 <li>
-                    <a href="/posts">Posts</a>
+                    <a href="{{ route('posts.index') }}">Posts</a>
                 </li>
                 <li>
                     <a href="/contact">Contact</a>

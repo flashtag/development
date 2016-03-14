@@ -13,7 +13,7 @@ class PageCreateRequest extends Request
     {
         return [
             'title' => 'required|unique:posts|max:255',
-            'body' => 'required',
+            'slug' => 'required|alpha_dash|unique:posts|max:255',
         ];
     }
 

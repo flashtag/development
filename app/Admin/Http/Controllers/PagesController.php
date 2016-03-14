@@ -57,7 +57,6 @@ class PagesController extends Controller
         $page->update($this->buildPageFromRequest($request));
 
         $this->handleImageUpload($page, $request->file('image'));
-        $this->syncTags($page, $request->get('tags'));
 
         return redirect()->route('admin.pages.index');
     }
@@ -66,7 +65,7 @@ class PagesController extends Controller
     {
         $data['title'] = $request->get('title');
         $data['subtitle'] = $request->get('subtitle');
-        $data['slug'] = str_slug($request->get('title'));
+        $data['slug'] = $request->get('slug');
         $data['body'] = $request->get('body');
         $data['is_published'] = $request->get('is_published', false);
         $data['meta_description'] = $request->get('meta_description');
@@ -87,11 +86,6 @@ class PagesController extends Controller
         if (! empty($image)) {
             $page->addImage($image);
         }
-    }
-
-    private function syncTags($page, $tags = [])
-    {
-        $page->tags()->sync((array) $tags);
     }
 
     public function destroy(PageDestroyRequest $request, $id)

@@ -56,6 +56,10 @@
             </div>
         </div>
         <div class="form-group">
+            <label for="slug">Slug</label>
+            <input name="slug" id="slug" class="form-control" value="{{ $page->slug or old('slug') }}">
+        </div>
+        <div class="form-group">
             <label>Include content from</label>
             <select class="form-control">
                 <option disabled selected>Select blade view</option>

@@ -13,13 +13,13 @@
         <a class="list-group-item indented" href="/admin/post-lists">
             <i class="fa fa-th-list"></i> Post lists
         </a>
-        <a class="list-group-item" href="/admin/categories">
+        <a class="list-group-item indented" href="/admin/categories">
             <i class="fa fa-columns"></i> Categories
         </a>
-        <a class="list-group-item" href="/admin/tags">
+        <a class="list-group-item indented" href="/admin/tags">
             <i class="fa fa-tags"></i> Tags
         </a>
-        <a class="list-group-item" href="/admin/authors">
+        <a class="list-group-item indented" href="/admin/authors">
             <i class="fa fa-pencil-square-o"></i> Authors
         </a>
         <a class="list-group-item" href="/admin/pages">
