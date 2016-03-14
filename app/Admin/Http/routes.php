@@ -32,6 +32,7 @@ $router->group(['middleware' => 'auth'], function ($router) {
     $router->resource('posts', 'PostsController');
     $router->resource('post-fields', 'PostFieldsController');
     $router->resource('post-lists', 'PostListsController');
+    $router->resource('pages', 'PagesController');
     $router->resource('categories', 'CategoriesController');
     $router->resource('tags', 'TagsController');
     $router->resource('authors', 'AuthorsController');
@@ -51,6 +52,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function ($router) {
     $router->post('post-lists/{postList}/posts', 'Api\PostListsController@addPost');
     $router->patch('post-lists/{postList}/reorder', 'Api\PostListsController@reorder');
     $router->resource('post-lists', 'Api\PostListsController', ['except' => ['edit', 'create']]);
+    $router->resource('pages', 'Api\PagesController', ['except' => ['edit', 'create']]);
     $router->resource('tags', 'Api\TagsController', ['except' => ['edit', 'create']]);
     $router->resource('categories', 'Api\CategoriesController', ['except' => ['edit', 'create']]);
     $router->resource('authors', 'Api\AuthorsController', ['except' => ['edit', 'create']]);

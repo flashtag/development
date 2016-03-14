@@ -7,13 +7,13 @@ Route::get('/', function () {
     return view('flashtag::home', compact('posts', 'categories'));
 });
 
-Route::get('about', function () {
-    return view('flashtag::about');
-});
-
-Route::get('contact', function () {
-    return view('flashtag::contact');
-});
+//Route::get('about', function () {
+//    return view('flashtag::about');
+//});
+//
+//Route::get('contact', function () {
+//    return view('flashtag::contact');
+//});
 
 // POSTS
 Route::get('posts', function () {
@@ -40,6 +40,10 @@ Route::get('authors/{author}', function ($author_slug) {
     });
     return view('flashtag::posts.author', compact('author', 'posts'));
 });
+
+Route::get('{page}', 'PagesController@show')->where([
+    'page' => implode('|', \Flashtag\Data\Page::lists('slug')->all())
+]);
 
 Route::get('{category}/{post}', function ($category_slug, $post_slug) {
     return redirect('posts/'.$post_slug, 301);

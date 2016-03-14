@@ -4,14 +4,14 @@ namespace Flashtag\Data\Presenters;
 
 use Carbon\Carbon;
 use McCool\LaravelAutoPresenter\BasePresenter;
-use Flashtag\Data\Post;
+use Flashtag\Data\Page;
 
-class PostPresenter extends BasePresenter
+class PagePresenter extends BasePresenter
 {
     /**
-     * @param \Flashtag\Data\Post $resource
+     * @param \Flashtag\Data\Page $resource
      */
-    public function __construct(Post $resource)
+    public function __construct(Page $resource)
     {
         parent::__construct($resource);
     }

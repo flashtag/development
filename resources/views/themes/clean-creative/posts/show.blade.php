@@ -1,5 +1,9 @@
 @extends('flashtag::layout')
 
+@section ('html-tag') <html itemscope itemtype="http://schema.org/Article"> @stop
+@section ('title') {{ $post->title }} @stop
+@section('meta') @include('flashtag::partials.post-meta') @stop
+
 @section('content')
     <!-- Page Header -->
     <!-- Set your background image for this header on the line below. -->

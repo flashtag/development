@@ -5,7 +5,7 @@
             <i class="fa fa-home"></i> Home
         </a>
         <a class="list-group-item" href="/admin/posts">
-            <i class="fa fa-newspaper-o"></i> Posts
+            <i class="fa fa-sticky-note-o"></i> Posts
         </a>
         <a class="list-group-item indented" href="/admin/post-fields">
             <i class="fa fa-list-alt"></i> Post fields
@@ -21,6 +21,9 @@
         </a>
         <a class="list-group-item" href="/admin/authors">
             <i class="fa fa-pencil-square-o"></i> Authors
+        </a>
+        <a class="list-group-item" href="/admin/pages">
+            <i class="fa fa-newspaper-o"></i> Pages
         </a>
         @if ($current_user->admin)
             <a class="list-group-item" href="/admin/users">

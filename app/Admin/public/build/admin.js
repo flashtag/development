@@ -13966,6 +13966,9 @@ new _vue2['default']({
         'posts': require('./components/posts/index.vue'),
         'post-revisions': require('./components/posts/revisions/index.vue'),
         'post-revision': require('./components/posts/revisions/show.vue'),
+        'pages': require('./components/pages/index.vue'),
+        'page-revisions': require('./components/pages/revisions/index.vue'),
+        'page-revision': require('./components/pages/revisions/show.vue'),
         'fields': require('./components/fields/index.vue'),
         'post-lists': require('./components/post-lists/index.vue'),
         'post-list': require('./components/post-lists/posts.vue'),
@@ -13976,7 +13979,7 @@ new _vue2['default']({
     }
 });
 
-},{"./components/authors.vue":27,"./components/categories.vue":28,"./components/fields/index.vue":29,"./components/partials/image-preview.vue":30,"./components/partials/media-input.vue":31,"./components/post-lists/index.vue":32,"./components/post-lists/posts.vue":33,"./components/posts/index.vue":34,"./components/posts/revisions/index.vue":35,"./components/posts/revisions/show.vue":36,"./components/tags.vue":37,"./components/users.vue":38,"./directives/rich-editor":39,"./directives/select":40,"vue":25,"vue-resource":10}],27:[function(require,module,exports){
+},{"./components/authors.vue":27,"./components/categories.vue":28,"./components/fields/index.vue":29,"./components/pages/index.vue":30,"./components/pages/revisions/index.vue":31,"./components/pages/revisions/show.vue":32,"./components/partials/image-preview.vue":33,"./components/partials/media-input.vue":34,"./components/post-lists/index.vue":35,"./components/post-lists/posts.vue":36,"./components/posts/index.vue":37,"./components/posts/revisions/index.vue":38,"./components/posts/revisions/show.vue":39,"./components/tags.vue":40,"./components/users.vue":41,"./directives/rich-editor":42,"./directives/select":43,"vue":25,"vue-resource":10}],27:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14040,14 +14043,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/author":41,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],28:[function(require,module,exports){
+},{"../models/author":44,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],28:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14119,14 +14122,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/category":42,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],29:[function(require,module,exports){
+},{"../models/category":45,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],29:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14191,14 +14194,435 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/fields/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/fields/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/field":43,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],30:[function(require,module,exports){
+},{"../../models/field":46,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],30:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+exports.__esModule = true;
+
+var _modelsPage = require('../../models/page');
+
+var _modelsPage2 = _interopRequireDefault(_modelsPage);
+
+var _modelsCategory = require('../../models/category');
+
+var _modelsCategory2 = _interopRequireDefault(_modelsCategory);
+
+var _modelsUser = require('../../models/user');
+
+var _modelsUser2 = _interopRequireDefault(_modelsUser);
+
+exports['default'] = {
+
+    props: ['current-user'],
+
+    data: function data() {
+        return {
+            pages: [],
+            categories: [],
+            users: [],
+            titleFilter: null,
+            categoryFilter: null,
+            sortKey: 'order',
+            sortDir: 1
+        };
+    },
+
+    created: function created() {
+        this.fetchPages();
+        this.fetchCategories();
+        this.fetchUsers();
+    },
+
+    ready: function ready() {
+        this.$nextTick((function () {
+            this.initTooltips();
+        }).bind(this));
+    },
+
+    methods: {
+
+        fetchPages: function fetchPages() {
+            this.$http.get('pages').then(function (response) {
+                this.$set('pages', response.data.map(function (page) {
+                    return new _modelsPage2['default'](page);
+                }));
+            });
+        },
+
+        fetchCategories: function fetchCategories() {
+            this.$http.get('categories').then(function (response) {
+                this.$set('categories', response.data.map(function (category) {
+                    return new _modelsCategory2['default'](category);
+                }));
+            });
+        },
+
+        fetchUsers: function fetchUsers() {
+            this.$http.get('users').then(function (response) {
+                this.$set('users', response.data.map(function (user) {
+                    return new _modelsUser2['default'](user);
+                }));
+            });
+        },
+
+        goToPage: function goToPage(page) {
+            if (!page.is_locked) {
+                window.location = '/admin/pages/' + page.id;
+            } else {
+                swal({
+                    html: true,
+                    title: "Are you sure?",
+                    text: "The page is currently opened by <strong>" + this.userName(page.locked_by_id) + "</strong>. " + "If you proceed and they are still editing the page, you may overwrite each other's work.",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, unlock it!",
+                    cancelButtonText: "Nevermind"
+                }, (function () {
+                    window.location = '/admin/pages/' + page.id;
+                }).bind(this));
+            }
+        },
+
+        userName: function userName(userId) {
+            if (!userId || !this.users || !this.users.length) {
+                return '';
+            }
+
+            var user = this.users.filter(function (user) {
+                return user.id == userId;
+            })[0];
+
+            return user.name;
+        },
+
+        formatTime: function formatTime(time) {
+            return moment(time, "YYYY-MM-DD").format('MMM D, YYYY');
+        },
+
+        sortBy: function sortBy(key) {
+            if (this.sortKey == key) {
+                this.sortDir = this.sortDir * -1;
+            } else {
+                this.sortKey = key;
+                this.sortDir = 1;
+            }
+        },
+
+        orderIcon: function orderIcon(key) {
+            if (key == this.sortKey) {
+                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
+            }
+
+            return 'fa fa-unsorted';
+        },
+
+        initTooltips: function initTooltips() {
+            this.$nextTick(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+        },
+
+        changeFilter: function changeFilter() {
+            this.initTooltips();
+        }
+
+    }
+
+};
+module.exports = exports['default'];
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"/admin\">Home</a></li>\n        <li class=\"active\">Pages</li>\n    </ol>\n\n    <div class=\"create-button\">\n        <a href=\"/admin/pages/create\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</a>\n    </div>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Pages table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                <th class=\"text-centered\"><a>Showing</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"page in pages | filterBy titleFilter in 'title' | orderBy sortKey sortDir\" class=\"Page\" :class=\"{ 'Page--unpublished': !page.is_published }\">\n\n                <td>\n                    <a href=\"/admin/pages/{{ page.id }}\" @click.prevent=\"goToPage(page)\">{{ page.title }}</a>\n                    <span v-if=\"page.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(page.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                </td>\n\n                <td>{{ formatTime(page.created_at) }}</td>\n\n                <td class=\"published\">\n                    <div class=\"switch\">\n                        <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{page.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"page.is_published\" @change=\"page.publish(page.is_published)\">\n                        <label for=\"is_published_{{page.id}}\"></label>\n                    </div>\n                </td>\n\n                <td class=\"text-centered\">\n                    <span v-if=\"page.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                    <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-times\"></i></span>\n                </td>\n\n            </tr>\n        </tbody>\n    </table>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/index.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, module.exports.template)
+  }
+})()}
+},{"../../models/category":45,"../../models/page":48,"../../models/user":52,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],31:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = {
+
+    props: ['page-id'],
+
+    data: function data() {
+        return {
+            page: { revisions: { data: [] } },
+            keys: {
+                title: 'Title',
+                subtitle: 'Subtitle',
+                body: 'Body',
+                start_showing_at: 'Start showing',
+                stop_showing_at: 'Stop showing',
+                image: 'Image',
+                order: 'Order'
+            },
+            diffKeys: ['body'],
+            pagination: { links: {} },
+            users: [],
+            fieldFilter: null
+        };
+    },
+
+    created: function created() {
+        this.fetch();
+        this.fetchUsers();
+    },
+
+    methods: {
+
+        fetch: function fetch() {
+            return this.$http.get('pages/' + this.pageId + '/revisions').then(function (response) {
+                this.$set('page', response.data);
+            });
+        },
+
+        fetchUsers: function fetchUsers(successHandler) {
+            return this.$http.get('users').then(function (response) {
+                this.$set('users', response.data);
+            });
+        },
+
+        who: function who(userId) {
+            if (!userId || !this.users || !this.users.length) {
+                return 'a script';
+            }
+
+            var user = this.users.filter(function (user) {
+                return user.id == userId;
+            })[0];
+
+            return user.name;
+        },
+
+        when: function when(timestamp) {
+            return moment(timestamp, "YYYY-MM-DD").format('h:mm a on MMM D, YYYY');
+        },
+
+        shouldDiff: function shouldDiff(key) {
+            return !! ~this.diffKeys.indexOf(key);
+        },
+
+        what: function what(revision) {
+            var what = this.keys[revision.key];
+
+            if (revision.key == 'is_published') {
+                return '<strong>' + (revision.new_value > 0 ? 'Published' : 'Unpublished') + '</strong>';
+            }
+            if (!! ~this.diffKeys.indexOf(revision.key)) {
+                return '<strong>' + what + '</strong> was edited';
+            }
+            if (revision.key == 'category_id') {
+                return '<strong>' + what + '</strong> changed to <strong>' + this.categoryName(revision.new_value) + '</strong>';
+            }
+
+            return '<strong>' + what + '</strong> changed to <strong>' + revision.new_value + '</strong>';
+        }
+
+    },
+
+    computed: {
+
+        currentUserName: function currentUserName() {
+            return this.currentUser ? this.currentUser.name : '';
+        }
+
+    }
+
+};
+module.exports = exports['default'];
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a></li>\n        <li><a href=\"/admin/pages\">Pages</a></li>\n        <li><a href=\"/admin/pages/{{ pageId }}\">{{ page.title }}</a></li>\n        <li class=\"active\">Revisions</li>\n    </ol>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <select v-model=\"fieldFilter\" id=\"field\" class=\"form-control\">\n                    <option value=\"\" selected=\"\">Filter by field...</option>\n                    <option v-for=\"field in keys\" :value=\"$key\">\n                        {{ field }}\n                    </option>\n                </select>\n            </div>\n        </div>\n    </div>\n\n    <div class=\"panel panel-default\">\n        <div class=\"panel-heading\">Revision History</div>\n        <div class=\"panel-body\" v-if=\"!page.revisions.length > 0\"><h6>No revisions</h6></div>\n        <table v-else=\"\" class=\"Revisions table table-hover\">\n            <tbody>\n            <tr v-for=\"revision in page.revisions\n                    | filterBy fieldFilter in 'key'\n                    | orderBy 'created_at' -1\" class=\"Revision\">\n                <td>{{{ what(revision) }}}</td>\n                <td>at {{ when(revision.created_at) }}</td>\n                <td>by <em>{{ who(revision.user_id) }}</em></td>\n                <td class=\"action-button\"><a v-if=\"shouldDiff(revision.key)\" href=\"/admin/pages/{{page.id}}/revisions/{{revision.id}}\" class=\"btn btn-primary btn-sm\">View</a></td>\n            </tr>\n            </tbody>\n        </table>\n    </div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/revisions/index.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, module.exports.template)
+  }
+})()}
+},{"vue":25,"vue-hot-reload-api":5}],32:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+exports.__esModule = true;
+
+var _diffMatchPatch = require('diff-match-patch');
+
+var _diffMatchPatch2 = _interopRequireDefault(_diffMatchPatch);
+
+var _he = require('he');
+
+var _he2 = _interopRequireDefault(_he);
+
+exports['default'] = {
+
+    props: ['current-user', 'page-id', 'revision-id'],
+
+    data: function data() {
+        return {
+            revision: {},
+            page: {},
+            viewDiff: false,
+            users: []
+        };
+    },
+
+    computed: {
+
+        content: function content() {
+            return this.viewDiff ? this.diff : this.revision.new_value;
+        },
+
+        diff: function diff() {
+            if (!this.revision) {
+                return '';
+            }
+            var differ = new _diffMatchPatch2['default']();
+            var diffs = differ.diff_main(this.revision.old_value || '', this.revision.new_value || '');
+            differ.diff_cleanupSemantic(diffs);
+            var diff = _he2['default'].decode(differ.diff_prettyHtml(diffs));
+
+            return this.replaceAll(diff, ['<br>', '¶'], '');
+        }
+
+    },
+
+    created: function created() {
+        this.fetch();
+        this.fetchPage();
+        this.fetchUsers();
+    },
+
+    methods: {
+
+        fetch: function fetch() {
+            return this.$http.get('pages/' + this.pageId + '/revisions/' + this.revisionId).then(function (response) {
+                this.$set('revision', response.data);
+            });
+        },
+
+        fetchPage: function fetchPage() {
+            return this.$http.get('pages/' + this.pageId).then(function (response) {
+                this.$set('page', response.data);
+            });
+        },
+
+        fetchUsers: function fetchUsers() {
+            return this.$http.get('users').then(function (response) {
+                this.$set('users', response.data);
+            });
+        },
+
+        restore: function restore() {
+            if (this.canRestore()) {
+                var self = this;
+                swal({
+                    title: 'For reals?',
+                    text: 'This will restore the content to this state.',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, restore!',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
+                    var entity = {};
+                    entity[self.revision.key] = self.revision.new_value;
+                    client({
+                        method: 'PATCH',
+                        path: '/pages/' + self.$route.params.page_id + '/property',
+                        entity: entity
+                    }).then(function (response) {
+                        swal({
+                            html: true,
+                            title: 'Great success!',
+                            text: '<strong>' + self.page.title + '</strong> was restored to this state!',
+                            type: 'success'
+                        }, function () {
+                            self.$route.router.go('/pages/' + self.page.id);
+                        });
+                    }, function (response) {
+                        swal("Oops", "We couldn't connect to the server!", "error");
+                        self.checkResponseStatus(response);
+                    });
+                });
+            } else {
+                swal("Well, actually...", "There is no difference between this revision and the current state.", "info");
+            }
+        },
+
+        who: function who(userId) {
+            if (!userId || !this.users || !this.users.length) {
+                return 'a script';
+            }
+
+            var user = this.users.filter(function (user) {
+                return user.id == userId;
+            })[0];
+
+            return user.name;
+        },
+
+        when: function when(timestamp) {
+            return moment.utc(timestamp, 'X').format('h:mm a on MMM D, YYYY');
+        },
+
+        canRestore: function canRestore() {
+            return this.page[this.revision.key] != this.revision.new_value;
+        },
+
+        replaceAll: function replaceAll(str, find, replace) {
+            if (!find instanceof Array) {
+                find = [find];
+            }
+
+            return find.reduce(function (s, search) {
+                return s.replace(new RegExp(search, 'g'), replace);
+            }, str);
+        },
+
+        checkResponseStatus: function checkResponseStatus(response) {
+            if (response.status.code == 401 || response.status.code == 500) {
+                this.$dispatch('userHasLoggedOut');
+            }
+        }
+
+    }
+
+};
+module.exports = exports['default'];
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"/admin/home\">Home</a></li>\n        <li><a href=\"/admin/pages\">Pages</a></li>\n        <li><a href=\"/admin/pages/{{pageId}}\">{{ page.title }}</a></li>\n        <li><a href=\"/admin/pages/{{pageId}}/revisions\">Revisions</a></li>\n        <li class=\"active\">{{ revisionId }}</li>\n    </ol>\n\n    <div class=\"Revision panel panel-default\">\n        <div class=\"panel-heading\">\n            <div class=\"row\">\n            <div class=\"col-md-6\">\n                <strong>{{ who(revision.user_id) }}</strong> — <em>{{ when(revision.created_at) }}</em>\n            </div>\n            <div class=\"col-md-6 clearfix\">\n                <div class=\"view-buttons\">\n                    <button class=\"btn btn-sm\" :class=\"{ 'active': !viewDiff }\" @click.prevent=\"viewDiff = false\">Content</button>\n                    <button class=\"btn btn-sm\" :class=\"{ 'active': viewDiff }\" @click.prevent=\"viewDiff = true\">Changes</button>\n                </div>\n            </div>\n            </div>\n        </div>\n        <div class=\"panel-body\">{{{ content }}}</div>\n        <div class=\"panel-footer\">\n            <button class=\"btn btn-warning\" :class=\"{ 'disabled': !canRestore() }\" @click.prevent=\"restore\">\n                <i class=\"fa fa-repeat\"></i> Restore this revision\n            </button>\n        </div>\n    </div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/revisions/show.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, module.exports.template)
+  }
+})()}
+},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],33:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -14213,14 +14637,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/image-preview.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/image-preview.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],31:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],34:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -14307,14 +14731,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],32:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],35:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14378,14 +14802,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/post-list":45,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],33:[function(require,module,exports){
+},{"../../models/post-list":49,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],36:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14617,14 +15041,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/posts.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/posts.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/post-list":45,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],34:[function(require,module,exports){
+},{"../../models/post-list":49,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],37:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14768,14 +15192,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":42,"../../models/post":46,"../../models/user":48,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],35:[function(require,module,exports){
+},{"../../models/category":45,"../../models/post":50,"../../models/user":52,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],38:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -14911,14 +15335,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],36:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],39:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15075,14 +15499,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],37:[function(require,module,exports){
+},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],40:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15146,14 +15570,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/tag":47,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],38:[function(require,module,exports){
+},{"../models/tag":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],41:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15218,14 +15642,14 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users.vue"
+  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/user":48,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],39:[function(require,module,exports){
+},{"../models/user":52,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],42:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15261,7 +15685,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],40:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15292,7 +15716,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],41:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15334,7 +15758,7 @@ var Author = (function (_Model) {
 exports['default'] = Author;
 module.exports = exports['default'];
 
-},{"./model":44}],42:[function(require,module,exports){
+},{"./model":47}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15382,7 +15806,7 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":44}],43:[function(require,module,exports){
+},{"./model":47}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15424,7 +15848,7 @@ var Field = (function (_Model) {
 exports['default'] = Field;
 module.exports = exports['default'];
 
-},{"./model":44}],44:[function(require,module,exports){
+},{"./model":47}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15496,7 +15920,104 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],45:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _model = require('./model');
+
+var _model2 = _interopRequireDefault(_model);
+
+var Page = (function (_Model) {
+    _inherits(Page, _Model);
+
+    function Page(data) {
+        _classCallCheck(this, Page);
+
+        _get(Object.getPrototypeOf(Page.prototype), 'constructor', this).call(this, 'posts', {
+            id: data.id,
+            title: data.title,
+            category_id: data.category_id,
+            slug: data.slug,
+            body: data.body,
+            is_published: data.is_published,
+            start_showing_at: data.start_showing_at ? moment.utc(data.start_showing_at).format('YYYY-MM-DD') : null,
+            stop_showing_at: data.stop_showing_at ? moment.utc(data.stop_showing_at).format('YYYY-MM-DD') : null,
+            is_locked: data.is_locked,
+            locked_by_id: data.locked_by_id,
+            category: data.category ? data.category : {},
+            tags: data.tags ? data.tags : [],
+            meta: data.meta ? data.meta : [],
+            revisions: data.revisions ? data.revisions : [],
+            media: data.media ? data.media : {},
+            created_at: data.created_at,
+            updated_at: data.updated_at
+        });
+    }
+
+    _createClass(Page, [{
+        key: 'publish',
+        value: function publish(published) {
+            if (typeof published === 'undefined' || published === null) {
+                published = true;
+            }
+            console.log(published);
+            return this.update({
+                is_published: published
+            });
+        }
+    }, {
+        key: 'lock',
+        value: function lock(user) {
+            console.log(user);
+            return this.update({
+                is_locked: true,
+                locked_by_id: user.id
+            });
+        }
+    }, {
+        key: 'unlock',
+        value: function unlock() {
+            return this.update({
+                is_locked: false,
+                locked_by_id: null
+            });
+        }
+    }, {
+        key: 'is_showing',
+        get: function get() {
+            if (!this.attributes['is_published']) {
+                return false;
+            }
+
+            var start = this.attributes['start_showing_at'] ? moment(this.attributes['start_showing_at'], 'YYYY-MM-DD') : moment("1980-01-01", "YYYY-MM-DD");
+            var stop = this.attributes['stop_showing_at'] ? moment(this.attributes['stop_showing_at'], 'YYYY-MM-DD') : moment("2033-01-19", "YYYY-MM-DD");
+            var now = moment();
+
+            return start <= now && now <= stop;
+        }
+    }]);
+
+    return Page;
+})(_model2['default']);
+
+exports['default'] = Page;
+module.exports = exports['default'];
+
+},{"./model":47}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15558,7 +16079,7 @@ var PostList = (function (_Model) {
 exports['default'] = PostList;
 module.exports = exports['default'];
 
-},{"./model":44}],46:[function(require,module,exports){
+},{"./model":47}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15656,7 +16177,7 @@ var Post = (function (_Model) {
 exports['default'] = Post;
 module.exports = exports['default'];
 
-},{"./model":44}],47:[function(require,module,exports){
+},{"./model":47}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15699,7 +16220,7 @@ var Tag = (function (_Model) {
 exports['default'] = Tag;
 module.exports = exports['default'];
 
-},{"./model":44}],48:[function(require,module,exports){
+},{"./model":47}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15740,6 +16261,6 @@ var User = (function (_Model) {
 exports['default'] = User;
 module.exports = exports['default'];
 
-},{"./model":44}]},{},[26]);
+},{"./model":47}]},{},[26]);
 
 //# sourceMappingURL=admin.js.map
