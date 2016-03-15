@@ -32,6 +32,7 @@ $router->group(['middleware' => 'auth'], function ($router) {
     $router->resource('posts', 'PostsController');
     $router->resource('post-fields', 'PostFieldsController');
     $router->resource('post-lists', 'PostListsController');
+    $router->resource('pages/{page_id}/revisions', 'PagesRevisionsController', ['only' => ['index', 'show']]);
     $router->resource('pages', 'PagesController');
     $router->resource('categories', 'CategoriesController');
     $router->resource('tags', 'TagsController');
@@ -43,9 +44,9 @@ $router->group(['middleware' => 'auth'], function ($router) {
 
 // Admin API
 $router->group(['prefix' => 'api', 'middleware' => 'auth'], function ($router) {
+    $router->get('posts/search', 'Api\PostsController@search');
     $router->patch('posts/{post}/lock', 'Api\PostsController@lock');
     $router->patch('posts/{post}/unlock', 'Api\PostsController@unlock');
-    $router->get('posts/search', 'Api\PostsController@search');
     $router->resource('posts/{post_id}/revisions', 'Api\PostRevisionsController', ['only' => ['index', 'show']]);
     $router->resource('posts', 'Api\PostsController', ['except' => ['edit', 'create']]);
     $router->resource('post-fields', 'Api\PostFieldsController', ['except' => ['edit', 'create']]);
