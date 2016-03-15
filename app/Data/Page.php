@@ -272,18 +272,4 @@ class Page extends Model implements HasPresenter
             }
         });
     }
-
-    public static function routesPattern()
-    {
-        try {
-            return implode('|', static::slugs());
-        } catch (\PDOException $e) {
-            return [];
-        }
-    }
-
-    public static function slugs()
-    {
-        return static::lists('slug')->all();
-    }
 }

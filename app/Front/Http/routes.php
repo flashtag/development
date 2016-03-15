@@ -21,7 +21,7 @@ $router->resource('authors', 'AuthorsController', [
     'only' => ['index', 'show']
 ]);
 $router->get('{page}', 'PagesController@show')->where([
-    'page' => \Flashtag\Data\Page::routesPattern()
+    'page' => pageRoutesPattern()
 ]);
 
 // Example custom view

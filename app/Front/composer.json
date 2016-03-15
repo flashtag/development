@@ -16,7 +16,8 @@
     "autoload": {
         "psr-4": {
             "Flashtag\\Front\\": ""
-        }
+        },
+        "files": [ "helpers.php" ]
     },
     "minimum-stability": "dev",
     "prefer-stable": true
