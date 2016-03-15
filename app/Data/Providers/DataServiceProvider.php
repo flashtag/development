@@ -73,7 +73,7 @@ class DataServiceProvider extends ServiceProvider
     {
         // Config
         $this->publishes([
-            __DIR__.'/../config/' => config_path('settings.php')
+            __DIR__.'/../config/settings.php' => config_path('settings.php')
         ], 'config');
 
         // Migrations
