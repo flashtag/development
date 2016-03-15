@@ -1,7 +1,7 @@
 
 <div class="Side-nav panel">
     <div class="list-group">
-        <a class="list-group-item {{ Flashtag\Admin\set_active('/') }}" href="/admin/">
+        <a class="list-group-item {{ Flashtag\Admin\set_active('') }}" href="/admin/">
             <i class="fa fa-home"></i> Home
         </a>
         <a class="list-group-item {{ Flashtag\Admin\set_active('posts') }}" href="/admin/posts">
