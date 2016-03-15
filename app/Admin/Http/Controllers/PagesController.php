@@ -6,6 +6,7 @@ use Flashtag\Admin\Http\Requests\PageCreateRequest;
 use Flashtag\Admin\Http\Requests\PageDestroyRequest;
 use Flashtag\Admin\Http\Requests\PageUpdateRequest;
 use Flashtag\Data\Page;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class PagesController extends Controller
@@ -23,8 +24,9 @@ class PagesController extends Controller
     public function create()
     {
         $page = new Page();
+        $templates = $this->listPageTemplates();
 
-        return view('admin::pages.create', compact('page'));
+        return view('admin::pages.create', compact('page', 'templates'));
     }
 
     public function store(PageCreateRequest $request)
@@ -41,7 +43,27 @@ class PagesController extends Controller
         $page = Page::findOrFail($id);
         $page->lock(auth()->user()->id);
 
-        return view('admin::pages.edit', compact('page', 'includes'));
+        $templates = $this->listPageTemplates();
+
+        return view('admin::pages.edit', compact('page', 'templates'));
+    }
+
+    /**
+     * @return array
+     */
+    private function listPageTemplates()
+    {
+        $templates = Storage::files('resources/views', true);
+
+        return array_reduce($templates, function ($carry, $file) {
+            if (str_contains($file, '-page.blade.php') !== false) {
+                $path = str_replace(['-page.blade.php', 'resources/views/'], '', $file);
+                $view = str_replace('/', '.', $path);
+                $view = preg_replace('/themes\.'.settings('theme').'./', 'flashtag::', $view);
+                $carry[$view] = basename($path);
+            }
+            return $carry;
+        }, []);
     }
 
     public function update(PageUpdateRequest $request, $id)
@@ -60,6 +82,7 @@ class PagesController extends Controller
         $data['title'] = $request->get('title');
         $data['subtitle'] = $request->get('subtitle');
         $data['slug'] = $request->get('slug');
+        $data['template'] = $request->get('template');
         $data['body'] = $request->get('body');
         $data['is_published'] = $request->get('is_published', false);
         $data['meta_description'] = $request->get('meta_description');

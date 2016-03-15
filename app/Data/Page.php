@@ -10,11 +10,12 @@ use McCool\LaravelAutoPresenter\HasPresenter;
 use Venturecraft\Revisionable\RevisionableTrait;
 
 /**
- * Class Post
+ * Class Page
  *
  * @property int $id
  * @property string $title
  * @property string $slug
+ * @property string $template
  * @property string $subtitle
  * @property string $body
  * @property boolean $is_published
@@ -271,5 +272,14 @@ class Page extends Model implements HasPresenter
                 $query->orWhere($column, 'LIKE', "%{$search}%");
             }
         });
+    }
+
+    public function view()
+    {
+        if (str_contains($this->template, settings('theme')) !== false) {
+            return 'flashtag::pages.default';
+        }
+
+        return $this->template;
     }
 }

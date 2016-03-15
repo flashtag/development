@@ -3,7 +3,7 @@
 /**
  * Helper method for getting and setting settings
  *
- * @param  ...mixed $key
+ * @param mixed $key
  * @return mixed
  */
 function settings(...$key)

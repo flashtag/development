@@ -3,8 +3,6 @@
 namespace Flashtag\Front\Http\Controllers;
 
 use Flashtag\Data\Page;
-use Illuminate\Http\Request;
-use Flashtag\Front\Http\Requests;
 use Flashtag\Front\Http\Controllers\Controller;
 
 class PagesController extends Controller
@@ -12,52 +10,16 @@ class PagesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param string $page_slug
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($page_slug)
     {
-        if (is_numeric($id)) {
-            $page = Page::findOrFail($id);
-            return redirect()->action('PagesController@show', [$page->slug], 301);
-        }
+        $page = Page::getBySlug($page_slug);
 
-        $page = Page::getBySlug($id);
+        $template = $page->template ?: 'flashtag::pages.default';
+        $template .= '-page';
 
-        return view('flashtag::page', compact('page'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return view($template, compact('page'));
     }
 }

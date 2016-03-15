@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "87d5464e4cabb6496afed59d172bf09c",
+    "hash": "3a49d9656b2e780c6e3b7d7f7dcd338a",
     "content-hash": "bc22fc46cacc437c893c497dc66002f3",
     "packages": [
         {
@@ -127,7 +127,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dingo/api/zipball/b9ff594eedea42d5cd78f09b20cbb66dd46b1204",
+                "url": "https://api.github.com/repos/dingo/api/zipball/90d4e4e60e5d460c8135fca611f0ac44a037df89",
                 "reference": "b9ff594eedea42d5cd78f09b20cbb66dd46b1204",
                 "shasum": ""
             },
@@ -814,12 +814,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/flashtag-themes/clean-creative.git",
-                "reference": "c7e12caf8cbea2bbb4000ac6a42336f5e42daf2b"
+                "reference": "85d35fef2fbe6d8c74b471ca347ec14703ae372c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flashtag-themes/clean-creative/zipball/c7e12caf8cbea2bbb4000ac6a42336f5e42daf2b",
-                "reference": "c7e12caf8cbea2bbb4000ac6a42336f5e42daf2b",
+                "url": "https://api.github.com/repos/flashtag-themes/clean-creative/zipball/85d35fef2fbe6d8c74b471ca347ec14703ae372c",
+                "reference": "85d35fef2fbe6d8c74b471ca347ec14703ae372c",
                 "shasum": ""
             },
             "type": "library",
@@ -837,7 +837,7 @@
                     "email": "feedback@startbootstrap.com"
                 }
             ],
-            "time": "2016-03-14 05:26:12"
+            "time": "2016-03-15 06:58:03"
         },
         {
             "name": "fzaninotto/faker",
@@ -3106,7 +3106,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/e8cc5204d5cd7d80a98ab1897735681414b9d45f",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/ff253a6ddc7bc2793855796967b283a2712ce4a0",
                 "reference": "e8cc5204d5cd7d80a98ab1897735681414b9d45f",
                 "shasum": ""
             },

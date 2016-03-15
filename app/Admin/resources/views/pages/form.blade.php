@@ -60,6 +60,18 @@
             <input name="slug" id="slug" class="form-control" value="{{ $page->slug or old('slug') }}">
         </div>
         <div class="form-group">
+            <label for="template">Template</label>
+            <select name="template" id="template" class="form-control">
+                @foreach ($templates as $value => $name)
+                    <option value="{{ $value }}" {{ (
+                        (empty($page->template) && $value == 'flashtag::pages.default') || $value == $page->template)
+                            ? 'selected'
+                            : ''
+                        }}>{{ $value }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="form-group">
             <label for="body">Body</label>
             <textarea name="body" id="body" class="form-control rich-editor">
                 {!! $page->body or old('body') !!}

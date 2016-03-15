@@ -327,6 +327,14 @@ HTML;
                 'body' => $body,
                 'image' => '/assets/themes/clean-creative/img/about-bg.jpg',
             ]),
+            factory(\Flashtag\Data\Page::class)->create([
+                'title' => 'Contact Us',
+                'slug' => 'contact',
+                'template' => 'flashtag::pages.contact',
+                'subtitle' => 'Have questions? We have answers (maybe).',
+                'body' => '<p>Want to get in touch with us? Fill out the form below to send us a message and we will try to get back to you within 24 hours!</p>',
+                'image' => '/assets/themes/clean-creative/img/contact-bg.jpg',
+            ]),
         ]);
     }
 }
