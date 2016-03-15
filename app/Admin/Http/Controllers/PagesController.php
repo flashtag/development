@@ -41,12 +41,6 @@ class PagesController extends Controller
         $page = Page::findOrFail($id);
         $page->lock(auth()->user()->id);
 
-        $includes = Storage::allFiles('resources/views/includes');
-
-        $includes = array_map(function ($file) {
-            return explode('.', basename($file))[0];
-        }, $includes);
-
         return view('admin::pages.edit', compact('page', 'includes'));
     }
 

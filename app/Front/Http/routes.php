@@ -23,3 +23,8 @@ $router->resource('authors', 'AuthorsController', [
 $router->get('{page}', 'PagesController@show')->where([
     'page' => \Flashtag\Data\Page::routesPattern()
 ]);
+
+// Example custom view
+$router->get('contact', function () {
+    return view('flashtag::contact');
+});

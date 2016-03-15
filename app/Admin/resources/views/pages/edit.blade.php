@@ -13,9 +13,11 @@
 
         <section class="info row">
             <div class="col-md-6 clearfix">
+                <!-- TODO: Revision history
                 <a href="/admin/pages/{{ $page->id }}/revisions" class="btn btn-link">
                     <i class="fa fa-history"></i> Revision history
                 </a>
+                -->
             </div>
             <div class="col-md-6 clearfix">
                 <div class="action-buttons">

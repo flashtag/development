@@ -52,6 +52,8 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function ($router) {
     $router->post('post-lists/{postList}/posts', 'Api\PostListsController@addPost');
     $router->patch('post-lists/{postList}/reorder', 'Api\PostListsController@reorder');
     $router->resource('post-lists', 'Api\PostListsController', ['except' => ['edit', 'create']]);
+    $router->patch('pages/{page}/lock', 'Api\PagesController@lock');
+    $router->patch('pages/{page}/unlock', 'Api\PagesController@unlock');
     $router->resource('pages', 'Api\PagesController', ['except' => ['edit', 'create']]);
     $router->resource('tags', 'Api\TagsController', ['except' => ['edit', 'create']]);
     $router->resource('categories', 'Api\CategoriesController', ['except' => ['edit', 'create']]);

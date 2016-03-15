@@ -60,15 +60,6 @@
             <input name="slug" id="slug" class="form-control" value="{{ $page->slug or old('slug') }}">
         </div>
         <div class="form-group">
-            <label>Include content from</label>
-            <select class="form-control">
-                <option disabled selected>Select blade view</option>
-                @foreach ($includes as $include)
-                    <option value="">{{ $include }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="form-group">
             <label for="body">Body</label>
             <textarea name="body" id="body" class="form-control rich-editor">
                 {!! $page->body or old('body') !!}
