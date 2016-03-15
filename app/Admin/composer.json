@@ -15,7 +15,10 @@
     "autoload": {
         "psr-4": {
             "Flashtag\\Admin\\": ""
-        }
+        },
+        "files": [
+            "helpers.php"
+        ]
     },
     "minimum-stability": "dev",
     "prefer-stable": true

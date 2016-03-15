@@ -39,6 +39,7 @@
         "psr-4": { "Flashtag\\": "app/" },
         "files": [
             "app/Data/helpers.php",
+            "app/Admin/helpers.php",
             "app/Front/helpers.php"
         ]
     },
