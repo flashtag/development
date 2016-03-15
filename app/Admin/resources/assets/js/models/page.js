@@ -3,11 +3,12 @@ import Model from './model';
 
 class Page extends Model {
     constructor(data) {
-        super('posts', {
+        super('pages', {
             id: data.id,
             title: data.title,
             category_id: data.category_id,
             slug: data.slug,
+            template: data.template,
             body: data.body,
             is_published: data.is_published,
             start_showing_at: data.start_showing_at
@@ -18,11 +19,7 @@ class Page extends Model {
                 : null,
             is_locked: data.is_locked,
             locked_by_id: data.locked_by_id,
-            category: data.category ? data.category : {},
-            tags: data.tags ? data.tags : [],
-            meta: data.meta ? data.meta : [],
             revisions: data.revisions ? data.revisions : [],
-            media: data.media ? data.media : {},
             created_at: data.created_at,
             updated_at: data.updated_at
         });

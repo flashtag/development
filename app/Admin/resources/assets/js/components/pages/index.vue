@@ -20,7 +20,8 @@
         <thead>
             <tr>
                 <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('title')">Url slug <i :class="orderIcon('slug')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('slug')">Url slug <i :class="orderIcon('slug')"></i></a></th>
+                <th><a href="#" @click.prevent="sortBy('template')">Template <i :class="orderIcon('template')"></i></a></th>
                 <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
                 <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
                 <th class="text-centered"><a>Showing</a></th>
@@ -37,6 +38,8 @@
                 </td>
 
                 <td>/{{ page.slug }}</td>
+
+                <td>{{ page.template }}</td>
 
                 <td>{{ formatTime(page.created_at) }}</td>
 
