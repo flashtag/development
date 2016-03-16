@@ -57,7 +57,7 @@
 
                 <td class="text-centered">
                     <span v-if="page.is_showing" class="showing"><i class="fa fa-check"></i></span>
-                    <span v-else class="not-showing"><i class="fa fa-times"></i></span>
+                    <span v-else class="not-showing"><i class="fa fa-ban"></i></span>
                 </td>
 
             </tr>
