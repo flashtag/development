@@ -127,12 +127,23 @@
 @endif
 
 <div class="panel panel-default">
-    <div class="panel-heading">Image</div>
+    <div class="panel-heading">Images</div>
     <div class="panel-body">
-        <div class="form-group">
-            <input type="file" name="image" id="image" class="file form-control" accept="image/*">
-            <br>
-            <image-preview path="/images/media/" image="{{ $post->image }}" height="200"></image-preview>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="image">Image</label>
+                <input type="file" name="image" id="image" class="file form-control" accept="image/*">
+                <br>
+                <image-preview path="/images/media/" image="{{ $post->image }}" height="200"></image-preview>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="image">Cover</label>
+                <input type="file" name="cover_image" id="cover_image" class="file form-control" accept="image/*">
+                <br>
+                <image-preview path="/images/media/" image="{{ $post->cover_image }}" height="200"></image-preview>
+            </div>
         </div>
     </div>
 </div>

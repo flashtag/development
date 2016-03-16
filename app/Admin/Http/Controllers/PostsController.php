@@ -39,7 +39,7 @@ class PostsController extends Controller
     {
         $post = Post::create($this->buildPostFromRequest($request));
 
-        $this->handleImageUpload($post, $request->file('image'));
+        $this->handleImageUploadsFromRequest($post, $request);
         $this->syncTags($post, $request->get('tags'));
         $this->syncFields($post, $request->get('fields'));
 
@@ -65,7 +65,7 @@ class PostsController extends Controller
 
         $post->update($this->buildPostFromRequest($request));
 
-        $this->handleImageUpload($post, $request->file('image'));
+        $this->handleImageUploadsFromRequest($post, $request);
         $this->syncTags($post, $request->get('tags'));
         $this->syncFields($post, $request->get('fields'));
 
@@ -95,10 +95,14 @@ class PostsController extends Controller
         return $data;
     }
 
-    private function handleImageUpload(Post $post, $image)
+    private function handleImageUploadsFromRequest(Post $post, $request)
     {
-        if (! empty($image)) {
-            $post->addImage($image);
+        if (! empty($request->file('image'))) {
+            $post->addImage($request->file('image'));
+        }
+
+        if (! empty($request->file('cover_image'))) {
+            $post->addCoverImage($request->file('cover_image'));
         }
     }
 

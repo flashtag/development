@@ -22,6 +22,7 @@ use Venturecraft\Revisionable\RevisionableTrait;
  * @property string $body
  * @property boolean $is_published
  * @property string $image
+ * @property string $cover_image
  * @property string $meta_description
  * @property string $meta_canonical
  * @property boolean $is_locked
@@ -270,55 +271,6 @@ class Post extends Model implements HasPresenter
     }
 
     /**
-     * Reorder the post within its category.
-     *
-     * @param int $order
-     * @return bool
-     */
-    public function reorder($order)
-    {
-        $current = $this->order;
-
-        if ($order === $current) {
-            return false;
-        }
-
-        static::incrementCategoryOrderBetween($this->category_id, $current, $order);
-
-        $this->order = $order;
-
-        return $this->save();
-    }
-
-    /**
-     * Increment all the posts in a category between an old and new order.
-     *
-     * @param int $categoryId
-     * @param int $old
-     * @param int $new
-     * @return int The number of rows affected.
-     */
-    public static function incrementCategoryOrderBetween($categoryId, $old, $new)
-    {
-        if ($new < $old) {
-            $increment = '+1';
-            $whereBetween = [$new, $old];
-        } else {
-            $increment = '-1';
-            $whereBetween = [$old, $new];
-        }
-
-        $query = sprintf(
-            'UPDATE posts
-             SET "order" = "order" %s
-             WHERE category_id = ? AND "order" BETWEEN ? AND ?',
-            $increment
-        );
-
-        return DB::update(DB::raw($query), array_merge([$categoryId], $whereBetween));
-    }
-
-    /**
      * Add an image to the post.
      *
      * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
@@ -331,6 +283,21 @@ class Post extends Model implements HasPresenter
         $this->image = $name;
 
         // TODO: Generate thumbnails
+
+        $this->save();
+    }
+
+    /**
+     * Add a cover image to the post.
+     *
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     */
+    public function addCoverImage($image)
+    {
+        $this->removeCoverImage();
+        $name = 'post-'.$this->id.'__cover__'.$this->slug.'.'.$this->imageExtension($image);
+        $image->move(public_path('images/media'), $name);
+        $this->cover_image = $name;
 
         $this->save();
     }
@@ -359,6 +326,23 @@ class Post extends Model implements HasPresenter
             }
 
             $this->image = null;
+            $this->save();
+        }
+    }
+
+    /**
+     * Remove an image from a post and delete it.
+     */
+    public function removeCoverImage()
+    {
+        if (! is_null($this->cover_image)) {
+            $img = '/public/images/media/' . $this->cover_image;
+
+            if (is_file(base_path($img))) {
+                Storage::delete($img);
+            }
+
+            $this->cover_image = null;
             $this->save();
         }
     }

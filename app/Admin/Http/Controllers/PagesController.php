@@ -72,7 +72,7 @@ class PagesController extends Controller
 
         $page->update($this->buildPageFromRequest($request));
 
-        $this->handleImageUpload($page, $request->file('image'));
+        $this->handleImageUploadsFromRequest($page, $request);
 
         return redirect()->route('admin.pages.index');
     }
@@ -98,10 +98,14 @@ class PagesController extends Controller
         return $data;
     }
 
-    private function handleImageUpload(Page $page, $image)
+    private function handleImageUploadsFromRequest(Page $page, $request)
     {
-        if (! empty($image)) {
-            $page->addImage($image);
+        if (! empty($request->file('image'))) {
+            $page->addImage($request->file('image'));
+        }
+
+        if (! empty($request->file('cover_image'))) {
+            $page->addCoverImage($request->file('cover_image'));
         }
     }
 

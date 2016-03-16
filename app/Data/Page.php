@@ -151,18 +151,33 @@ class Page extends Model implements HasPresenter
     }
 
     /**
-     * Add an image to the post.
+     * Add an image to the page.
      *
      * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
      */
     public function addImage($image)
     {
         $this->removeImage();
-        $name = 'post-'.$this->id.'__'.$this->slug.'.'.$this->imageExtension($image);
+        $name = 'page-'.$this->id.'__'.$this->slug.'.'.$this->imageExtension($image);
         $image->move(public_path('images/media'), $name);
         $this->image = $name;
 
         // TODO: Generate thumbnails
+
+        $this->save();
+    }
+
+    /**
+     * Add a cover image to the page.
+     *
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     */
+    public function addCoverImage($image)
+    {
+        $this->removeCoverImage();
+        $name = 'page-'.$this->id.'__cover__'.$this->slug.'.'.$this->imageExtension($image);
+        $image->move(public_path('images/media'), $name);
+        $this->cover_image = $name;
 
         $this->save();
     }
@@ -179,7 +194,7 @@ class Page extends Model implements HasPresenter
     }
 
     /**
-     * Remove an image from a post and delete it.
+     * Remove an image from a page and delete it.
      */
     public function removeImage()
     {
@@ -196,19 +211,36 @@ class Page extends Model implements HasPresenter
     }
 
     /**
-     * Get a post by its slug.
+     * Remove an image from a post and delete it.
+     */
+    public function removeCoverImage()
+    {
+        if (! is_null($this->cover_image)) {
+            $img = '/public/images/media/' . $this->cover_image;
+
+            if (is_file(base_path($img))) {
+                Storage::delete($img);
+            }
+
+            $this->cover_image = null;
+            $this->save();
+        }
+    }
+
+    /**
+     * Get a page by its slug.
      *
-     * @param string $post_slug
+     * @param string $page_slug
      * @return Post
      */
-    public static function getBySlug($post_slug)
+    public static function getBySlug($page_slug)
     {
-        return static::where('slug', $post_slug)
+        return static::where('slug', $page_slug)
             ->firstOrFail();
     }
 
     /**
-     * Whether or not the post is showing.
+     * Whether or not the page is showing.
      *
      * @return bool
      */

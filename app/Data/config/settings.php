@@ -5,11 +5,11 @@ return [
     // ------------------------------------------------------------------------
     // SITE
     // ------------------------------------------------------------------------
-    'site_name' => 'Flashtag',
-    'site_tagline' => 'The simple CMS',
-    'site_keywords' => 'flashtag, cms',
-    'site_description' => '',
-
+    'name' => 'Flashtag',
+    'tagline' => 'The simple CMS',
+    'keywords' => 'flashtag, cms',
+    'description' => '',
+    'default_cover' => '/assets/themes/clean-creative/img/post-bg.jpg',
     'theme' => 'clean-creative',
 
     // ------------------------------------------------------------------------
@@ -17,12 +17,11 @@ return [
     // ------------------------------------------------------------------------
     'twitter_account' => '',
     'facebook_page' => '',
+    'facebook_app_id' => '',
 
     // ------------------------------------------------------------------------
     // ANALYTICS
     // ------------------------------------------------------------------------
     'ga_id' => '',
-
-    'template' => 'clean-blog',
 
 ];

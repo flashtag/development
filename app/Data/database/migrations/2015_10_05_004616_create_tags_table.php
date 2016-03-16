@@ -17,6 +17,7 @@ class CreateTagsTable extends Migration
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
+            $table->string('cover_image')->nullable();
             $table->timestamps();
         });
     }

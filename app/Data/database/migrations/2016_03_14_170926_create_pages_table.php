@@ -24,6 +24,7 @@ class CreatePagesTable extends Migration
             $table->timestamp('stop_showing_at')->nullable();
             $table->boolean('is_locked')->default(false);
             $table->unsignedInteger('locked_by_id')->nullable();
+            $table->string('cover_image')->nullable();
             $table->string('image')->nullable();
             $table->string('meta_description')->nullable();
             $table->string('meta_canonical')->nullable();

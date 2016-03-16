@@ -37,4 +37,13 @@ class PagePresenter extends BasePresenter
 
         return $date->format("F j, Y");
     }
+
+    public function coverImageSrc()
+    {
+        if (! $this->wrappedObject->cover_image) {
+            return settings('default_cover');
+        }
+
+        return "/images/media/".$this->wrappedObject->cover_image;
+    }
 }
