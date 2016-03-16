@@ -9,20 +9,20 @@
         <div class="panel-heading">General</div>
         <div class="panel-body">
             <div class="form-group">
-                <label for="site_name">Name</label>
-                <input type="text" value="{{ settings('site_name') }}" name="site_name" id="site_name" class="form-control">
+                <label for="name">Name</label>
+                <input type="text" value="{{ settings('name') }}" name="name" id="name" class="form-control">
             </div>
             <div class="form-group">
-                <label for="site_tagline">Tagline</label>
-                <input type="text" value="{{ settings('site_tagline') }}" name="site_tagline" id="site_tagline" class="form-control">
+                <label for="tagline">Tagline</label>
+                <input type="text" value="{{ settings('tagline') }}" name="tagline" id="tagline" class="form-control">
             </div>
             <div class="form-group">
-                <label for="site_keywords">Keywords</label>
-                <input type="text" value="{{ settings('site_keywords') }}" name="site_keywords" id="site_keywords" class="form-control" placeholder="flashtag, cms, php, open source">
+                <label for="keywords">Keywords</label>
+                <input type="text" value="{{ settings('keywords') }}" name="keywords" id="keywords" class="form-control" placeholder="flashtag, cms, php, open source">
             </div>
             <div class="form-group">
-                <label for="site_description">Description</label>
-                <input type="text" value="{{ settings('site_description') }}" name="site_description" id="site_description" class="form-control" placeholder="A short description of your site...">
+                <label for="description">Description</label>
+                <input type="text" value="{{ settings('description') }}" name="description" id="description" class="form-control" placeholder="A short description of your site...">
             </div>
         </div>
     </div>

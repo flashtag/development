@@ -8,7 +8,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <span class="navbar-brand">{{ settings('site_name') }}</span>
+            <span class="navbar-brand">{{ settings('name') }}</span>
         </div>
         <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
