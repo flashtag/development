@@ -10,7 +10,7 @@
     "require": {
         "flashtag/data": "*@dev",
         "dingo/api": "dev-master@dev",
-        "illuminate/routing": "5.1.*",
+        "illuminate/routing": "~5.1",
         "tymon/jwt-auth": "0.6.*"
     },
     "require-dev": {
