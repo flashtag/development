@@ -8,10 +8,10 @@
             <i class="fa fa-sticky-note-o"></i> Posts
         </a>
         <a class="list-group-item indented {{ Flashtag\Admin\set_active('post-fields') }}" href="/admin/post-fields">
-            <i class="fa fa-list-alt"></i> Post fields
+            <i class="fa fa-list-alt"></i> Custom fields
         </a>
         <a class="list-group-item indented {{ Flashtag\Admin\set_active('post-lists') }}" href="/admin/post-lists">
-            <i class="fa fa-th-list"></i> Post lists
+            <i class="fa fa-th-list"></i> Lists
         </a>
         <a class="list-group-item indented {{ Flashtag\Admin\set_active('categories') }}" href="/admin/categories">
             <i class="fa fa-columns"></i> Categories

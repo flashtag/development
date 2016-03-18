@@ -47,6 +47,14 @@
                             <input type="password" name="password" placeholder="Password" class="form-control">
                         </div>
 
+                        <div class="form-group">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="remember"> Remember Me
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="form-group buttons">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fa fa-btn fa-sign-in"></i> Login
