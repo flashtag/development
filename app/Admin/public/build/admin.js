@@ -14943,6 +14943,26 @@ exports['default'] = {
             return $('.Posts').find('#Post-' + post.id);
         },
 
+        removePost: function removePost(post_id) {
+            var self = this;
+            swal({
+                title: 'Are you sure?',
+                text: 'Do you really want to remove this post from the list?',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Yes, remove it!',
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true
+            }, function () {
+                self.$http['delete']('/admin/api/post-lists/' + self.postListId + '/posts/' + post_id).then(function () {
+                    self.fetch();
+                }).then(function () {
+                    swal("Removed!", "post removed.", "success");
+                });
+            });
+        },
+
         /**
          * Save the post's position to the database.
          * @param post
@@ -15036,7 +15056,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"row\">\n        <div class=\"col-md-6\">\n            <div class=\"form-group\">\n                <label for=\"order_by\">Sort by</label>\n                <select name=\"order_by\" id=\"order_by\" v-model=\"sortKey\" class=\"form-control\">\n                    <option v-for=\"key in sortKeys\" value=\"{{ key.value }}\">{{ key.text }}</option>\n                </select>\n            </div>\n        </div>\n        <div class=\"col-md-6\">\n            <label for=\"order_dir\">Sort direction</label>\n            <select name=\"order_dir\" id=\"order_dir\" v-model=\"orderDir\" class=\"form-control\">\n                <option value=\"asc\">Ascending</option>\n                <option value=\"desc\">Descending</option>\n            </select>\n        </div>\n    </div>\n\n    <div class=\"form-group\">\n        <label for=\"add-post\">Add post</label>\n        <select id=\"add-post\" class=\"Post-select form-control\" multiple=\"\">\n            <option></option>\n        </select>\n    </div>\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th v-if=\"sortKey == 'order'\">Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !isShowing(post) }\" id=\"Post-{{post.id}}\">\n\n            <td v-if=\"sortKey == 'order'\" class=\"order\">\n                <input class=\"post__order\" type=\"number\" :value=\"post.order\" @keydown.enter.prevent=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"isShowing(post)\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-ban\"></i></span>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"row\">\n        <div class=\"col-md-6\">\n            <div class=\"form-group\">\n                <label for=\"order_by\">Sort by</label>\n                <select name=\"order_by\" id=\"order_by\" v-model=\"sortKey\" class=\"form-control\">\n                    <option v-for=\"key in sortKeys\" value=\"{{ key.value }}\">{{ key.text }}</option>\n                </select>\n            </div>\n        </div>\n        <div class=\"col-md-6\">\n            <label for=\"order_dir\">Sort direction</label>\n            <select name=\"order_dir\" id=\"order_dir\" v-model=\"orderDir\" class=\"form-control\">\n                <option value=\"asc\">Ascending</option>\n                <option value=\"desc\">Descending</option>\n            </select>\n        </div>\n    </div>\n\n    <div class=\"form-group\">\n        <label for=\"add-post\">Add post</label>\n        <select id=\"add-post\" class=\"Post-select form-control\" multiple=\"\">\n            <option></option>\n        </select>\n    </div>\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th v-if=\"sortKey == 'order'\">Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n            <th></th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !isShowing(post) }\" id=\"Post-{{post.id}}\">\n\n            <td v-if=\"sortKey == 'order'\" class=\"order\">\n                <input class=\"post__order\" type=\"number\" :value=\"post.order\" @keydown.enter.prevent=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"isShowing(post)\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-ban\"></i></span>\n            </td>\n\n            <td>\n                <a @click.prevent=\"removePost(post.id)\" href=\"#remove\" class=\"remove-post\">\n                    <i class=\"fa fa-times\"></i>\n                </a>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)

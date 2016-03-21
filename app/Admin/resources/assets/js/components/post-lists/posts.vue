@@ -33,6 +33,7 @@
             <th>Category</th>
             <th>Created</th>
             <th class="text-centered">Showing</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -57,6 +58,12 @@
             <td class="text-centered">
                 <span v-if="isShowing(post)" class="showing"><i class="fa fa-check"></i></span>
                 <span v-else class="not-showing"><i class="fa fa-ban"></i></span>
+            </td>
+
+            <td>
+                <a @click.prevent="removePost(post.id)" href="#remove" class="remove-post">
+                    <i class="fa fa-times"></i>
+                </a>
             </td>
 
         </tr>
@@ -195,6 +202,27 @@
 
             getAddedPostRow: function (post) {
                 return $('.Posts').find('#Post-'+post.id);
+            },
+
+            removePost: function (post_id) {
+                var self = this;
+                swal({
+                    title: 'Are you sure?',
+                    text: 'Do you really want to remove this post from the list?',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, remove it!',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
+                    self.$http.delete('/admin/api/post-lists/'+self.postListId+'/posts/'+post_id)
+                        .then(function(){
+                            self.fetch();
+                        }).then(function() {
+                            swal("Removed!", "post removed.", "success");
+                        });
+                    });
             },
 
             /**

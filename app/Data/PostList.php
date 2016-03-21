@@ -76,6 +76,19 @@ class PostList extends Model
     }
 
     /**
+     * Remove a post from the list.
+     *
+     * @param int $post_id
+     */
+    public function removePost($post_id)
+    {
+        $post = $this->getPost($post_id);
+        $this->reorder($post->id, $this->posts()->count() + 1);
+
+        $this->posts()->detach($post->id);
+    }
+
+    /**
      * Reorder a post within this list.
      *
      * @param int $post_id

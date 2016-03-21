@@ -51,6 +51,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function ($router) {
     $router->resource('posts', 'Api\PostsController', ['except' => ['edit', 'create']]);
     $router->resource('post-fields', 'Api\PostFieldsController', ['except' => ['edit', 'create']]);
     $router->post('post-lists/{postList}/posts', 'Api\PostListsController@addPost');
+    $router->delete('post-lists/{postList}/posts/{post}', 'Api\PostListsController@removePost');
     $router->patch('post-lists/{postList}/reorder', 'Api\PostListsController@reorder');
     $router->resource('post-lists', 'Api\PostListsController', ['except' => ['edit', 'create']]);
     $router->patch('pages/{page}/lock', 'Api\PagesController@lock');

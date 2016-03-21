@@ -72,6 +72,16 @@ class PostListsController extends Controller
     }
 
     /**
+     * @param int $list_id
+     * @param int $post_id
+     */
+    public function removePost($list_id, $post_id)
+    {
+        $list = PostList::findOrFail($list_id);
+        $list->removePost($post_id);
+    }
+
+    /**
      * @param Request $request
      * @param int $id
      */
