@@ -17,6 +17,10 @@ class PagesController extends Controller
     {
         $page = Page::getBySlug($page_slug);
 
+        if (! $page->isShowing()) {
+            abort(404);
+        }
+
         $template = $page->template ?: 'flashtag::pages.default';
         $template .= '-page';
 

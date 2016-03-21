@@ -87,13 +87,8 @@ class PagesController extends Controller
         $data['is_published'] = $request->get('is_published', false);
         $data['meta_description'] = $request->get('meta_description');
         $data['meta_canonical'] = $request->get('meta_canonical');
-
-        if ($request->get('start_showing_at')) {
-            $data['start_showing_at'] = $request->get('start_showing_at');
-        }
-        if ($request->get('stop_showing_at')) {
-            $data['stop_showing_at'] = $request->get('stop_showing_at');
-        }
+        $data['start_showing_at'] = $request->get('start_showing_at', null);
+        $data['stop_showing_at'] = $request->get('stop_showing_at', null);
 
         return $data;
     }
