@@ -42,7 +42,9 @@ class Install extends Command
             }
         }
 
-        if ($this->confirm("Create administration user now? (requires working db connection)", true)) {
+        if ($this->confirm("Run database migrations now? (requires working db connection)", true)) {
+            $this->runMigrations();
+            $this->seedDB();
             $this->createAdminUser();
         }
     }
@@ -98,6 +100,20 @@ class Install extends Command
         }
     }
 
+    private function runMigrations()
+    {
+        $this->call('migrate');
+    }
+
+    private function seedDB()
+    {
+        if ($this->confirm("Add example post and category?", true)) {
+            $this->call('db:seed', [
+                '--class' => 'InstallationSeeder',
+            ]);
+        }
+    }
+
     private function createAdminUser()
     {
         $this->info("Create an Admin user");
@@ -118,6 +134,6 @@ class Install extends Command
         $admin->admin = true;
         $admin->save();
 
-        dump($admin);
+        $this->comment("Created admin user {$admin->email}");
     }
 }
