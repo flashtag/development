@@ -19,14 +19,35 @@ class PagesTest extends TestCase
         $this->actingAs($user)
             ->visit("/admin")
             ->see('Dashboard')
-            ->see('Posts')
-            ->see('Post fields')
-            ->see('Categories')
-            ->see('Tags')
-            ->see('Authors')
-            //->see('Users')    TODO
-            //->see('Settings') TODO
+            ->seeLink('Posts')
+            ->seeLink('Custom fields')
+            ->seeLink('Lists')
+            ->seeLink('Categories')
+            ->seeLink('Tags')
+            ->seeLink('Authors')
+            ->dontSeeLink('Users')
+            ->dontSeeLink('Settings')
             ->see($user->name)
-            ->see('Logout');
+            ->seeLink('Logout');
+    }
+
+    /** @test */
+    public function dashboard_as_admin()
+    {
+        $user = factory(User::class, 'admin')->create();
+
+        $this->actingAs($user)
+            ->visit("/admin")
+            ->see('Dashboard')
+            ->seeLink('Posts')
+            ->seeLink('Custom fields')
+            ->seeLink('Lists')
+            ->seeLink('Categories')
+            ->seeLink('Tags')
+            ->seeLink('Authors')
+            ->seeLink('Users')
+            ->seeLink('Settings')
+            ->see($user->name)
+            ->seeLink('Logout');
     }
 }
