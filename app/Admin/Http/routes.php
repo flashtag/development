@@ -38,7 +38,7 @@ $router->group(['middleware' => 'auth'], function ($router) {
     $router->resource('tags', 'TagsController');
     $router->resource('authors', 'AuthorsController');
     $router->resource('users', 'UsersController');
-    $router->resource('settings', 'SettingsController');
+    $router->resource('settings', 'SettingsController', ['only' => ['index', 'store']]);
     $router->get('media/preview/{type}', 'MediaController@preview');
 });
 

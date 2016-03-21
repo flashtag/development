@@ -17,21 +17,23 @@ trait SyncsMedia
         $type = $request->get('media-type');
         $url = $request->get('media-link');
 
-        if ($type == 'image') {
-            $this->handleImageUpload($model, $request->file('image'));
-        } elseif ($type && $url) {
+        if ($type == 'video' && $url) {
             $model->updateMedia($type, $url);
         }
     }
 
     /**
      * @param \Illuminate\Database\Eloquent\Model $model
-     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     * @param \Illuminate\Http\Request $request $request
      */
-    private function handleImageUpload(Model $model, $image)
+    protected function handleImageUploadsFromRequest(Model $model, $request)
     {
-        if (! empty($image)) {
-            $model->addImage($image);
+        if (! empty($request->file('image'))) {
+            $model->addImage($request->file('image'));
+        }
+
+        if (! empty($request->file('cover_image'))) {
+            $model->addCoverImage($request->file('cover_image'));
         }
     }
 }

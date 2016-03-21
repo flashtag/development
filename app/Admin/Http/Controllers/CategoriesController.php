@@ -52,6 +52,7 @@ class CategoriesController extends Controller
 
         $this->syncTagsFromRequest($category, $request);
         $this->syncMediaFromRequest($category, $request);
+        $this->handleImageUploadsFromRequest($category, $request);
 
         return redirect()->route('admin.categories.index');
     }
@@ -81,6 +82,7 @@ class CategoriesController extends Controller
 
         $this->syncTagsFromRequest($category, $request);
         $this->syncMediaFromRequest($category, $request);
+        $this->handleImageUploadsFromRequest($category, $request);
 
         return redirect()->route('admin.categories.index');
     }

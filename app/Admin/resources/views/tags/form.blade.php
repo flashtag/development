@@ -20,11 +20,23 @@
 <div class="panel panel-default">
     <div class="panel-heading">Media</div>
     <div class="panel-body">
-        <media-input
-                type="{{ $tag->media ? $tag->media->type : 'image' }}"
-                url="{{ $tag->media ? $tag->media->url : '' }}"
-                image-path="/images/media/"
-                image-upload="/api/tags/{{  $tag->id }}/image">
-        </media-input>
+        <div class="row">
+            <div class="col-md-6">
+                <media-input
+                        type="{{ $tag->media ? $tag->media->type : 'image' }}"
+                        url="{{ $tag->media ? $tag->media->url : '' }}"
+                        image-path="/images/media/"
+                        image-upload="/api/tags/{{  $tag->id }}/image">
+                </media-input>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="image">Cover</label>
+                    <input type="file" name="cover_image" id="cover_image" class="file form-control" accept="image/*">
+                    <br>
+                    <image-preview path="/images/media/" image="{{ $tag->cover_image }}" height="200"></image-preview>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

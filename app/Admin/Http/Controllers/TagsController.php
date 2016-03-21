@@ -48,6 +48,7 @@ class TagsController extends Controller
         $tag = Tag::create($this->buildTagFromRequest($request));
 
         $this->syncMediaFromRequest($tag, $request);
+        $this->handleImageUploadsFromRequest($tag, $request);
 
         return redirect()->route('admin.tags.index');
     }
@@ -74,6 +75,7 @@ class TagsController extends Controller
         $tag->update($this->buildTagFromRequest($request));
 
         $this->syncMediaFromRequest($tag, $request);
+        $this->handleImageUploadsFromRequest($tag, $request);
 
         return redirect()->route('admin.tags.index');
     }
