@@ -29,6 +29,8 @@ class Install extends Command
      */
     public function handle()
     {
+        $this->publishFlashtag();
+        
         $continue = true;
         while ($continue) {
             $db = $this->getDBCredentialsFromUser();
@@ -56,6 +58,8 @@ class Install extends Command
             $this->seedDB();
             $this->createAdminUser();
         }
+
+        $this->installDefaultTheme();
     }
 
     private function getDBCredentialsFromUser()
@@ -134,5 +138,19 @@ class Install extends Command
         $admin->save();
 
         $this->comment("Created admin user {$admin->email}");
+    }
+
+    private function publishFlashtag()
+    {
+        $this->call("flashtag:publish", [
+            "--packages" => "all"
+        ]);
+    }
+
+    private function installDefaultTheme()
+    {
+        $this->call("flashtag:install-theme", [
+            "flashtag-themes/clean-creative"
+        ]);
     }
 }
