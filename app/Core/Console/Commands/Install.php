@@ -72,8 +72,8 @@ class Install extends Command
 
     /**
      * Test the database connection.
-     * @param  [type] $db [description]
-     * @return [type]     [description]
+     * @param array $db
+     * @return bool
      */
     private function testDBConnection($db)
     {
@@ -114,6 +114,10 @@ class Install extends Command
         }
     }
 
+    /**
+     * Write the configuration to the .env file
+     * @param array $db
+     */
     private function writeDBConfig($db)
     {
         $env = file_get_contents(base_path('.env'));
@@ -134,11 +138,17 @@ class Install extends Command
         }
     }
 
+    /**
+     * Run the migrations.
+     */
     private function runMigrations()
     {
         $this->call('migrate');
     }
 
+    /**
+     * Run the Install seeder.
+     */
     private function seedDB()
     {
         if ($this->confirm("Add example post and category?", true)) {
@@ -148,6 +158,9 @@ class Install extends Command
         }
     }
 
+    /**
+     * Create the Admin user.
+     */
     private function createAdminUser()
     {
         $this->info("Create an Admin user");
@@ -171,6 +184,9 @@ class Install extends Command
         $this->comment("Created admin user {$admin->email}");
     }
 
+    /**
+     * Publish the needed flashtag files.
+     */
     private function publishFlashtag()
     {
         $this->call("flashtag:publish", [
@@ -178,6 +194,9 @@ class Install extends Command
         ]);
     }
 
+    /**
+     * Install the default flashtag theme.
+     */
     private function installDefaultTheme()
     {
         $this->call("flashtag:install-theme", [
