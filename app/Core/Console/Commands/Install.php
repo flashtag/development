@@ -32,13 +32,22 @@ class Install extends Command
         $continue = true;
         while ($continue) {
             $db = $this->getDBCredentialsFromUser();
-            $this->testDBCOnnection($db);
 
-            if ($this->confirm('Save this database connection information?')) {
-                $this->writeDBConfig($db);
-                $continue = false;
-            } else {
-                $continue = $this->confirm('Would you like to re-enter the database credentials?', false);
+            if ($this->confirm('Would you like to attempt a test connection now?', true)) {
+                foreach ($db as $key => $value) {
+                    putenv($key.'='.$value);
+                }
+                try {
+                    \DB::connection($db['DB_CONNECTION'])->getPdo();
+                    $this->info('Connection successful.');
+                    if ($this->confirm('Save this database connection information?', true)) {
+                        $this->writeDBConfig($db);
+                    }
+                    $continue = false;
+                } catch (\PDOException $e) {
+                    $this->error('Connection failed.');
+                    $continue = $this->confirm('Would you like to re-enter the database credentials?', false);
+                }
             }
         }
 
@@ -67,17 +76,7 @@ class Install extends Command
 
     private function testDBCOnnection($db)
     {
-        if ($this->confirm('Would you like to attempt a test connection now?', true)) {
-            foreach ($db as $key => $value) {
-                putenv($key.'='.$value);
-            }
-            try {
-                \DB::connection($db['DB_CONNECTION'])->getPdo();
-                $this->info('Connection successful.');
-            } catch (\PDOException $e) {
-                $this->error('Connection failed.');
-            }
-        }
+
     }
 
     private function writeDBConfig($db)
@@ -109,7 +108,7 @@ class Install extends Command
     {
         if ($this->confirm("Add example post and category?", true)) {
             $this->call('db:seed', [
-                '--class' => 'InstallationSeeder',
+                '--class' => 'InstallSeeder',
             ]);
         }
     }

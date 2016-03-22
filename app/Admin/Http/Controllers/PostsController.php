@@ -84,8 +84,12 @@ class PostsController extends Controller
         $data['is_published'] = $request->get('is_published', false);
         $data['meta_description'] = $request->get('meta_description');
         $data['meta_canonical'] = $request->get('meta_canonical');
-        $data['start_showing_at'] = $request->get('start_showing_at', null);
-        $data['stop_showing_at'] = $request->get('stop_showing_at', null);
+        $data['start_showing_at'] = !empty($request->get('start_showing_at'))
+            ? $request->get('start_showing_at')
+            : null;
+        $data['stop_showing_at'] = !empty($request->get('stop_showing_at'))
+            ? $request->get('stop_showing_at')
+            : null;
 
         return $data;
     }
