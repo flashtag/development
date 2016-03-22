@@ -31,25 +31,13 @@ class Install extends Command
     {
         $this->publishFlashtag();
 
-        $continue = true;
-        while ($continue) {
+        $DBisGood = false;
+        while (! $DBisGood) {
             $db = $this->getDBCredentialsFromUser();
-
             if ($this->confirm('Would you like to attempt a test connection now?', true)) {
-                foreach ($db as $key => $value) {
-                    putenv($key.'='.$value);
-                }
-                try {
-                    \DB::connection($db['DB_CONNECTION'])->getPdo();
-                    $this->info('Connection successful.');
-                    if ($this->confirm('Save this database connection information?', true)) {
-                        $this->writeDBConfig($db);
-                    }
-                    $continue = false;
-                } catch (\PDOException $e) {
-                    $this->error('Connection failed.');
-                    $continue = $this->confirm('Would you like to re-enter the database credentials?', false);
-                }
+                $DBisGood = $this->testDBConnection($db);
+            } else {
+                $DBisGood = true;
             }
         }
 
@@ -62,6 +50,10 @@ class Install extends Command
         $this->installDefaultTheme();
     }
 
+    /**
+     * Get the database credentials from the user.
+     * @return array
+     */
     private function getDBCredentialsFromUser()
     {
         return [
@@ -78,9 +70,48 @@ class Install extends Command
         ];
     }
 
-    private function testDBCOnnection($db)
+    /**
+     * Test the database connection.
+     * @param  [type] $db [description]
+     * @return [type]     [description]
+     */
+    private function testDBConnection($db)
     {
+        if ($db['DB_CONNECTION'] == 'sqlite') {
+            $connection = sprintf(
+                "%s:%s",
+                $db['DB_CONNECTION'],
+                $db['DB_DATABASE']
+            );
+        } else {
+            $connection = sprintf(
+                "%s:host=%s;dbname=%s",
+                $db['DB_CONNECTION'],
+                $db['DB_HOST'],
+                $db['DB_DATABASE']
+            );
+        }
 
+        try {
+            $dbh = new \PDO(
+                $connection,
+                $db['DB_USERNAME'],
+                $db['DB_PASSWORD'],
+                [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+            );
+            $this->info('Connection successful.');
+            if ($this->confirm('Save this database connection information?', true)) {
+                $this->writeDBConfig($db);
+            }
+
+            return true;
+
+        } catch (\PDOException $e) {
+            $this->error('Connection failed.');
+            $this->error($e->getMessage());
+
+            return ! $this->confirm('Would you like to re-enter the database credentials?', false);
+        }
     }
 
     private function writeDBConfig($db)
