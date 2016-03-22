@@ -30,7 +30,7 @@ class Install extends Command
     public function handle()
     {
         $this->publishFlashtag();
-        
+
         $continue = true;
         while ($continue) {
             $db = $this->getDBCredentialsFromUser();
@@ -150,7 +150,7 @@ class Install extends Command
     private function installDefaultTheme()
     {
         $this->call("flashtag:install-theme", [
-            "flashtag-themes/clean-creative"
+            "theme" => "flashtag-themes/clean-creative"
         ]);
     }
 }
