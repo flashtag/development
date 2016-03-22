@@ -39,6 +39,9 @@ class Install extends Command
             } else {
                 $DBisGood = true;
             }
+            if ($this->confirm('Save this database connection information?', true)) {
+                $this->writeDBConfig($db);
+            }
         }
 
         if ($this->confirm("Run database migrations now? (requires working db connection)", true)) {
@@ -99,10 +102,8 @@ class Install extends Command
                 $db['DB_PASSWORD'],
                 [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
             );
+
             $this->info('Connection successful.');
-            if ($this->confirm('Save this database connection information?', true)) {
-                $this->writeDBConfig($db);
-            }
 
             return true;
 
