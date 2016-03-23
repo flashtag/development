@@ -11,5 +11,7 @@ namespace Flashtag\Admin;
  */
 function set_active($path, $active = 'active')
 {
-    return \Request::segment(2) == $path ? $active : '';
+    return in_array(\Request::segment(2), (array) $path)
+        ? $active
+        : '';
 }

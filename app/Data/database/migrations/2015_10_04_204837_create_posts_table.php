@@ -30,6 +30,7 @@ class CreatePostsTable extends Migration
             $table->string('image')->nullable();
             $table->string('meta_description')->nullable();
             $table->string('meta_canonical')->nullable();
+            $table->integer('views')->unsigned()->default(1);
             $table->timestamps();
         });
     }
