@@ -4,7 +4,6 @@ namespace Flashtag\Core\Console\Commands;
 
 use Flashtag\Data\User;
 use Illuminate\Console\Command;
-use Symfony\Component\Process\Process;
 
 class Install extends Command
 {
@@ -111,7 +110,7 @@ class Install extends Command
             $this->error('Connection failed.');
             $this->error($e->getMessage());
 
-            return ! $this->confirm('Would you like to re-enter the database credentials?', false);
+            return ! $this->confirm('Would you like to re-enter the database credentials?', true);
         }
     }
 
