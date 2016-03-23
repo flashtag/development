@@ -1,6 +1,6 @@
-# Flashtag Api
+# Flashtag Admin
 
-### Read-Only subsplit of Flashtag/Api
+### Read-Only subsplit of Flashtag/Admin
 
 - [Wiki](https://github.com/flashtag/flashtag/wiki)
 - [Issues](https://github.com/flashtag/flashtag/issues)
