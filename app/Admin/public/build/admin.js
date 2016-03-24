@@ -14043,7 +14043,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14122,7 +14122,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14194,7 +14194,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/fields/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/fields/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14345,7 +14345,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14451,7 +14451,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/revisions/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/revisions/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14615,7 +14615,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/revisions/show.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/revisions/show.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14637,7 +14637,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/image-preview.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/image-preview.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14731,7 +14731,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14802,7 +14802,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15061,7 +15061,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/posts.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/posts.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15141,6 +15141,10 @@ exports['default'] = {
             });
         },
 
+        getClass: function getClass(post) {
+            return post.is_published ? "fa fa-eye fa list-view-pf-icon-md list-view-pf-icon-success" : "fa fa-eye-slash fa list-view-pf-icon-md list-view-pf-icon-default";
+        },
+
         goToPost: function goToPost(post) {
             if (!post.is_locked) {
                 window.location = '/admin/posts/' + post.id;
@@ -15207,12 +15211,12 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <ol class=\"breadcrumb\">\n        <li><a href=\"/admin\">Home</a></li>\n        <li class=\"active\">Posts</li>\n    </ol>\n\n    <div class=\"create-button\">\n        <a href=\"/admin/posts/create\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</a>\n    </div>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n            </div>\n            <div class=\"col-md-6\">\n                <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                    <option :value=\"null\" selected=\"\">Filter by category...</option>\n                    <option v-for=\"category in categories\" :value=\"category.name\">\n                        {{ category.name }}\n                    </option>\n                </select>\n            </div>\n        </div>\n    </div>\n\n    <table class=\"Posts table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('category.name')\">Category <i :class=\"orderIcon('category.name')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                <th class=\"text-centered\"><a>Showing</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n                <td>\n                    <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                    <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                </td>\n\n                <td>{{ post.category ? post.category.name : '' }}</td>\n\n                <td>{{ formatTime(post.created_at) }}</td>\n\n                <td class=\"published\">\n                    <div class=\"switch\">\n                        <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish(post.is_published)\">\n                        <label for=\"is_published_{{post.id}}\"></label>\n                    </div>\n                </td>\n\n                <td class=\"text-centered\">\n                    <span v-if=\"post.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                    <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-ban\"></i></span>\n                </td>\n\n            </tr>\n        </tbody>\n    </table>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"create-button\">\n        <a href=\"/admin/posts/create\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</a>\n    </div>\n\n    <div class=\"filters\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n            </div>\n            <div class=\"col-md-6\">\n                <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                    <option :value=\"null\" selected=\"\">Filter by category...</option>\n                    <option v-for=\"category in categories\" :value=\"category.name\">\n                        {{ category.name }}\n                    </option>\n                </select>\n            </div>\n        </div>\n    </div>\n\n    <div class=\"list-group list-view-pf\">\n        <div v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"list-group-item\">\n            <div class=\"list-view-pf-checkbox\">\n                <input type=\"checkbox\">\n            </div>\n            <div class=\"list-view-pf-actions\">\n                <button class=\"btn btn-default\"><span class=\"fa fa-trash\"></span></button>\n            </div>\n            <div class=\"list-view-pf-main-info\">\n                <div class=\"list-view-pf-left\">\n                    <div class=\"switch\">\n                        <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish(post.is_published)\">\n                        <label for=\"is_published_{{post.id}}\"></label>\n                    </div>\n                </div>\n                <div class=\"list-view-pf-body\">\n                    <div class=\"list-view-pf-description\">\n                        <div class=\"list-group-item-text\">\n                            <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                    <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                        </div>\n                        <div class=\"list-group-item-heading\">\n                            <span style=\"font-weight: normal;\">{{ post.category.name }}</span>\n                        </div>\n                    </div>\n                    <div class=\"list-view-pf-additional-info\">\n                        <div v-if=\"post.is_published\" class=\"list-view-pf-additional-info-item\" data-toggle=\"tooltip\" title=\"Showing\">\n                            <span class=\"pficon pficon-ok\"></span>\n                        </div>\n                        <div v-else=\"\" class=\"list-view-pf-additional-info-item\" data-toggle=\"tooltip\" title=\"Not Showing\">\n                            <span class=\"fa fa-eye-slash\"></span>\n                        </div>\n                        <div class=\"list-view-pf-additional-info-item\">\n                            {{ formatTime(post.created_at) }}\n                        </div>\n                        <div class=\"list-view-pf-additional-info-item\">\n                            {{ post.views }} Views\n                        </div>\n\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <!--\n    <table class=\"Posts table table-striped table-hover\">\n        <thead>\n            <tr>\n                <th><a href=\"#\" @click.prevent=\"sortBy('title')\">Title <i :class=\"orderIcon('title')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('category.name')\">Category <i :class=\"orderIcon('category.name')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('created_at')\">Created <i :class=\"orderIcon('created_at')\"></i></a></th>\n                <th><a href=\"#\" @click.prevent=\"sortBy('is_published')\">Published <i :class=\"orderIcon('is_published')\"></i></a></th>\n                <th class=\"text-centered\"><a>Showing</a></th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\"\n                class=\"Post\" :class=\"{ 'Post--unpublished': !post.is_published }\">\n\n                <td>\n                    <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">{{ post.title }}</a>\n                    <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\"\n                          title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                </td>\n\n                <td>{{ post.category ? post.category.name : '' }}</td>\n\n                <td>{{ formatTime(post.created_at) }}</td>\n\n                <td class=\"published\">\n                    <div class=\"switch\">\n                        <input class=\"cmn-toggle cmn-toggle-round-sm\"\n                               id=\"is_published_{{post.id}}\"\n                               type=\"checkbox\"\n                               name=\"is_published\"\n                               v-model=\"post.is_published\"\n                               @change=\"post.publish(post.is_published)\">\n                        <label for=\"is_published_{{post.id}}\"></label>\n                    </div>\n                </td>\n\n                <td class=\"text-centered\">\n                    <span v-if=\"post.is_showing\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                    <span v-else class=\"not-showing\"><i class=\"fa fa-ban\"></i></span>\n                </td>\n\n            </tr>\n        </tbody>\n    </table>\n-->\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15355,7 +15359,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15519,7 +15523,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15590,7 +15594,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15662,7 +15666,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users.vue"
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -16140,6 +16144,7 @@ var Post = (function (_Model) {
             meta: data.meta ? data.meta : [],
             revisions: data.revisions ? data.revisions : [],
             media: data.media ? data.media : {},
+            views: data.views,
             created_at: data.created_at,
             updated_at: data.updated_at
         });

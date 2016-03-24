@@ -413,6 +413,15 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * Increment view count by one.
+     */
+    public function viewed()
+    {
+        $this->views++;
+        $this->save();
+    }
+
+    /**
      * Scope a query to perform a very basic search of posts.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
@@ -442,5 +451,22 @@ class Post extends Model implements HasPresenter
             }
         });
     }
-}
 
+    public function scopeMostViewed($query, $take = null)
+    {
+        if ($take) {
+            $query = $query->take($take);
+        }
+
+        return $query->orderBy('views', 'desc');
+    }
+
+    public function scopeLeastViewed($query, $take = null)
+    {
+        if ($take) {
+            $query = $query->take($take);
+        }
+
+        return $query->orderBy('views', 'asc');
+    }
+}

@@ -32,6 +32,7 @@ class PostsController extends Controller
         }
 
         $post = Post::getBySlug($id);
+        $post->viewed();
 
         return view('flashtag::posts.show', compact('post'));
     }

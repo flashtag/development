@@ -2,26 +2,15 @@
 
 @import "vendor/font-awesome";
 @import "vendor/select2";
-@import "vendor/bootstrap";
+@import "vendor/patternfly";
 @import "vendor/animate";
 @import "vendor/sweetalert";
 @import "vendor/ckeditor";
 @import "vendor/dropzone";
 
-@import "pages/posts/index";
-@import "pages/posts/edit";
-@import "pages/revisions/index";
-@import "pages/revisions/show";
-
-@import "partials/top-nav";
-@import "partials/side-nav";
-@import "partials/main";
-@import "partials/indices";
-@import "partials/forms";
-@import "partials/panels";
-
-@import "includes/utility";
-@import "includes/buttons";
 @import "includes/toggles";
 @import "includes/animations";
-@import "includes/layout";
+
+.navbar-brand-icon {
+    line-height: 35px;
+}
