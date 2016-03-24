@@ -1,9 +1,4 @@
 <template>
-    <ol class="breadcrumb">
-        <li><a href="/admin">Home</a></li>
-        <li class="active">Posts</li>
-    </ol>
-
     <div class="create-button">
         <a href="/admin/posts/create" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</a>
     </div>
@@ -24,6 +19,58 @@
         </div>
     </div>
 
+    <div class="list-group list-view-pf">
+        <div v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir" class="list-group-item">
+            <div class="list-view-pf-checkbox">
+                <input type="checkbox">
+            </div>
+            <div class="list-view-pf-actions">
+                <button class="btn btn-default"><span class="fa fa-trash"></span></button>
+            </div>
+            <div class="list-view-pf-main-info">
+                <div class="list-view-pf-left">
+                    <div class="switch">
+                        <input class="cmn-toggle cmn-toggle-round-sm"
+                               id="is_published_{{post.id}}"
+                               type="checkbox"
+                               name="is_published"
+                               v-model="post.is_published"
+                               @change="post.publish(post.is_published)">
+                        <label for="is_published_{{post.id}}"></label>
+                    </div>
+                </div>
+                <div class="list-view-pf-body">
+                    <div class="list-view-pf-description">
+                        <div class="list-group-item-text">
+                            <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)">{{ post.title }}</a>
+                    <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
+                          title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
+                        </div>
+                        <div class="list-group-item-heading">
+                            <span style="font-weight: normal;">{{ post.category.name }}</span>
+                        </div>
+                    </div>
+                    <div class="list-view-pf-additional-info">
+                        <div v-if="post.is_published" class="list-view-pf-additional-info-item" data-toggle="tooltip" title="Showing">
+                            <span class="pficon pficon-ok"></span>
+                        </div>
+                        <div v-else class="list-view-pf-additional-info-item" data-toggle="tooltip" title="Not Showing">
+                            <span class="fa fa-eye-slash"></span>
+                        </div>
+                        <div class="list-view-pf-additional-info-item">
+                            {{ formatTime(post.created_at) }}
+                        </div>
+                        <div class="list-view-pf-additional-info-item">
+                            {{ post.views }} Views
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
     <table class="Posts table table-striped table-hover">
         <thead>
             <tr>
@@ -68,7 +115,7 @@
             </tr>
         </tbody>
     </table>
-
+-->
 </template>
 
 <script>
@@ -128,6 +175,12 @@
                         return new User(user);
                     }));
                 });
+            },
+
+            getClass: function (post) {
+                return post.is_published
+                    ? "fa fa-eye fa list-view-pf-icon-md list-view-pf-icon-success"
+                    : "fa fa-eye-slash fa list-view-pf-icon-md list-view-pf-icon-default";
             },
 
             goToPost: function (post) {

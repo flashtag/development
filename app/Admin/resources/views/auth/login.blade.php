@@ -1,4 +1,4 @@
-@extends('admin::layout')
+@extends('admin::auth')
 
 @section('styles')
 <style>

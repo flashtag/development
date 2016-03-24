@@ -24,6 +24,7 @@ class Post extends Model {
             meta: data.meta ? data.meta : [],
             revisions: data.revisions ? data.revisions : [],
             media: data.media ? data.media : {},
+            views: data.views,
             created_at: data.created_at,
             updated_at: data.updated_at
         });

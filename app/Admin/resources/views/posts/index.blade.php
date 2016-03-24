@@ -2,6 +2,11 @@
 
 @section('content')
     <div class="container-fluid container-cards-pf container-pf-nav-pf-vertical container-pf-nav-pf-vertical-with-secondary">
+        <ol class="breadcrumb">
+            <li><a href="/admin">Home</a></li>
+            <li class="active">Posts</li>
+        </ol>
+
         <div class="row row-cards-pf">
             <!-- Important:  if you need to nest additional .row within a .row.row-cards-pf, do *not* use .row-cards-pf on the nested .row  -->
             <div class="col-md-12">
