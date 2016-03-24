@@ -44,6 +44,14 @@
                             </div>
                         </a>
                     </li>
+                    <li class="list-group-item {{ Flashtag\Admin\set_active('authors') }}">
+                        <a href="{{ route('admin.authors.index') }}">
+                            <span class="list-group-item-value">Authors</span>
+                            <div class="badge-container-pf">
+                                <span class="badge">{{ Flashtag\Data\Author::count() }}</span>
+                            </div>
+                        </a>
+                    </li>
                 </ul>
                 <h5>Taxonomy</h5>
                 <ul class="list-group">
