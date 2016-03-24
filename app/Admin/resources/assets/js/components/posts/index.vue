@@ -1,112 +1,110 @@
 <style>
     .fa.fa-lock, .fa.fa-ban {
-        color: #888888;
+        color: #888;
+    }
+    .fa.fa-lock {
+        margin-left: 5px;
+    }
+    .post-list--not-showing {
+        color: #bbb;
+    }
+    .post-list__title a {
+        color: inherit;
+    }
+    .post-list--not-showing a {
+        color: #bbb;
     }
 </style>
 
 <template>
 
-    <div class="row row-cards-pf">
-        <!-- Important:  if you need to nest additional .row within a .row.row-cards-pf, do *not* use .row-cards-pf on the nested .row  -->
-        <div class="col-md-12">
-            <div class="card-pf">
-                <div class="card-pf-heading">
-                    <div class="row toolbar-pf">
-                        <div class="col-sm-12">
-                            <div class="toolbar-pf-actions">
-                                <div class="form-group toolbar-pf-filter">
-                                    <label class="sr-only" for="title-filter">Title</label>
-                                    <input type="text" id="title-filter" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
-                                </div>
-                                <div class="form-group toolbar-pf-filter">
-                                    <select v-model="categoryFilter" @change="changeFilter" id="category" class="form-control">
-                                        <option :value="null" selected>Filter by category...</option>
-                                        <option v-for="category in categories" :value="category.name">
-                                            {{ category.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <div class="dropdown btn-group">
-                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Name <span class="caret"></span></button>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="#">Action</a></li>
-                                            <li><a href="#">Another action</a></li>
-                                            <li><a href="#">Something else here</a></li>
-                                            <li role="separator" class="divider"></li>
-                                            <li><a href="#">Separated link</a></li>
-                                        </ul>
-                                    </div>
-                                    <button class="btn btn-link" type="button">
-                                        <span class="fa fa-sort-alpha-asc"></span>
-                                    </button>
-                                </div>
-                                <div class="form-group">
-                                    <a href="/admin/posts/create" class="btn btn-success">
-                                        <i class="fa fa-pencil"></i> Write New
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+    <h2>Posts</h2>
+
+    <div class="row toolbar-pf">
+        <div class="col-sm-12">
+            <div class="toolbar-pf-actions">
+                <div class="form-group toolbar-pf-filter">
+                    <label class="sr-only" for="title-filter">Title</label>
+                    <input type="text" id="title-filter" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
+                </div>
+                <div class="form-group toolbar-pf-filter">
+                    <select v-model="categoryFilter" @change="changeFilter" id="category" class="form-control">
+                        <option :value="null" selected>Filter by category...</option>
+                        <option v-for="category in categories" :value="category.name">
+                            {{ category.name }}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="dropdown btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Updated at <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Created at</a></li>
+                            <li><a href="#">Title</a></li>
+                            <li><a href="#">Views</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-link" type="button">
+                        <span class="fa fa-sort-alpha-asc"></span>
+                    </button>
+                </div>
+                <div class="form-group">
+                    <a href="/admin/posts/create" class="btn btn-success">
+                        <i class="fa fa-pencil"></i> Write New
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="list-group list-view-pf">
+            <div v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir" class="list-group-item"
+            :class="{ 'post-list--not-showing': !post.is_showing }">
+                <div class="list-view-pf-actions">
+                    <div class="switch">
+                        <input class="cmn-toggle cmn-toggle-round-sm"
+                               id="is_published_{{post.id}}"
+                               type="checkbox"
+                               name="is_published"
+                               v-model="post.is_published"
+                               @change="post.publish(post.is_published)">
+                        <label for="is_published_{{post.id}}"></label>
                     </div>
                 </div>
-                <div class="card-pf-body">
-                    <div class="list-group list-view-pf">
-                        <div v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir" class="list-group-item">
-                            <!--
-                            <div class="list-view-pf-checkbox">
-                                <input type="checkbox">
+                <div class="list-view-pf-main-info">
+                    <div class="list-view-pf-body">
+                        <div class="list-view-pf-description">
+                            <div class="list-group-item-text">
+                                <span class="post-list__title" style="font-size:15px;">
+                                    <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)">
+                                        {{ post.title }}
+                                    </a>
+                                    <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
+                                          title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
+                                </span>
                             </div>
-                            -->
-                            <div class="list-view-pf-actions">
-                                <button class="btn btn-default" @click.prevent="destroy(post)" title="Delete" data-toggle="tooltip">
-                                    <span class="fa fa-trash"></span>
-                                </button>
+                            <div class="list-group-item-heading" title="Category" data-toggle="tooltip">
+                                <span style="font-weight: normal;">{{ post.category.name }}</span>
                             </div>
-                            <div class="list-view-pf-main-info">
-                                <div class="list-view-pf-left">
-                                    <div class="switch">
-                                        <input class="cmn-toggle cmn-toggle-round-sm"
-                                               id="is_published_{{post.id}}"
-                                               type="checkbox"
-                                               name="is_published"
-                                               v-model="post.is_published"
-                                               @change="post.publish(post.is_published)">
-                                        <label for="is_published_{{post.id}}"></label>
-                                    </div>
-                                </div>
-                                <div class="list-view-pf-body">
-                                    <div class="list-view-pf-description">
-                                        <div class="list-group-item-text">
-                                            <span class="post-list__title" style="font-size:15px;">
-                                                <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)">
-                                                    {{ post.title }}
-                                                </a>
-                                                <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
-                                                      title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
-                                            </span>
-                                        </div>
-                                        <div class="list-group-item-heading" title="Category" data-toggle="tooltip">
-                                            <span style="font-weight: normal;">{{ post.category.name }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="list-view-pf-additional-info">
-                                        <div v-if="post.is_published" class="list-view-pf-additional-info-item" title="Showing" data-toggle="tooltip">
-                                            <span class="pficon pficon-ok"></span>
-                                        </div>
-                                        <div v-else class="list-view-pf-additional-info-item" title="Not Showing" data-toggle="tooltip">
-                                            <span class="fa fa-ban"></span>
-                                        </div>
-                                        <div class="list-view-pf-additional-info-item" title="Created at" data-toggle="tooltip">
-                                            {{ formatTime(post.created_at) }}
-                                        </div>
-                                        <div class="list-view-pf-additional-info-item" title="Total Views" data-toggle="tooltip">
-                                            {{ post.views }} Views
-                                        </div>
+                        </div>
+                        <div class="list-view-pf-additional-info">
+                            <div v-if="post.is_showing" class="list-view-pf-additional-info-item" title="Showing" data-toggle="tooltip">
+                                <span class="pficon pficon-ok"></span>
+                            </div>
+                            <div v-else class="list-view-pf-additional-info-item" title="Not Showing" data-toggle="tooltip">
+                                <span class="fa fa-ban"></span>
+                            </div>
+                            <div class="list-view-pf-additional-info-item" title="Created at" data-toggle="tooltip">
+                                {{ formatTime(post.created_at) }}
+                            </div>
+                            <div class="list-view-pf-additional-info-item" title="Total Views" data-toggle="tooltip">
+                                {{ post.views }} Views
+                            </div>
 
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
