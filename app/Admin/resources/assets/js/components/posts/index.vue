@@ -34,7 +34,7 @@
                             </div>
                             -->
                             <div class="list-view-pf-actions">
-                                <button class="btn btn-default"><span class="fa fa-trash"></span></button>
+                                <button class="btn btn-default" @click.prevent="delete(post)"><span class="fa fa-trash"></span></button>
                             </div>
                             <div class="list-view-pf-main-info">
                                 <div class="list-view-pf-left">
@@ -87,52 +87,6 @@
         </div>
     </div>
 
-    <!--
-    <table class="Posts table table-striped table-hover">
-        <thead>
-            <tr>
-                <th><a href="#" @click.prevent="sortBy('title')">Title <i :class="orderIcon('title')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('category.name')">Category <i :class="orderIcon('category.name')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('created_at')">Created <i :class="orderIcon('created_at')"></i></a></th>
-                <th><a href="#" @click.prevent="sortBy('is_published')">Published <i :class="orderIcon('is_published')"></i></a></th>
-                <th class="text-centered"><a>Showing</a></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir"
-                class="Post" :class="{ 'Post--unpublished': !post.is_published }">
-
-                <td>
-                    <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)">{{ post.title }}</a>
-                    <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
-                          title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
-                </td>
-
-                <td>{{ post.category ? post.category.name : '' }}</td>
-
-                <td>{{ formatTime(post.created_at) }}</td>
-
-                <td class="published">
-                    <div class="switch">
-                        <input class="cmn-toggle cmn-toggle-round-sm"
-                               id="is_published_{{post.id}}"
-                               type="checkbox"
-                               name="is_published"
-                               v-model="post.is_published"
-                               @change="post.publish(post.is_published)">
-                        <label for="is_published_{{post.id}}"></label>
-                    </div>
-                </td>
-
-                <td class="text-centered">
-                    <span v-if="post.is_showing" class="showing"><i class="fa fa-check"></i></span>
-                    <span v-else class="not-showing"><i class="fa fa-ban"></i></span>
-                </td>
-
-            </tr>
-        </tbody>
-    </table>
--->
 </template>
 
 <script>
@@ -251,6 +205,32 @@
                 }
 
                 return 'fa fa-unsorted';
+            },
+
+            delete: function (post) {
+                var self = this;
+                swal({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this post and all of its revision history!',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, delete it!',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
+                    self.$http.delete('posts/'+post.id).then(function (response) {
+                        self.posts = self.posts.filter(function (p) {
+                            return p.id != post.id;
+                        });
+                        swal({
+                            html: true,
+                            title: 'Great success!',
+                            text: '<strong>' + post.title + '</strong> was deleted!',
+                            type: 'success'
+                        });
+                    });
+                });
             },
 
             initTooltips: function () {
