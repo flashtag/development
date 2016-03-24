@@ -11,27 +11,46 @@
         <div class="col-md-12">
             <div class="card-pf">
                 <div class="card-pf-heading">
-                    <div class="create-button" style="float:right;">
-                        <a href="/admin/posts/create" class="btn btn-success"><i class="fa fa-pencil"></i> Write New</a>
-                    </div>
-                    <h2 class="card-pf-title">Posts</h2>
-                </div>
-                <div class="card-pf-body">
-                    <div class="filters" style="margin-bottom:15px;">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <input type="text" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <select v-model="categoryFilter" @change="changeFilter" id="category" class="form-control">
-                                    <option :value="null" selected>Filter by category...</option>
-                                    <option v-for="category in categories" :value="category.name">
-                                        {{ category.name }}
-                                    </option>
-                                </select>
+                    <div class="row toolbar-pf">
+                        <div class="col-sm-12">
+                            <div class="toolbar-pf-actions">
+                                <div class="form-group toolbar-pf-filter">
+                                    <label class="sr-only" for="title-filter">Title</label>
+                                    <input type="text" id="title-filter" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
+                                </div>
+                                <div class="form-group toolbar-pf-filter">
+                                    <select v-model="categoryFilter" @change="changeFilter" id="category" class="form-control">
+                                        <option :value="null" selected>Filter by category...</option>
+                                        <option v-for="category in categories" :value="category.name">
+                                            {{ category.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <div class="dropdown btn-group">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Name <span class="caret"></span></button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#">Action</a></li>
+                                            <li><a href="#">Another action</a></li>
+                                            <li><a href="#">Something else here</a></li>
+                                            <li role="separator" class="divider"></li>
+                                            <li><a href="#">Separated link</a></li>
+                                        </ul>
+                                    </div>
+                                    <button class="btn btn-link" type="button">
+                                        <span class="fa fa-sort-alpha-asc"></span>
+                                    </button>
+                                </div>
+                                <div class="form-group">
+                                    <a href="/admin/posts/create" class="btn btn-success">
+                                        <i class="fa fa-pencil"></i> Write New
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="card-pf-body">
                     <div class="list-group list-view-pf">
                         <div v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir" class="list-group-item">
                             <!--
@@ -46,7 +65,7 @@
                             </div>
                             <div class="list-view-pf-main-info">
                                 <div class="list-view-pf-left">
-                                    <div class="switch" title="Publish status" data-toggle="tooltip">
+                                    <div class="switch">
                                         <input class="cmn-toggle cmn-toggle-round-sm"
                                                id="is_published_{{post.id}}"
                                                type="checkbox"
@@ -60,7 +79,7 @@
                                     <div class="list-view-pf-description">
                                         <div class="list-group-item-text">
                                             <span class="post-list__title" style="font-size:15px;">
-                                                <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)" title="Title" data-toggle="tooltip">
+                                                <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)">
                                                     {{ post.title }}
                                                 </a>
                                                 <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"

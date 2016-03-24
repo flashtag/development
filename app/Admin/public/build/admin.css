@@ -27670,3 +27670,7 @@ input.cmn-toggle-yes-no:checked + label:after {
 .navbar-brand-icon {
   line-height: 35px;
 }
+
+.toolbar-pf {
+  padding-bottom: 10px;
+}
