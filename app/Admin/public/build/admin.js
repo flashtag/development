@@ -13935,6 +13935,26 @@ if (devtools) {
 module.exports = Vue;
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"_process":4}],26:[function(require,module,exports){
+var inserted = exports.cache = {}
+
+exports.insert = function (css) {
+  if (inserted[css]) return
+  inserted[css] = true
+
+  var elem = document.createElement('style')
+  elem.setAttribute('type', 'text/css')
+
+  if ('textContent' in elem) {
+    elem.textContent = css
+  } else {
+    elem.styleSheet.cssText = css
+  }
+
+  document.getElementsByTagName('head')[0].appendChild(elem)
+  return elem
+}
+
+},{}],27:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -13979,7 +13999,7 @@ new _vue2['default']({
     }
 });
 
-},{"./components/authors.vue":27,"./components/categories.vue":28,"./components/fields/index.vue":29,"./components/pages/index.vue":30,"./components/pages/revisions/index.vue":31,"./components/pages/revisions/show.vue":32,"./components/partials/image-preview.vue":33,"./components/partials/media-input.vue":34,"./components/post-lists/index.vue":35,"./components/post-lists/posts.vue":36,"./components/posts/index.vue":37,"./components/posts/revisions/index.vue":38,"./components/posts/revisions/show.vue":39,"./components/tags.vue":40,"./components/users.vue":41,"./directives/rich-editor":42,"./directives/select":43,"vue":25,"vue-resource":10}],27:[function(require,module,exports){
+},{"./components/authors.vue":28,"./components/categories.vue":29,"./components/fields/index.vue":30,"./components/pages/index.vue":31,"./components/pages/revisions/index.vue":32,"./components/pages/revisions/show.vue":33,"./components/partials/image-preview.vue":34,"./components/partials/media-input.vue":35,"./components/post-lists/index.vue":36,"./components/post-lists/posts.vue":37,"./components/posts/index.vue":38,"./components/posts/revisions/index.vue":39,"./components/posts/revisions/show.vue":40,"./components/tags.vue":41,"./components/users.vue":42,"./directives/rich-editor":43,"./directives/select":44,"vue":25,"vue-resource":10}],28:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14050,7 +14070,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/author":44,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],28:[function(require,module,exports){
+},{"../models/author":45,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],29:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14129,7 +14149,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/category":45,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],29:[function(require,module,exports){
+},{"../models/category":46,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],30:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14201,7 +14221,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/field":46,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],30:[function(require,module,exports){
+},{"../../models/field":47,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],31:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14352,7 +14372,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":45,"../../models/page":48,"../../models/user":52,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],31:[function(require,module,exports){
+},{"../../models/category":46,"../../models/page":49,"../../models/user":53,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],32:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -14458,7 +14478,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],32:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],33:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14622,7 +14642,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],33:[function(require,module,exports){
+},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],34:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -14644,7 +14664,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],34:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],35:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -14738,7 +14758,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],35:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],36:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14809,7 +14829,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/post-list":49,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],36:[function(require,module,exports){
+},{"../../models/post-list":50,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],37:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15068,7 +15088,8 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/post-list":49,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],37:[function(require,module,exports){
+},{"../../models/post-list":50,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],38:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n    .fa.fa-lock, .fa.fa-ban {\n        color: #888888;\n    }\n")
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15109,12 +15130,6 @@ exports['default'] = {
         this.fetchUsers();
     },
 
-    ready: function ready() {
-        this.$nextTick((function () {
-            this.initTooltips();
-        }).bind(this));
-    },
-
     methods: {
 
         fetchPosts: function fetchPosts() {
@@ -15122,6 +15137,8 @@ exports['default'] = {
                 this.$set('posts', response.data.map(function (post) {
                     return new _modelsPost2['default'](post);
                 }));
+            }).then(function () {
+                this.initTooltips();
             });
         },
 
@@ -15197,7 +15214,7 @@ exports['default'] = {
             return 'fa fa-unsorted';
         },
 
-        'delete': function _delete(post) {
+        destroy: function destroy(post) {
             var self = this;
             swal({
                 title: 'Are you sure?',
@@ -15224,9 +15241,9 @@ exports['default'] = {
         },
 
         initTooltips: function initTooltips() {
-            this.$nextTick(function () {
+            setTimeout(function () {
                 $('[data-toggle="tooltip"]').tooltip();
-            });
+            }, 0);
         },
 
         changeFilter: function changeFilter() {
@@ -15237,19 +15254,23 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"row row-cards-pf\">\n        <!-- Important:  if you need to nest additional .row within a .row.row-cards-pf, do *not* use .row-cards-pf on the nested .row  -->\n        <div class=\"col-md-12\">\n            <div class=\"card-pf\">\n                <div class=\"card-pf-heading\">\n                    <div class=\"create-button\" style=\"float:right;\">\n                        <a href=\"/admin/posts/create\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</a>\n                    </div>\n                    <h2 class=\"card-pf-title\">Posts</h2>\n                </div>\n                <div class=\"card-pf-body\">\n                    <div class=\"filters\" style=\"margin-bottom:15px;\">\n                        <div class=\"row\">\n                            <div class=\"col-md-6\">\n                                <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                            </div>\n                            <div class=\"col-md-6\">\n                                <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                                    <option :value=\"null\" selected=\"\">Filter by category...</option>\n                                    <option v-for=\"category in categories\" :value=\"category.name\">\n                                        {{ category.name }}\n                                    </option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"list-group list-view-pf\">\n                        <div v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"list-group-item\">\n                            <!--\n                            <div class=\"list-view-pf-checkbox\">\n                                <input type=\"checkbox\">\n                            </div>\n                            -->\n                            <div class=\"list-view-pf-actions\">\n                                <button class=\"btn btn-default\" @click.prevent=\"delete(post)\"><span class=\"fa fa-trash\"></span></button>\n                            </div>\n                            <div class=\"list-view-pf-main-info\">\n                                <div class=\"list-view-pf-left\">\n                                    <div class=\"switch\">\n                                        <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish(post.is_published)\">\n                                        <label for=\"is_published_{{post.id}}\"></label>\n                                    </div>\n                                </div>\n                                <div class=\"list-view-pf-body\">\n                                    <div class=\"list-view-pf-description\">\n                                        <div class=\"list-group-item-text\">\n                                            <span class=\"post-list__title\" style=\"font-size:15px;\">\n                                                <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">\n                                                    {{ post.title }}\n                                                </a>\n                                                <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                                            </span>\n                                        </div>\n                                        <div class=\"list-group-item-heading\">\n                                            <span style=\"font-weight: normal;\">{{ post.category.name }}</span>\n                                        </div>\n                                    </div>\n                                    <div class=\"list-view-pf-additional-info\">\n                                        <div v-if=\"post.is_published\" class=\"list-view-pf-additional-info-item\" data-toggle=\"tooltip\" title=\"Showing\">\n                                            <span class=\"pficon pficon-ok\"></span>\n                                        </div>\n                                        <div v-else=\"\" class=\"list-view-pf-additional-info-item\" data-toggle=\"tooltip\" title=\"Not Showing\">\n                                            <span class=\"fa fa-eye-slash\"></span>\n                                        </div>\n                                        <div class=\"list-view-pf-additional-info-item\">\n                                            {{ formatTime(post.created_at) }}\n                                        </div>\n                                        <div class=\"list-view-pf-additional-info-item\">\n                                            {{ post.views }} Views\n                                        </div>\n\n                                    </div>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"row row-cards-pf\">\n        <!-- Important:  if you need to nest additional .row within a .row.row-cards-pf, do *not* use .row-cards-pf on the nested .row  -->\n        <div class=\"col-md-12\">\n            <div class=\"card-pf\">\n                <div class=\"card-pf-heading\">\n                    <div class=\"create-button\" style=\"float:right;\">\n                        <a href=\"/admin/posts/create\" class=\"btn btn-success\"><i class=\"fa fa-pencil\"></i> Write New</a>\n                    </div>\n                    <h2 class=\"card-pf-title\">Posts</h2>\n                </div>\n                <div class=\"card-pf-body\">\n                    <div class=\"filters\" style=\"margin-bottom:15px;\">\n                        <div class=\"row\">\n                            <div class=\"col-md-6\">\n                                <input type=\"text\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                            </div>\n                            <div class=\"col-md-6\">\n                                <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                                    <option :value=\"null\" selected=\"\">Filter by category...</option>\n                                    <option v-for=\"category in categories\" :value=\"category.name\">\n                                        {{ category.name }}\n                                    </option>\n                                </select>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"list-group list-view-pf\">\n                        <div v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"list-group-item\">\n                            <!--\n                            <div class=\"list-view-pf-checkbox\">\n                                <input type=\"checkbox\">\n                            </div>\n                            -->\n                            <div class=\"list-view-pf-actions\">\n                                <button class=\"btn btn-default\" @click.prevent=\"destroy(post)\" title=\"Delete\" data-toggle=\"tooltip\">\n                                    <span class=\"fa fa-trash\"></span>\n                                </button>\n                            </div>\n                            <div class=\"list-view-pf-main-info\">\n                                <div class=\"list-view-pf-left\">\n                                    <div class=\"switch\" title=\"Publish status\" data-toggle=\"tooltip\">\n                                        <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish(post.is_published)\">\n                                        <label for=\"is_published_{{post.id}}\"></label>\n                                    </div>\n                                </div>\n                                <div class=\"list-view-pf-body\">\n                                    <div class=\"list-view-pf-description\">\n                                        <div class=\"list-group-item-text\">\n                                            <span class=\"post-list__title\" style=\"font-size:15px;\">\n                                                <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\" title=\"Title\" data-toggle=\"tooltip\">\n                                                    {{ post.title }}\n                                                </a>\n                                                <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                                            </span>\n                                        </div>\n                                        <div class=\"list-group-item-heading\" title=\"Category\" data-toggle=\"tooltip\">\n                                            <span style=\"font-weight: normal;\">{{ post.category.name }}</span>\n                                        </div>\n                                    </div>\n                                    <div class=\"list-view-pf-additional-info\">\n                                        <div v-if=\"post.is_published\" class=\"list-view-pf-additional-info-item\" title=\"Showing\" data-toggle=\"tooltip\">\n                                            <span class=\"pficon pficon-ok\"></span>\n                                        </div>\n                                        <div v-else=\"\" class=\"list-view-pf-additional-info-item\" title=\"Not Showing\" data-toggle=\"tooltip\">\n                                            <span class=\"fa fa-ban\"></span>\n                                        </div>\n                                        <div class=\"list-view-pf-additional-info-item\" title=\"Created at\" data-toggle=\"tooltip\">\n                                            {{ formatTime(post.created_at) }}\n                                        </div>\n                                        <div class=\"list-view-pf-additional-info-item\" title=\"Total Views\" data-toggle=\"tooltip\">\n                                            {{ post.views }} Views\n                                        </div>\n\n                                    </div>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
   var id = "/Users/fungku/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n    .fa.fa-lock, .fa.fa-ban {\n        color: #888888;\n    }\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":45,"../../models/post":50,"../../models/user":52,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],38:[function(require,module,exports){
+},{"../../models/category":46,"../../models/post":51,"../../models/user":53,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5,"vueify-insert-css":26}],39:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -15392,7 +15413,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],39:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],40:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15556,7 +15577,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],40:[function(require,module,exports){
+},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],41:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15627,7 +15648,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/tag":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],41:[function(require,module,exports){
+},{"../models/tag":52,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],42:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15699,7 +15720,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/user":52,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],42:[function(require,module,exports){
+},{"../models/user":53,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],43:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15735,7 +15756,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15766,7 +15787,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15808,7 +15829,7 @@ var Author = (function (_Model) {
 exports['default'] = Author;
 module.exports = exports['default'];
 
-},{"./model":47}],45:[function(require,module,exports){
+},{"./model":48}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15856,7 +15877,7 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":47}],46:[function(require,module,exports){
+},{"./model":48}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15898,7 +15919,7 @@ var Field = (function (_Model) {
 exports['default'] = Field;
 module.exports = exports['default'];
 
-},{"./model":47}],47:[function(require,module,exports){
+},{"./model":48}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15970,7 +15991,7 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16064,7 +16085,7 @@ var Page = (function (_Model) {
 exports['default'] = Page;
 module.exports = exports['default'];
 
-},{"./model":47}],49:[function(require,module,exports){
+},{"./model":48}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16126,7 +16147,7 @@ var PostList = (function (_Model) {
 exports['default'] = PostList;
 module.exports = exports['default'];
 
-},{"./model":47}],50:[function(require,module,exports){
+},{"./model":48}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16225,7 +16246,7 @@ var Post = (function (_Model) {
 exports['default'] = Post;
 module.exports = exports['default'];
 
-},{"./model":47}],51:[function(require,module,exports){
+},{"./model":48}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16268,7 +16289,7 @@ var Tag = (function (_Model) {
 exports['default'] = Tag;
 module.exports = exports['default'];
 
-},{"./model":47}],52:[function(require,module,exports){
+},{"./model":48}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16309,6 +16330,6 @@ var User = (function (_Model) {
 exports['default'] = User;
 module.exports = exports['default'];
 
-},{"./model":47}]},{},[26]);
+},{"./model":48}]},{},[27]);
 
 //# sourceMappingURL=admin.js.map

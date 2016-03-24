@@ -1,3 +1,9 @@
+<style>
+    .fa.fa-lock, .fa.fa-ban {
+        color: #888888;
+    }
+</style>
+
 <template>
 
     <div class="row row-cards-pf">
@@ -34,11 +40,13 @@
                             </div>
                             -->
                             <div class="list-view-pf-actions">
-                                <button class="btn btn-default" @click.prevent="delete(post)"><span class="fa fa-trash"></span></button>
+                                <button class="btn btn-default" @click.prevent="destroy(post)" title="Delete" data-toggle="tooltip">
+                                    <span class="fa fa-trash"></span>
+                                </button>
                             </div>
                             <div class="list-view-pf-main-info">
                                 <div class="list-view-pf-left">
-                                    <div class="switch">
+                                    <div class="switch" title="Publish status" data-toggle="tooltip">
                                         <input class="cmn-toggle cmn-toggle-round-sm"
                                                id="is_published_{{post.id}}"
                                                type="checkbox"
@@ -52,28 +60,28 @@
                                     <div class="list-view-pf-description">
                                         <div class="list-group-item-text">
                                             <span class="post-list__title" style="font-size:15px;">
-                                                <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)">
+                                                <a href="/admin/posts/{{ post.id }}" @click.prevent="goToPost(post)" title="Title" data-toggle="tooltip">
                                                     {{ post.title }}
                                                 </a>
                                                 <span v-if="post.is_locked" data-toggle="tooltip" data-placement="top"
                                                       title="Locked by {{ userName(post.locked_by_id) }}"><i class="fa fa-lock"></i></span>
                                             </span>
                                         </div>
-                                        <div class="list-group-item-heading">
+                                        <div class="list-group-item-heading" title="Category" data-toggle="tooltip">
                                             <span style="font-weight: normal;">{{ post.category.name }}</span>
                                         </div>
                                     </div>
                                     <div class="list-view-pf-additional-info">
-                                        <div v-if="post.is_published" class="list-view-pf-additional-info-item" data-toggle="tooltip" title="Showing">
+                                        <div v-if="post.is_published" class="list-view-pf-additional-info-item" title="Showing" data-toggle="tooltip">
                                             <span class="pficon pficon-ok"></span>
                                         </div>
-                                        <div v-else class="list-view-pf-additional-info-item" data-toggle="tooltip" title="Not Showing">
-                                            <span class="fa fa-eye-slash"></span>
+                                        <div v-else class="list-view-pf-additional-info-item" title="Not Showing" data-toggle="tooltip">
+                                            <span class="fa fa-ban"></span>
                                         </div>
-                                        <div class="list-view-pf-additional-info-item">
+                                        <div class="list-view-pf-additional-info-item" title="Created at" data-toggle="tooltip">
                                             {{ formatTime(post.created_at) }}
                                         </div>
-                                        <div class="list-view-pf-additional-info-item">
+                                        <div class="list-view-pf-additional-info-item" title="Total Views" data-toggle="tooltip">
                                             {{ post.views }} Views
                                         </div>
 
@@ -116,12 +124,6 @@
             this.fetchUsers();
         },
 
-        ready: function () {
-            this.$nextTick(function() {
-                this.initTooltips();
-            }.bind(this));
-        },
-
         methods: {
 
             fetchPosts: function() {
@@ -129,6 +131,8 @@
                     this.$set('posts', response.data.map(function (post) {
                         return new Post(post);
                     }));
+                }).then(function() {
+                    this.initTooltips();
                 });
             },
 
@@ -207,7 +211,7 @@
                 return 'fa fa-unsorted';
             },
 
-            delete: function (post) {
+            destroy: function (post) {
                 var self = this;
                 swal({
                     title: 'Are you sure?',
@@ -234,9 +238,9 @@
             },
 
             initTooltips: function () {
-                this.$nextTick(function() {
+                setTimeout(function() {
                     $('[data-toggle="tooltip"]').tooltip();
-                });
+                }, 0);
             },
 
             changeFilter: function () {
