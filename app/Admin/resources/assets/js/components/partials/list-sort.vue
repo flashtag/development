@@ -9,7 +9,7 @@
         </ul>
     </div>
     <button class="btn btn-link" type="button" @click.prevent="toggleSortDir">
-        <span class="fa fa-sort-alpha-{{ sortDirText }}"></span>
+        <span class="fa fa-sort-amount-{{ sortDirText }}"></span>
     </button>
 </template>
 

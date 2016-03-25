@@ -14749,7 +14749,7 @@ exports['default'] = {
     }
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"dropdown btn-group\">\n        <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n            {{ sortKeyText }} <span class=\"caret\"></span>\n        </button>\n        <ul class=\"dropdown-menu\">\n            <li v-for=\"key in sortKeys\"><a href=\"#\" @click.prevent=\"setSortKey(key)\">{{ key.text }}</a></li>\n        </ul>\n    </div>\n    <button class=\"btn btn-link\" type=\"button\" @click.prevent=\"toggleSortDir\">\n        <span class=\"fa fa-sort-alpha-{{ sortDirText }}\"></span>\n    </button>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"dropdown btn-group\">\n        <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n            {{ sortKeyText }} <span class=\"caret\"></span>\n        </button>\n        <ul class=\"dropdown-menu\">\n            <li v-for=\"key in sortKeys\"><a href=\"#\" @click.prevent=\"setSortKey(key)\">{{ key.text }}</a></li>\n        </ul>\n    </div>\n    <button class=\"btn btn-link\" type=\"button\" @click.prevent=\"toggleSortDir\">\n        <span class=\"fa fa-sort-amount-{{ sortDirText }}\"></span>\n    </button>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
