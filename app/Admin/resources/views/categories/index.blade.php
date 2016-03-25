@@ -1,5 +1,11 @@
 @extends('admin::layout')
 
 @section('content')
-    <categories :current-user="user"></categories>
+    <div class="container-fluid container-pf-nav-pf-vertical container-pf-nav-pf-vertical-with-secondary">
+        <ol class="breadcrumb">
+            <li><a href="/admin">Home</a></li>
+            <li class="active">Categories</li>
+        </ol>
+        <categories :current-user="user"></categories>
+    </div>
 @endsection

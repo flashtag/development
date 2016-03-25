@@ -1,10 +1,12 @@
 @extends('admin::layout')
 
 @section('content')
-    <ol class="breadcrumb">
-        <li><a href="/admin">Home</a></li>
-        <li class="active">Posts</li>
-    </ol>
-    
-    <posts :current-user="user"></posts>
+    <div class="container-fluid container-pf-nav-pf-vertical container-pf-nav-pf-vertical-with-secondary">
+        <ol class="breadcrumb">
+            <li><a href="/admin">Home</a></li>
+            <li class="active">Posts</li>
+        </ol>
+
+        <posts :current-user="user"></posts>
+    </div>
 @endsection

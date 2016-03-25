@@ -18,7 +18,7 @@
 
 <template>
 
-    <h2>Posts</h2>
+    <h2>Posts <span class="badge">{{ posts | filterBy titleFilter | filterBy categoryFilter | count }}</span></h2>
 
     <div class="row toolbar-pf">
         <div class="col-sm-12">
@@ -60,8 +60,8 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="list-group list-view-pf">
+    <div class="row list-view-pf">
+        <div class="list-group">
             <div v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir" class="list-group-item"
             :class="{ 'post-list--not-showing': !post.is_showing }">
                 <div class="list-view-pf-actions">

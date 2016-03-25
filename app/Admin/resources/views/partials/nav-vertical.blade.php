@@ -75,7 +75,7 @@
                 <h5>Pages</h5>
                 <ul class="list-group">
                     <li class="list-group-item {{ Flashtag\Admin\set_active('pages') }}">
-                        <a href="#">
+                        <a href="{{ route('admin.pages.index') }}">
                             <span class="list-group-item-value">Pages</span>
                             <div class="badge-container-pf">
                                 <span class="badge">{{ Flashtag\Data\Page::count() }}</span>

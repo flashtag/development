@@ -1,5 +1,12 @@
 @extends('admin::layout')
 
 @section('content')
-    <authors :current-user="user"></authors>
+    <div class="container-fluid container-pf-nav-pf-vertical container-pf-nav-pf-vertical-with-secondary">
+        <ol class="breadcrumb">
+            <li><a href="/admin">Home</a></li>
+            <li class="active">Authors</li>
+        </ol>
+
+        <authors :current-user="user"></authors>
+    </div>
 @endsection

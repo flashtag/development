@@ -17,6 +17,11 @@ Vue.directive('rich-editor', require('./directives/rich-editor'));
 Vue.component('media-input', require('./components/partials/media-input.vue'));
 Vue.component('image-preview', require('./components/partials/image-preview.vue'));
 
+// Global Filters
+Vue.filter('count', function (value) {
+    return value.length;
+});
+
 new Vue({
     el: '#Admin',
     components: {

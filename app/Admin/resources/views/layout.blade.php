@@ -52,7 +52,7 @@ _______.---./    .'                    \_.--._ ___________
 
     @include('admin::partials.nav-vertical')
 
-    <div class="container-fluid container-cards-pf container-pf-nav-pf-vertical container-pf-nav-pf-vertical-with-secondary">
+
         @yield('content')
     </div>
 
