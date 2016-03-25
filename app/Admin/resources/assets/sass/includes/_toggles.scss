@@ -1,4 +1,4 @@
-$toggle-on: $rolf-green;
+$toggle-on: #3f9c35;
 
 // --------------------------------------------------------------------------
 // CSS TOGGLE
@@ -47,7 +47,7 @@ input.cmn-toggle-round + label:after {
   transition: margin 0.4s;
 }
 input.cmn-toggle-round:checked + label:before {
-  background-color: #18bc9c;
+  background-color: #3f9c35;
 }
 input.cmn-toggle-round:checked + label:after {
   margin-left: 60px;
@@ -83,7 +83,7 @@ input.cmn-toggle-round-md + label:after {
   transition: margin 0.4s;
 }
 input.cmn-toggle-round-md:checked + label:before {
-  background-color: #18bc9c;
+  background-color: #3f9c35;
 }
 input.cmn-toggle-round-md:checked + label:after {
   margin-left: 40px;

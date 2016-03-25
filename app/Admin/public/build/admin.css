@@ -27485,7 +27485,7 @@ input.cmn-toggle-round + label:after {
 }
 
 input.cmn-toggle-round:checked + label:before {
-  background-color: #18bc9c;
+  background-color: #3f9c35;
 }
 
 input.cmn-toggle-round:checked + label:after {
@@ -27526,7 +27526,7 @@ input.cmn-toggle-round-md + label:after {
 }
 
 input.cmn-toggle-round-md:checked + label:before {
-  background-color: #18bc9c;
+  background-color: #3f9c35;
 }
 
 input.cmn-toggle-round-md:checked + label:after {
@@ -27571,7 +27571,7 @@ input.cmn-toggle-round-sm + label:after {
 }
 
 input.cmn-toggle-round-sm:checked + label:before {
-  background-color: #18bc9c;
+  background-color: #3f9c35;
 }
 
 input.cmn-toggle-round-sm:checked + label:after {
@@ -27610,7 +27610,7 @@ input.cmn-toggle-yes-no + label:before {
 }
 
 input.cmn-toggle-yes-no + label:after {
-  background-color: #18bc9c;
+  background-color: #3f9c35;
   content: attr(data-on);
   transition: -webkit-transform 0.5s;
   transition: transform 0.5s;
@@ -27673,4 +27673,9 @@ input.cmn-toggle-yes-no:checked + label:after {
 
 .toolbar-pf {
   padding-bottom: 10px;
+}
+
+.list-card {
+  margin-left: 0px;
+  margin-right: 0px;
 }

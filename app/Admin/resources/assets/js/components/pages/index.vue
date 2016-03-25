@@ -1,84 +1,85 @@
 <template>
 
     <h2>Pages <span class="badge">{{ pages | filterBy titleFilter | count }}</span></h2>
-
-    <div class="row toolbar-pf">
-        <div class="col-sm-12">
-            <div class="toolbar-pf-actions">
-                <div class="form-group toolbar-pf-filter">
-                    <label class="sr-only" for="title-filter">Title</label>
-                    <input type="text" id="title-filter" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
-                </div>
-                <div class="form-group">
-                    <div class="dropdown btn-group">
-                        <button type="button" class="btn btn-default dropdown-toggle"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Updated at <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Created at</a></li>
-                            <li><a href="#">Title</a></li>
-                            <li><a href="#">Views</a></li>
-                        </ul>
+    <div class="card-pf list-card">
+        <div class="row toolbar-pf">
+            <div class="col-sm-12">
+                <div class="toolbar-pf-actions">
+                    <div class="form-group toolbar-pf-filter">
+                        <label class="sr-only" for="title-filter">Title</label>
+                        <input type="text" id="title-filter" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
                     </div>
-                    <button class="btn btn-link" type="button">
-                        <span class="fa fa-sort-alpha-asc"></span>
-                    </button>
-                </div>
-                <div class="form-group">
-                    <a href="/admin/pages/create" class="btn btn-success">
-                        <i class="fa fa-plus"></i> Add
-                    </a>
+                    <div class="form-group">
+                        <div class="dropdown btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Updated at <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Created at</a></li>
+                                <li><a href="#">Title</a></li>
+                                <li><a href="#">Views</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-link" type="button">
+                            <span class="fa fa-sort-alpha-asc"></span>
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <a href="/admin/pages/create" class="btn btn-success">
+                            <i class="fa fa-plus"></i> Add
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row list-view-pf">
-        <div class="list-group">
-            <div v-for="page in pages | filterBy titleFilter in 'title' | orderBy sortKey sortDir" class="list-group-item"
-                 :class="{ 'page-list--not-showing': !page.is_showing }">
-                <div class="list-view-pf-actions">
-                    <div class="switch">
-                        <input class="cmn-toggle cmn-toggle-round-sm"
-                               id="is_published_{{page.id}}"
-                               type="checkbox"
-                               name="is_published"
-                               v-model="page.is_published"
-                               @change="page.publish(page.is_published)">
-                        <label for="is_published_{{page.id}}"></label>
-                    </div>
-                </div>
-                <div class="list-view-pf-main-info">
-                    <div class="list-view-pf-body">
-                        <div class="list-view-pf-description">
-                            <div class="list-group-item-text">
-                                <span class="page-list__title" style="font-size:15px;">
-                                    <a href="/admin/pages/{{ page.id }}" @click.prevent="goToPage(page)">
-                                        {{ page.title }}
-                                    </a>
-                                    <span v-if="page.is_locked" data-toggle="tooltip" data-placement="top"
-                                          title="Locked by {{ userName(page.locked_by_id) }}"><i class="fa fa-lock"></i></span>
-                                </span>
-                            </div>
-                            <div class="list-group-item-heading" title="URL component" data-toggle="tooltip">
-                                <span style="font-weight: normal;">/{{ page.slug }}</span>
-                            </div>
+        <div class="row list-view-pf">
+            <div class="list-group">
+                <div v-for="page in pages | filterBy titleFilter in 'title' | orderBy sortKey sortDir" class="list-group-item"
+                     :class="{ 'page-list--not-showing': !page.is_showing }">
+                    <div class="list-view-pf-actions">
+                        <div class="switch">
+                            <input class="cmn-toggle cmn-toggle-round-sm"
+                                   id="is_published_{{page.id}}"
+                                   type="checkbox"
+                                   name="is_published"
+                                   v-model="page.is_published"
+                                   @change="page.publish(page.is_published)">
+                            <label for="is_published_{{page.id}}"></label>
                         </div>
-                        <div class="list-view-pf-additional-info">
-                            <div v-if="page.is_showing" class="list-view-pf-additional-info-item" title="Showing" data-toggle="tooltip">
-                                <span class="pficon pficon-ok"></span>
+                    </div>
+                    <div class="list-view-pf-main-info">
+                        <div class="list-view-pf-body">
+                            <div class="list-view-pf-description">
+                                <div class="list-group-item-text">
+                                    <span class="page-list__title" style="font-size:15px;">
+                                        <a href="/admin/pages/{{ page.id }}" @click.prevent="goToPage(page)">
+                                            {{ page.title }}
+                                        </a>
+                                        <span v-if="page.is_locked" data-toggle="tooltip" data-placement="top"
+                                              title="Locked by {{ userName(page.locked_by_id) }}"><i class="fa fa-lock"></i></span>
+                                    </span>
+                                </div>
+                                <div class="list-group-item-heading" title="URL component" data-toggle="tooltip">
+                                    <span style="font-weight: normal;">/{{ page.slug }}</span>
+                                </div>
                             </div>
-                            <div v-else class="list-view-pf-additional-info-item" title="Not Showing" data-toggle="tooltip">
-                                <span class="fa fa-ban"></span>
-                            </div>
-                            <div class="list-view-pf-additional-info-item" title="Created at" data-toggle="tooltip">
-                                {{ formatTime(page.created_at) }}
-                            </div>
-                            <div class="list-view-pf-additional-info-item" title="Total Views" data-toggle="tooltip">
-                                {{ page.views || 0 }} Views
-                            </div>
+                            <div class="list-view-pf-additional-info">
+                                <div v-if="page.is_showing" class="list-view-pf-additional-info-item" title="Showing" data-toggle="tooltip">
+                                    <span class="pficon pficon-ok"></span>
+                                </div>
+                                <div v-else class="list-view-pf-additional-info-item" title="Not Showing" data-toggle="tooltip">
+                                    <span class="fa fa-ban"></span>
+                                </div>
+                                <div class="list-view-pf-additional-info-item" title="Created at" data-toggle="tooltip">
+                                    {{ formatTime(page.created_at) }}
+                                </div>
+                                <div class="list-view-pf-additional-info-item" title="Total Views" data-toggle="tooltip">
+                                    {{ page.views || 0 }} Views
+                                </div>
 
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -128,7 +129,7 @@
                     this.$set('pages', response.data.map(function (page) {
                         return new Page(page);
                     }));
-                });
+                }).then(initTooltips);
             },
 
             fetchCategories: function () {

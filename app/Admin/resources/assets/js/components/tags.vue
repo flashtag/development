@@ -1,58 +1,60 @@
 <template>
 
     <h2>Tags <span class="badge">{{ tags | filterBy nameFilter | count }}</span></h2>
-    <div class="row toolbar-pf">
-        <div class="col-sm-12">
-            <div class="toolbar-pf-actions">
-                <div class="form-group toolbar-pf-filter">
-                    <label class="sr-only" for="name-filter">Name</label>
-                    <input type="text" id="name-filter" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
-                </div>
-                <div class="form-group">
-                    <div class="dropdown btn-group">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Name <span class="caret"></span></button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Action</a></li>
-                            <li><a href="#">Another action</a></li>
-                            <li><a href="#">Something else here</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li><a href="#">Separated link</a></li>
-                        </ul>
+    <div class="card-pf list-card">
+        <div class="row toolbar-pf">
+            <div class="col-sm-12">
+                <div class="toolbar-pf-actions">
+                    <div class="form-group toolbar-pf-filter">
+                        <label class="sr-only" for="name-filter">Name</label>
+                        <input type="text" id="name-filter" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
                     </div>
-                    <button class="btn btn-link" type="button">
-                        <span class="fa fa-sort-alpha-asc"></span>
-                    </button>
-                </div>
-                <div class="form-group">
-                    <a class="btn btn-success" href="/admin/tags/create">
-                        <i class="fa fa-plus"></i> Add New
-                    </a>
+                    <div class="form-group">
+                        <div class="dropdown btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Name <span class="caret"></span></button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-link" type="button">
+                            <span class="fa fa-sort-alpha-asc"></span>
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <a class="btn btn-success" href="/admin/tags/create">
+                            <i class="fa fa-plus"></i> Add New
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row list-view-pf">
-        <div class="list-group">
-            <div v-for="tag in tags | filterBy nameFilter | orderBy sortKey sortDir" class="list-group-item">
-                <div class="list-view-pf-actions">
-                    <button class="btn btn-default" @click.prevent="destroy(tag)" title="Delete" data-toggle="tooltip">
-                        <span class="fa fa-trash"></span>
-                    </button>
-                </div>
-                <div class="list-view-pf-main-info">
-                    <div class="list-view-pf-body">
-                        <div class="list-view-pf-description">
-                            <div class="list-group-item-heading" title="Category" data-toggle="tooltip">
-                                <a href="/admin/tags/{{ tag.id }}">{{ tag.name }}</a>
+        <div class="row list-view-pf">
+            <div class="list-group">
+                <div v-for="tag in tags | filterBy nameFilter | orderBy sortKey sortDir" class="list-group-item">
+                    <div class="list-view-pf-actions">
+                        <button class="btn btn-default" @click.prevent="destroy(tag)" title="Delete" data-toggle="tooltip">
+                            <span class="fa fa-trash"></span>
+                        </button>
+                    </div>
+                    <div class="list-view-pf-main-info">
+                        <div class="list-view-pf-body">
+                            <div class="list-view-pf-description">
+                                <div class="list-group-item-heading">
+                                    <a href="/admin/tags/{{ tag.id }}">{{ tag.name }}</a>
+                                </div>
+                                <div class="list-group-item-text">
+                                    &nbsp;
+                                </div>
                             </div>
-                            <div class="list-group-item-text">
-                                &nbsp;
-                            </div>
-                        </div>
-                        <div class="list-view-pf-additional-info">
-                            <div class="list-view-pf-additional-info-item" title="Type" data-toggle="tooltip">
-                                &nbsp;
+                            <div class="list-view-pf-additional-info">
+                                <div class="list-view-pf-additional-info-item">
+                                    &nbsp;
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -90,7 +92,7 @@
                     this.$set('tags', response.data.map(function (tag) {
                         return new Tag(tag);
                     }));
-                });
+                }).then(initTooltips);
             },
 
             sortBy: function (key) {
@@ -108,6 +110,32 @@
                 }
 
                 return 'fa fa-unsorted';
+            },
+
+            destroy: function (tag) {
+                var self = this;
+                swal({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this tag!',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, delete it!',
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
+                    self.$http.delete('tags/'+tag.id).then(function () {
+                        self.tags = self.tags.filter(function (cat) {
+                            return cat.id != tag.id;
+                        });
+                        swal({
+                            html: true,
+                            title: 'Great success!',
+                            text: '<strong>' + tag.name + '</strong> was deleted!',
+                            type: 'success'
+                        });
+                    });
+                });
             }
 
         }

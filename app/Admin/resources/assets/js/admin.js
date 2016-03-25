@@ -9,6 +9,13 @@ Vue.http.options.root = '/admin/api';
 window.client = Vue.http;
 window.resource = Vue.resource;
 
+// Global functions
+window.initTooltips = function() {
+    setTimeout(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+    }, 0);
+};
+
 // Global Directives
 Vue.directive('select', require('./directives/select'));
 Vue.directive('rich-editor', require('./directives/rich-editor'));
