@@ -23,6 +23,7 @@ Vue.directive('rich-editor', require('./directives/rich-editor'));
 // Global Components
 Vue.component('media-input', require('./components/partials/media-input.vue'));
 Vue.component('image-preview', require('./components/partials/image-preview.vue'));
+Vue.component('list-sort', require('./components/partials/list-sort.vue'));
 
 // Global Filters
 Vue.filter('count', function (value) {

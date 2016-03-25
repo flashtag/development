@@ -11,19 +11,7 @@
                         <input type="text" id="name-filter" v-model="nameFilter" placeholder="Filter by name..." class="form-control">
                     </div>
                     <div class="form-group">
-                        <div class="dropdown btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Name <span class="caret"></span></button>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">Action</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something else here</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="#">Separated link</a></li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-link" type="button">
-                            <span class="fa fa-sort-alpha-asc"></span>
-                        </button>
+                        <list-sort :sort-key.sync="sortKey" :sort-dir.sync="sortDir" :sort-keys="sortKeys"></list-sort>
                     </div>
                     <div class="form-group">
                         <a class="btn btn-success" href="/admin/authors/create">
@@ -77,8 +65,13 @@
             return {
                 authors: [],
                 nameFilter: null,
-                sortKey: null,
-                sortDir: -1
+                sortKey: 'updated_at',
+                sortDir: -1,
+                sortKeys: [
+                    { value: 'created_at', text: 'Created at' },
+                    { value: 'updated_at', text: 'Updated at' },
+                    { value: 'name', text: 'Name' }
+                ]
             }
         },
 

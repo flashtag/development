@@ -37,20 +37,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <div class="dropdown btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Updated at <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">Created at</a></li>
-                                <li><a href="#">Title</a></li>
-                                <li><a href="#">Views</a></li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-link" type="button">
-                            <span class="fa fa-sort-alpha-asc"></span>
-                        </button>
+                        <list-sort :sort-key.sync="sortKey" :sort-dir.sync="sortDir" :sort-keys="sortKeys"></list-sort>
                     </div>
                     <div class="form-group">
                         <a href="/admin/posts/create" class="btn btn-success">
@@ -66,7 +53,7 @@
                 <div v-for="post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir" class="list-group-item"
                 :class="{ 'post-list--not-showing': !post.is_showing }">
                     <div class="list-view-pf-actions">
-                        <div class="switch">
+                        <div class="switch" title="Publishing" data-toggle="tooltip">
                             <input class="cmn-toggle cmn-toggle-round-sm"
                                    id="is_published_{{post.id}}"
                                    type="checkbox"
@@ -132,13 +119,21 @@
                 users: [],
                 titleFilter: null,
                 categoryFilter: null,
-                sortKey: 'order',
-                sortDir: 1
+                sortKey: 'updated_at',
+                sortKeys: [
+                    { value: 'created_at', text: 'Created at' },
+                    { value: 'updated_at', text: 'Updated at' },
+                    { value: 'title', text: 'Title' },
+                    { value: 'views', text: 'Views' },
+                    { value: 'category.name', text: 'Category' },
+                    { value: 'is_published', text: 'Published' }
+                ],
+                sortDir: -1
             }
         },
 
         created: function() {
-            this.fetchPosts();
+            this.fetchPosts().then(initTooltips);
             this.fetchCategories();
             this.fetchUsers();
         },
@@ -146,15 +141,15 @@
         methods: {
 
             fetchPosts: function() {
-                this.$http.get('posts').then(function (response) {
+                return this.$http.get('posts').then(function (response) {
                     this.$set('posts', response.data.map(function (post) {
                         return new Post(post);
                     }));
-                }).then(initTooltips);
+                });
             },
 
             fetchCategories: function () {
-                this.$http.get('categories').then(function (response) {
+                return this.$http.get('categories').then(function (response) {
                     this.$set('categories', response.data.map(function (category) {
                         return new Category(category);
                     }));
@@ -162,7 +157,7 @@
             },
 
             fetchUsers: function () {
-                this.$http.get('users').then(function (response) {
+                return this.$http.get('users').then(function (response) {
                     this.$set('users', response.data.map(function (user) {
                         return new User(user);
                     }));
@@ -204,28 +199,11 @@
                     return user.id == userId;
                 })[0];
 
-                return user.name;
+                return user ? user.name : '';
             },
 
             formatTime: function (time) {
                 return moment(time, "YYYY-MM-DD").format('MMM D, YYYY');
-            },
-
-            sortBy: function (key) {
-                if (this.sortKey == key) {
-                    this.sortDir = this.sortDir * -1;
-                } else {
-                    this.sortKey = key;
-                    this.sortDir = 1;
-                }
-            },
-
-            orderIcon: function (key) {
-                if (key == this.sortKey) {
-                    return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc'
-                }
-
-                return 'fa fa-unsorted';
             },
 
             destroy: function (post) {

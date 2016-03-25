@@ -10,20 +10,7 @@
                         <input type="text" id="title-filter" v-model="titleFilter" @keyup="changeFilter" placeholder="Filter by title..." class="form-control">
                     </div>
                     <div class="form-group">
-                        <div class="dropdown btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Updated at <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">Created at</a></li>
-                                <li><a href="#">Title</a></li>
-                                <li><a href="#">Views</a></li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-link" type="button">
-                            <span class="fa fa-sort-alpha-asc"></span>
-                        </button>
+                        <list-sort :sort-key.sync="sortKey" :sort-dir.sync="sortDir" :sort-keys="sortKeys"></list-sort>
                     </div>
                     <div class="form-group">
                         <a href="/admin/pages/create" class="btn btn-success">
@@ -105,8 +92,15 @@
                 users: [],
                 titleFilter: null,
                 categoryFilter: null,
-                sortKey: 'order',
-                sortDir: 1
+                sortKey: 'updated_at',
+                sortKeys: [
+                    { value: 'created_at', text: 'Created at' },
+                    { value: 'updated_at', text: 'Updated at' },
+                    { value: 'title', text: 'Title' },
+                    { value: 'views', text: 'Views' },
+                    { value: 'is_published', text: 'Published' }
+                ],
+                sortDir: -1
             }
         },
 
@@ -182,23 +176,6 @@
 
             formatTime: function (time) {
                 return moment(time, "YYYY-MM-DD").format('MMM D, YYYY');
-            },
-
-            sortBy: function (key) {
-                if (this.sortKey == key) {
-                    this.sortDir = this.sortDir * -1;
-                } else {
-                    this.sortKey = key;
-                    this.sortDir = 1;
-                }
-            },
-
-            orderIcon: function (key) {
-                if (key == this.sortKey) {
-                    return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc'
-                }
-
-                return 'fa fa-unsorted';
             },
 
             initTooltips: function () {

@@ -13986,6 +13986,7 @@ _vue2['default'].directive('rich-editor', require('./directives/rich-editor'));
 // Global Components
 _vue2['default'].component('media-input', require('./components/partials/media-input.vue'));
 _vue2['default'].component('image-preview', require('./components/partials/image-preview.vue'));
+_vue2['default'].component('list-sort', require('./components/partials/list-sort.vue'));
 
 // Global Filters
 _vue2['default'].filter('count', function (value) {
@@ -14011,7 +14012,7 @@ new _vue2['default']({
     }
 });
 
-},{"./components/authors.vue":28,"./components/categories.vue":29,"./components/fields/index.vue":30,"./components/pages/index.vue":31,"./components/pages/revisions/index.vue":32,"./components/pages/revisions/show.vue":33,"./components/partials/image-preview.vue":34,"./components/partials/media-input.vue":35,"./components/post-lists/index.vue":36,"./components/post-lists/posts.vue":37,"./components/posts/index.vue":38,"./components/posts/revisions/index.vue":39,"./components/posts/revisions/show.vue":40,"./components/tags.vue":41,"./components/users.vue":42,"./directives/rich-editor":43,"./directives/select":44,"vue":25,"vue-resource":10}],28:[function(require,module,exports){
+},{"./components/authors.vue":28,"./components/categories.vue":29,"./components/fields/index.vue":30,"./components/pages/index.vue":31,"./components/pages/revisions/index.vue":32,"./components/pages/revisions/show.vue":33,"./components/partials/image-preview.vue":34,"./components/partials/list-sort.vue":35,"./components/partials/media-input.vue":36,"./components/post-lists/index.vue":37,"./components/post-lists/posts.vue":38,"./components/posts/index.vue":39,"./components/posts/revisions/index.vue":40,"./components/posts/revisions/show.vue":41,"./components/tags.vue":42,"./components/users.vue":43,"./directives/rich-editor":44,"./directives/select":45,"vue":25,"vue-resource":10}],28:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14030,8 +14031,9 @@ exports['default'] = {
         return {
             authors: [],
             nameFilter: null,
-            sortKey: null,
-            sortDir: -1
+            sortKey: 'updated_at',
+            sortDir: -1,
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'name', text: 'Name' }]
         };
     },
 
@@ -14096,7 +14098,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Authors <span class=\"badge\">{{ authors | filterBy nameFilter | count }}</span></h2>\n\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <div class=\"dropdown btn-group\">\n                            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Name <span class=\"caret\"></span></button>\n                            <ul class=\"dropdown-menu\">\n                                <li><a href=\"#\">Action</a></li>\n                                <li><a href=\"#\">Another action</a></li>\n                                <li><a href=\"#\">Something else here</a></li>\n                                <li role=\"separator\" class=\"divider\"></li>\n                                <li><a href=\"#\">Separated link</a></li>\n                            </ul>\n                        </div>\n                        <button class=\"btn btn-link\" type=\"button\">\n                            <span class=\"fa fa-sort-alpha-asc\"></span>\n                        </button>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/authors/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"author in authors | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(author)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/authors/{{ author.id }}\">{{ author.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Authors <span class=\"badge\">{{ authors | filterBy nameFilter | count }}</span></h2>\n\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/authors/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"author in authors | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(author)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/authors/{{ author.id }}\">{{ author.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -14108,7 +14110,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/author":45,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],29:[function(require,module,exports){
+},{"../models/author":46,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],29:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14127,8 +14129,9 @@ exports['default'] = {
         return {
             categories: [],
             nameFilter: null,
-            sortKey: null,
-            sortDir: -1
+            sortKey: 'updated_at',
+            sortDir: -1,
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'name', text: 'Name' }]
         };
     },
 
@@ -14144,23 +14147,6 @@ exports['default'] = {
                     return new _modelsCategory2['default'](category);
                 }));
             }).then(initTooltips);
-        },
-
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
         },
 
         getNames: function getNames(items) {
@@ -14199,7 +14185,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Categories <span class=\"badge\">{{ categories | filterBy nameFilter | count }}</span></h2>\n\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <div class=\"dropdown btn-group\">\n                            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Name <span class=\"caret\"></span></button>\n                            <ul class=\"dropdown-menu\">\n                                <li><a href=\"#\">Action</a></li>\n                                <li><a href=\"#\">Another action</a></li>\n                                <li><a href=\"#\">Something else here</a></li>\n                                <li role=\"separator\" class=\"divider\"></li>\n                                <li><a href=\"#\">Separated link</a></li>\n                            </ul>\n                        </div>\n                        <button class=\"btn btn-link\" type=\"button\">\n                            <span class=\"fa fa-sort-alpha-asc\"></span>\n                        </button>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/categories/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"category in categories | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(category)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/categories/{{ category.id }}\">{{ category.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\" title=\"Parent Category\" data-toggle=\"tooltip\">\n                                    <span v-if=\"category.parent.length\">Subcategory of <strong>{{ category.parent.name }}</strong></span>\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Tags\" data-toggle=\"tooltip\">\n                                    <span class=\"fa fa-tags\"></span>\n                                    {{ getNames(category.tags).join(\", \") }}\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Categories <span class=\"badge\">{{ categories | filterBy nameFilter | count }}</span></h2>\n\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/categories/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"category in categories | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(category)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/categories/{{ category.id }}\">{{ category.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\" title=\"Parent Category\" data-toggle=\"tooltip\">\n                                    <span v-if=\"category.parent.length\">Subcategory of <strong>{{ category.parent.name }}</strong></span>\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Tags\" data-toggle=\"tooltip\">\n                                    <span class=\"fa fa-tags\"></span>\n                                    {{ getNames(category.tags).join(\", \") }}\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -14211,7 +14197,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/category":46,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],30:[function(require,module,exports){
+},{"../models/category":47,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],30:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14231,8 +14217,9 @@ exports['default'] = {
             fields: [],
             pagination: { links: {} },
             labelFilter: null,
-            sortKey: null,
-            sortDir: -1
+            sortKey: 'updated_at',
+            sortDir: -1,
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'name', text: 'Name' }]
         };
     },
 
@@ -14297,7 +14284,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Post Fields <span class=\"badge\">{{ fields | filterBy labelFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"label-filter\">Label</label>\n                        <input type=\"text\" id=\"label-filter\" v-model=\"labelFilter\" placeholder=\"Filter by label...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <div class=\"dropdown btn-group\">\n                            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Name <span class=\"caret\"></span></button>\n                            <ul class=\"dropdown-menu\">\n                                <li><a href=\"#\">Action</a></li>\n                                <li><a href=\"#\">Another action</a></li>\n                                <li><a href=\"#\">Something else here</a></li>\n                                <li role=\"separator\" class=\"divider\"></li>\n                                <li><a href=\"#\">Separated link</a></li>\n                            </ul>\n                        </div>\n                        <button class=\"btn btn-link\" type=\"button\">\n                            <span class=\"fa fa-sort-alpha-asc\"></span>\n                        </button>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/post-fields/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"field in fields | filterBy labelFilter in 'label' | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(field)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/post-fields/{{ field.id }}\">{{ field.label }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\" title=\"Name\" data-toggle=\"tooltip\">\n                                    {{ field.name }}\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Type\" data-toggle=\"tooltip\">\n                                    {{ field.template }}\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Post Fields <span class=\"badge\">{{ fields | filterBy labelFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"label-filter\">Label</label>\n                        <input type=\"text\" id=\"label-filter\" v-model=\"labelFilter\" placeholder=\"Filter by label...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/post-fields/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"field in fields | filterBy labelFilter in 'label' | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(field)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/post-fields/{{ field.id }}\">{{ field.label }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\" title=\"Name\" data-toggle=\"tooltip\">\n                                    {{ field.name }}\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Type\" data-toggle=\"tooltip\">\n                                    {{ field.template }}\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -14309,7 +14296,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/field":47,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],31:[function(require,module,exports){
+},{"../../models/field":48,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],31:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14339,8 +14326,9 @@ exports['default'] = {
             users: [],
             titleFilter: null,
             categoryFilter: null,
-            sortKey: 'order',
-            sortDir: 1
+            sortKey: 'updated_at',
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'title', text: 'Title' }, { value: 'views', text: 'Views' }, { value: 'is_published', text: 'Published' }],
+            sortDir: -1
         };
     },
 
@@ -14417,23 +14405,6 @@ exports['default'] = {
             return moment(time, "YYYY-MM-DD").format('MMM D, YYYY');
         },
 
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
-        },
-
         initTooltips: function initTooltips() {
             this.$nextTick(function () {
                 $('[data-toggle="tooltip"]').tooltip();
@@ -14448,7 +14419,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Pages <span class=\"badge\">{{ pages | filterBy titleFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"title-filter\">Title</label>\n                        <input type=\"text\" id=\"title-filter\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <div class=\"dropdown btn-group\">\n                            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n                                Updated at <span class=\"caret\"></span>\n                            </button>\n                            <ul class=\"dropdown-menu\">\n                                <li><a href=\"#\">Created at</a></li>\n                                <li><a href=\"#\">Title</a></li>\n                                <li><a href=\"#\">Views</a></li>\n                            </ul>\n                        </div>\n                        <button class=\"btn btn-link\" type=\"button\">\n                            <span class=\"fa fa-sort-alpha-asc\"></span>\n                        </button>\n                    </div>\n                    <div class=\"form-group\">\n                        <a href=\"/admin/pages/create\" class=\"btn btn-success\">\n                            <i class=\"fa fa-plus\"></i> Add\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"page in pages | filterBy titleFilter in 'title' | orderBy sortKey sortDir\" class=\"list-group-item\" :class=\"{ 'page-list--not-showing': !page.is_showing }\">\n                    <div class=\"list-view-pf-actions\">\n                        <div class=\"switch\">\n                            <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{page.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"page.is_published\" @change=\"page.publish(page.is_published)\">\n                            <label for=\"is_published_{{page.id}}\"></label>\n                        </div>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-text\">\n                                    <span class=\"page-list__title\" style=\"font-size:15px;\">\n                                        <a href=\"/admin/pages/{{ page.id }}\" @click.prevent=\"goToPage(page)\">\n                                            {{ page.title }}\n                                        </a>\n                                        <span v-if=\"page.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(page.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                                    </span>\n                                </div>\n                                <div class=\"list-group-item-heading\" title=\"URL component\" data-toggle=\"tooltip\">\n                                    <span style=\"font-weight: normal;\">/{{ page.slug }}</span>\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div v-if=\"page.is_showing\" class=\"list-view-pf-additional-info-item\" title=\"Showing\" data-toggle=\"tooltip\">\n                                    <span class=\"pficon pficon-ok\"></span>\n                                </div>\n                                <div v-else=\"\" class=\"list-view-pf-additional-info-item\" title=\"Not Showing\" data-toggle=\"tooltip\">\n                                    <span class=\"fa fa-ban\"></span>\n                                </div>\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Created at\" data-toggle=\"tooltip\">\n                                    {{ formatTime(page.created_at) }}\n                                </div>\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Total Views\" data-toggle=\"tooltip\">\n                                    {{ page.views || 0 }} Views\n                                </div>\n\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Pages <span class=\"badge\">{{ pages | filterBy titleFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"title-filter\">Title</label>\n                        <input type=\"text\" id=\"title-filter\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a href=\"/admin/pages/create\" class=\"btn btn-success\">\n                            <i class=\"fa fa-plus\"></i> Add\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"page in pages | filterBy titleFilter in 'title' | orderBy sortKey sortDir\" class=\"list-group-item\" :class=\"{ 'page-list--not-showing': !page.is_showing }\">\n                    <div class=\"list-view-pf-actions\">\n                        <div class=\"switch\">\n                            <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{page.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"page.is_published\" @change=\"page.publish(page.is_published)\">\n                            <label for=\"is_published_{{page.id}}\"></label>\n                        </div>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-text\">\n                                    <span class=\"page-list__title\" style=\"font-size:15px;\">\n                                        <a href=\"/admin/pages/{{ page.id }}\" @click.prevent=\"goToPage(page)\">\n                                            {{ page.title }}\n                                        </a>\n                                        <span v-if=\"page.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(page.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                                    </span>\n                                </div>\n                                <div class=\"list-group-item-heading\" title=\"URL component\" data-toggle=\"tooltip\">\n                                    <span style=\"font-weight: normal;\">/{{ page.slug }}</span>\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div v-if=\"page.is_showing\" class=\"list-view-pf-additional-info-item\" title=\"Showing\" data-toggle=\"tooltip\">\n                                    <span class=\"pficon pficon-ok\"></span>\n                                </div>\n                                <div v-else=\"\" class=\"list-view-pf-additional-info-item\" title=\"Not Showing\" data-toggle=\"tooltip\">\n                                    <span class=\"fa fa-ban\"></span>\n                                </div>\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Created at\" data-toggle=\"tooltip\">\n                                    {{ formatTime(page.created_at) }}\n                                </div>\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Total Views\" data-toggle=\"tooltip\">\n                                    {{ page.views || 0 }} Views\n                                </div>\n\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -14460,7 +14431,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":46,"../../models/page":49,"../../models/user":53,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],32:[function(require,module,exports){
+},{"../../models/category":47,"../../models/page":50,"../../models/user":54,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],32:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -14757,6 +14728,44 @@ if (module.hot) {(function () {  module.hot.accept()
 
 exports.__esModule = true;
 exports['default'] = {
+    props: ['sort-key', 'sort-keys', 'sort-dir'],
+    computed: {
+        sortKeyText: function sortKeyText() {
+            return this.sortKeys.filter((function (sortKey) {
+                return sortKey.value == this.sortKey;
+            }).bind(this))[0].text;
+        },
+        sortDirText: function sortDirText() {
+            return this.sortDir > 0 ? 'asc' : 'desc';
+        }
+    },
+    methods: {
+        setSortKey: function setSortKey(key) {
+            this.$set('sortKey', key.value);
+        },
+        toggleSortDir: function toggleSortDir() {
+            this.sortDir = this.sortDir * -1;
+        }
+    }
+};
+module.exports = exports['default'];
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div class=\"dropdown btn-group\">\n        <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n            {{ sortKeyText }} <span class=\"caret\"></span>\n        </button>\n        <ul class=\"dropdown-menu\">\n            <li v-for=\"key in sortKeys\"><a href=\"#\" @click.prevent=\"setSortKey(key)\">{{ key.text }}</a></li>\n        </ul>\n    </div>\n    <button class=\"btn btn-link\" type=\"button\" @click.prevent=\"toggleSortDir\">\n        <span class=\"fa fa-sort-alpha-{{ sortDirText }}\"></span>\n    </button>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/list-sort.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, module.exports.template)
+  }
+})()}
+},{"vue":25,"vue-hot-reload-api":5}],36:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = {
 
     props: ['type', 'url', 'image-path', 'image-upload'],
 
@@ -14846,7 +14855,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],36:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],37:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -14865,8 +14874,9 @@ exports['default'] = {
         return {
             "postLists": [],
             nameFilter: null,
-            sortKey: null,
-            sortDir: -1
+            sortKey: 'updated_at',
+            sortDir: -1,
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'name', text: 'Name' }]
         };
     },
 
@@ -14882,23 +14892,6 @@ exports['default'] = {
                     return new _modelsPostList2['default'](postList);
                 }));
             }).then(initTooltips);
-        },
-
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
         },
 
         destroy: function destroy(postList) {
@@ -14931,7 +14924,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Post Lists <span class=\"badge\">{{ postLists | filterBy nameFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <div class=\"dropdown btn-group\">\n                            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Name <span class=\"caret\"></span></button>\n                            <ul class=\"dropdown-menu\">\n                                <li><a href=\"#\">Action</a></li>\n                                <li><a href=\"#\">Another action</a></li>\n                                <li><a href=\"#\">Something else here</a></li>\n                                <li role=\"separator\" class=\"divider\"></li>\n                                <li><a href=\"#\">Separated link</a></li>\n                            </ul>\n                        </div>\n                        <button class=\"btn btn-link\" type=\"button\">\n                            <span class=\"fa fa-sort-alpha-asc\"></span>\n                        </button>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/post-lists/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"postList in postLists | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(postList)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/post-lists/{{ postList.id }}\">{{ postList.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Post Lists <span class=\"badge\">{{ postLists | filterBy nameFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/post-lists/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"postList in postLists | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(postList)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/post-lists/{{ postList.id }}\">{{ postList.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -14943,7 +14936,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/post-list":50,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],37:[function(require,module,exports){
+},{"../../models/post-list":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],38:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15202,7 +15195,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/post-list":50,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],38:[function(require,module,exports){
+},{"../../models/post-list":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],39:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n    .fa.fa-lock, .fa.fa-ban {\n        color: #888;\n    }\n    .fa.fa-lock {\n        margin-left: 5px;\n    }\n    .post-list--not-showing {\n        color: #bbb;\n    }\n    .post-list__title a {\n        color: inherit;\n    }\n    .post-list--not-showing a {\n        color: #bbb;\n    }\n")
 'use strict';
 
@@ -15233,13 +15226,14 @@ exports['default'] = {
             users: [],
             titleFilter: null,
             categoryFilter: null,
-            sortKey: 'order',
-            sortDir: 1
+            sortKey: 'updated_at',
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'title', text: 'Title' }, { value: 'views', text: 'Views' }, { value: 'category.name', text: 'Category' }, { value: 'is_published', text: 'Published' }],
+            sortDir: -1
         };
     },
 
     created: function created() {
-        this.fetchPosts();
+        this.fetchPosts().then(initTooltips);
         this.fetchCategories();
         this.fetchUsers();
     },
@@ -15247,15 +15241,15 @@ exports['default'] = {
     methods: {
 
         fetchPosts: function fetchPosts() {
-            this.$http.get('posts').then(function (response) {
+            return this.$http.get('posts').then(function (response) {
                 this.$set('posts', response.data.map(function (post) {
                     return new _modelsPost2['default'](post);
                 }));
-            }).then(initTooltips);
+            });
         },
 
         fetchCategories: function fetchCategories() {
-            this.$http.get('categories').then(function (response) {
+            return this.$http.get('categories').then(function (response) {
                 this.$set('categories', response.data.map(function (category) {
                     return new _modelsCategory2['default'](category);
                 }));
@@ -15263,7 +15257,7 @@ exports['default'] = {
         },
 
         fetchUsers: function fetchUsers() {
-            this.$http.get('users').then(function (response) {
+            return this.$http.get('users').then(function (response) {
                 this.$set('users', response.data.map(function (user) {
                     return new _modelsUser2['default'](user);
                 }));
@@ -15302,28 +15296,11 @@ exports['default'] = {
                 return user.id == userId;
             })[0];
 
-            return user.name;
+            return user ? user.name : '';
         },
 
         formatTime: function formatTime(time) {
             return moment(time, "YYYY-MM-DD").format('MMM D, YYYY');
-        },
-
-        sortBy: function sortBy(key) {
-            if (this.sortKey == key) {
-                this.sortDir = this.sortDir * -1;
-            } else {
-                this.sortKey = key;
-                this.sortDir = 1;
-            }
-        },
-
-        orderIcon: function orderIcon(key) {
-            if (key == this.sortKey) {
-                return this.sortDir > 0 ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
-            }
-
-            return 'fa fa-unsorted';
         },
 
         destroy: function destroy(post) {
@@ -15360,7 +15337,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Posts <span class=\"badge\">{{ posts | filterBy titleFilter | filterBy categoryFilter | count }}</span></h2>\n\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"title-filter\">Title</label>\n                        <input type=\"text\" id=\"title-filter\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                            <option :value=\"null\" selected=\"\">Filter by category...</option>\n                            <option v-for=\"category in categories\" :value=\"category.name\">\n                                {{ category.name }}\n                            </option>\n                        </select>\n                    </div>\n                    <div class=\"form-group\">\n                        <div class=\"dropdown btn-group\">\n                            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n                                Updated at <span class=\"caret\"></span>\n                            </button>\n                            <ul class=\"dropdown-menu\">\n                                <li><a href=\"#\">Created at</a></li>\n                                <li><a href=\"#\">Title</a></li>\n                                <li><a href=\"#\">Views</a></li>\n                            </ul>\n                        </div>\n                        <button class=\"btn btn-link\" type=\"button\">\n                            <span class=\"fa fa-sort-alpha-asc\"></span>\n                        </button>\n                    </div>\n                    <div class=\"form-group\">\n                        <a href=\"/admin/posts/create\" class=\"btn btn-success\">\n                            <i class=\"fa fa-pencil\"></i> Write New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"list-group-item\" :class=\"{ 'post-list--not-showing': !post.is_showing }\">\n                    <div class=\"list-view-pf-actions\">\n                        <div class=\"switch\">\n                            <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish(post.is_published)\">\n                            <label for=\"is_published_{{post.id}}\"></label>\n                        </div>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-text\">\n                                    <span class=\"post-list__title\" style=\"font-size:15px;\">\n                                        <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">\n                                            {{ post.title }}\n                                        </a>\n                                        <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                                    </span>\n                                </div>\n                                <div class=\"list-group-item-heading\" title=\"Category\" data-toggle=\"tooltip\">\n                                    <span style=\"font-weight: normal;\">{{ post.category.name }}</span>\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div v-if=\"post.is_showing\" class=\"list-view-pf-additional-info-item\" title=\"Showing\" data-toggle=\"tooltip\">\n                                    <span class=\"pficon pficon-ok\"></span>\n                                </div>\n                                <div v-else=\"\" class=\"list-view-pf-additional-info-item\" title=\"Not Showing\" data-toggle=\"tooltip\">\n                                    <span class=\"fa fa-ban\"></span>\n                                </div>\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Created at\" data-toggle=\"tooltip\">\n                                    {{ formatTime(post.created_at) }}\n                                </div>\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Total Views\" data-toggle=\"tooltip\">\n                                    {{ post.views }} Views\n                                </div>\n\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Posts <span class=\"badge\">{{ posts | filterBy titleFilter | filterBy categoryFilter | count }}</span></h2>\n\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"title-filter\">Title</label>\n                        <input type=\"text\" id=\"title-filter\" v-model=\"titleFilter\" @keyup=\"changeFilter\" placeholder=\"Filter by title...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <select v-model=\"categoryFilter\" @change=\"changeFilter\" id=\"category\" class=\"form-control\">\n                            <option :value=\"null\" selected=\"\">Filter by category...</option>\n                            <option v-for=\"category in categories\" :value=\"category.name\">\n                                {{ category.name }}\n                            </option>\n                        </select>\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a href=\"/admin/posts/create\" class=\"btn btn-success\">\n                            <i class=\"fa fa-pencil\"></i> Write New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"post in posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"list-group-item\" :class=\"{ 'post-list--not-showing': !post.is_showing }\">\n                    <div class=\"list-view-pf-actions\">\n                        <div class=\"switch\" title=\"Publishing\" data-toggle=\"tooltip\">\n                            <input class=\"cmn-toggle cmn-toggle-round-sm\" id=\"is_published_{{post.id}}\" type=\"checkbox\" name=\"is_published\" v-model=\"post.is_published\" @change=\"post.publish(post.is_published)\">\n                            <label for=\"is_published_{{post.id}}\"></label>\n                        </div>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-text\">\n                                    <span class=\"post-list__title\" style=\"font-size:15px;\">\n                                        <a href=\"/admin/posts/{{ post.id }}\" @click.prevent=\"goToPost(post)\">\n                                            {{ post.title }}\n                                        </a>\n                                        <span v-if=\"post.is_locked\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Locked by {{ userName(post.locked_by_id) }}\"><i class=\"fa fa-lock\"></i></span>\n                                    </span>\n                                </div>\n                                <div class=\"list-group-item-heading\" title=\"Category\" data-toggle=\"tooltip\">\n                                    <span style=\"font-weight: normal;\">{{ post.category.name }}</span>\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div v-if=\"post.is_showing\" class=\"list-view-pf-additional-info-item\" title=\"Showing\" data-toggle=\"tooltip\">\n                                    <span class=\"pficon pficon-ok\"></span>\n                                </div>\n                                <div v-else=\"\" class=\"list-view-pf-additional-info-item\" title=\"Not Showing\" data-toggle=\"tooltip\">\n                                    <span class=\"fa fa-ban\"></span>\n                                </div>\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Created at\" data-toggle=\"tooltip\">\n                                    {{ formatTime(post.created_at) }}\n                                </div>\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Total Views\" data-toggle=\"tooltip\">\n                                    {{ post.views }} Views\n                                </div>\n\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -15376,7 +15353,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/category":46,"../../models/post":51,"../../models/user":53,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5,"vueify-insert-css":26}],39:[function(require,module,exports){
+},{"../../models/category":47,"../../models/post":52,"../../models/user":54,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5,"vueify-insert-css":26}],40:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -15519,7 +15496,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],40:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5}],41:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15683,7 +15660,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],41:[function(require,module,exports){
+},{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],42:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15702,8 +15679,9 @@ exports['default'] = {
         return {
             tags: [],
             nameFilter: null,
-            sortKey: null,
-            sortDir: -1
+            sortKey: 'updated_at',
+            sortDir: -1,
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'name', text: 'Name' }]
         };
     },
 
@@ -15768,7 +15746,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Tags <span class=\"badge\">{{ tags | filterBy nameFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <div class=\"dropdown btn-group\">\n                            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Name <span class=\"caret\"></span></button>\n                            <ul class=\"dropdown-menu\">\n                                <li><a href=\"#\">Action</a></li>\n                                <li><a href=\"#\">Another action</a></li>\n                                <li><a href=\"#\">Something else here</a></li>\n                                <li role=\"separator\" class=\"divider\"></li>\n                                <li><a href=\"#\">Separated link</a></li>\n                            </ul>\n                        </div>\n                        <button class=\"btn btn-link\" type=\"button\">\n                            <span class=\"fa fa-sort-alpha-asc\"></span>\n                        </button>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/tags/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"tag in tags | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(tag)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/tags/{{ tag.id }}\">{{ tag.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Tags <span class=\"badge\">{{ tags | filterBy nameFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/tags/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"tag in tags | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(tag)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/tags/{{ tag.id }}\">{{ tag.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -15780,7 +15758,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/tag":52,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],42:[function(require,module,exports){
+},{"../models/tag":53,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],43:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15800,8 +15778,9 @@ exports['default'] = {
             users: [],
             pagination: { links: {} },
             nameFilter: null,
-            sortKey: null,
-            sortDir: -1
+            sortKey: 'updated_at',
+            sortDir: -1,
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'name', text: 'Name' }, { value: 'email', text: 'Email' }, { value: 'admin', text: 'Admin' }]
         };
     },
 
@@ -15866,7 +15845,7 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Users <span class=\"badge\">{{ users | filterBy nameFilter | count }}</span></h2>\n\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <div class=\"dropdown btn-group\">\n                            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Name <span class=\"caret\"></span></button>\n                            <ul class=\"dropdown-menu\">\n                                <li><a href=\"#\">Action</a></li>\n                                <li><a href=\"#\">Another action</a></li>\n                                <li><a href=\"#\">Something else here</a></li>\n                                <li role=\"separator\" class=\"divider\"></li>\n                                <li><a href=\"#\">Separated link</a></li>\n                            </ul>\n                        </div>\n                        <button class=\"btn btn-link\" type=\"button\">\n                            <span class=\"fa fa-sort-alpha-asc\"></span>\n                        </button>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/users/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"user in users | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(user)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/users/{{ user.id }}\">{{ user.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\" title=\"Email\" data-toggle=\"tooltip\">\n                                    {{ user.email }}\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Role\" data-toggle=\"tooltip\">\n                                    <span v-if=\"user.admin\">Admin</span>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Users <span class=\"badge\">{{ users | filterBy nameFilter | count }}</span></h2>\n\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/users/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"user in users | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(user)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/users/{{ user.id }}\">{{ user.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\" title=\"Email\" data-toggle=\"tooltip\">\n                                    {{ user.email }}\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\" title=\"Role\" data-toggle=\"tooltip\">\n                                    <span v-if=\"user.admin\">Admin</span>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -15878,7 +15857,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../models/user":53,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],43:[function(require,module,exports){
+},{"../models/user":54,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15914,7 +15893,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15945,7 +15924,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15987,7 +15966,7 @@ var Author = (function (_Model) {
 exports['default'] = Author;
 module.exports = exports['default'];
 
-},{"./model":48}],46:[function(require,module,exports){
+},{"./model":49}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16035,7 +16014,7 @@ var Category = (function (_Model) {
 exports['default'] = Category;
 module.exports = exports['default'];
 
-},{"./model":48}],47:[function(require,module,exports){
+},{"./model":49}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16077,7 +16056,7 @@ var Field = (function (_Model) {
 exports['default'] = Field;
 module.exports = exports['default'];
 
-},{"./model":48}],48:[function(require,module,exports){
+},{"./model":49}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16149,7 +16128,7 @@ var Model = (function () {
 exports['default'] = Model;
 module.exports = exports['default'];
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16243,7 +16222,7 @@ var Page = (function (_Model) {
 exports['default'] = Page;
 module.exports = exports['default'];
 
-},{"./model":48}],50:[function(require,module,exports){
+},{"./model":49}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16305,7 +16284,7 @@ var PostList = (function (_Model) {
 exports['default'] = PostList;
 module.exports = exports['default'];
 
-},{"./model":48}],51:[function(require,module,exports){
+},{"./model":49}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16404,7 +16383,7 @@ var Post = (function (_Model) {
 exports['default'] = Post;
 module.exports = exports['default'];
 
-},{"./model":48}],52:[function(require,module,exports){
+},{"./model":49}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16447,7 +16426,7 @@ var Tag = (function (_Model) {
 exports['default'] = Tag;
 module.exports = exports['default'];
 
-},{"./model":48}],53:[function(require,module,exports){
+},{"./model":49}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16488,6 +16467,6 @@ var User = (function (_Model) {
 exports['default'] = User;
 module.exports = exports['default'];
 
-},{"./model":48}]},{},[27]);
+},{"./model":49}]},{},[27]);
 
 //# sourceMappingURL=admin.js.map
