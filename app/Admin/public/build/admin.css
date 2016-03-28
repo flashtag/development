@@ -27679,3 +27679,19 @@ input.cmn-toggle-yes-no:checked + label:after {
   margin-left: 0px;
   margin-right: 0px;
 }
+
+.info.row {
+  margin-bottom: 15px;
+}
+
+.info.row .action-buttons {
+  text-align: right;
+}
+
+.Form__title {
+  margin: 0px;
+}
+
+.Image__thumbnail--200 img {
+  max-width: 100%;
+}

@@ -3,10 +3,12 @@
 
 <div class="panel panel-default {{ $post->isShowing() ? 'border-green': 'border-red' }}">
     <div class="panel-heading">
-        PUBLISHING
-        <label class="showing label {{ $post->isShowing() ? 'label-success': 'label-danger' }}">
-            {{ $post->isShowing() ? 'Will show on website' : 'Will not show on website' }}
-        </label>
+        <h3 class="panel-title">
+            Publishing
+            <label class="showing label {{ $post->isShowing() ? 'label-success': 'label-danger' }}">
+                {{ $post->isShowing() ? 'Will show on website' : 'Will not show on website' }}
+            </label>
+        </h3>
     </div>
     <div class="panel-body">
         <div class="row">
@@ -39,7 +41,7 @@
 </div>
 
 <div class="panel panel-default" >
-    <div class="panel-heading">POST</div>
+    <div class="panel-heading"><h3 class="panel-title">Post</h3></div>
     <div class="panel-body">
         <div class="row">
             <div class="col-md-6">
@@ -115,7 +117,7 @@
 
 @if (count($fields))
     <div class="panel panel-default">
-        <div class="panel-heading">CUSTOM FIELDS</div>
+        <div class="panel-heading"><h3 class="panel-title">Custom Fields</div>
         <div class="panel-body">
             @foreach ($fields as $i => $field)
                 <div class="form-group">
@@ -127,7 +129,7 @@
 @endif
 
 <div class="panel panel-default">
-    <div class="panel-heading">Images</div>
+    <div class="panel-heading"><h3 class="panel-title">Images</h3></div>
     <div class="panel-body">
         <div class="col-md-6">
             <div class="form-group">
@@ -149,7 +151,7 @@
 </div>
 
 <div class="panel panel-default">
-    <div class="panel-heading">META</div>
+    <div class="panel-heading"><h3 class="panel-title">Meta</h3></div>
     <div class="panel-body">
         <div class="form-group">
             <label for="meta_description">Description</label>

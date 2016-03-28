@@ -3,10 +3,11 @@
 
 <div class="panel panel-default {{ $page->isShowing() ? 'border-green': 'border-red' }}">
     <div class="panel-heading">
-        PUBLISHING
-        <label class="showing label {{ $page->isShowing() ? 'label-success': 'label-danger' }}">
-            {{ $page->isShowing() ? 'Will show on website' : 'Will not show on website' }}
-        </label>
+        <h3 class="panel-title">PUBLISHING
+            <label class="showing label {{ $page->isShowing() ? 'label-success': 'label-danger' }}">
+                {{ $page->isShowing() ? 'Will show on website' : 'Will not show on website' }}
+            </label>
+        </h3>
     </div>
     <div class="panel-body">
         <div class="row">

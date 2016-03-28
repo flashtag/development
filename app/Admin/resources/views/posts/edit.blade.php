@@ -12,6 +12,8 @@
             {{ csrf_field() }}
             {{ method_field('PUT') }}
 
+            <h1>{{ $post->title }}</h1>
+
             <section class="info row">
                 <div class="col-md-6 clearfix">
                     <a href="/admin/posts/{{ $post->id }}/revisions" class="btn btn-link">
@@ -28,6 +30,21 @@
             </section>
 
             @include('admin::posts.form')
+
+            <section class="info row">
+                <div class="col-md-6 clearfix">
+                    <a href="/admin/posts/{{ $post->id }}/revisions" class="btn btn-link">
+                        <i class="fa fa-history"></i> Revision history
+                    </a>
+                </div>
+                <div class="col-md-6 clearfix">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
+                        <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                        <a href="/admin/posts" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
+                    </div>
+                </div>
+            </section>
 
         </form>
     </div>

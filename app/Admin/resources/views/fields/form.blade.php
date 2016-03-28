@@ -2,7 +2,7 @@
 @include('admin::partials.form-errors')
 
 <div class="panel panel-default">
-    <div class="panel-heading">Field</div>
+    <div class="panel-heading"><h3 class="panel-title">Field</h3></div>
     <div class="panel-body">
         <div class="form-group">
             <label for="label">Label</label>
