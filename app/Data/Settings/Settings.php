@@ -12,25 +12,25 @@ class Settings
 {
     /**
      * Cache repository
-     * @var Illuminate\Contracts\Cache\Repository
+     * @var \Illuminate\Contracts\Cache\Repository
      */
     protected $cache;
 
     /**
      * Config Repository
-     * @var Illuminate\Contracts\Config\Repository
+     * @var \Illuminate\Contracts\Config\Repository
      */
     protected $config;
 
     /**
      * Event Dispatcher
-     * @var Illuminate\Contracts\Events\Dispatcher
+     * @var \Illuminate\Contracts\Events\Dispatcher
      */
     protected $event;
 
     /**
      * Setting model
-     * @var Flashtag\Data\Setting
+     * @var \Flashtag\Data\Setting
      */
     protected $setting;
 
@@ -61,10 +61,10 @@ class Settings
     /**
      * Da construcdor.
      *
-     * @param Illuminate\Contracts\Cache\Repository   $cache
-     * @param Illuminate\Contracts\Config\Repository  $config
-     * @param Illuminate\Contracts\Events\Dispatcher $event
-     * @param Flashtag\Data\Setting $setting
+     * @param \Illuminate\Contracts\Cache\Repository   $cache
+     * @param \Illuminate\Contracts\Config\Repository  $config
+     * @param \Illuminate\Contracts\Events\Dispatcher $event
+     * @param \Flashtag\Data\Setting $setting
      */
     public function __construct(Cache $cache, Config $config, Event $event, Setting $setting)
     {

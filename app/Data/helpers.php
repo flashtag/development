@@ -3,16 +3,16 @@
 /**
  * Helper method for getting and setting settings
  *
- * @param mixed $key
  * @return mixed
  */
-function settings(...$key)
+function settings()
 {
     $settings = app('settings');
+    $key = func_get_args();
 
     if (empty($key)) {
         return $settings;
     }
 
-    return $settings(...$key);
+    return call_user_func_array($settings, $key);
 }
