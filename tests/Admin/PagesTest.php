@@ -20,14 +20,14 @@ class PagesTest extends TestCase
             ->visit("/admin")
             ->see('Dashboard')
             ->seeLink('Posts')
-            ->seeLink('Custom fields')
+            ->seeLink('Fields')
             ->seeLink('Lists')
             ->seeLink('Categories')
             ->seeLink('Tags')
             ->seeLink('Authors')
             ->dontSeeLink('Users')
             ->dontSeeLink('Settings')
-            ->see($user->name)
+            //->see($user->name)
             ->seeLink('Logout');
     }
 
@@ -40,14 +40,14 @@ class PagesTest extends TestCase
             ->visit("/admin")
             ->see('Dashboard')
             ->seeLink('Posts')
-            ->seeLink('Custom fields')
+            ->seeLink('Fields')
             ->seeLink('Lists')
             ->seeLink('Categories')
             ->seeLink('Tags')
             ->seeLink('Authors')
             ->seeLink('Users')
             ->seeLink('Settings')
-            ->see($user->name)
+            //->see($user->name)
             ->seeLink('Logout');
     }
 }

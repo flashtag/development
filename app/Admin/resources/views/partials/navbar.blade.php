@@ -57,7 +57,7 @@
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                     <li><a href="#">Preferences</a></li>
-                    <li><a href="#">Logout</a></li>
+                    <li><a href="/admin/auth/logout">Logout</a></li>
                 </ul>
             </li>
         </ul>

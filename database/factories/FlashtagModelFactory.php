@@ -33,7 +33,6 @@ $factory->define(Flashtag\Data\Post::class, function (Faker\Generator $faker) {
         'stop_showing_at' => $faker->dateTimeBetween('-1 week', '+1 year')->getTimestamp(),
         'meta_description' => $faker->sentence(6),
         'meta_canonical' => $faker->url,
-        'views' => $faker->numberBetween(1, 1000),
     ];
 });
 

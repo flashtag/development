@@ -225,7 +225,7 @@ class TestSeeder extends Seeder
 IPSUM;
 
         $posts = factory(Post::class, 100)->create([
-            'body' => $ipsum
+            'body' => $ipsum,
         ]);
 
         return $posts->map(function ($post) use ($categories, $tags, $authors, $users, $fieldValues) {
@@ -235,6 +235,7 @@ IPSUM;
             $post->saveFields($fieldValues);
             $post->author_id = $this->faker->randomElement($authors->lists('id')->toArray());
             $post->show_author = $this->faker->boolean();
+            $post->views = $this->faker->numberBetween(1, 1000);
             if ($this->faker->boolean()) {
                 $post->is_locked = true;
                 $post->locked_by_id = $this->faker->randomElement($users->lists('id')->toArray());
