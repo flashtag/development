@@ -8,7 +8,8 @@
             <span class="icon-bar"></span>
         </button>
         <a href="/admin" class="navbar-brand">
-            <span class="navbar-brand-icon">{{ settings('name') }}</span>
+            <span class="navbar-brand-icon" style="margin:0;"><img src="/assets/admin/images/flashtag.png" style="height:30px;"></span>
+            <span style="font-style:italic; text-transform:uppercase; letter-spacing:1px;">{{ settings('name') }}</span>
         </a>
     </div>
     <nav class="collapse navbar-collapse">
