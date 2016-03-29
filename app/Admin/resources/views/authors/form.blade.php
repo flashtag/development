@@ -2,7 +2,7 @@
 @include('admin::partials.form-errors')
 
 <div class="panel panel-default">
-    <div class="panel-heading">Author</div>
+    <div class="panel-heading"><h3 class="panel-title">Author</h3></div>
     <div class="panel-body">
         <div class="form-group">
             <label for="name">Name</label>
@@ -22,7 +22,7 @@
 </div>
 
 <div class="panel panel-default">
-    <div class="panel-heading">Photo</div>
+    <div class="panel-heading"><h3 class="panel-title">Photo</h3></div>
     <div class="panel-body">
         <dropzone path="/images/media/"
                   image="{{ $author->photo }}"

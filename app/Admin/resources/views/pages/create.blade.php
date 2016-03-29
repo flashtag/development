@@ -1,29 +1,32 @@
 @extends('admin::layout')
 
 @section('content')
-    <ol class="breadcrumb">
-        <li><a href="/admin">Home</a></li>
-        <li><a href="/admin/pages">Pages</a></li>
-        <li class="active">New</li>
-    </ol>
+    <div class="container-fluid container-pf-nav-pf-vertical container-pf-nav-pf-vertical-with-secondary">
+        <ol class="breadcrumb">
+            <li><a href="/admin">Home</a></li>
+            <li><a href="/admin/pages">Pages</a></li>
+            <li class="active">New</li>
+        </ol>
 
-    <form class="Post EditForm" action="{{ route('admin.pages.store') }}" method="POST" enctype="multipart/form-data">
-        {{ csrf_field() }}
+        <form class="Post EditForm" action="{{ route('admin.pages.store') }}" method="POST" enctype="multipart/form-data">
+            {{ csrf_field() }}
 
-        <section class="info row">
-            <div class="col-md-6 clearfix"></div>
-            <div class="col-md-6 clearfix">
-                <div class="action-buttons">
-                    <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
-                    <a href="/admin/pages" class="btn btn-default"><i class="fa fa-close"></i> Cancel</a>
+            <section class="info row">
+                <div class="col-md-6 clearfix">
+                    <h1 class="Form__title">Create a New Page</h1>
                 </div>
-            </div>
-        </section>
+                <div class="col-md-6 clearfix">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
+                        <a href="/admin/pages" class="btn btn-default"><i class="fa fa-close"></i> Cancel</a>
+                    </div>
+                </div>
+            </section>
 
-        @include('admin::pages.form')
+            @include('admin::pages.form')
 
-    </form>
-
+        </form>
+    </div>
 @endsection
 
 @section('scripts')

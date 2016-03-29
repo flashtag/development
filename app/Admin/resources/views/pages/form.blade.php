@@ -3,7 +3,7 @@
 
 <div class="panel panel-default {{ $page->isShowing() ? 'border-green': 'border-red' }}">
     <div class="panel-heading">
-        <h3 class="panel-title">PUBLISHING
+        <h3 class="panel-title">Publishing
             <label class="showing label {{ $page->isShowing() ? 'label-success': 'label-danger' }}">
                 {{ $page->isShowing() ? 'Will show on website' : 'Will not show on website' }}
             </label>
@@ -40,7 +40,7 @@
 </div>
 
 <div class="panel panel-default" >
-    <div class="panel-heading">PAGE</div>
+    <div class="panel-heading"><h3 class="panel-title">Page</h3></div>
     <div class="panel-body">
         <div class="row">
             <div class="col-md-6">
@@ -82,7 +82,7 @@
 </div>
 
 <div class="panel panel-default">
-    <div class="panel-heading">Images</div>
+    <div class="panel-heading"><h3 class="panel-title">Images</h3></div>
     <div class="panel-body">
         <div class="col-md-6">
             <div class="form-group">
@@ -104,7 +104,7 @@
 </div>
 
 <div class="panel panel-default">
-    <div class="panel-heading">META</div>
+    <div class="panel-heading"><h3 class="panel-title">Meta</h3></div>
     <div class="panel-body">
         <div class="form-group">
             <label for="meta_description">Description</label>

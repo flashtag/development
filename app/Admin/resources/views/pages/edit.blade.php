@@ -1,37 +1,34 @@
 @extends('admin::layout')
 
 @section('content')
-    <ol class="breadcrumb">
-        <li><a href="/admin">Home</a></li>
-        <li><a href="/admin/pages">Pages</a></li>
-        <li class="active">{{ $page->title }}</li>
-    </ol>
+    <div class="container-fluid container-pf-nav-pf-vertical container-pf-nav-pf-vertical-with-secondary">
+        <ol class="breadcrumb">
+            <li><a href="/admin">Home</a></li>
+            <li><a href="/admin/pages">Pages</a></li>
+            <li class="active">{{ $page->title }}</li>
+        </ol>
 
-    <form class="Post EditForm" action="{{ route('admin.pages.update', [$page->id]) }}" method="POST" enctype="multipart/form-data">
-        {{ csrf_field() }}
-        {{ method_field('PUT') }}
+        <form class="Post EditForm" action="{{ route('admin.pages.update', [$page->id]) }}" method="POST" enctype="multipart/form-data">
+            {{ csrf_field() }}
+            {{ method_field('PUT') }}
 
-        <section class="info row">
-            <div class="col-md-6 clearfix">
-                <!-- TODO: Revision history
-                <a href="/admin/pages/{{ $page->id }}/revisions" class="btn btn-link">
-                    <i class="fa fa-history"></i> Revision history
-                </a>
-                -->
-            </div>
-            <div class="col-md-6 clearfix">
-                <div class="action-buttons">
-                    <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
-                    <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
-                    <a href="/admin/pages" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
+            <section class="info row">
+                <div class="col-md-6">
+                    <h1 class="Form__title">{{ $page->title }}</h1>
                 </div>
-            </div>
-        </section>
+                <div class="col-md-6 clearfix">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
+                        <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                        <a href="/admin/pages" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
+                    </div>
+                </div>
+            </section>
 
-        @include('admin::pages.form')
+            @include('admin::pages.form')
 
-    </form>
-
+        </form>
+    </div>
 @endsection
 
 @section('scripts')

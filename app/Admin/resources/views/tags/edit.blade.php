@@ -1,29 +1,34 @@
 @extends('admin::layout')
 
 @section('content')
-    <ol class="breadcrumb">
-        <li><a href="/admin">Home</a></li>
-        <li><a href="/admin/tags">Tags</a></li>
-        <li class="active">{{ $tag->name }}</li>
-    </ol>
+    <div class="container-fluid container-pf-nav-pf-vertical container-pf-nav-pf-vertical-with-secondary">
+        <ol class="breadcrumb">
+            <li><a href="/admin">Home</a></li>
+            <li><a href="/admin/tags">Tags</a></li>
+            <li class="active">{{ $tag->name }}</li>
+        </ol>
 
-    <form class="Category EditForm" action="{{ route('admin.tags.update', [$tag->id]) }}" method="POST" enctype="multipart/form-data">
-        {{ csrf_field() }}
-        {{ method_field('PUT') }}
+        <form class="Category EditForm" action="{{ route('admin.tags.update', [$tag->id]) }}" method="POST" enctype="multipart/form-data">
+            {{ csrf_field() }}
+            {{ method_field('PUT') }}
 
-        <section class="info row">
-            <div class="col-md-6 col-md-offset-6 clearfix">
-                <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-                    <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
-                    <a href="/admin/tags" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
+            <section class="info row">
+                <div class="col-md-6">
+                    <h1 class="Form__title">{{ $tag->name }}</h1>
                 </div>
-            </div>
-        </section>
+                <div class="col-md-6 clearfix">
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                        <a href="#delete" id="delete" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                        <a href="/admin/tags" class="btn btn-default"><i class="fa fa-close"></i> Close</a>
+                    </div>
+                </div>
+            </section>
 
-        @include('admin::tags.form')
+            @include('admin::tags.form')
 
-    </form>
+        </form>
+    </div>
 @endsection
 
 @section('scripts')

@@ -2,7 +2,7 @@
 @include('admin::partials.form-errors')
 
 <div class="panel panel-default">
-    <div class="panel-heading">Tag</div>
+    <div class="panel-heading"><h3 class="panel-title">Tag</h3></div>
     <div class="panel-body">
         <div class="form-group">
             <label for="name">Name</label>
@@ -18,7 +18,7 @@
 </div>
 
 <div class="panel panel-default">
-    <div class="panel-heading">Media</div>
+    <div class="panel-heading"><h3 class="panel-title">Media</h3></div>
     <div class="panel-body">
         <div class="row">
             <div class="col-md-6">
