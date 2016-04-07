@@ -1,6 +1,6 @@
-## Flashtag - Development repository
-
 ![Flashtag](https://s3-us-west-2.amazonaws.com/flashtag/images/flashtag-logo-banner.png)
+
+## Flashtag - Development repository
 
  [![Code Climate](https://codeclimate.com/github/flashtag/flashtag/badges/gpa.svg)](https://codeclimate.com/github/flashtag/flashtag)
  [![Build Status](https://travis-ci.org/flashtag/flashtag.svg?branch=master)](https://travis-ci.org/flashtag/flashtag)
