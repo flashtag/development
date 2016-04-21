@@ -18,6 +18,15 @@ class PostList extends Model
     protected $guarded = ['id', 'updated_at', 'created_at'];
 
     /**
+     * @param string $slug
+     * @return mixed
+     */
+    public static function getBySlug($slug)
+    {
+        return static::with('posts')->where('slug', $slug)->first();
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function posts()
