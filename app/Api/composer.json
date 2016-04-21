@@ -11,7 +11,7 @@
         "flashtag/data": "*@dev",
         "dingo/api": "dev-master@dev",
         "illuminate/routing": "~5.1",
-        "tymon/jwt-auth": "0.6.*"
+        "tymon/jwt-auth": "~1.0.0-alpha1@dev"
     },
     "require-dev": {
         "phpspec/phpspec": "^2.1",

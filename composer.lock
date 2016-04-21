@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3a49d9656b2e780c6e3b7d7f7dcd338a",
-    "content-hash": "bc22fc46cacc437c893c497dc66002f3",
+    "hash": "bf76f83731bf63120cdb755a5eb1a005",
+    "content-hash": "2e92c77d6aa88744fb35beb7196b0e71",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -127,7 +127,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dingo/api/zipball/90d4e4e60e5d460c8135fca611f0ac44a037df89",
+                "url": "https://api.github.com/repos/dingo/api/zipball/8cd1a6cd7d2ba9fc96841fd0745ef8fc1ce2a530",
                 "reference": "b9ff594eedea42d5cd78f09b20cbb66dd46b1204",
                 "shasum": ""
             },
@@ -818,7 +818,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flashtag-themes/clean-creative/zipball/85d35fef2fbe6d8c74b471ca347ec14703ae372c",
+                "url": "https://api.github.com/repos/flashtag-themes/clean-creative/zipball/b3a3462b65028e37f3f41ab2a51da1b6aaf70efa",
                 "reference": "85d35fef2fbe6d8c74b471ca347ec14703ae372c",
                 "shasum": ""
             },
@@ -3098,16 +3098,16 @@
         },
         {
             "name": "tymon/jwt-auth",
-            "version": "dev-develop",
+            "version": "1.0.0-alpha1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tymondesigns/jwt-auth.git",
-                "reference": "e8cc5204d5cd7d80a98ab1897735681414b9d45f"
+                "reference": "58903f9039d81f29ef25a22e9d5797f6b022a203"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/ff253a6ddc7bc2793855796967b283a2712ce4a0",
-                "reference": "e8cc5204d5cd7d80a98ab1897735681414b9d45f",
+                "url": "https://api.github.com/repos/tymondesigns/jwt-auth/zipball/58903f9039d81f29ef25a22e9d5797f6b022a203",
+                "reference": "58903f9039d81f29ef25a22e9d5797f6b022a203",
                 "shasum": ""
             },
             "require": {
@@ -3117,7 +3117,7 @@
                 "illuminate/support": "5.1.* || 5.2.*",
                 "namshi/jose": "^6.0",
                 "nesbot/carbon": "^1.0",
-                "php": "^5.5.9 || ^7.0"
+                "php": ">=5.5.9"
             },
             "require-dev": {
                 "cartalyst/sentinel": "2.0.*",
@@ -3160,7 +3160,7 @@
                 "jwt",
                 "laravel"
             ],
-            "time": "2016-03-13 09:31:48"
+            "time": "2016-03-02 20:27:02"
         },
         {
             "name": "venturecraft/revisionable",

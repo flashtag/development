@@ -9,7 +9,7 @@
         "laravel/framework": "5.1.*",
         "venturecraft/revisionable": " 1.*",
         "dingo/api": "dev-master@dev",
-        "tymon/jwt-auth": "0.6.*",
+        "tymon/jwt-auth": "~1.0.0-alpha1",
         "ryanwinchester/laravel-auto-presenter": "^4.3",
         "filp/whoops": " ~1.0",
         "doctrine/dbal": "^2.5",
