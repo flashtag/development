@@ -33,7 +33,7 @@ class PagesController extends Controller
     {
         $page = Page::create($this->buildPageFromRequest($request));
 
-        $this->handleImageUpload($page, $request->file('image'));
+        $this->handleImageUploadsFromRequest($page, $request);
 
         return redirect()->route('admin.pages.index');
     }
@@ -56,7 +56,7 @@ class PagesController extends Controller
         $templates = Storage::files('resources/views', true);
 
         return array_reduce($templates, function ($carry, $file) {
-            if (str_contains($file, '-page.blade.php') !== false) {
+            if (str_contains($file, '-page.blade.php') !== false && str_contains($file, settings('theme')) !== false) {
                 $path = str_replace(['-page.blade.php', 'resources/views/'], '', $file);
                 $view = str_replace('/', '.', $path);
                 $view = preg_replace('/themes\.'.settings('theme').'./', 'flashtag::', $view);
