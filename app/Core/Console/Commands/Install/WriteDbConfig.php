@@ -1,36 +1,18 @@
 <?php
 
-namespace Flashtag\Core\Console\Commands;
+namespace Flashtag\Core\Console\Commands\Install;
 
-use Flashtag\Data\User;
 use Illuminate\Console\Command;
 
-class Install extends Command
+class WriteDbConfig extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'flashtag:install';
+    protected $signature = 'flashtag:initial-db-config';
+    protected $description = 'Configure database connection';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Install Flashtag';
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
     public function handle()
     {
-        $this->publishFlashtag();
-
         $DBisGood = false;
+
         while (! $DBisGood) {
             $db = $this->getDBCredentialsFromUser();
             if ($this->confirm('Would you like to attempt a test connection now?', true)) {
@@ -42,14 +24,6 @@ class Install extends Command
                 $this->writeDBConfig($db);
             }
         }
-
-        if ($this->confirm("Run database migrations now? (requires working db connection)", true)) {
-            $this->runMigrations();
-            $this->seedDB();
-            $this->createAdminUser();
-        }
-
-        $this->installDefaultTheme();
     }
 
     /**
@@ -136,71 +110,5 @@ class Install extends Command
         } else {
             $this->comment('Wrote environment file.');
         }
-    }
-
-    /**
-     * Run the migrations.
-     */
-    private function runMigrations()
-    {
-        $this->call('migrate');
-    }
-
-    /**
-     * Run the Install seeder.
-     */
-    private function seedDB()
-    {
-        if ($this->confirm("Add example post and category?", true)) {
-            $this->call('db:seed', [
-                '--class' => 'InstallSeeder',
-            ]);
-        }
-    }
-
-    /**
-     * Create the Admin user.
-     */
-    private function createAdminUser()
-    {
-        $this->info("Create an Admin user");
-        $user['name'] = $this->ask("Administrator's name");
-        $user['email'] = $this->ask("Administrator email address");
-
-        $matches = false;
-        while (! $matches) {
-            $user['password'] = $this->secret("Administrator password");
-            $user['password_confirmation'] = $this->secret("Confirm password");
-            $matches = $user['password'] === $user['password_confirmation'];
-        }
-        $user['password'] = bcrypt($user['password']);
-        unset($user['password_confirmation']);
-
-        // Persist the user
-        $admin = User::create($user);
-        $admin->admin = true;
-        $admin->save();
-
-        $this->comment("Created admin user {$admin->email}");
-    }
-
-    /**
-     * Publish the needed flashtag files.
-     */
-    private function publishFlashtag()
-    {
-        $this->call("flashtag:publish", [
-            "--packages" => "all"
-        ]);
-    }
-
-    /**
-     * Install the default flashtag theme.
-     */
-    private function installDefaultTheme()
-    {
-        $this->call("flashtag:install-theme", [
-            "theme" => "flashtag-themes/clean-creative"
-        ]);
     }
 }
