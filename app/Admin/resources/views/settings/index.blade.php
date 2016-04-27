@@ -61,7 +61,7 @@
                 <div class="panel-heading">Routing</div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label for="twitter_account">Posts Route Prefix</label>
+                        <label for="post_route">Posts Route Prefix</label>
                         <input type="text" value="{{ settings('post_route') }}" name="post_route" id="post_route" class="form-control" placeholder="posts">
                     </div>
                 </div>
