@@ -1,16 +1,19 @@
 <?php
 
+use Illuminate\Routing\Router;
+
 /**
- * @var \Illuminate\Routing\Router $router
+ * @var Router $router
  */
 
 $router->get('/', [
     'uses' => 'HomeController@index',
     'as' => 'home'
 ]);
-$router->resource('posts', 'PostsController', [
-    'only' => ['index', 'show']
-]);
+$router->group(['prefix' => settings('post_route')], function (Router $router) {
+    $router->get('/', ['uses' => 'PostsController@index', 'as' => 'posts.index']);
+    $router->get('{post}', ['uses' => 'PostsController@show', 'as' => 'posts.show']);
+});
 $router->resource('categories', 'CategoriesController', [
     'only' => ['index', 'show']
 ]);

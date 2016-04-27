@@ -147,6 +147,7 @@ return [
         // Flashtag\Front\Providers\RouteServiceProvider::class,
         Flashtag\Data\Providers\DataServiceProvider::class,
         Flashtag\Core\Providers\CoreServiceProvider::class,
+        Flashtag\Core\Providers\InstallServiceProvider::class,
 
     ],
 

@@ -271,8 +271,8 @@ IPSUM;
                 'slug' => str_slug('Featured Grid'),
             ]),
             PostList::create([
-                'name' => 'Featured List',
-                'slug' => str_slug('Featured List'),
+                'name' => 'Featured Posts',
+                'slug' => str_slug('Featured Posts'),
             ]),
         ])->map(function ($postList) use ($posts) {
             $order = 0;

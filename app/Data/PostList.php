@@ -18,6 +18,15 @@ class PostList extends Model
     protected $guarded = ['id', 'updated_at', 'created_at'];
 
     /**
+     * @param string $slug
+     * @return mixed
+     */
+    public static function getBySlug($slug)
+    {
+        return static::with('posts')->where('slug', $slug)->first();
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function posts()
@@ -121,20 +130,16 @@ class PostList extends Model
     public static function incrementOrderBetween($id, $old, $new)
     {
         if ($new < $old) {
-            $increment = '+1';
+            $increment = +1;
             $whereBetween = [$new, $old];
         } else {
-            $increment = '-1';
+            $increment = -1;
             $whereBetween = [$old, $new];
         }
 
-        $query = sprintf(
-            'UPDATE post_post_list
-             SET "order" = "order" %s
-             WHERE post_list_id = ? AND "order" BETWEEN ? AND ?',
-            $increment
-        );
+        $query = DB::table('post_post_list')->where('post_list_id', $id)
+            ->whereBetween('order', $whereBetween);
 
-        return DB::update(DB::raw($query), array_merge([$id], $whereBetween));
+        $increment > 0 ? $query->increment('order') : $query->decrement('order');
     }
 }
