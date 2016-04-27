@@ -189,7 +189,11 @@ class Settings
         $this->grabbedCache = true;
 
         $cached = $this->cache->rememberForever('settings', function () {
-            return $this->setting->oldest('name')->lists('value', 'name')->all();
+            try {
+                return $this->setting->oldest('name')->lists('value', 'name')->all();
+            } catch (\PDOException $e) {
+                return [];
+            }
         });
 
         return $this->settings = array_merge($this->settings, $cached);
