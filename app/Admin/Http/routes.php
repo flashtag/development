@@ -32,7 +32,7 @@ $router->group(['middleware' => 'auth'], function ($router) {
     $router->resource('posts', 'PostsController');
     $router->resource('post-fields', 'PostFieldsController');
     $router->resource('post-lists', 'PostListsController');
-    $router->resource('pages/{page_id}/revisions', 'PagesRevisionsController', ['only' => ['index', 'show']]);
+    $router->resource('pages/{page_id}/revisions', 'PageRevisionsController', ['only' => ['index', 'show']]);
     $router->resource('pages', 'PagesController');
     $router->resource('categories', 'CategoriesController');
     $router->resource('tags', 'TagsController');
