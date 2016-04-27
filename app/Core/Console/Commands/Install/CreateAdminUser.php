@@ -3,24 +3,20 @@
 namespace Flashtag\Core\Console\Commands\Install;
 
 use Flashtag\Data\User;
-use Illuminate\Console\Command;
 
-class CreateAdminUser extends Command
+class CreateAdminUser extends InstallCommand
 {
-    protected $signature = 'flashtag:initial-admin-user';
-    protected $description = 'Create Flashtag Admin user';
-
-    public function handle()
+    public function execute()
     {
-        if ($this->confirm("Create Admin user now? (requires working db connection)", true)) {
-            $this->info("Create an Admin user");
-            $user['name'] = $this->ask("Administrator's name");
-            $user['email'] = $this->ask("Administrator email address");
+        if ($this->artisan->confirm("Create Admin user now? (requires working db connection)", true)) {
+            $this->artisan->info("Create an Admin user");
+            $user['name'] = $this->artisan->ask("Administrator's name");
+            $user['email'] = $this->artisan->ask("Administrator email address");
 
             $matches = false;
             while (! $matches) {
-                $user['password'] = $this->secret("Administrator password");
-                $user['password_confirmation'] = $this->secret("Confirm password");
+                $user['password'] = $this->artisan->secret("Administrator password");
+                $user['password_confirmation'] = $this->artisan->secret("Confirm password");
                 $matches = $user['password'] === $user['password_confirmation'];
             }
             $user['password'] = bcrypt($user['password']);
@@ -31,7 +27,7 @@ class CreateAdminUser extends Command
             $admin->admin = true;
             $admin->save();
 
-            $this->comment("Created admin user {$admin->email}");
+            $this->artisan->comment("Created admin user {$admin->email}");
         }
     }
 }

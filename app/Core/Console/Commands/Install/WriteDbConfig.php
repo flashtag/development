@@ -2,25 +2,20 @@
 
 namespace Flashtag\Core\Console\Commands\Install;
 
-use Illuminate\Console\Command;
-
-class WriteDbConfig extends Command
+class WriteDbConfig extends InstallCommand
 {
-    protected $signature = 'flashtag:initial-db-config';
-    protected $description = 'Configure database connection';
-
-    public function handle()
+    public function execute()
     {
         $DBisGood = false;
 
         while (! $DBisGood) {
             $db = $this->getDBCredentialsFromUser();
-            if ($this->confirm('Would you like to attempt a test connection now?', true)) {
+            if ($this->artisan->confirm('Would you like to attempt a test connection now?', true)) {
                 $DBisGood = $this->testDBConnection($db);
             } else {
                 $DBisGood = true;
             }
-            if ($this->confirm('Save this database connection information?', true)) {
+            if ($this->artisan->confirm('Save this database connection information?', true)) {
                 $this->writeDBConfig($db);
             }
         }
@@ -33,16 +28,16 @@ class WriteDbConfig extends Command
     private function getDBCredentialsFromUser()
     {
         return [
-            'DB_CONNECTION' => $this->choice('Select your database driver:', [
+            'DB_CONNECTION' => $this->artisan->choice('Select your database driver:', [
                 'mysql',
                 'pgsql',
                 'sqlite',
                 'sqlsrv'
             ], 0),
-            'DB_HOST' => $this->ask('Database host?', 'localhost'),
-            'DB_DATABASE' => $this->ask('Database name?', 'homestead'),
-            'DB_USERNAME' => $this->ask('Database username?', 'homestead'),
-            'DB_PASSWORD' => $this->ask('Database password?', 'secret'),
+            'DB_HOST' => $this->artisan->ask('Database host?', 'localhost'),
+            'DB_DATABASE' => $this->artisan->ask('Database name?', 'homestead'),
+            'DB_USERNAME' => $this->artisan->ask('Database username?', 'homestead'),
+            'DB_PASSWORD' => $this->artisan->ask('Database password?', 'secret'),
         ];
     }
 
@@ -76,15 +71,15 @@ class WriteDbConfig extends Command
                 [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
             );
 
-            $this->info('Connection successful.');
+            $this->artisan->info('Connection successful.');
 
             return true;
 
         } catch (\PDOException $e) {
-            $this->error('Connection failed.');
-            $this->error($e->getMessage());
+            $this->artisan->error('Connection failed.');
+            $this->artisan->error($e->getMessage());
 
-            return ! $this->confirm('Would you like to re-enter the database credentials?', true);
+            return ! $this->artisan->confirm('Would you like to re-enter the database credentials?', true);
         }
     }
 
@@ -106,9 +101,9 @@ class WriteDbConfig extends Command
         }
 
         if (file_put_contents('.env', $env) === false) {
-            $this->error('Error writing environment file.');
+            $this->artisan->error('Error writing environment file.');
         } else {
-            $this->comment('Wrote environment file.');
+            $this->artisan->comment('Wrote environment file.');
         }
     }
 }

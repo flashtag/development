@@ -125,7 +125,6 @@ class PostList extends Model
      * @param int $id
      * @param int $old
      * @param int $new
-     * @return int The number of rows affected.
      */
     public static function incrementOrderBetween($id, $old, $new)
     {

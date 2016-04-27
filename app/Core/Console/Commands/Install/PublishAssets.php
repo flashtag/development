@@ -2,16 +2,11 @@
 
 namespace Flashtag\Core\Console\Commands\Install;
 
-use Illuminate\Console\Command;
-
-class PublishAssets extends Command
+class PublishAssets extends InstallCommand
 {
-    protected $signature = 'flashtag:initial-publish';
-    protected $description = 'Publish the assets';
-
-    public function handle()
+    public function execute()
     {
-        $this->call("flashtag:publish", [
+        $this->artisan->call("flashtag:publish", [
             "--packages" => "all"
         ]);
     }

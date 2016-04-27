@@ -13,6 +13,7 @@ class CoreServiceProvider extends ServiceProvider
     public function register()
     {
         $this->commands([
+            Commands\Install\Install::class,
             Commands\Update::class,
             Commands\Publish::class,
         ]);

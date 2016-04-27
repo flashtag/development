@@ -2,17 +2,12 @@
 
 namespace Flashtag\Core\Console\Commands\Install;
 
-use Illuminate\Console\Command;
-
-class SeedDb extends Command
+class SeedDb extends InstallCommand
 {
-    protected $signature = 'flashtag:initial-seed';
-    protected $description = 'Seed example data';
-
-    public function handle()
+    public function execute()
     {
-        if ($this->confirm("Add example post and category?", true)) {
-            $this->call('db:seed', [
+        if ($this->artisan->confirm("Add example post and category?", true)) {
+            $this->artisan->call('db:seed', [
                 '--class' => 'InstallSeeder',
             ]);
         }

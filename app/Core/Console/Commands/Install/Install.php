@@ -26,12 +26,12 @@ class Install extends Command
      * @var array
      */
     private $steps = [
-        'flashtag:initial-publish',
-        'flashtag:initial-db-config',
-        'flashtag:initial-migrations',
-        'flashtag:initial-seed',
-        'flashtag:initial-admin',
-        'flashtag:install-default-theme',
+        PublishAssets::class,
+        WriteDbConfig::class,
+        RunMigrations::class,
+        SeedDb::class,
+        CreateAdminUser::class,
+        InstallDefaultTheme::class,
     ];
 
     /**
@@ -42,7 +42,7 @@ class Install extends Command
     public function handle()
     {
         foreach ($this->steps as $step) {
-            $this->call($step);
+            (new $step($this))->execute();
         }
     }
 }
