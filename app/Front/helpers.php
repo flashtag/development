@@ -13,5 +13,5 @@ function pageRoutesPattern()
         $pages = null;
     }
 
-    return implode('|', $pages ?: [md5('404')]);
+    return implode('|', $pages ?: ['338e56cd45b6483dbe63c1616cd5feee']);
 }
