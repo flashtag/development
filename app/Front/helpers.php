@@ -8,8 +8,10 @@
 function pageRoutesPattern()
 {
     try {
-        return implode('|', \Flashtag\Data\Page::lists('slug')->all());
+        $pages = \Flashtag\Data\Page::lists('slug')->all();
     } catch (\PDOException $e) {
-        return '';
+        $pages = null;
     }
+
+    return implode('|', $pages ?: [md5('404')]);
 }
