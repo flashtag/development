@@ -24,7 +24,7 @@ $router->resource('authors', 'AuthorsController', [
     'only' => ['index', 'show']
 ]);
 $router->get('{page}', 'PagesController@show')->where([
-    'page' => pageRoutesPattern()
+    'page' => page_routes_pattern()
 ]);
 
 // Example custom view

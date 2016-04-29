@@ -5,7 +5,7 @@
  *
  * @return string
  */
-function pageRoutesPattern()
+function page_routes_pattern()
 {
     try {
         $pages = \Flashtag\Data\Page::lists('slug')->all();
