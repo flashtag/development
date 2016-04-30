@@ -5,11 +5,13 @@
  *
  * @return string
  */
-function pageRoutesPattern()
+function page_routes_pattern()
 {
     try {
-        return implode('|', \Flashtag\Data\Page::lists('slug')->all());
+        $pages = \Flashtag\Data\Page::lists('slug')->all();
     } catch (\PDOException $e) {
-        return '';
+        $pages = null;
     }
+
+    return implode('|', $pages ?: ['338e56cd45b6483dbe63c1616cd5feee']);
 }

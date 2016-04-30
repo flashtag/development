@@ -32,6 +32,12 @@ class PostsController extends Controller
         }
 
         $post = Post::getBySlug($id);
+
+        // TODO: only retrieve showing posts to avoid this check.
+        if (! $post->isShowing()) {
+            abort(404);
+        }
+
         $post->viewed();
 
         return view('flashtag::posts.show', compact('post'));
