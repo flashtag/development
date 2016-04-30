@@ -26,10 +26,10 @@ class Install extends Command
      * @var array
      */
     private $steps = [
-        PublishAssets::class,
-        WriteDbConfig::class,
+        PublishFiles::class,
+        WriteConnectionDetails::class,
         RunMigrations::class,
-        SeedDb::class,
+        SeedExamples::class,
         CreateAdminUser::class,
         InstallDefaultTheme::class,
     ];

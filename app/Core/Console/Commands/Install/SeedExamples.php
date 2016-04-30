@@ -2,7 +2,7 @@
 
 namespace Flashtag\Core\Console\Commands\Install;
 
-class SeedDb extends InstallCommand
+class SeedExamples extends InstallCommand
 {
     public function execute()
     {
