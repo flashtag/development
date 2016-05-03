@@ -31,6 +31,6 @@ class TagsController extends Controller
             $query->where('slug', $tag_slug);
         })->simplePaginate();
 
-        return view('flashtag::posts.tag', compact('tag', 'posts'));
+        return view('flashtag::tags.show', compact('tag', 'posts'));
     }
 }

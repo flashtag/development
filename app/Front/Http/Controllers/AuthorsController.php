@@ -34,6 +34,6 @@ class AuthorsController extends Controller
                 ->where('show_author', true);
         })->simplePaginate();
 
-        return view('flashtag::posts.author', compact('author', 'posts'));
+        return view('flashtag::authors.show', compact('author', 'posts'));
     }
 }
