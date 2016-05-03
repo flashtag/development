@@ -31,6 +31,6 @@ class CategoriesController extends Controller
             $query->where('slug', $category_slug);
         })->simplePaginate();
 
-        return view('flashtag::posts.category', compact('category', 'posts'));
+        return view('flashtag::categories.show', compact('category', 'posts'));
     }
 }
