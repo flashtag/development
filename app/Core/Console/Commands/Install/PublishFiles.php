@@ -2,7 +2,7 @@
 
 namespace Flashtag\Core\Console\Commands\Install;
 
-class PublishAssets extends InstallCommand
+class PublishFiles extends InstallCommand
 {
     public function execute()
     {

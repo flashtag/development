@@ -2,7 +2,7 @@
 
 namespace Flashtag\Core\Console\Commands\Install;
 
-class WriteDbConfig extends InstallCommand
+class WriteConnectionDetails extends InstallCommand
 {
     public function execute()
     {
