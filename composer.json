@@ -1,6 +1,6 @@
 {
-    "name": "flashtag/flashtag",
-    "description": "Flashtag CMS",
+    "name": "flashtag/development",
+    "description": "Flashtag development",
     "keywords": ["cms", "flashtag"],
     "license": "MIT",
     "type": "project",
