@@ -89,7 +89,7 @@ class WriteConnectionDetails extends InstallCommand
      */
     private function writeDBConfig($db)
     {
-        $env = file_get_contents(base_path('.env'));
+        $env = @file_get_contents(base_path('.env'));
         if ($env === false) {
             $env = file_get_contents(base_path('.env.example'));
         }
