@@ -2,8 +2,8 @@
 
 ## Flashtag - Development repository
 
- [![Code Climate](https://codeclimate.com/github/flashtag/flashtag/badges/gpa.svg)](https://codeclimate.com/github/flashtag/flashtag)
- [![Build Status](https://travis-ci.org/flashtag/flashtag.svg?branch=master)](https://travis-ci.org/flashtag/flashtag)
+ [![Code Climate](https://codeclimate.com/github/flashtag/development/badges/gpa.svg)](https://codeclimate.com/github/flashtag/flashtag)
+ [![Build Status](https://travis-ci.org/flashtag/development.svg?branch=master)](https://travis-ci.org/flashtag/flashtag)
 
 **Do NOT use this repo in production**, this is for development purposes where we can work on and test all of the flashtag repositories in one place.
 
