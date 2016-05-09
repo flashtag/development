@@ -14,6 +14,7 @@ class SettingsEventListener
     {
         $this->cache = $cache;
     }
+
     /**
      * Handle the post creation events.
      *
