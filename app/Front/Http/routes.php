@@ -2,9 +2,7 @@
 
 use Illuminate\Routing\Router;
 
-/**
- * @var Router $router
- */
+/** @var Router $router */
 
 // Home
 $router->get('/', [

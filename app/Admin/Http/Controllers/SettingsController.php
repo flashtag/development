@@ -6,6 +6,14 @@ use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
+    /**
+     * Register middleware and stuff.
+     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
+    
     public function index()
     {
         return view('admin::settings.index');

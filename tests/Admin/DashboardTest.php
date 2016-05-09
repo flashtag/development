@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
-class PagesTest extends TestCase
+class DashboardTest extends TestCase
 {
     use DatabaseMigrations, DatabaseTransactions;
 

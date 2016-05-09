@@ -16,6 +16,10 @@ return [
     // ROUTING
     // ------------------------------------------------------------------------
     'post_route' => 'posts',
+    'tag_route' => 'topics',
+    'category_route' => 'categories',
+    'authors_route' => 'authors',
+    'search_route' => 'search',
 
     // ------------------------------------------------------------------------
     // SOCIAL

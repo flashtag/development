@@ -64,6 +64,22 @@
                         <label for="post_route">Posts Route Prefix</label>
                         <input type="text" value="{{ settings('post_route') }}" name="post_route" id="post_route" class="form-control" placeholder="posts">
                     </div>
+                    <div class="form-group">
+                        <label for="category_route">Categories Route Prefix</label>
+                        <input type="text" value="{{ settings('category_route') }}" name="category_route" id="category_route" class="form-control" placeholder="categories">
+                    </div>
+                    <div class="form-group">
+                        <label for="tag_route">Tags Route Prefix</label>
+                        <input type="text" value="{{ settings('tag_route') }}" name="tag_route" id="tag_route" class="form-control" placeholder="topics">
+                    </div>
+                    <div class="form-group">
+                        <label for="author_route">Posts Route Prefix</label>
+                        <input type="text" value="{{ settings('author_route') }}" name="author_route" id="author_route" class="form-control" placeholder="authors">
+                    </div>
+                    <div class="form-group">
+                        <label for="search_route">Posts Route Prefix</label>
+                        <input type="text" value="{{ settings('search_route') }}" name="search_route" id="search_route" class="form-control" placeholder="search">
+                    </div>
                 </div>
             </div>
 
@@ -77,6 +93,10 @@
                     <div class="form-group">
                         <label for="facebook_page">Facebook Page</label>
                         <input type="text" value="{{ settings('facebook_page') }}" name="facebook_page" id="facebook_page" class="form-control" placeholder="flashtagcms">
+                    </div>
+                    <div class="form-group">
+                        <label for="facebook_app_id">Facebook App ID</label>
+                        <input type="text" value="{{ settings('facebook_app_id') }}" name="facebook_app_id" id="facebook_app_id" class="form-control">
                     </div>
                 </div>
             </div>
