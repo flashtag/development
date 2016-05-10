@@ -38,11 +38,7 @@ class Theme
 
     public static function viewLocations()
     {
-        try {
-            $theme = settings('theme');
-        } catch (\PDOException $e) {
-            $theme = 'clean-creative';
-        }
+        $theme = settings('theme', 'clean-creative');
 
         return [
             base_path('resources/views/theme-overrides/'.$theme),

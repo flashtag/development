@@ -21,7 +21,7 @@ class PagesController extends Controller
             abort(404);
         }
 
-        $template = $page->template ?: 'flashtag::pages.default';
+        $template = $page->template ?: 'flashtag::page-templates.default';
         $template .= '-page';
 
         return view($template, compact('page'));

@@ -309,7 +309,7 @@ class Page extends Model implements HasPresenter
     public function view()
     {
         if (str_contains($this->template, settings('theme')) !== false) {
-            return 'flashtag::pages.default';
+            return 'flashtag::page-templates.default';
         }
 
         return $this->template;

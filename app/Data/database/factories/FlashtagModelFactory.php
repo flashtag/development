@@ -90,7 +90,7 @@ $factory->define(Flashtag\Data\Page::class, function (Faker\Generator $faker) {
         'is_published' => $faker->boolean(80),
         'start_showing_at' => $faker->dateTimeBetween('-1 year')->getTimestamp(),
         'stop_showing_at' => $faker->dateTimeBetween('-1 week', '+1 year')->getTimestamp(),
-        'template' => 'flashtag::pages.default',
+        'template' => 'flashtag::page-templates.default',
         'meta_description' => $faker->sentence(6),
         'meta_canonical' => $faker->url,
     ];

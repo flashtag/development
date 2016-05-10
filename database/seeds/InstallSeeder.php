@@ -84,7 +84,7 @@ HTML;
                 'title' => 'About Us',
                 'subtitle' => 'This is the heart',
                 'slug' => 'about',
-                'template' => 'flashtag::pages.default',
+                'template' => 'flashtag::page-templates.default',
                 'body' => $dirtyPaws,
                 'is_published' => true,
             ]),

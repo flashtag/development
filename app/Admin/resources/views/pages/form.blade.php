@@ -65,7 +65,7 @@
             <select name="template" id="template" class="form-control">
                 @foreach ($templates as $value => $name)
                     <option value="{{ $value }}" {{ (
-                        (empty($page->template) && $value == 'flashtag::pages.default') || $value == $page->template)
+                        (empty($page->template) && $value == 'flashtag::page-templates.default') || $value == $page->template)
                             ? 'selected'
                             : ''
                         }}>{{ $value }}</option>

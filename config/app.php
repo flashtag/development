@@ -144,7 +144,6 @@ return [
         Flashtag\Admin\Providers\AdminServiceProvider::class,
         Flashtag\Api\Providers\ApiServiceProvider::class,
         Flashtag\Front\Providers\FrontServiceProvider::class,
-        // Flashtag\Front\Providers\RouteServiceProvider::class,
         Flashtag\Data\Providers\DataServiceProvider::class,
         Flashtag\Core\Providers\CoreServiceProvider::class,
 

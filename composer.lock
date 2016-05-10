@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "bf76f83731bf63120cdb755a5eb1a005",
-    "content-hash": "2e92c77d6aa88744fb35beb7196b0e71",
+    "hash": "1eda524a5429a41694dccdb58a3be9e2",
+    "content-hash": "539c48fd2342023046ddad88f094a9e7",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -814,12 +814,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/flashtag-themes/clean-creative.git",
-                "reference": "85d35fef2fbe6d8c74b471ca347ec14703ae372c"
+                "reference": "d1e4c3bd68754fcaac4ac8b3886e2e376ad9b0f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flashtag-themes/clean-creative/zipball/b3a3462b65028e37f3f41ab2a51da1b6aaf70efa",
-                "reference": "85d35fef2fbe6d8c74b471ca347ec14703ae372c",
+                "url": "https://api.github.com/repos/flashtag-themes/clean-creative/zipball/d1e4c3bd68754fcaac4ac8b3886e2e376ad9b0f3",
+                "reference": "d1e4c3bd68754fcaac4ac8b3886e2e376ad9b0f3",
                 "shasum": ""
             },
             "type": "library",
@@ -837,7 +837,7 @@
                     "email": "feedback@startbootstrap.com"
                 }
             ],
-            "time": "2016-03-15 06:58:03"
+            "time": "2016-05-10 18:41:32"
         },
         {
             "name": "fzaninotto/faker",
