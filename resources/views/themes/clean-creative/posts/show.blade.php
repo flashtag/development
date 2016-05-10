@@ -22,7 +22,7 @@
                         </span>
                         <span class="tags">
                             @foreach ($post->tags as $tag)
-                                <a href="{{ route('topics.show', [$tag->slug]) }}" class="label label-default">{{ $tag->name }}</a>
+                                <a href="{{ route('tags.show', [$tag->slug]) }}" class="label label-default">{{ $tag->name }}</a>
                             @endforeach
                         </span>
                     </div>
