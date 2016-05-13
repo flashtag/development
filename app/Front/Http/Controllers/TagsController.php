@@ -29,7 +29,7 @@ class TagsController extends Controller
 
         $posts = Post::whereHas('tags', function ($query) use ($tag_slug) {
             $query->where('slug', $tag_slug);
-        })->simplePaginate();
+        })->simplePaginate(10);
 
         return view('flashtag::tags.show', compact('tag', 'posts'));
     }
