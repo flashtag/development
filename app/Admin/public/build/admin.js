@@ -14937,6 +14937,7 @@ if (module.hot) {(function () {  module.hot.accept()
   }
 })()}
 },{"../../models/post-list":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],38:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n    ul.select2-selection__rendered {\n        display: block;\n        width: 100%;\n        height: 26px;\n        padding: 2px 6px;\n        font-size: 12px;\n        line-height: 1.66666667;\n        color: #333333;\n        background-color: #fff;\n        background-image: none;\n        border: 1px solid #BABABA;\n        border-radius: 1px;\n        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n    }\n")
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15147,10 +15148,6 @@ exports['default'] = {
                         };
                     },
                     processResults: function processResults(data, params) {
-                        // parse the results into the format expected by Select2
-                        // since we are using custom formatting functions we do not need to
-                        // alter the remote JSON data, except to indicate that infinite
-                        // scrolling can be used
                         params.page = params.page || 1;
 
                         return {
@@ -15167,13 +15164,11 @@ exports['default'] = {
                     },
                     cache: true
                 },
-                //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
                 minimumInputLength: 1
-                //                    templateResult: formatRepo, // omitted for brevity, see the source of this page
-                //                    templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
-            }).on("select2:select", function (e) {
-                //                    console.log(e.params.data.id);
-                //                    console.log(e.params.data.text);
+            });
+            this.postSelect.on("select2:select", function (e) {
+                // console.log(e.params.data.id);
+                // console.log(e.params.data.text);
                 self.addPost(e.params.data);
                 $(this).val(null).trigger("change");
             });
@@ -15183,19 +15178,23 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"row\">\n        <div class=\"col-md-6\">\n            <div class=\"form-group\">\n                <label for=\"order_by\">Sort by</label>\n                <select name=\"order_by\" id=\"order_by\" v-model=\"sortKey\" class=\"form-control\">\n                    <option v-for=\"key in sortKeys\" value=\"{{ key.value }}\">{{ key.text }}</option>\n                </select>\n            </div>\n        </div>\n        <div class=\"col-md-6\">\n            <label for=\"order_dir\">Sort direction</label>\n            <select name=\"order_dir\" id=\"order_dir\" v-model=\"orderDir\" class=\"form-control\">\n                <option value=\"asc\">Ascending</option>\n                <option value=\"desc\">Descending</option>\n            </select>\n        </div>\n    </div>\n\n    <div class=\"form-group\">\n        <label for=\"add-post\">Add post</label>\n        <select id=\"add-post\" class=\"Post-select form-control\" multiple=\"\">\n            <option></option>\n        </select>\n    </div>\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th v-if=\"sortKey == 'order'\">Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n            <th></th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !isShowing(post) }\" id=\"Post-{{post.id}}\">\n\n            <td v-if=\"sortKey == 'order'\" class=\"order\">\n                <input class=\"post__order\" type=\"number\" :value=\"post.order\" @keydown.enter.prevent=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"isShowing(post)\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-ban\"></i></span>\n            </td>\n\n            <td>\n                <a @click.prevent=\"removePost(post.id)\" href=\"#remove\" class=\"remove-post\">\n                    <i class=\"fa fa-times\"></i>\n                </a>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <div class=\"row\">\n        <div class=\"col-md-6\">\n            <div class=\"form-group\">\n                <label for=\"order_by\">Sort by</label>\n                <select name=\"order_by\" id=\"order_by\" v-model=\"sortKey\" class=\"form-control\">\n                    <option v-for=\"key in sortKeys\" value=\"{{ key.value }}\">{{ key.text }}</option>\n                </select>\n            </div>\n        </div>\n        <div class=\"col-md-6\">\n            <label for=\"order_dir\">Sort direction</label>\n            <select name=\"order_dir\" id=\"order_dir\" v-model=\"orderDir\" class=\"form-control\">\n                <option value=\"asc\">Ascending</option>\n                <option value=\"desc\">Descending</option>\n            </select>\n        </div>\n    </div>\n\n    <div class=\"form-group select-post-input\">\n        <label for=\"add-post\">Add post</label>\n        <select id=\"add-post\" class=\"Post-select form-control\" data-allow-clear=\"true\" multiple=\"\">\n            <option></option>\n        </select>\n    </div>\n\n    <table v-if=\"postList.posts.length\" class=\"Posts table table-striped table-hover\">\n        <thead>\n        <tr>\n            <th v-if=\"sortKey == 'order'\">Order</th>\n            <th>Title</th>\n            <th>Category</th>\n            <th>Created</th>\n            <th class=\"text-centered\">Showing</th>\n            <th></th>\n        </tr>\n        </thead>\n        <tbody>\n        <tr v-for=\"post in postList.posts | filterBy titleFilter in 'title' | filterBy categoryFilter in 'category.name' | orderBy sortKey sortDir\" class=\"Post\" :class=\"{ 'Post--unpublished': !isShowing(post) }\" id=\"Post-{{post.id}}\">\n\n            <td v-if=\"sortKey == 'order'\" class=\"order\">\n                <input class=\"post__order\" type=\"number\" :value=\"post.order\" @keydown.enter.prevent=\"blur\" @focusout=\"reorder(post, $event)\" number=\"\">\n            </td>\n\n            <td>{{ post.title }}</td>\n\n            <td>{{ post.category ? post.category.name : '' }}</td>\n\n            <td>{{ formatTimestamp(post.created_at) }}</td>\n\n            <td class=\"text-centered\">\n                <span v-if=\"isShowing(post)\" class=\"showing\"><i class=\"fa fa-check\"></i></span>\n                <span v-else=\"\" class=\"not-showing\"><i class=\"fa fa-ban\"></i></span>\n            </td>\n\n            <td>\n                <a @click.prevent=\"removePost(post.id)\" href=\"#remove\" class=\"remove-post\">\n                    <i class=\"fa fa-times\"></i>\n                </a>\n            </td>\n\n        </tr>\n        </tbody>\n    </table>\n\n    <p v-else=\"\">No posts.</p>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
   var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/post-lists/posts.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n    ul.select2-selection__rendered {\n        display: block;\n        width: 100%;\n        height: 26px;\n        padding: 2px 6px;\n        font-size: 12px;\n        line-height: 1.66666667;\n        color: #333333;\n        background-color: #fff;\n        background-image: none;\n        border: 1px solid #BABABA;\n        border-radius: 1px;\n        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n    }\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/post-list":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],39:[function(require,module,exports){
+},{"../../models/post-list":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5,"vueify-insert-css":26}],39:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n    .fa.fa-lock, .fa.fa-ban {\n        color: #888;\n    }\n    .fa.fa-lock {\n        margin-left: 5px;\n    }\n    .post-list--not-showing {\n        color: #bbb;\n    }\n    .post-list__title a {\n        color: inherit;\n    }\n    .post-list--not-showing a {\n        color: #bbb;\n    }\n")
 'use strict';
 

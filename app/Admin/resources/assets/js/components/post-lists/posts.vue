@@ -1,3 +1,20 @@
+<style>
+    ul.select2-selection__rendered {
+        display: block;
+        width: 100%;
+        height: 26px;
+        padding: 2px 6px;
+        font-size: 12px;
+        line-height: 1.66666667;
+        color: #333333;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #BABABA;
+        border-radius: 1px;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+    }
+</style>
 <template>
 
     <div class="row">
@@ -18,9 +35,9 @@
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group select-post-input">
         <label for="add-post">Add post</label>
-        <select id="add-post" class="Post-select form-control" multiple>
+        <select id="add-post" class="Post-select form-control" data-allow-clear="true" multiple>
             <option></option>
         </select>
     </div>
@@ -286,10 +303,6 @@
                             };
                         },
                         processResults: function (data, params) {
-                            // parse the results into the format expected by Select2
-                            // since we are using custom formatting functions we do not need to
-                            // alter the remote JSON data, except to indicate that infinite
-                            // scrolling can be used
                             params.page = params.page || 1;
 
                             return {
@@ -306,13 +319,11 @@
                         },
                         cache: true
                     },
-                    //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
                     minimumInputLength: 1
-//                    templateResult: formatRepo, // omitted for brevity, see the source of this page
-//                    templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
-                }).on("select2:select", function (e) {
-//                    console.log(e.params.data.id);
-//                    console.log(e.params.data.text);
+                });
+                this.postSelect.on("select2:select", function (e) {
+                    // console.log(e.params.data.id);
+                    // console.log(e.params.data.text);
                     self.addPost(e.params.data);
                     $(this).val(null).trigger("change");
                 });
