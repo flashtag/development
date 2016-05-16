@@ -5,3 +5,6 @@ Homestead.yaml
 Homestead.json
 Vagrantfile
 .env
+
+/.idea
+/.vagrant
