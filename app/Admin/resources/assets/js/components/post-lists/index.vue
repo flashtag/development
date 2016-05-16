@@ -32,10 +32,10 @@
                     <div class="list-view-pf-main-info">
                         <div class="list-view-pf-body">
                             <div class="list-view-pf-description">
-                                <div class="list-group-item-heading">
+                                <div class="list-group-item-text">
                                     <a href="/admin/post-lists/{{ postList.id }}">{{ postList.name }}</a>
                                 </div>
-                                <div class="list-group-item-text">
+                                <div class="list-group-item-heading">
                                     &nbsp;
                                 </div>
                             </div>

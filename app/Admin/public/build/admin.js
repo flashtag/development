@@ -14103,7 +14103,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/authors.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/authors.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14190,7 +14190,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/categories.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/categories.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14289,7 +14289,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/fields/index.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/fields/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14424,7 +14424,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/index.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/pages/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14530,7 +14530,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/revisions/index.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/pages/revisions/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14694,7 +14694,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/pages/revisions/show.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/pages/revisions/show.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14716,7 +14716,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/image-preview.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/partials/image-preview.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14754,7 +14754,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/list-sort.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/partials/list-sort.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14848,7 +14848,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/partials/media-input.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/partials/media-input.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -14924,12 +14924,12 @@ exports['default'] = {
 
 };
 module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Post Lists <span class=\"badge\">{{ postLists | filterBy nameFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/post-lists/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"postList in postLists | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(postList)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-heading\">\n                                    <a href=\"/admin/post-lists/{{ postList.id }}\">{{ postList.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-text\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n    <h2>Post Lists <span class=\"badge\">{{ postLists | filterBy nameFilter | count }}</span></h2>\n    <div class=\"card-pf list-card\">\n        <div class=\"row toolbar-pf\">\n            <div class=\"col-sm-12\">\n                <div class=\"toolbar-pf-actions\">\n                    <div class=\"form-group toolbar-pf-filter\">\n                        <label class=\"sr-only\" for=\"name-filter\">Name</label>\n                        <input type=\"text\" id=\"name-filter\" v-model=\"nameFilter\" placeholder=\"Filter by name...\" class=\"form-control\">\n                    </div>\n                    <div class=\"form-group\">\n                        <list-sort :sort-key.sync=\"sortKey\" :sort-dir.sync=\"sortDir\" :sort-keys=\"sortKeys\"></list-sort>\n                    </div>\n                    <div class=\"form-group\">\n                        <a class=\"btn btn-success\" href=\"/admin/post-lists/create\">\n                            <i class=\"fa fa-plus\"></i> Add New\n                        </a>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"row list-view-pf\">\n            <div class=\"list-group\">\n                <div v-for=\"postList in postLists | filterBy nameFilter | orderBy sortKey sortDir\" class=\"list-group-item\">\n                    <div class=\"list-view-pf-actions\">\n                        <button class=\"btn btn-default\" @click.prevent=\"destroy(postList)\" title=\"Delete\" data-toggle=\"tooltip\">\n                            <span class=\"fa fa-trash\"></span>\n                        </button>\n                    </div>\n                    <div class=\"list-view-pf-main-info\">\n                        <div class=\"list-view-pf-body\">\n                            <div class=\"list-view-pf-description\">\n                                <div class=\"list-group-item-text\">\n                                    <a href=\"/admin/post-lists/{{ postList.id }}\">{{ postList.name }}</a>\n                                </div>\n                                <div class=\"list-group-item-heading\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                            <div class=\"list-view-pf-additional-info\">\n                                <div class=\"list-view-pf-additional-info-item\">\n                                    &nbsp;\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/index.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/post-lists/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15188,7 +15188,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/post-lists/posts.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/post-lists/posts.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15342,7 +15342,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/index.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/posts/index.vue"
   module.hot.dispose(function () {
     require("vueify-insert-css").cache["\n    .fa.fa-lock, .fa.fa-ban {\n        color: #888;\n    }\n    .fa.fa-lock {\n        margin-left: 5px;\n    }\n    .post-list--not-showing {\n        color: #bbb;\n    }\n    .post-list__title a {\n        color: inherit;\n    }\n    .post-list--not-showing a {\n        color: #bbb;\n    }\n"] = false
     document.head.removeChild(__vueify_style__)
@@ -15489,7 +15489,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/posts/revisions/index.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15653,7 +15653,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/posts/revisions/show.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15751,7 +15751,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/tags.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/tags.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -15850,7 +15850,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Users/ryanwinchester/Code/flashtag/flashtag/app/Admin/resources/assets/js/components/users.vue"
+  var id = "/Users/fungku/Code/flashtag/development/app/Admin/resources/assets/js/components/users.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
