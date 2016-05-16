@@ -22,17 +22,22 @@ Follow the progress or vote on features on [our trello board](https://trello.com
 
 Look at our [existing issues](https://github.com/flashtag/flashtag/issues), and feel free to contribute!
 
-#### Development Install:
+### Contributing
 
- - `git clone git@github.com:flashtag/flashtag.git` then go to that directory
- 
+##### 1. Clone the repo
+
+- Fork the repo
+- `git clone git@github.com:YOUR_FORK_HERE/development.git flashtag-dev` then go to that directory
+
+##### 2. Development Install:
+
  - `composer install`
  
  - `cp .env.example .env`
  
  - `php artisan key:generate`
  
-#### Development VM and database seeding:
+##### 3. Development VM and database seeding:
 
  - `vendor/bin/homestead make`
 
@@ -44,11 +49,11 @@ Look at our [existing issues](https://github.com/flashtag/flashtag/issues), and 
 
  - `php artisan migrate --seed`
  
-#### Running tests:
+##### 4. Running tests:
 
  - `vendor/bin/phpunit`
 
-#### Admin login:
+##### 5. Admin login:
  
  - Visit the admin page on the domain you set in `Homestead.yaml` (in my case that would be **http://app.test/admin**) and enter the seeded test users' credentials:
     - `test@test.com`/`password` : normal user
