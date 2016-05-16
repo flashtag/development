@@ -1,10 +1,11 @@
+# dirs
+/.vagrant/
 /vendor/
 node_modules/
 
-Homestead.yaml
-Homestead.json
-Vagrantfile
+# files
 .env
+Homestead.json
+Homestead.yaml
+Vagrantfile
 
-/.idea
-/.vagrant
