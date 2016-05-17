@@ -105,7 +105,7 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="show_author">Show author?</label>
+            <label for="show_author">Author is showing?</label>
             <div class="switch">
                 <input id="show_author" name="show_author" class="cmn-toggle cmn-toggle-yes-no" type="checkbox" value="1"
                         {{ $post->show_author ? 'checked' : '' }}>
