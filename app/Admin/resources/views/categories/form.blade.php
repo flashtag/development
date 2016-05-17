@@ -45,11 +45,11 @@
     </div>
 </div>
 
-<div class="panel panel-default">
-    <div class="panel-heading"><h3 class="panel-title">Media</h3></div>
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-md-6">
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading"><h3 class="panel-title">Media</h3></div>
+            <div class="panel-body">
                 <media-input
                         type="{{ $category->media ? $category->media->type : 'image' }}"
                         url="{{ $category->media ? $category->media->url : '' }}"
@@ -57,7 +57,12 @@
                         image-upload="/api/categories/{{  $category->id }}/image">
                 </media-input>
             </div>
-            <div class="col-md-6">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading"><h3 class="panel-title">Cover Image</h3></div>
+            <div class="panel-body">
                 <div class="form-group">
                     <label for="image">Cover</label>
                     <input type="file" name="cover_image" id="cover_image" class="file form-control" accept="image/*">
