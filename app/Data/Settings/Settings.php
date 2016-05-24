@@ -149,7 +149,7 @@ class Settings
      *
      * @param string|array $key
      * @param string $value
-     * @param void
+     * @return void
      */
     public function set($key, $value = '')
     {
