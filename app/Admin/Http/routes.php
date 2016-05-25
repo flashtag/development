@@ -61,4 +61,5 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function ($router) {
     $router->resource('categories', 'Api\CategoriesController', ['except' => ['edit', 'create']]);
     $router->resource('authors', 'Api\AuthorsController', ['except' => ['edit', 'create']]);
     $router->resource('users', 'Api\UsersController', ['except' => ['edit', 'create']]);
+    $router->resource('media/images', 'Api\ImagesController', ['only' => ['destroy']]);
 });

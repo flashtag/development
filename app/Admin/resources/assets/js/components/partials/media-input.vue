@@ -57,6 +57,12 @@
               }
         },
 
+        events: {
+            'media-image:deleted': function (image) {
+                this.url = "";
+            }
+        },
+
         methods: {
 
             changeSelect: function () {
