@@ -15395,6 +15395,7 @@ if (module.hot) {(function () {  module.hot.accept()
   }
 })()}
 },{"../../models/post-list":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],38:[function(require,module,exports){
+var __vueify_style__ = require("vueify-insert-css").insert("\n    ul.select2-selection__rendered {\n        display: block;\n        width: 100%;\n        height: 26px;\n        padding: 2px 6px;\n        font-size: 12px;\n        line-height: 1.66666667;\n        color: #333333;\n        background-color: #fff;\n        background-image: none;\n        border: 1px solid #BABABA;\n        border-radius: 1px;\n        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n    }\n")
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -15647,13 +15648,17 @@ if (module.hot) {(function () {  module.hot.accept()
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
   var id = "/Users/ryanwinchester/Code/flashtag/development/app/Admin/resources/assets/js/components/post-lists/posts.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n    ul.select2-selection__rendered {\n        display: block;\n        width: 100%;\n        height: 26px;\n        padding: 2px 6px;\n        font-size: 12px;\n        line-height: 1.66666667;\n        color: #333333;\n        background-color: #fff;\n        background-image: none;\n        border: 1px solid #BABABA;\n        border-radius: 1px;\n        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n    }\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"../../models/post-list":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5}],39:[function(require,module,exports){
+},{"../../models/post-list":51,"babel-runtime/helpers/interop-require-default":1,"vue":25,"vue-hot-reload-api":5,"vueify-insert-css":26}],39:[function(require,module,exports){
 var __vueify_style__ = require("vueify-insert-css").insert("\n    .fa.fa-lock, .fa.fa-ban {\n        color: #888;\n    }\n    .fa.fa-lock {\n        margin-left: 5px;\n    }\n    .post-list--not-showing {\n        color: #bbb;\n    }\n    .post-list__title a {\n        color: inherit;\n    }\n    .post-list--not-showing a {\n        color: #bbb;\n    }\n")
 'use strict';
 
