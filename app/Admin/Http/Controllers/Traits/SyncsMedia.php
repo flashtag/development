@@ -2,7 +2,6 @@
 
 namespace Flashtag\Admin\Http\Controllers\Traits;
 
-use Flashtag\Data\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 

@@ -15140,36 +15140,42 @@ if (module.hot) {(function () {  module.hot.accept()
   }
 })()}
 },{"babel-runtime/helpers/interop-require-default":1,"diff-match-patch":2,"he":3,"vue":25,"vue-hot-reload-api":5}],34:[function(require,module,exports){
-'use strict';
+var __vueify_style__ = require("vueify-insert-css").insert("\n    .image-preview--controls {\n        margin-top: 12px;\n    }\n")
+"use strict";
 
 exports.__esModule = true;
-exports['default'] = {
+exports["default"] = {
 
-    props: ['path', 'image', 'height'],
+    props: ["path", "image", "height"],
 
     methods: {
         deleteImage: function deleteImage() {
-            return this.$http['delete']('/admin/api/media/images/' + this.image).then(function (response) {
-                this.$dispatch('media-image:deleted', this.image);
+            return this.$http["delete"]("/admin/api/media/images/" + this.image).then(function () {
+                this.image = null;
+                this.$dispatch("media-image:deleted", this.image);
             });
         }
     }
 
 };
-module.exports = exports['default'];
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div v-if=\"image\" :class=\"'Image__thumbnail--'+height\">\n        <h6>Current Image</h6>\n        <div>\n            <img :src=\"path + image\">\n        </div>\n        <div>\n            <a href=\"#delete-image\" @click.prevent=\"deleteImage\" class=\"btn btn-danger\">Delete Image</a>\n        </div>\n    </div>\n"
+module.exports = exports["default"];
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n    <div v-if=\"image\" :class=\"'Image__thumbnail--'+height\">\n        <h6>Current Image</h6>\n        <div>\n            <img :src=\"path + image\">\n        </div>\n        <div class=\"image-preview--controls\">\n            <a href=\"#delete-image\" @click.prevent=\"deleteImage\" class=\"btn btn-danger\">Delete Image</a>\n        </div>\n    </div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
   var id = "/Users/ryanwinchester/Code/flashtag/development/app/Admin/resources/assets/js/components/partials/image-preview.vue"
+  module.hot.dispose(function () {
+    require("vueify-insert-css").cache["\n    .image-preview--controls {\n        margin-top: 12px;\n    }\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, module.exports.template)
   }
 })()}
-},{"vue":25,"vue-hot-reload-api":5}],35:[function(require,module,exports){
+},{"vue":25,"vue-hot-reload-api":5,"vueify-insert-css":26}],35:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
