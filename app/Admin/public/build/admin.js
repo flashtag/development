@@ -14131,7 +14131,7 @@ exports['default'] = {
             nameFilter: null,
             sortKey: 'updated_at',
             sortDir: -1,
-            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'name', text: 'Name' }]
+            sortKeys: [{ value: 'created_at', text: 'Created at' }, { value: 'updated_at', text: 'Updated at' }, { value: 'name', text: 'Name' }, { value: 'parent.name', text: 'Parent' }]
         };
     },
 
