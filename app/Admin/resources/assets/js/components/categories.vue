@@ -37,7 +37,7 @@
                                     <a href="/admin/categories/{{ category.id }}">{{ category.name }}</a>
                                 </div>
                                 <div class="list-group-item-text" title="Parent Category" data-toggle="tooltip">
-                                    <span v-if="category.parent.length">Subcategory of <strong>{{ category.parent.name }}</strong></span>
+                                    <span v-if="hasParent(category)">Subcategory of <strong>{{ category.parent.name }}</strong></span>
                                 </div>
                             </div>
                             <div class="list-view-pf-additional-info">
@@ -94,6 +94,10 @@
                 return items.map(function (item) {
                     return item.name;
                 });
+            },
+
+            hasParent: function(category) {
+                return category.parent.name && category.parent.name.length > 0;
             },
 
             destroy: function (category) {
