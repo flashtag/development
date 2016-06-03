@@ -18,7 +18,7 @@ class SearchController extends Controller
         $query = $request->get('q', false);
 
         $posts = $query
-            ? Post::search($query)->get()
+            ? Post::showing()->search($query)->get()
             : collect([]);
 
         return view('flashtag::search', compact('posts', 'query'));
