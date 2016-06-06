@@ -445,6 +445,9 @@ class Post extends Model implements HasPresenter
             $search = str_replace(' ', '%', $search);
         }
 
+        // Only keep alphanumeric characters (and dash)
+        $search = preg_replace('/[^A-Za-z0-9\-]/', '', $search);
+
         return $query->where(function ($query) use ($columns, $search) {
             foreach ($columns as $column) {
                 $query->orWhere($column, 'LIKE', "%{$search}%");
