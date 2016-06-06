@@ -373,7 +373,7 @@ class Post extends Model implements HasPresenter
     {
         return static::with('fields', 'author', 'category')
             ->where('slug', $post_slug)
-            ->firstOrFail();
+            ->first();
     }
 
     /**

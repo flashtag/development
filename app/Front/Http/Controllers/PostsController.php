@@ -21,20 +21,14 @@ class PostsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param int $id
+     * @param string $post_slug
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($post_slug)
     {
-        if (is_numeric($id)) {
-            $post = Post::findOrFail($id);
-            return redirect()->route('posts.show', [$post->slug]);
-        }
-
-        $post = Post::getBySlug($id);
-
-        // TODO: only retrieve showing posts to avoid this check.
-        if (! $post->isShowing()) {
+        try {
+            $post = Post::showing()->whereSlug($post_slug)->firstOrFail();
+        } catch (\Exception $e) {
             abort(404);
         }
 
