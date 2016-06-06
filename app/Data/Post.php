@@ -446,7 +446,7 @@ class Post extends Model implements HasPresenter
         }
 
         // Only keep alphanumeric characters (and dash)
-        $search = preg_replace('/[^A-Za-z0-9\-]/', '', $search);
+        $search = preg_replace('/[^A-Za-z0-9\-\s]/', '', $search);
 
         return $query->where(function ($query) use ($columns, $search) {
             foreach ($columns as $column) {
