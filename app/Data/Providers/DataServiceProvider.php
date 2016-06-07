@@ -35,11 +35,11 @@ class DataServiceProvider extends ServiceProvider
     /**
      * Perform post-registration booting of services.
      */
-    public function boot(Kernel $kernel)
+    public function boot()
     {
         $this->registerPublishes();
 
-        $kernel->pushMiddleware(SettingsMiddleware::class);
+        $this->app->router->middleware('settings', SettingsMiddleware::class);
     }
 
     /**

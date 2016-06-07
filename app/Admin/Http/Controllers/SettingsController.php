@@ -12,6 +12,7 @@ class SettingsController extends Controller
     public function __construct()
     {
         $this->middleware('admin');
+        $this->middleware('settings');
     }
 
     public function index()
