@@ -13,7 +13,7 @@ class SettingsController extends Controller
     {
         $this->middleware('admin');
     }
-    
+
     public function index()
     {
         return view('admin::settings.index');
@@ -23,9 +23,16 @@ class SettingsController extends Controller
     {
         foreach (settings()->all() as $setting => $value) {
             if ($request->has($setting)) {
-                settings()->set($setting, $request->get($setting));
+                settings()->set($setting, $request->input($setting));
             }
         }
+
+        return redirect()->route('admin.settings.index');
+    }
+
+    public function destroy($setting)
+    {
+        settings()->forget($setting);
 
         return redirect()->route('admin.settings.index');
     }
