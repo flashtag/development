@@ -196,13 +196,37 @@ class Post extends Model implements HasPresenter
      */
     public function getRating()
     {
-        $ratings = $this->ratings;
-
-        if (! $ratings->count()) {
-            return "0.0";
+        if ($this->relationLoaded('ratings')) {
+            $avg = $this->ratings->avg('value');
+        } else {
+            $avg = $this->ratings()->avg('value');
         }
 
-        return number_format($ratings->sum('value') / $ratings->count());
+        return number_format($avg);
+
+        // $ratings = $this->ratings;
+
+        // if (! $ratings->count()) {
+        //     return "0.0";
+        // }
+
+        // return number_format($ratings->sum('value') / $ratings->count());
+    }
+
+    /**
+     * Add a rating to a post
+     *
+     * @param  string|float $rating the rating
+     * @param  string|int $ip
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function addRating($rating, $ip, $id = null)
+    {
+        return $this->ratings()->create([
+            'value' => $rating,
+            'ip' => $ip,
+            'rater_id' => $id,
+        ]);
     }
 
     /**

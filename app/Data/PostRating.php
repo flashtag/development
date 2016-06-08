@@ -2,8 +2,8 @@
 
 namespace Flashtag\Data;
 
-use Illuminate\Database\Eloquent\Model;
 use Storage;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class PostRating
@@ -18,6 +18,10 @@ use Storage;
  */
 class PostRating extends Model
 {
+    protected $fillable = [
+        'post_id', 'ip', 'rater_id', 'value'
+    ];
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -29,12 +33,12 @@ class PostRating extends Model
     /**
      * Set the author's photo.
      *
-     * @param string $value
+     * @param string|long $value
      * @return string
      */
     public function setIpAttribute($value)
     {
-        $this->attributes['ip'] = ip2long($value);
+        $this->attributes['ip'] = is_long($value) ? $value : ip2long($value);
     }
 
     /**
