@@ -7,6 +7,7 @@ use Flashtag\Data\Settings\Settings;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider;
 use Flashtag\Data\Settings\SettingsMiddleware;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Flashtag\Data\Presenters\Decorators\ModelDecorator;
 use McCool\LaravelAutoPresenter\Decorators\AtomDecorator;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
@@ -21,6 +22,11 @@ class DataServiceProvider extends ServiceProvider
     protected $providers = [
         AutoPresenterServiceProvider::class,
         EventServiceProvider::class,
+        \Intervention\Image\ImageServiceProvider::class,
+    ];
+
+    protected $aliases = [
+        'Image' => \Intervention\Image\Facades\Image::class,
     ];
 
     /**
@@ -30,6 +36,7 @@ class DataServiceProvider extends ServiceProvider
     {
         $this->registerBindings();
         $this->registerServiceProviders();
+        $this->registerAliases();
     }
 
     /**
@@ -40,6 +47,11 @@ class DataServiceProvider extends ServiceProvider
         $this->registerPublishes();
 
         $kernel->pushMiddleware(SettingsMiddleware::class);
+
+        // morph mapping
+        Relation::morphMap([
+            'post' => \Flashtag\Data\Post::class,
+        ]);
     }
 
     /**
@@ -49,6 +61,18 @@ class DataServiceProvider extends ServiceProvider
     {
         foreach ($this->providers as $provider) {
             $this->app->register($provider);
+        }
+    }
+
+    /**
+     * Register the aliases from vendor packages.
+     */
+    protected function registerAliases()
+    {
+        $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+
+        foreach ($this->aliases as $alias => $class) {
+            $loader->alias($alias, $class);
         }
     }
 
@@ -73,7 +97,8 @@ class DataServiceProvider extends ServiceProvider
     {
         // Config
         $this->publishes([
-            __DIR__.'/../config/settings.php' => config_path('settings.php')
+            __DIR__.'/../config/settings.php' => config_path('settings.php'),
+            __DIR__.'/../config/site.php' => config_path('site.php')
         ], 'config');
 
         // Migrations

@@ -74,8 +74,16 @@ class Category extends Model
     public function addCoverImage($image)
     {
         $this->removeCoverImage();
+
         $name = 'category-'.$this->id.'__cover__'.$this->slug.'.'.$this->imageExtension($image);
-        $image->move(public_path('images/media'), $name);
+
+        $defaults = config('site.images.storage');
+
+        Storage::disk($defaults['disk'])->put(
+            $defaults['path'] .'/'. $name,
+            file_get_contents($image->getRealPath())
+        );
+
         $this->cover_image = $name;
 
         $this->save();
@@ -87,10 +95,15 @@ class Category extends Model
     public function removeCoverImage()
     {
         if (! is_null($this->cover_image)) {
-            $img = '/public/images/media/' . $this->cover_image;
 
-            if (is_file(base_path($img))) {
-                Storage::delete($img);
+            $defaults = config('site.images.storage');
+
+            $storage = Storage::disk($defaults['disk']);
+
+            $img = $defaults['path'] .'/'. $this->cover_image;
+
+            if ($storage->has($img)) {
+                $storage->delete($img);
             }
 
             $this->cover_image = null;

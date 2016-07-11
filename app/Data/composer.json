@@ -13,7 +13,8 @@
         "venturecraft/revisionable": " 1.*",
         "ryanwinchester/laravel-auto-presenter": "^4.3",
         "doctrine/dbal": "^2.5",
-        "fzaninotto/faker": "~1.4"
+        "fzaninotto/faker": "~1.4",
+        "intervention/image": "^2.3"
     },
     "autoload": {
         "psr-4": {
