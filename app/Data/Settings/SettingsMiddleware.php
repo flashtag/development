@@ -13,13 +13,12 @@ class SettingsMiddleware
 
     public function handle($request, Closure $next)
     {
-        return $next($request);
-    }
+        $response = $next($request);
 
-    public function terminate($request, $response)
-    {
         if ($this->settings->isDirty()) {
             $this->settings->wash();
         }
+
+        return $response;
     }
 }

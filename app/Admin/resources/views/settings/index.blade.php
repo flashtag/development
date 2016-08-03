@@ -20,19 +20,39 @@
                 <div class="panel-body">
                     <div class="form-group">
                         <label for="name">Name</label>
-                        <input type="text" value="{{ settings('name') }}" name="name" id="name" class="form-control">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('name') }}" name="name" id="name" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="tagline">Tagline</label>
-                        <input type="text" value="{{ settings('tagline') }}" name="tagline" id="tagline" class="form-control">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('tagline') }}" name="tagline" id="tagline" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="keywords">Keywords</label>
-                        <input type="text" value="{{ settings('keywords') }}" name="keywords" id="keywords" class="form-control" placeholder="flashtag, cms, php, open source">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('keywords') }}" name="keywords" id="keywords" class="form-control" placeholder="flashtag, cms, php, open source">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="description">Description</label>
-                        <input type="text" value="{{ settings('description') }}" name="description" id="description" class="form-control" placeholder="A short description of your site...">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('description') }}" name="description" id="description" class="form-control" placeholder="A short description of your site...">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -44,14 +64,19 @@
                     <div class="panel-body">
                         <div class="form-group">
                             <label for="theme">Theme</label>
-                            <select name="theme" id="theme" class="form-control">
-                                @foreach (\Flashtag\Front\Theme::lists() as $template)
-                                    <option value="{{ $template }}"
-                                            {{ settings('theme') == $template ? 'selected' : '' }}>
-                                        {{ $template }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="input-group">
+                                <select name="theme" id="theme" class="form-control">
+                                    @foreach (\Flashtag\Front\Theme::lists() as $template)
+                                        <option value="{{ $template }}"
+                                                {{ settings('theme') == $template ? 'selected' : '' }}>
+                                            {{ $template }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -62,23 +87,48 @@
                 <div class="panel-body">
                     <div class="form-group">
                         <label for="post_route">Posts Route Prefix</label>
-                        <input type="text" value="{{ settings('post_route') }}" name="post_route" id="post_route" class="form-control" placeholder="posts">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('post_route') }}" name="post_route" id="post_route" class="form-control" placeholder="posts">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="category_route">Categories Route Prefix</label>
-                        <input type="text" value="{{ settings('category_route') }}" name="category_route" id="category_route" class="form-control" placeholder="categories">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('category_route') }}" name="category_route" id="category_route" class="form-control" placeholder="categories">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="tag_route">Tags Route Prefix</label>
-                        <input type="text" value="{{ settings('tag_route') }}" name="tag_route" id="tag_route" class="form-control" placeholder="topics">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('tag_route') }}" name="tag_route" id="tag_route" class="form-control" placeholder="topics">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="author_route">Posts Route Prefix</label>
-                        <input type="text" value="{{ settings('author_route') }}" name="author_route" id="author_route" class="form-control" placeholder="authors">
+                        <label for="author_route">Authors Route Prefix</label>
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('author_route') }}" name="author_route" id="author_route" class="form-control" placeholder="authors">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="search_route">Posts Route Prefix</label>
-                        <input type="text" value="{{ settings('search_route') }}" name="search_route" id="search_route" class="form-control" placeholder="search">
+                        <label for="search_route">Search Route Prefix</label>
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('search_route') }}" name="search_route" id="search_route" class="form-control" placeholder="search">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -88,15 +138,30 @@
                 <div class="panel-body">
                     <div class="form-group">
                         <label for="twitter_account">Twitter Account</label>
-                        <input type="text" value="{{ settings('twitter_account') }}" name="twitter_account" id="twitter_account" class="form-control" placeholder="@flashtag">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('twitter_account') }}" name="twitter_account" id="twitter_account" class="form-control" placeholder="@flashtag">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="facebook_page">Facebook Page</label>
-                        <input type="text" value="{{ settings('facebook_page') }}" name="facebook_page" id="facebook_page" class="form-control" placeholder="flashtagcms">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('facebook_page') }}" name="facebook_page" id="facebook_page" class="form-control" placeholder="flashtagcms">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="facebook_app_id">Facebook App ID</label>
-                        <input type="text" value="{{ settings('facebook_app_id') }}" name="facebook_app_id" id="facebook_app_id" class="form-control">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('facebook_app_id') }}" name="facebook_app_id" id="facebook_app_id" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,7 +171,12 @@
                 <div class="panel-body">
                     <div class="form-group">
                         <label for="ga_id">Google Universal Analytics ID</label>
-                        <input type="text" value="{{ settings('ga_id') }}" name="ga_id" id="ga_id" class="form-control" placeholder="UA-XXXXX-Y">
+                        <div class="input-group">
+                            <input type="text" value="{{ settings('ga_id') }}" name="ga_id" id="ga_id" class="form-control" placeholder="UA-XXXXX-Y">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default reset-setting" type="button"><i class="fa fa-refresh"></i></button>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,4 +191,18 @@
             </section>
         </form>
     </div>
+<script>
+    $(document).ready(function() {
+        $('.reset-setting').click(function (e) {
+            e.preventDefault();
+
+            var key = $(this).parent().siblings('input').attr('name');
+
+            $('<form action="{{ url('admin/settings') }}/'+key+'" method="POST">'
+            +'<input type="hidden" name="_method" value="DELETE">'
+            +'<input type="hidden" name="_token" value="{{ csrf_token() }}">'
+            +'</form>').appendTo($(document.body)).submit();
+        });
+    });
+</script>
 @endsection
