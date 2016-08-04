@@ -1,6 +1,6 @@
 {
     "name": "flashtag/api",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Ryan Winchester",
@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Flashtag\\Api\\": ""
+            "Flashtag\\Api\\": "src/"
         }
     },
     "minimum-stability": "dev",

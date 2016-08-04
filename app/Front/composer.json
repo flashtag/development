@@ -1,6 +1,6 @@
 {
     "name": "flashtag/front",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Ryan Winchester",
@@ -15,9 +15,9 @@
     },
     "autoload": {
         "psr-4": {
-            "Flashtag\\Front\\": ""
+            "Flashtag\\Front\\": "src/"
         },
-        "files": [ "helpers.php" ]
+        "files": [ "src/helpers.php" ]
     },
     "minimum-stability": "dev",
     "prefer-stable": true

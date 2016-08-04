@@ -1,5 +1,5 @@
 {
-    "name": "flashtag/admin",
+    "name": "flashtag/auth",
     "license": "Apache-2.0",
     "authors": [
         {
@@ -8,17 +8,9 @@
         }
     ],
     "require": {
-        "flashtag/core": "*@dev",
-        "flashtag/data": "*@dev",
-        "guzzlehttp/guzzle": "^6.1"
     },
     "autoload": {
-        "psr-4": {
-            "Flashtag\\Admin\\": "src/"
-        },
-        "files": [
-            "src/helpers.php"
-        ]
+        "psr-4": {"Flashtag\\Auth\\": "src/"}
     },
     "minimum-stability": "dev",
     "prefer-stable": true

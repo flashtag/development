@@ -1,5 +1,5 @@
 {
-    "name": "flashtag/admin",
+    "name": "flashtag/posts",
     "license": "Apache-2.0",
     "authors": [
         {
@@ -8,17 +8,21 @@
         }
     ],
     "require": {
+        "illuminate/database": "~5.1",
         "flashtag/core": "*@dev",
-        "flashtag/data": "*@dev",
-        "guzzlehttp/guzzle": "^6.1"
+        "venturecraft/revisionable": " 1.*",
+        "ryanwinchester/laravel-auto-presenter": "^4.3",
+        "doctrine/dbal": "^2.5",
+        "fzaninotto/faker": "~1.4"
     },
     "autoload": {
         "psr-4": {
-            "Flashtag\\Admin\\": "src/"
+            "Flashtag\\Data\\": "src/"
         },
         "files": [
             "src/helpers.php"
-        ]
+        ],
+        "exclude-from-classmap": ["/database/"]
     },
     "minimum-stability": "dev",
     "prefer-stable": true

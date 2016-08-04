@@ -2,7 +2,7 @@
     "name": "flashtag/development",
     "description": "Flashtag development",
     "keywords": ["cms", "flashtag"],
-    "license": "MIT",
+    "license": "Apache-2.0",
     "type": "project",
     "require": {
         "php": ">=5.6.4",
@@ -36,7 +36,13 @@
         "classmap": [
             "database/"
         ],
-        "psr-4": { "Flashtag\\": "app/" },
+        "psr-4": {
+            "Flashtag\\Admin\\": "app/Admin/src/",
+            "Flashtag\\Api\\": "app/Api/src/",
+            "Flashtag\\Core\\": "app/Core/src/",
+            "Flashtag\\Front\\": "app/Front/src/",
+            "Flashtag\\Posts\\": "app/Posts/src/"
+        },
         "files": [
             "app/Data/helpers.php",
             "app/Admin/helpers.php",
