@@ -8,6 +8,7 @@
         }
     ],
     "require": {
+        "flashtag/core": "*@dev"
     },
     "autoload": {
         "psr-4": {"Flashtag\\Auth\\": "src/"}

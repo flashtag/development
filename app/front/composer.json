@@ -9,7 +9,6 @@
     ],
     "require": {
         "flashtag/core": "*@dev",
-        "flashtag/data": "*@dev",
         "flashtag-themes/clean-creative": "*@dev",
         "symfony/filesystem": "^3.0"
     },
