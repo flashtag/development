@@ -33,16 +33,20 @@
         "behat/mink-selenium2-driver": "^1.3"
     },
     "autoload": {
-        "classmap": [
-            "database/"
-        ],
         "psr-4": {
-            "Flashtag\\Admin\\": "app/Admin/src/",
-            "Flashtag\\Api\\": "app/Api/src/",
-            "Flashtag\\Core\\": "app/Core/src/",
-            "Flashtag\\Front\\": "app/Front/src/",
-            "Flashtag\\Posts\\": "app/Posts/src/"
+            "Flashtag\\Admin\\": "app/admin/src/",
+            "Flashtag\\Api\\": "app/api/src/",
+            "Flashtag\\Auth\\": "app/auth/src/",
+            "Flashtag\\Core\\": "app/core/src/",
+            "Flashtag\\Front\\": "app/front/src/",
+            "Flashtag\\Posts\\": "app/posts/src/"
         },
+        "classmap": [
+            "database/",
+            "app/ConsoleKernel.php",
+            "app/HttpKernel.php",
+            "app/ExceptionHandler.php"
+        ],
         "files": [
             "app/Data/helpers.php",
             "app/Admin/helpers.php",
