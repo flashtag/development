@@ -42,10 +42,7 @@
             "Flashtag\\Posts\\": "app/posts/src/"
         },
         "classmap": [
-            "database/",
-            "app/ConsoleKernel.php",
-            "app/HttpKernel.php",
-            "app/ExceptionHandler.php"
+            "database/", "framework/"
         ],
         "files": [
             "app/Data/helpers.php",
