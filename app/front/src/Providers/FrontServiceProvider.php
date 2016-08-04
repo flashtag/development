@@ -17,7 +17,7 @@ class FrontServiceProvider extends ServiceProvider
             $router->group([
                 'namespace' => 'Flashtag\Front\Http\Controllers'
             ], function ($router) {
-                require __DIR__.'/../Http/routes.php';
+                require __DIR__.'/../../routes/web.php';
             });
         }
     }
