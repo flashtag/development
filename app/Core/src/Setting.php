@@ -1,8 +1,7 @@
 <?php
 
-namespace Flashtag\Settings;
+namespace Flashtag\Core;
 
-use Cache;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
@@ -13,11 +12,11 @@ class Setting extends Model
 
     public static function byName($name)
     {
-        $vals = static::oldest('name')->name($name);
+        $values = static::oldest('name')->name($name);
 
         return is_array($name)
-            ? $vals->lists('value', 'name')->all()
-            : $vals->value('value');
+            ? $values->lists('value', 'name')->all()
+            : $values->value('value');
     }
 
     public static function destroyByName($names)

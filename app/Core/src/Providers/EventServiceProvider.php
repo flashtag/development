@@ -1,9 +1,9 @@
 <?php
 
-namespace Flashtag\Settings\Providers;
+namespace Flashtag\Core\Providers;
 
-use Flashtag\Settings\Events;
-use Flashtag\Settings\Listeners;
+use Flashtag\Core\Events;
+use Flashtag\Core\Listeners;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider

@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Settings;
+namespace Flashtag\Core\Settings;
 
 use Closure;
 

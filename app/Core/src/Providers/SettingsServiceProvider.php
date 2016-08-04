@@ -1,10 +1,10 @@
 <?php
 
-namespace Flashtag\Settings\Providers;
+namespace Flashtag\Core\Providers;
 
-use Flashtag\Settings\Setting;
-use Flashtag\Settings\Settings;
-use Flashtag\Settings\SettingsMiddleware;
+use Flashtag\Core\Setting;
+use Flashtag\Core\Settings\Settings;
+use Flashtag\Core\Settings\SettingsMiddleware;
 use Illuminate\Support\ServiceProvider;
 
 class SettingsServiceProvider extends ServiceProvider
@@ -24,8 +24,6 @@ class SettingsServiceProvider extends ServiceProvider
         });
 
         $this->app->alias('settings', Settings::class);
-
-        $this->app->register(EventServiceProvider::class);
     }
 
     /**

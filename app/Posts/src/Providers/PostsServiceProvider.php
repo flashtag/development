@@ -2,14 +2,10 @@
 
 namespace Flashtag\Posts\Providers;
 
-use Flashtag\Posts\Setting;
-use Flashtag\Posts\Settings\Settings;
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Support\ServiceProvider;
-use Flashtag\Posts\Settings\SettingsMiddleware;
 use Flashtag\Posts\Presenters\Decorators\ModelDecorator;
-use McCool\LaravelAutoPresenter\Decorators\AtomDecorator;
+use Illuminate\Support\ServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
+use McCool\LaravelAutoPresenter\Decorators\AtomDecorator;
 
 class PostsServiceProvider extends ServiceProvider
 {

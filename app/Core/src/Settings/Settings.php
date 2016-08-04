@@ -1,8 +1,8 @@
 <?php
 
-namespace Flashtag\Settings;
+namespace Flashtag\Core\Settings;
 
-use Flashtag\Settings\Events\SettingsSaved;
+use Flashtag\Core\Events\SettingsSaved;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Events\Dispatcher as Event;
 use Illuminate\Contracts\Config\Repository as Config;
@@ -63,7 +63,7 @@ class Settings
      * @param \Illuminate\Contracts\Cache\Repository   $cache
      * @param \Illuminate\Contracts\Config\Repository  $config
      * @param \Illuminate\Contracts\Events\Dispatcher $event
-     * @param \Flashtag\Settings\Setting $setting
+     * @param \Flashtag\Core\Setting $setting
      */
     public function __construct(Cache $cache, Config $config, Event $event, Setting $setting)
     {

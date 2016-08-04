@@ -17,5 +17,8 @@ class CoreServiceProvider extends ServiceProvider
             Commands\Update::class,
             Commands\Publish::class,
         ]);
+
+        $this->app->register(EventServiceProvider::class);
+        $this->app->register(SettingsServiceProvider::class);
     }
 }

@@ -1,9 +1,8 @@
 <?php
 
-namespace Flashtag\Settings\Listeners;
+namespace Flashtag\Core\Listeners;
 
-use Flashtag\Settings\Setting;
-use Flashtag\Settings\Events\SettingsSaved;
+use Flashtag\Core\Events\SettingsSaved;
 use Illuminate\Contracts\Cache\Repository as Cache;
 
 class SettingsEventListener

@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Settings\Events;
+namespace Flashtag\Core\Events;
 
 class SettingsSaved
 {
