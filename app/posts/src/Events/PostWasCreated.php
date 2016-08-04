@@ -3,7 +3,7 @@
 namespace Flashtag\Posts\Events;
 
 use Flashtag\Posts\Post;
-use Flashtag\Posts\User;
+use Flashtag\Auth\User;
 use Illuminate\Queue\SerializesModels;
 
 class PostWasCreated extends Event
