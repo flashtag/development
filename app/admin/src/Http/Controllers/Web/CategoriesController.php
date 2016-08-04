@@ -1,13 +1,14 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Admin\Http\Controllers\Traits\SyncsMedia;
 use Flashtag\Admin\Http\Requests\CategoryCreateRequest;
 use Flashtag\Admin\Http\Requests\CategoryDestroyRequest;
 use Flashtag\Admin\Http\Requests\CategoryUpdateRequest;
-use Flashtag\Data\Category;
-use Flashtag\Data\Tag;
+use Flashtag\Posts\Category;
+use Flashtag\Posts\Tag;
 
 class CategoriesController extends Controller
 {

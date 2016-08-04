@@ -11,7 +11,12 @@
         "illuminate/console": "~5.0"
     },
     "autoload": {
-        "psr-4": {"Flashtag\\Core\\": "src/"}
+        "psr-4": {
+            "Flashtag\\Core\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "minimum-stability": "dev",
     "prefer-stable": true

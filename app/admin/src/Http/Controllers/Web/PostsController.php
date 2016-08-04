@@ -1,15 +1,16 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Admin\Http\Requests\PostCreateRequest;
 use Flashtag\Admin\Http\Requests\PostDestroyRequest;
 use Flashtag\Admin\Http\Requests\PostUpdateRequest;
-use Flashtag\Data\Author;
-use Flashtag\Data\Category;
-use Flashtag\Data\Field;
-use Flashtag\Data\Post;
-use Flashtag\Data\Tag;
+use Flashtag\Posts\Author;
+use Flashtag\Posts\Category;
+use Flashtag\Posts\Field;
+use Flashtag\Posts\Post;
+use Flashtag\Posts\Tag;
 
 class PostsController extends Controller
 {

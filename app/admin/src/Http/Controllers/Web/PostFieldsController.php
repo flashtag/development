@@ -1,11 +1,12 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Admin\Http\Requests\FieldCreateRequest;
 use Flashtag\Admin\Http\Requests\FieldDestroyRequest;
 use Flashtag\Admin\Http\Requests\FieldUpdateRequest;
-use Flashtag\Data\Field;
+use Flashtag\Posts\Field;
 
 class PostFieldsController extends Controller
 {

@@ -1,11 +1,12 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
-use Flashtag\Data\Category;
-use Flashtag\Data\Page;
-use Flashtag\Data\Post;
-use Flashtag\Data\Tag;
+use Flashtag\Admin\Http\Controllers\Controller;
+use Flashtag\Posts\Category;
+use Flashtag\Posts\Page;
+use Flashtag\Posts\Post;
+use Flashtag\Posts\Tag;
 
 class HomeController extends Controller
 {

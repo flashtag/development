@@ -1,12 +1,13 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Admin\Http\Controllers\Traits\SyncsMedia;
 use Flashtag\Admin\Http\Requests\TagCreateRequest;
 use Flashtag\Admin\Http\Requests\TagDestroyRequest;
 use Flashtag\Admin\Http\Requests\TagUpdateRequest;
-use Flashtag\Data\Tag;
+use Flashtag\Posts\Tag;
 
 class TagsController extends Controller
 {

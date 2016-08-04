@@ -1,11 +1,12 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Admin\Http\Requests\UserCreateRequest;
 use Flashtag\Admin\Http\Requests\UserDestroyRequest;
 use Flashtag\Admin\Http\Requests\UserUpdateRequest;
-use Flashtag\Data\User;
+use Flashtag\Auth\User;
 
 class UsersController extends Controller
 {

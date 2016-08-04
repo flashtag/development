@@ -11,7 +11,7 @@ class AdminServiceProvider extends ServiceProvider
     public function boot(Router $router)
     {
         $this->defineAdminRoutes($router);
-        $this->AddMiddlewares($router);
+        $this->addMiddlewares($router);
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'admin');
         $this->publishesAssets();
         $this->loadComposers();
@@ -20,13 +20,30 @@ class AdminServiceProvider extends ServiceProvider
     private function defineAdminRoutes(Router $router)
     {
         if (! $this->app->routesAreCached()) {
-            $router->group([
-                'prefix' => 'admin',
-                'namespace' => 'Flashtag\Admin\Http\Controllers'
-            ], function ($router) {
-                require __DIR__.'/../Http/routes.php';
-            });
+            $this->mapWebRoutes($router);
+            $this->mapApiRoutes($router);
         }
+    }
+
+    private function mapWebRoutes(Router $router)
+    {
+        $router->group([
+            'prefix' => 'admin',
+            'namespace' => 'Flashtag\Admin\Http\Controllers\Web'
+        ], function ($router) {
+            require __DIR__.'/../../routes/web.php';
+        });
+    }
+
+    private function mapApiRoutes(Router $router)
+    {
+        $router->group([
+            'prefix' => 'admin/api',
+            'namespace' => 'Flashtag\Admin\Http\Controllers\Api',
+            'middleware' => 'auth'
+        ], function ($router) {
+            require __DIR__.'/../../routes/api.php';
+        });
     }
 
     private function addMiddlewares(Router $router)

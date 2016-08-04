@@ -1,7 +1,8 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class MediaController extends Controller

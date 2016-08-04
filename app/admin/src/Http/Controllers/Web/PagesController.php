@@ -1,12 +1,12 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Admin\Http\Requests\PageCreateRequest;
 use Flashtag\Admin\Http\Requests\PageDestroyRequest;
 use Flashtag\Admin\Http\Requests\PageUpdateRequest;
-use Flashtag\Data\Page;
-use Illuminate\Support\Collection;
+use Flashtag\Core\Page;
 use Illuminate\Support\Facades\Storage;
 
 class PagesController extends Controller

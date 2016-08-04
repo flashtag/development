@@ -1,8 +1,9 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
-use Flashtag\Data\Page;
+use Flashtag\Admin\Http\Controllers\Controller;
+use Flashtag\Core\Page;
 use Venturecraft\Revisionable\Revision;
 
 class PageRevisionsController extends Controller

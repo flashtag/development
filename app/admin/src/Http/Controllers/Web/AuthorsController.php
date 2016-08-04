@@ -1,11 +1,12 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Admin\Http\Requests\AuthorCreateRequest;
 use Flashtag\Admin\Http\Requests\AuthorDestroyRequest;
 use Flashtag\Admin\Http\Requests\AuthorUpdateRequest;
-use Flashtag\Data\Author;
+use Flashtag\Posts\Author;
 
 class AuthorsController extends Controller
 {

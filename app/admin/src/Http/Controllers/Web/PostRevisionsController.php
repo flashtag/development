@@ -1,8 +1,9 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
-use Flashtag\Data\Post;
+use Flashtag\Admin\Http\Controllers\Controller;
+use Flashtag\Posts\Post;
 use Venturecraft\Revisionable\Revision;
 
 class PostRevisionsController extends Controller

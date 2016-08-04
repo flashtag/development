@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers\Auth;
+namespace Flashtag\Admin\Http\Controllers\Web\Auth;
 
 use Flashtag\Admin\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;

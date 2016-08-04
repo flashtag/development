@@ -1,11 +1,12 @@
 <?php
 
-namespace Flashtag\Admin\Http\Controllers;
+namespace Flashtag\Admin\Http\Controllers\Web;
 
+use Flashtag\Admin\Http\Controllers\Controller;
 use Flashtag\Admin\Http\Requests\PostListCreateRequest;
 use Flashtag\Admin\Http\Requests\PostListDestroyRequest;
 use Flashtag\Admin\Http\Requests\PostListUpdateRequest;
-use Flashtag\Data\PostList;
+use Flashtag\Posts\PostList;
 
 class PostListsController extends Controller
 {
