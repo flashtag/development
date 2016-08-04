@@ -5,8 +5,8 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": ">=5.5.9",
-        "laravel/framework": "5.1.*",
+        "php": ">=5.6.4",
+        "laravel/framework": "5.3.*",
         "venturecraft/revisionable": " 1.*",
         "dingo/api": "dev-master@dev",
         "tymon/jwt-auth": "~1.0.0-alpha1",
