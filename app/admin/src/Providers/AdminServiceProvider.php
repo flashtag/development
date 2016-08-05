@@ -29,7 +29,8 @@ class AdminServiceProvider extends ServiceProvider
     {
         $router->group([
             'prefix' => 'admin',
-            'namespace' => 'Flashtag\Admin\Http\Controllers\Web'
+            'namespace' => 'Flashtag\Admin\Http\Controllers\Web',
+            'middleware' => ['web'],
         ], function ($router) {
             require __DIR__.'/../../routes/web.php';
         });
@@ -40,7 +41,7 @@ class AdminServiceProvider extends ServiceProvider
         $router->group([
             'prefix' => 'admin/api',
             'namespace' => 'Flashtag\Admin\Http\Controllers\Api',
-            'middleware' => 'auth'
+            'middleware' => ['auth', 'api'],
         ], function ($router) {
             require __DIR__.'/../../routes/api.php';
         });

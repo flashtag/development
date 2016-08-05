@@ -1,32 +1,32 @@
 <?php
 
+use Illuminate\Routing\Router;
+
 /**
- * @var \Illuminate\Routing\Router $router
+ * @var Router $router
  */
 
 // ----------------------------------------------------------------------------------------
 // Public routes
 // ----------------------------------------------------------------------------------------
 
-// Authentication routes
-$router->get('auth/login', 'Auth\AuthController@getLogin');
-$router->post('auth/login', 'Auth\AuthController@postLogin');
-$router->get('auth/logout', 'Auth\AuthController@getLogout');
+// Authentication Routes...
+$router->get('login', 'Auth\LoginController@showLoginForm')->name('login');
+$router->post('login', 'Auth\LoginController@login');
+$router->post('logout', 'Auth\LoginController@logout');
 
-// Password reset link request routes
-$router->get('password/email', 'Auth\PasswordController@getEmail');
-$router->post('password/email', 'Auth\PasswordController@postEmail');
-
-// Password reset routes
-$router->get('password/reset/{token}', 'Auth\PasswordController@getReset');
-$router->post('password/reset', 'Auth\PasswordController@postReset');
+// Password Reset Routes...
+$router->get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm');
+$router->post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
+$router->get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm');
+$router->post('password/reset', 'Auth\ResetPasswordController@reset');
 
 // ----------------------------------------------------------------------------------------
 // Authenticated routes
 // ----------------------------------------------------------------------------------------
 
 // Admin routes
-$router->group(['middleware' => 'auth'], function ($router) {
+$router->group(['middleware' => 'auth'], function (Router $router) {
     $router->get('/', 'HomeController@home');
     $router->resource('posts/{post_id}/revisions', 'PostRevisionsController', ['only' => ['index', 'show']]);
     $router->resource('posts', 'PostsController');
