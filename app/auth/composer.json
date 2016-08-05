@@ -1,0 +1,18 @@
+{
+    "name": "flashtag/auth",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Ryan Winchester",
+            "email": "fungku@gmail.com"
+        }
+    ],
+    "require": {
+        "flashtag/core": "*@dev"
+    },
+    "autoload": {
+        "psr-4": {"Flashtag\\Auth\\": "src/"}
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

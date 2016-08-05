@@ -1,0 +1,23 @@
+{
+    "name": "flashtag/core",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Ryan Winchester",
+            "email": "fungku@gmail.com"
+        }
+    ],
+    "require": {
+        "illuminate/console": "~5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Flashtag\\Core\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
