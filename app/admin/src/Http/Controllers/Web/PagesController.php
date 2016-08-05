@@ -18,7 +18,7 @@ class PagesController extends Controller
 
     public function show($id)
     {
-        return redirect()->route('admin.pages.edit', [$id], 301);
+        return redirect()->route('admin::pages.edit', [$id], 301);
     }
 
     public function create()
@@ -35,7 +35,7 @@ class PagesController extends Controller
 
         $this->handleImageUploadsFromRequest($page, $request);
 
-        return redirect()->route('admin.pages.index');
+        return redirect()->route('admin::pages.index');
     }
 
     public function edit($id)
@@ -74,7 +74,7 @@ class PagesController extends Controller
 
         $this->handleImageUploadsFromRequest($page, $request);
 
-        return redirect()->route('admin.pages.index');
+        return redirect()->route('admin::pages.index');
     }
 
     private function buildPageFromRequest($request)
@@ -113,6 +113,6 @@ class PagesController extends Controller
         $page = Page::findOrFail($id);
         $page->delete();
 
-        return redirect()->route('admin.pages.index');
+        return redirect()->route('admin::pages.index');
     }
 }

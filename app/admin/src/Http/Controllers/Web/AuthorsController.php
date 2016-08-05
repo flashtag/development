@@ -24,7 +24,7 @@ class AuthorsController extends Controller
      */
     public function show($id)
     {
-        return redirect()->route('admin.authors.edit', [$id], 301);
+        return redirect()->route('admin::authors.edit', [$id], 301);
     }
 
     /**
@@ -45,7 +45,7 @@ class AuthorsController extends Controller
     {
         $author = Author::create($this->buildAuthorFromRequest($request));
 
-        return redirect()->route('admin.authors.index');
+        return redirect()->route('admin::authors.index');
     }
 
     /**
@@ -69,7 +69,7 @@ class AuthorsController extends Controller
         $author = Author::findOrFail($id);
         $author->update($this->buildAuthorFromRequest($request));
 
-        return redirect()->route('admin.authors.index');
+        return redirect()->route('admin::authors.index');
     }
 
     /**
@@ -82,7 +82,7 @@ class AuthorsController extends Controller
         $author = Author::findOrFail($id);
         $author->delete();
 
-        return redirect()->route('admin.authors.index');
+        return redirect()->route('admin::authors.index');
     }
 
     /**

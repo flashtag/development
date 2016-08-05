@@ -13,7 +13,7 @@
                 <div class="card-pf-body">
                     <p class="card-pf-aggregate-status-notifications">
                         <span class="card-pf-aggregate-status-notification">
-                            <a href="{{ route('admin.posts.create') }}" class="add" data-toggle="tooltip" data-placement="top" title="Write new">
+                            <a href="{{ route('admin::posts.create') }}" class="add" data-toggle="tooltip" data-placement="top" title="Write new">
                                 <span class="pficon pficon-add-circle-o"></span>
                             </a>
                         </span>
@@ -30,7 +30,7 @@
                 <div class="card-pf-body">
                     <p class="card-pf-aggregate-status-notifications">
                         <span class="card-pf-aggregate-status-notification">
-                            <a href="{{ route('admin.categories.create') }}" class="add" data-toggle="tooltip" data-placement="top" title="Add new">
+                            <a href="{{ route('admin::categories.create') }}" class="add" data-toggle="tooltip" data-placement="top" title="Add new">
                                 <span class="pficon pficon-add-circle-o"></span>
                             </a>
                         </span>
@@ -47,7 +47,7 @@
                 <div class="card-pf-body">
                     <p class="card-pf-aggregate-status-notifications">
                         <span class="card-pf-aggregate-status-notification">
-                            <a href="{{ route('admin.tags.create') }}" class="add" data-toggle="tooltip" data-placement="top" title="Add new">
+                            <a href="{{ route('admin::tags.create') }}" class="add" data-toggle="tooltip" data-placement="top" title="Add new">
                                 <span class="pficon pficon-add-circle-o"></span>
                             </a>
                         </span>
@@ -64,7 +64,7 @@
                 <div class="card-pf-body">
                     <p class="card-pf-aggregate-status-notifications">
                         <span class="card-pf-aggregate-status-notification">
-                            <a href="{{ route('admin.pages.create') }}" class="add" data-toggle="tooltip" data-placement="top" title="Add new">
+                            <a href="{{ route('admin::pages.create') }}" class="add" data-toggle="tooltip" data-placement="top" title="Add new">
                                 <span class="pficon pficon-add-circle-o"></span>
                             </a>
                         </span>
@@ -87,7 +87,7 @@
                     @foreach ($mostViewed as $post)
                         <?php $percent = number_format($post->views/$mostViewed->max('views') * 100); ?>
                         <div class="progress-description">
-                            <a href="{{ route('admin.posts.edit', [$post->id]) }}">{{ $post->title }}</a>
+                            <a href="{{ route('admin::posts.edit', [$post->id]) }}">{{ $post->title }}</a>
                         </div>
                         <div class="progress progress-label-top-right">
                             <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{ $post->views }}" aria-valuemin="0" aria-valuemax="{{ $mostViewed->max('views') }}" style="width: {{ $percent }}%;"  data-toggle="tooltip" title="{{ $post->views }} views">
@@ -110,7 +110,7 @@
                     @foreach ($leastViewed as $post)
                         <?php $percent = number_format($post->views/$leastViewed->max('views') * 100); ?>
                         <div class="progress-description">
-                            <a href="{{ route('admin.posts.edit', [$post->id]) }}">{{ $post->title }}</a>
+                            <a href="{{ route('admin::posts.edit', [$post->id]) }}">{{ $post->title }}</a>
                         </div>
                         <div class="progress progress-label-top-right">
                             <div class="progress-bar progress-bar-default" role="progressbar" aria-valuenow="{{ $post->views }}" aria-valuemin="0" aria-valuemax="{{ $leastViewed->max('views') }}" style="width: {{ $percent }}%;"  data-toggle="tooltip" title="{{ $post->views }} views">

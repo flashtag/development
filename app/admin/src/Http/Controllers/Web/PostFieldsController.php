@@ -24,7 +24,7 @@ class PostFieldsController extends Controller
      */
     public function show($id)
     {
-        return redirect()->route('admin.post-fields.edit', [$id], 301);
+        return redirect()->route('admin::post-fields.edit', [$id], 301);
     }
 
     /**
@@ -45,7 +45,7 @@ class PostFieldsController extends Controller
     {
         $field = Field::create($this->buildFieldFromRequest($request));
 
-        return redirect()->route('admin.post-fields.index');
+        return redirect()->route('admin::post-fields.index');
     }
 
     /**
@@ -69,7 +69,7 @@ class PostFieldsController extends Controller
         $field = Field::findOrFail($id);
         $field->update($this->buildFieldFromRequest($request));
 
-        return redirect()->route('admin.post-fields.index');
+        return redirect()->route('admin::post-fields.index');
     }
 
     /**
@@ -82,7 +82,7 @@ class PostFieldsController extends Controller
         $field = Field::findOrFail($id);
         $field->delete();
 
-        return redirect()->route('admin.post-fields.index');
+        return redirect()->route('admin::post-fields.index');
     }
 
     /**

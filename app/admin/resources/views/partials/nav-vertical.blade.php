@@ -21,7 +21,7 @@
                 <h5>Posts</h5>
                 <ul class="list-group">
                     <li class="list-group-item {{ Flashtag\Admin\set_active('posts') }}">
-                        <a href="{{ route('admin.posts.index') }}">
+                        <a href="{{ route('admin::posts.index') }}">
                             <span class="list-group-item-value">All Posts</span>
                             <div class="badge-container-pf">
                                 <span class="badge">{{ Flashtag\Posts\Post::count() }}</span>
@@ -29,7 +29,7 @@
                         </a>
                     </li>
                     <li class="list-group-item {{ Flashtag\Admin\set_active('post-fields') }}">
-                        <a href="{{ route('admin.post-fields.index') }}">
+                        <a href="{{ route('admin::post-fields.index') }}">
                             <span class="list-group-item-value">Fields</span>
                             <div class="badge-container-pf">
                                 <span class="badge">{{ Flashtag\Posts\Field::count() }}</span>
@@ -37,7 +37,7 @@
                         </a>
                     </li>
                     <li class="list-group-item {{ Flashtag\Admin\set_active('post-lists') }}">
-                        <a href="{{ route('admin.post-lists.index') }}">
+                        <a href="{{ route('admin::post-lists.index') }}">
                             <span class="list-group-item-value">Lists</span>
                             <div class="badge-container-pf">
                                 <span class="badge">{{ Flashtag\Posts\PostList::count() }}</span>
@@ -45,7 +45,7 @@
                         </a>
                     </li>
                     <li class="list-group-item {{ Flashtag\Admin\set_active('authors') }}">
-                        <a href="{{ route('admin.authors.index') }}">
+                        <a href="{{ route('admin::authors.index') }}">
                             <span class="list-group-item-value">Authors</span>
                             <div class="badge-container-pf">
                                 <span class="badge">{{ Flashtag\Posts\Author::count() }}</span>
@@ -56,7 +56,7 @@
                 <h5>Taxonomy</h5>
                 <ul class="list-group">
                     <li class="list-group-item {{ Flashtag\Admin\set_active('categories') }}">
-                        <a href="{{ route('admin.categories.index') }}">
+                        <a href="{{ route('admin::categories.index') }}">
                             <span class="list-group-item-value">Categories</span>
                             <div class="badge-container-pf">
                                 <span class="badge">{{ Flashtag\Posts\Category::count() }}</span>
@@ -64,7 +64,7 @@
                         </a>
                     </li>
                     <li class="list-group-item {{ Flashtag\Admin\set_active('tags') }}">
-                        <a href="{{ route('admin.tags.index') }}">
+                        <a href="{{ route('admin::tags.index') }}">
                             <span class="list-group-item-value">Tags</span>
                             <div class="badge-container-pf">
                                 <span class="badge">{{ Flashtag\Posts\Tag::count() }}</span>
@@ -75,10 +75,10 @@
                 <h5>Pages</h5>
                 <ul class="list-group">
                     <li class="list-group-item {{ Flashtag\Admin\set_active('pages') }}">
-                        <a href="{{ route('admin.pages.index') }}">
+                        <a href="{{ route('admin::pages.index') }}">
                             <span class="list-group-item-value">Pages</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Posts\Page::count() }}</span>
+                                <span class="badge">{{ Flashtag\Core\Page::count() }}</span>
                             </div>
                         </a>
                     </li>
@@ -99,7 +99,7 @@
                 <h5>Administration</h5>
                 <ul class="list-group">
                     <li class="list-group-item {{ Flashtag\Admin\set_active('users') }}">
-                        <a href="{{ route('admin.users.index') }}">
+                        <a href="{{ route('admin::users.index') }}">
                             <span class="list-group-item-value">Users</span>
                             <div class="badge-container-pf">
                                 <span class="badge">{{ Flashtag\Auth\User::count() }}</span>
@@ -107,7 +107,7 @@
                         </a>
                     </li>
                     <li class="list-group-item {{ Flashtag\Admin\set_active('settings') }}">
-                        <a href="{{ route('admin.settings.index') }}">
+                        <a href="{{ route('admin::settings.index') }}">
                             <span class="list-group-item-value">Settings</span>
                         </a>
                     </li>

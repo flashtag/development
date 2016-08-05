@@ -8,7 +8,7 @@
             <li class="active">{{ $tag->name }}</li>
         </ol>
 
-        <form class="Category EditForm" action="{{ route('admin.tags.update', [$tag->id]) }}" method="POST" enctype="multipart/form-data">
+        <form class="Category EditForm" action="{{ route('admin::tags.update', [$tag->id]) }}" method="POST" enctype="multipart/form-data">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
 

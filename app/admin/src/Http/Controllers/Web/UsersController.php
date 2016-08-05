@@ -32,7 +32,7 @@ class UsersController extends Controller
      */
     public function show($id)
     {
-        return redirect()->route('admin.users.edit', [$id], 301);
+        return redirect()->route('admin::users.edit', [$id], 301);
     }
 
     /**
@@ -53,7 +53,7 @@ class UsersController extends Controller
     {
         $user = User::create($this->buildUserFromRequest($request));
 
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin::users.index');
     }
 
     /**
@@ -77,7 +77,7 @@ class UsersController extends Controller
         $user = User::findOrFail($id);
         $user->update($this->buildUserFromRequest($request));
 
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin::users.index');
     }
 
     /**
@@ -90,7 +90,7 @@ class UsersController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin::users.index');
     }
 
     /**

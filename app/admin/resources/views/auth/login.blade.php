@@ -36,7 +36,7 @@
             <div class="panel-heading"><i class="fa fa-key"></i> SIGN IN</div>
             <div class="panel-body">
                 <div class="login-form">
-                    <form class="form-horizontal" role="form" action="/admin/auth/login" method="POST">
+                    <form class="form-horizontal" role="form" action="/admin/login" method="POST">
                         {!! csrf_field() !!}
 
                         <div class="form-group">

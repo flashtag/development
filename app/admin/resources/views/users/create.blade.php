@@ -10,7 +10,7 @@
         </ol>
 
 
-        <form class="Author EditForm" action="{{ route('admin.users.store') }}" method="POST">
+        <form class="Author EditForm" action="{{ route('admin::users.store') }}" method="POST">
             {{ csrf_field() }}
 
             <section class="info row">

@@ -12,7 +12,7 @@ class AdminServiceProvider extends ServiceProvider
     {
         $this->defineAdminRoutes($router);
         $this->addMiddlewares($router);
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'admin');
+        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'admin');
         $this->publishesAssets();
         $this->loadComposers();
     }
@@ -28,6 +28,7 @@ class AdminServiceProvider extends ServiceProvider
     private function mapWebRoutes(Router $router)
     {
         $router->group([
+            'as' => 'admin::',
             'prefix' => 'admin',
             'namespace' => 'Flashtag\Admin\Http\Controllers\Web',
             'middleware' => ['web'],
@@ -39,6 +40,7 @@ class AdminServiceProvider extends ServiceProvider
     private function mapApiRoutes(Router $router)
     {
         $router->group([
+            'as' => 'api::',
             'prefix' => 'admin/api',
             'namespace' => 'Flashtag\Admin\Http\Controllers\Api',
             'middleware' => ['auth', 'api'],

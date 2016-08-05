@@ -8,7 +8,7 @@
             <li class="active">New</li>
         </ol>
 
-        <form class="Post EditForm" action="{{ route('admin.posts.store') }}" method="POST" enctype="multipart/form-data">
+        <form class="Post EditForm" action="{{ route('admin::posts.store') }}" method="POST" enctype="multipart/form-data">
             {{ csrf_field() }}
 
             <section class="info row">

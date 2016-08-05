@@ -29,13 +29,13 @@ class SettingsController extends Controller
             }
         }
 
-        return redirect()->route('admin.settings.index');
+        return redirect()->route('admin::settings.index');
     }
 
     public function destroy($setting)
     {
         settings()->forget($setting);
 
-        return redirect()->route('admin.settings.index');
+        return redirect()->route('admin::settings.index');
     }
 }

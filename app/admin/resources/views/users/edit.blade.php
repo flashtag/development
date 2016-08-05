@@ -8,7 +8,7 @@
             <li class="active">{{ $user->name }}</li>
         </ol>
 
-        <form class="Category EditForm" action="{{ route('admin.users.update', [$user->id]) }}" method="POST">
+        <form class="Category EditForm" action="{{ route('admin::users.update', [$user->id]) }}" method="POST">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
 

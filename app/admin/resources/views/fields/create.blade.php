@@ -9,7 +9,7 @@
             <li class="active">Create</li>
         </ol>
 
-        <form class="Category EditForm" action="{{ route('admin.post-fields.store') }}" method="POST">
+        <form class="Category EditForm" action="{{ route('admin::post-fields.store') }}" method="POST">
             {{ csrf_field() }}
 
             <section class="info row">

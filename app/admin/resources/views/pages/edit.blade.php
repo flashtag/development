@@ -8,7 +8,7 @@
             <li class="active">{{ $page->title }}</li>
         </ol>
 
-        <form class="Post EditForm" action="{{ route('admin.pages.update', [$page->id]) }}" method="POST" enctype="multipart/form-data">
+        <form class="Post EditForm" action="{{ route('admin::pages.update', [$page->id]) }}" method="POST" enctype="multipart/form-data">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
 

@@ -8,7 +8,7 @@
             <li class="active">{{ $field->label }}</li>
         </ol>
 
-        <form class="Category EditForm" action="{{ route('admin.post-fields.update', [$field->id]) }}" method="POST">
+        <form class="Category EditForm" action="{{ route('admin::post-fields.update', [$field->id]) }}" method="POST">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
 

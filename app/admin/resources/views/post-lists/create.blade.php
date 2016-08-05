@@ -10,7 +10,7 @@
         </ol>
 
 
-        <form class="Category EditForm" action="{{ route('admin.post-lists.store') }}" method="POST">
+        <form class="Category EditForm" action="{{ route('admin::post-lists.store') }}" method="POST">
             {{ csrf_field() }}
 
             <section class="info row">

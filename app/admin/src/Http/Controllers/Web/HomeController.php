@@ -3,8 +3,8 @@
 namespace Flashtag\Admin\Http\Controllers\Web;
 
 use Flashtag\Admin\Http\Controllers\Controller;
+use Flashtag\Core\Page;
 use Flashtag\Posts\Category;
-use Flashtag\Posts\Page;
 use Flashtag\Posts\Post;
 use Flashtag\Posts\Tag;
 

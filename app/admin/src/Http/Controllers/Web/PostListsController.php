@@ -24,7 +24,7 @@ class PostListsController extends Controller
      */
     public function show($id)
     {
-        return redirect()->route('admin.post-lists.edit', [$id], 301);
+        return redirect()->route('admin::post-lists.edit', [$id], 301);
     }
 
     /**
@@ -45,7 +45,7 @@ class PostListsController extends Controller
     {
         $postList = PostList::create($this->buildListFromRequest($request));
 
-        return redirect()->route('admin.post-lists.index');
+        return redirect()->route('admin::post-lists.index');
     }
 
     /**
@@ -69,7 +69,7 @@ class PostListsController extends Controller
         $postList = PostList::findOrFail($id);
         $postList->update($this->buildListFromRequest($request));
 
-        return redirect()->route('admin.post-lists.index');
+        return redirect()->route('admin::post-lists.index');
     }
 
     /**
@@ -82,7 +82,7 @@ class PostListsController extends Controller
         $postList = PostList::findOrFail($id);
         $postList->delete();
 
-        return redirect()->route('admin.post-lists.index');
+        return redirect()->route('admin::post-lists.index');
     }
 
     /**

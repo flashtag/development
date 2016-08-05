@@ -10,7 +10,7 @@
         </ol>
 
 
-        <form class="Category EditForm" action="{{ route('admin.tags.store') }}" method="POST" enctype="multipart/form-data">
+        <form class="Category EditForm" action="{{ route('admin::tags.store') }}" method="POST" enctype="multipart/form-data">
             {{ csrf_field() }}
 
             <section class="info row">

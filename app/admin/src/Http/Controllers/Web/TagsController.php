@@ -27,7 +27,7 @@ class TagsController extends Controller
      */
     public function show($id)
     {
-        return redirect()->route('admin.tags.edit', [$id], 301);
+        return redirect()->route('admin::tags.edit', [$id], 301);
     }
 
     /**
@@ -51,7 +51,7 @@ class TagsController extends Controller
         $this->syncMediaFromRequest($tag, $request);
         $this->handleImageUploadsFromRequest($tag, $request);
 
-        return redirect()->route('admin.tags.index');
+        return redirect()->route('admin::tags.index');
     }
 
     /**
@@ -78,7 +78,7 @@ class TagsController extends Controller
         $this->syncMediaFromRequest($tag, $request);
         $this->handleImageUploadsFromRequest($tag, $request);
 
-        return redirect()->route('admin.tags.index');
+        return redirect()->route('admin::tags.index');
     }
 
     /**
@@ -91,7 +91,7 @@ class TagsController extends Controller
         $tag = Tag::findOrFail($id);
         $tag->delete();
 
-        return redirect()->route('admin.tags.index');
+        return redirect()->route('admin::tags.index');
     }
 
     /**

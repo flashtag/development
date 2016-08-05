@@ -21,7 +21,7 @@ class PostsController extends Controller
 
     public function show($id)
     {
-        return redirect()->route('admin.posts.edit', [$id], 301);
+        return redirect()->route('admin::posts.edit', [$id], 301);
     }
 
     public function create()
@@ -44,7 +44,7 @@ class PostsController extends Controller
         $this->syncTags($post, $request->get('tags'));
         $this->syncFields($post, $request->get('fields'));
 
-        return redirect()->route('admin.posts.index');
+        return redirect()->route('admin::posts.index');
     }
 
     public function edit($id)
@@ -70,7 +70,7 @@ class PostsController extends Controller
         $this->syncTags($post, $request->get('tags'));
         $this->syncFields($post, $request->get('fields'));
 
-        return redirect()->route('admin.posts.index');
+        return redirect()->route('admin::posts.index');
     }
 
     private function buildPostFromRequest($request)
@@ -123,6 +123,6 @@ class PostsController extends Controller
         $post = Post::findOrFail($id);
         $post->delete();
 
-        return redirect()->route('admin.posts.index');
+        return redirect()->route('admin::posts.index');
     }
 }

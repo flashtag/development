@@ -13,7 +13,7 @@
 
         @include('admin::partials.form-errors')
 
-        <form class="EditForm" action="{{ route('admin.settings.store') }}" method="POST">
+        <form class="EditForm" action="{{ route('admin::settings.store') }}" method="POST">
             {{ csrf_field() }}
             <div class="panel panel-default">
                 <div class="panel-heading">General</div>

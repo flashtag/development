@@ -8,7 +8,7 @@
         <li class="active">{{ $setting->name }}</li>
     </ol>
 
-    <form class="Category EditForm" action="{{ route('admin.settings.update', [$setting->id]) }}" method="POST">
+    <form class="Category EditForm" action="{{ route('admin::settings.update', [$setting->id]) }}" method="POST">
         {{ csrf_field() }}
         {{ method_field('PUT') }}
 

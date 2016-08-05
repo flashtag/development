@@ -8,7 +8,7 @@
             <li class="active">{{ $postList->name }}</li>
         </ol>
 
-        <form class="Category EditForm" action="{{ route('admin.post-lists.update', [$postList->id]) }}" method="POST">
+        <form class="Category EditForm" action="{{ route('admin::post-lists.update', [$postList->id]) }}" method="POST">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
 

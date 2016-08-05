@@ -28,7 +28,7 @@ class CategoriesController extends Controller
      */
     public function show($id)
     {
-        return redirect()->route('admin.categories.edit', [$id], 301);
+        return redirect()->route('admin::categories.edit', [$id], 301);
     }
 
     /**
@@ -55,7 +55,7 @@ class CategoriesController extends Controller
         $this->syncMediaFromRequest($category, $request);
         $this->handleImageUploadsFromRequest($category, $request);
 
-        return redirect()->route('admin.categories.index');
+        return redirect()->route('admin::categories.index');
     }
 
     /**
@@ -85,7 +85,7 @@ class CategoriesController extends Controller
         $this->syncMediaFromRequest($category, $request);
         $this->handleImageUploadsFromRequest($category, $request);
 
-        return redirect()->route('admin.categories.index');
+        return redirect()->route('admin::categories.index');
     }
 
     /**
@@ -98,7 +98,7 @@ class CategoriesController extends Controller
         $category = Category::findOrFail($id);
         $category->delete();
 
-        return redirect()->route('admin.categories.index');
+        return redirect()->route('admin::categories.index');
     }
 
     /**
