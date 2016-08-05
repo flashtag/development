@@ -6,17 +6,17 @@ use Flashtag\Api\Http\Requests\Posts\PublishRequest;
 use Flashtag\Api\Http\Requests\Posts\ReorderRequest;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\PostTransformer;
-use Flashtag\Data\Post;
+use Flashtag\Posts\Post;
 
 class PostsController extends Controller
 {
     /**
-     * @var \Flashtag\Data\Post
+     * @var \Flashtag\Posts\Post
      */
     private $post;
 
     /**
-     * @param \Flashtag\Data\Post $post
+     * @param \Flashtag\Posts\Post $post
      */
     public function __construct(Post $post)
     {
@@ -152,10 +152,10 @@ class PostsController extends Controller
 
         if ($is_published) {
             $post->publish();
-            event(new \Flashtag\Data\Events\PostWasPublished($post, $user_id));
+            event(new \Flashtag\Posts\Events\PostWasPublished($post, $user_id));
         } else {
             $post->unpublish();
-            event(new \Flashtag\Data\Events\PostWasUnpublished($post, $user_id));
+            event(new \Flashtag\Posts\Events\PostWasUnpublished($post, $user_id));
         }
 
         return $post;

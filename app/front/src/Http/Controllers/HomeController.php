@@ -2,8 +2,8 @@
 
 namespace Flashtag\Front\Http\Controllers;
 
-use Flashtag\Data\Category;
-use Flashtag\Data\Post;
+use Flashtag\Posts\Category;
+use Flashtag\Posts\Post;
 
 class HomeController extends Controller
 {

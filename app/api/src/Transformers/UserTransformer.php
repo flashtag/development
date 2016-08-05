@@ -2,12 +2,12 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\User;
+use Flashtag\Auth\User;
 
 class UserTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\User $user
+     * @param \Flashtag\Auth\User $user
      * @return array
      */
     public function transform(User $user)

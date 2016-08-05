@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\Post;
+use Flashtag\Posts\Post;
 use Illuminate\Http\Request;
 
 class PostsController extends Controller

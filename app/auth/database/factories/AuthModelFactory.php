@@ -1,6 +1,6 @@
 <?php
 
-$factory->define(Flashtag\Posts\User::class, function (Faker\Generator $faker) {
+$factory->define(Flashtag\Auth\User::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->firstName.' '.$faker->lastName,
         'email' => $faker->email,
@@ -9,8 +9,8 @@ $factory->define(Flashtag\Posts\User::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->defineAs(Flashtag\Posts\User::class, 'admin', function ($faker) use ($factory) {
-    $user = $factory->raw(Flashtag\Posts\User::class);
+$factory->defineAs(Flashtag\Auth\User::class, 'admin', function ($faker) use ($factory) {
+    $user = $factory->raw(Flashtag\Auth\User::class);
 
     return array_merge($user, ['admin' => true]);
 });

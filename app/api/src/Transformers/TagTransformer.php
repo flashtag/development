@@ -2,12 +2,12 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\Tag;
+use Flashtag\Posts\Tag;
 
 class TagTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\Tag $tag
+     * @param \Flashtag\Posts\Tag $tag
      * @return array
      */
     public function transform(Tag $tag)

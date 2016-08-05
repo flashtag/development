@@ -3,6 +3,7 @@
 namespace Flashtag\Core\Settings;
 
 use Flashtag\Core\Events\SettingsSaved;
+use Flashtag\Core\Setting;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Events\Dispatcher as Event;
 use Illuminate\Contracts\Config\Repository as Config;
@@ -189,7 +190,7 @@ class Settings
 
         $cached = $this->cache->rememberForever('settings', function () {
             try {
-                return $this->setting->oldest('name')->lists('value', 'name')->all();
+                return $this->setting->oldest('name')->pluck('value', 'name')->all();
             } catch (\PDOException $e) {
                 return [];
             }

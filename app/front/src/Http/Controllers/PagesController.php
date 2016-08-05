@@ -2,7 +2,7 @@
 
 namespace Flashtag\Front\Http\Controllers;
 
-use Flashtag\Data\Page;
+use Flashtag\Posts\Page;
 use Flashtag\Front\Http\Controllers\Controller;
 
 class PagesController extends Controller

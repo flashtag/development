@@ -4,17 +4,17 @@ namespace Flashtag\Api\Http\Controllers\V1;
 
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\TagTransformer;
-use Flashtag\Data\Tag;
+use Flashtag\Posts\Tag;
 
 class TagsController extends Controller
 {
     /**
-     * @var \Flashtag\Data\Tag
+     * @var \Flashtag\Posts\Tag
      */
     private $tag;
 
     /**
-     * @param \Flashtag\Data\Tag $tag
+     * @param \Flashtag\Posts\Tag $tag
      */
     public function __construct(Tag $tag)
     {

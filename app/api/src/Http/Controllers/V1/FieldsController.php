@@ -5,17 +5,17 @@ namespace Flashtag\Api\Http\Controllers\V1;
 use Flashtag\Api\Http\Requests\PublishRequest;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\FieldTransformer;
-use Flashtag\Data\Field;
+use Flashtag\Posts\Field;
 
 class FieldsController extends Controller
 {
     /**
-     * @var \Flashtag\Data\Field
+     * @var \Flashtag\Posts\Field
      */
     private $field;
 
     /**
-     * @param \Flashtag\Data\Field $field
+     * @param \Flashtag\Posts\Field $field
      */
     public function __construct(Field $field)
     {

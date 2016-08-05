@@ -4,17 +4,17 @@ namespace Flashtag\Api\Http\Controllers\V1;
 
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\SettingTransformer;
-use Flashtag\Data\Setting;
+use Flashtag\Core\Setting;
 
 class SettingsController extends Controller
 {
     /**
-     * @var \Flashtag\Data\Setting
+     * @var \Flashtag\Core\Setting
      */
     private $setting;
 
     /**
-     * @param \Flashtag\Data\Setting $setting
+     * @param \Flashtag\Core\Setting $setting
      */
     public function __construct(Setting $setting)
     {

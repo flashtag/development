@@ -15,13 +15,13 @@ class Setting extends Model
         $values = static::oldest('name')->name($name);
 
         return is_array($name)
-            ? $values->lists('value', 'name')->all()
+            ? $values->pluck('value', 'name')->all()
             : $values->value('value');
     }
 
     public static function destroyByName($names)
     {
-        $ids = static::name($names)->lists('id')->all();
+        $ids = static::name($names)->pluck('id')->all();
 
         return static::destroy($ids);
     }

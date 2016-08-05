@@ -2,7 +2,7 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\PostList;
+use Flashtag\Posts\PostList;
 
 class PostListTransformer extends Transformer
 {
@@ -19,7 +19,7 @@ class PostListTransformer extends Transformer
     protected $defaultIncludes = ['posts'];
 
     /**
-     * @param \Flashtag\Data\PostList $postList
+     * @param \Flashtag\Posts\PostList $postList
      * @return array
      */
     public function transform(PostList $postList)
@@ -36,7 +36,7 @@ class PostListTransformer extends Transformer
     /**
      * Include posts.
      *
-     * @param \Flashtag\Data\PostList $postList
+     * @param \Flashtag\Posts\PostList $postList
      * @return \League\Fractal\Resource\Collection
      */
     public function includePosts(PostList $postList)

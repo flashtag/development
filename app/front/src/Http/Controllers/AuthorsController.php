@@ -2,8 +2,8 @@
 
 namespace Flashtag\Front\Http\Controllers;
 
-use Flashtag\Data\Author;
-use Flashtag\Data\Post;
+use Flashtag\Posts\Author;
+use Flashtag\Posts\Post;
 
 class AuthorsController extends Controller
 {

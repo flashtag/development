@@ -11,7 +11,7 @@
         "illuminate/database": "~5.1",
         "flashtag/core": "*@dev",
         "venturecraft/revisionable": " 1.*",
-        "ryanwinchester/laravel-auto-presenter": "^4.3",
+        "ryanwinchester/laravel-auto-presenter": "^4.4",
         "doctrine/dbal": "^2.5",
         "fzaninotto/faker": "~1.4"
     },

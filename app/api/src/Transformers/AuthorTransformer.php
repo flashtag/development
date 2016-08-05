@@ -2,12 +2,12 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\Author;
+use Flashtag\Posts\Author;
 
 class AuthorTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\Author $author
+     * @param \Flashtag\Posts\Author $author
      * @return array
      */
     public function transform(Author $author)

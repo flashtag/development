@@ -4,17 +4,17 @@ namespace Flashtag\Api\Http\Controllers\V1;
 
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\AuthorTransformer;
-use Flashtag\Data\Author;
+use Flashtag\Posts\Author;
 
 class AuthorsController extends Controller
 {
     /**
-     * @var \Flashtag\Data\Author
+     * @var \Flashtag\Posts\Author
      */
     private $author;
 
     /**
-     * @param \Flashtag\Data\Author $author
+     * @param \Flashtag\Posts\Author $author
      */
     public function __construct(Author $author)
     {

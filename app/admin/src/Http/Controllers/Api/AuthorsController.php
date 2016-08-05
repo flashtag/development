@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\Author;
+use Flashtag\Posts\Author;
 
 class AuthorsController extends Controller
 {

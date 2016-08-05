@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\Tag;
+use Flashtag\Posts\Tag;
 
 class TagsController extends Controller
 {

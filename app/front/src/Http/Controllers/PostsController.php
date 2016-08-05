@@ -2,7 +2,7 @@
 
 namespace Flashtag\Front\Http\Controllers;
 
-use Flashtag\Data\Post;
+use Flashtag\Posts\Post;
 
 class PostsController extends Controller
 {

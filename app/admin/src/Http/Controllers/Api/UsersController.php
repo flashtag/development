@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\User;
+use Flashtag\Auth\User;
 
 class UsersController extends Controller
 {

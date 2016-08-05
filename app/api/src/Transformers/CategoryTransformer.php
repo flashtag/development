@@ -2,7 +2,7 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\Category;
+use Flashtag\Posts\Category;
 
 class CategoryTransformer extends Transformer
 {
@@ -14,7 +14,7 @@ class CategoryTransformer extends Transformer
     protected $availableIncludes = ['parent', 'posts', 'tags', 'meta', 'media'];
 
     /**
-     * @param \Flashtag\Data\Category $category
+     * @param \Flashtag\Posts\Category $category
      * @return array
      */
     public function transform(Category $category)
@@ -35,7 +35,7 @@ class CategoryTransformer extends Transformer
     /**
      * Include parent.
      *
-     * @param \Flashtag\Data\Category $category
+     * @param \Flashtag\Posts\Category $category
      * @return \League\Fractal\Resource\Item
      */
     public function includeParent(Category $category)
@@ -52,7 +52,7 @@ class CategoryTransformer extends Transformer
     /**
      * Include posts.
      *
-     * @param \Flashtag\Data\Category $category
+     * @param \Flashtag\Posts\Category $category
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */
@@ -64,7 +64,7 @@ class CategoryTransformer extends Transformer
     /**
      * Include tags.
      *
-     * @param \Flashtag\Data\Category $category
+     * @param \Flashtag\Posts\Category $category
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */
@@ -76,7 +76,7 @@ class CategoryTransformer extends Transformer
     /**
      * Include meta.
      *
-     * @param \Flashtag\Data\Category $category
+     * @param \Flashtag\Posts\Category $category
      * @return \League\Fractal\Resource\Item
      */
     public function includeMeta(Category $category)
@@ -87,7 +87,7 @@ class CategoryTransformer extends Transformer
     /**
      * Include media.
      *
-     * @param \Flashtag\Data\Category $category
+     * @param \Flashtag\Posts\Category $category
      * @return \League\Fractal\Resource\Item
      */
     public function includeMedia(Category $category)

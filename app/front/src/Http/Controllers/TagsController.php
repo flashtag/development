@@ -2,8 +2,8 @@
 
 namespace Flashtag\Front\Http\Controllers;
 
-use Flashtag\Data\Post;
-use Flashtag\Data\Tag;
+use Flashtag\Posts\Post;
+use Flashtag\Posts\Tag;
 
 class TagsController extends Controller
 {

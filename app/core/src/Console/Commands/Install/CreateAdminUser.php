@@ -2,7 +2,7 @@
 
 namespace Flashtag\Core\Console\Commands\Install;
 
-use Flashtag\Data\User;
+use Flashtag\Auth\User;
 
 class CreateAdminUser extends InstallCommand
 {

@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\Field;
+use Flashtag\Posts\Field;
 use Illuminate\Http\Request;
 
 class PostFieldsController extends Controller

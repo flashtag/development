@@ -8,7 +8,7 @@
 function page_routes_pattern()
 {
     try {
-        $pages = \Flashtag\Data\Page::lists('slug')->all();
+        $pages = \Flashtag\Core\Page::pluck('slug')->all();
     } catch (\PDOException $e) {
         $pages = null;
     }

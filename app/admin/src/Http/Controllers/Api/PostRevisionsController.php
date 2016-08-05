@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\Post;
+use Flashtag\Posts\Post;
 use Venturecraft\Revisionable\Revision;
 
 class PostRevisionsController extends Controller

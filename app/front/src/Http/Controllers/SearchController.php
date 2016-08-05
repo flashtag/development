@@ -2,7 +2,7 @@
 
 namespace Flashtag\Front\Http\Controllers;
 
-use Flashtag\Data\Post;
+use Flashtag\Posts\Post;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller

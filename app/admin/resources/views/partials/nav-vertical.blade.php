@@ -24,7 +24,7 @@
                         <a href="{{ route('admin.posts.index') }}">
                             <span class="list-group-item-value">All Posts</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Data\Post::count() }}</span>
+                                <span class="badge">{{ Flashtag\Posts\Post::count() }}</span>
                             </div>
                         </a>
                     </li>
@@ -32,7 +32,7 @@
                         <a href="{{ route('admin.post-fields.index') }}">
                             <span class="list-group-item-value">Fields</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Data\Field::count() }}</span>
+                                <span class="badge">{{ Flashtag\Posts\Field::count() }}</span>
                             </div>
                         </a>
                     </li>
@@ -40,7 +40,7 @@
                         <a href="{{ route('admin.post-lists.index') }}">
                             <span class="list-group-item-value">Lists</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Data\PostList::count() }}</span>
+                                <span class="badge">{{ Flashtag\Posts\PostList::count() }}</span>
                             </div>
                         </a>
                     </li>
@@ -48,7 +48,7 @@
                         <a href="{{ route('admin.authors.index') }}">
                             <span class="list-group-item-value">Authors</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Data\Author::count() }}</span>
+                                <span class="badge">{{ Flashtag\Posts\Author::count() }}</span>
                             </div>
                         </a>
                     </li>
@@ -59,7 +59,7 @@
                         <a href="{{ route('admin.categories.index') }}">
                             <span class="list-group-item-value">Categories</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Data\Category::count() }}</span>
+                                <span class="badge">{{ Flashtag\Posts\Category::count() }}</span>
                             </div>
                         </a>
                     </li>
@@ -67,7 +67,7 @@
                         <a href="{{ route('admin.tags.index') }}">
                             <span class="list-group-item-value">Tags</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Data\Tag::count() }}</span>
+                                <span class="badge">{{ Flashtag\Posts\Tag::count() }}</span>
                             </div>
                         </a>
                     </li>
@@ -78,7 +78,7 @@
                         <a href="{{ route('admin.pages.index') }}">
                             <span class="list-group-item-value">Pages</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Data\Page::count() }}</span>
+                                <span class="badge">{{ Flashtag\Posts\Page::count() }}</span>
                             </div>
                         </a>
                     </li>
@@ -102,7 +102,7 @@
                         <a href="{{ route('admin.users.index') }}">
                             <span class="list-group-item-value">Users</span>
                             <div class="badge-container-pf">
-                                <span class="badge">{{ Flashtag\Data\User::count() }}</span>
+                                <span class="badge">{{ Flashtag\Auth\User::count() }}</span>
                             </div>
                         </a>
                     </li>

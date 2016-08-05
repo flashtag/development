@@ -2,12 +2,12 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\MetaTag;
+use Flashtag\Posts\MetaTag;
 
 class MetaTagTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\MetaTag $meta
+     * @param \Flashtag\Posts\MetaTag $meta
      * @return array
      */
     public function transform(MetaTag $meta)

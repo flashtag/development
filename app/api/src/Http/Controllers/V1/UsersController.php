@@ -5,17 +5,17 @@ namespace Flashtag\Api\Http\Controllers\V1;
 use Flashtag\Api\Http\Requests\Users\CreateUserRequest;
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\UserTransformer;
-use Flashtag\Data\User;
+use Flashtag\Auth\User;
 
 class UsersController extends Controller
 {
     /**
-     * @var \Flashtag\Data\User
+     * @var \Flashtag\Auth\User
      */
     private $user;
 
     /**
-     * @param \Flashtag\Data\User $user
+     * @param \Flashtag\Auth\User $user
      */
     public function __construct(User $user)
     {

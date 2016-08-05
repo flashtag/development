@@ -2,12 +2,12 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\Media;
+use Flashtag\Posts\Media;
 
 class MediaTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\Media $media
+     * @param \Flashtag\Posts\Media $media
      * @return array
      */
     public function transform(Media $media)

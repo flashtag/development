@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Web\Auth;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\User;
+use Flashtag\Auth\User;
 use Illuminate\Cookie\CookieServiceProvider;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;

@@ -7,6 +7,12 @@
             "email": "fungku@gmail.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:flashtag/dingo-api.git"
+        }
+    ],
     "require": {
         "flashtag/core": "*@dev",
         "dingo/api": "dev-master@dev",

@@ -4,17 +4,17 @@ namespace Flashtag\Api\Http\Controllers\V1;
 
 use Illuminate\Http\Request;
 use Flashtag\Api\Transformers\CategoryTransformer;
-use Flashtag\Data\Category;
+use Flashtag\Posts\Category;
 
 class CategoriesController extends Controller
 {
     /**
-     * @var \Flashtag\Data\Category
+     * @var \Flashtag\Posts\Category
      */
     private $category;
 
     /**
-     * @param \Flashtag\Data\Category $category
+     * @param \Flashtag\Posts\Category $category
      */
     public function __construct(Category $category)
     {
@@ -90,7 +90,7 @@ class CategoriesController extends Controller
     }
 
     /**
-     * @param \Flashtag\Data\Category $category
+     * @param \Flashtag\Posts\Category $category
      * @param \Illuminate\Http\Request $request
      */
     private function syncMediaRelationshipFromRequest($category, $request)

@@ -2,12 +2,12 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\Field;
+use Flashtag\Posts\Field;
 
 class FieldTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\Field $field
+     * @param \Flashtag\Posts\Field $field
      * @return array
      */
     public function transform(Field $field)

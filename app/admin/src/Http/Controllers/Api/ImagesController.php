@@ -3,8 +3,8 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\Media;
-use Flashtag\Data\Post;
+use Flashtag\Posts\Media;
+use Flashtag\Posts\Post;
 use Illuminate\Support\Facades\Storage;
 
 class ImagesController extends Controller
@@ -18,7 +18,7 @@ class ImagesController extends Controller
     {
         if (str_contains($image, '__cover__')) {
             $type = explode('-', $image)[0];
-            $typeClass = '\\Flashtag\\Data\\'.ucfirst($type);
+            $typeClass = '\\Flashtag\\Posts\\'.ucfirst($type);
             $model = $typeClass::where('cover_image', $image)->first();
             $model->update(['cover_image' => null]);
         } elseif (substr($image, 0, 5) === "post-") {

@@ -3,7 +3,7 @@
 namespace Flashtag\Front\Http\Controllers\Auth;
 
 use Flashtag\Front\Http\Controllers\Controller;
-use Flashtag\Data\User;
+use Flashtag\Auth\User;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Validator;

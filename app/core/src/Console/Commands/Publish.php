@@ -30,7 +30,7 @@ class Publish extends Command
     private $providers = [
         'admin' => 'Flashtag\Admin\Providers\AdminServiceProvider',
         'api' => 'Flashtag\Api\Providers\ApiServiceProvider',
-        'data' => 'Flashtag\Data\Providers\DataServiceProvider',
+        'core' => 'Flashtag\Core\Providers\CoreServiceProvider',
         'front' => 'Flashtag\Front\Providers\FrontServiceProvider',
     ];
 

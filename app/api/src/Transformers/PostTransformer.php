@@ -2,7 +2,7 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\Post;
+use Flashtag\Posts\Post;
 
 class PostTransformer extends Transformer
 {
@@ -14,7 +14,7 @@ class PostTransformer extends Transformer
     protected $availableIncludes = ['category', 'tags', 'fields', 'revisions', 'meta', 'ratings', 'author', 'media'];
 
     /**
-     * @param \Flashtag\Data\Post $post
+     * @param \Flashtag\Posts\Post $post
      * @return array
      */
     public function transform(Post $post)
@@ -43,7 +43,7 @@ class PostTransformer extends Transformer
     /**
      * Include custom fields.
      *
-     * @param \Flashtag\Data\Post $post
+     * @param \Flashtag\Posts\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */
@@ -61,7 +61,7 @@ class PostTransformer extends Transformer
     /**
      * Include Category
      *
-     * @param \Flashtag\Data\Post $post
+     * @param \Flashtag\Posts\Post $post
      * @return \League\Fractal\Resource\Item
      */
     public function includeCategory(Post $post)
@@ -78,7 +78,7 @@ class PostTransformer extends Transformer
     /**
      * Include tags.
      *
-     * @param \Flashtag\Data\Post $post
+     * @param \Flashtag\Posts\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */
@@ -90,7 +90,7 @@ class PostTransformer extends Transformer
     /**
      * Include revision history.
      *
-     * @param \Flashtag\Data\Post $post
+     * @param \Flashtag\Posts\Post $post
      * @return \League\Fractal\Resource\Collection
      * @throws \Exception
      */
@@ -102,7 +102,7 @@ class PostTransformer extends Transformer
     /**
      * Include meta.
      *
-     * @param \Flashtag\Data\Post $post
+     * @param \Flashtag\Posts\Post $post
      * @return \League\Fractal\Resource\Item
      */
     public function includeMeta(Post $post)
@@ -147,7 +147,7 @@ class PostTransformer extends Transformer
     /**
      * Include media.
      *
-     * @param \Flashtag\Data\Post $post
+     * @param \Flashtag\Posts\Post $post
      * @return \League\Fractal\Resource\Item
      */
     public function includeMedia(Post $post)

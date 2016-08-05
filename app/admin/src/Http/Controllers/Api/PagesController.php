@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\Page;
+use Flashtag\Core\Page;
 use Illuminate\Http\Request;
 
 class PagesController extends Controller

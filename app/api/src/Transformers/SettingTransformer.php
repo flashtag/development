@@ -2,12 +2,12 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\Setting;
+use Flashtag\Core\Setting;
 
 class SettingTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\Setting $setting
+     * @param \Flashtag\Core\Setting $setting
      * @return array
      */
     public function transform(Setting $setting)

@@ -3,7 +3,7 @@
 namespace Flashtag\Admin\Http\Controllers\Api;
 
 use Flashtag\Admin\Http\Controllers\Controller;
-use Flashtag\Data\Category;
+use Flashtag\Posts\Category;
 
 class CategoriesController extends Controller
 {

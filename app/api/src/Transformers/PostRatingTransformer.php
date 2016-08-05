@@ -2,12 +2,12 @@
 
 namespace Flashtag\Api\Transformers;
 
-use Flashtag\Data\PostRating;
+use Flashtag\Posts\PostRating;
 
 class PostRatingTransformer extends Transformer
 {
     /**
-     * @param \Flashtag\Data\PostRating $rating
+     * @param \Flashtag\Posts\PostRating $rating
      * @return array
      */
     public function transform(PostRating $rating)
