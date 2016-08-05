@@ -53,9 +53,9 @@
             "database/", "framework/"
         ],
         "files": [
-            "app/Core/src/helpers.php",
-            "app/Admin/src/helpers.php",
-            "app/Front/src/helpers.php"
+            "app/core/src/helpers.php",
+            "app/admin/src/helpers.php",
+            "app/front/src/helpers.php"
         ]
     },
     "autoload-dev": {
