@@ -66,6 +66,7 @@ class Post extends Model implements HasPresenter
         'category_id' => 'integer',
         'is_published' => 'boolean',
         'show_author' => 'boolean',
+        'is_locked' => 'boolean',
     ];
 
     /**

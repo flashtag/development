@@ -2,7 +2,7 @@
 
 namespace Tests\Admin;
 
-use Flashtag\Data\User;
+use Flashtag\Auth\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -15,7 +15,7 @@ class AuthTest extends TestCase
     public function redirects_to_log_in()
     {
         $this->visit('/admin')
-            ->seePageIs('/admin/auth/login');
+            ->seePageIs('/admin/login');
     }
 
     /** @test */
@@ -38,7 +38,7 @@ class AuthTest extends TestCase
         $this->actingAs(factory(User::class)->create())
             ->visit('/admin')
             ->click('Logout')
-            ->seePageIs('/admin/auth/login');
+            ->seePageIs('/admin/login');
     }
 
     public function sends_password_reset()

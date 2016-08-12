@@ -2,8 +2,8 @@
 
 namespace Tests\Admin;
 
-use Flashtag\Data\Page;
-use Flashtag\Data\User;
+use Flashtag\Core\Page;
+use Flashtag\Auth\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;

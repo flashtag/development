@@ -3,7 +3,7 @@
 namespace Tests\Settings;
 
 use Tests\TestCase;
-use Flashtag\Data\Setting;
+use Flashtag\Core\Setting;
 use Illuminate\Support\Arr;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;

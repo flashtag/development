@@ -2,10 +2,10 @@
 
 namespace Tests\Admin;
 
-use Flashtag\Data\Author;
-use Flashtag\Data\Category;
-use Flashtag\Data\Post;
-use Flashtag\Data\User;
+use Flashtag\Posts\Author;
+use Flashtag\Posts\Category;
+use Flashtag\Posts\Post;
+use Flashtag\Auth\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
