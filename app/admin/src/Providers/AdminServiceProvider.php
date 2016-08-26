@@ -3,11 +3,27 @@
 namespace Flashtag\Admin\Providers;
 
 use Flashtag\Admin\Http\Middleware\Administrator as AdminMiddleware;
+use Flashtag\Admin\Menu\Repository as MenuRepository;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 class AdminServiceProvider extends ServiceProvider
 {
+    /**
+     * Register the service provider.
+     */
+    public function register()
+    {
+        $this->app['menu'] = $this->app->share(function () {
+            return new MenuRepository();
+        });
+    }
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @param Router $router
+     */
     public function boot(Router $router)
     {
         $this->defineAdminRoutes($router);
@@ -40,7 +56,7 @@ class AdminServiceProvider extends ServiceProvider
     private function mapApiRoutes(Router $router)
     {
         $router->group([
-            'as' => 'api::',
+            'as' => 'admin.api::',
             'prefix' => 'admin/api',
             'namespace' => 'Flashtag\Admin\Http\Controllers\Api',
             'middleware' => ['auth', 'api'],
@@ -67,10 +83,5 @@ class AdminServiceProvider extends ServiceProvider
         view()->composer('admin::*', function ($view) {
             return $view->with('current_user', \Auth::user());
         });
-    }
-
-    public function register()
-    {
-        //
     }
 }
