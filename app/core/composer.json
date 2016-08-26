@@ -8,7 +8,8 @@
         }
     ],
     "require": {
-        "illuminate/console": "~5.0"
+        "illuminate/console": "~5.0",
+        "ramsey/uuid": "^3.5"
     },
     "autoload": {
         "psr-4": {

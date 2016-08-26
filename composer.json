@@ -22,7 +22,8 @@
         "fzaninotto/faker": "~1.4",
         "guzzlehttp/guzzle": "^6.1",
         "flashtag-themes/clean-creative": "dev-master",
-        "symfony/filesystem": "^3.0"
+        "symfony/filesystem": "^3.0",
+        "ramsey/uuid": "^3.5"
     },
     "require-dev": {
         "mockery/mockery": "0.9.*",

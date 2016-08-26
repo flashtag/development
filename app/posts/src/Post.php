@@ -3,10 +3,10 @@
 namespace Flashtag\Posts;
 
 use Carbon\Carbon;
+use Flashtag\Core\Uuid;
 use Flashtag\Posts\Presenters\PostPresenter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use McCool\LaravelAutoPresenter\HasPresenter;
 use Venturecraft\Revisionable\RevisionableTrait;
@@ -40,7 +40,14 @@ use Venturecraft\Revisionable\RevisionableTrait;
  */
 class Post extends Model implements HasPresenter
 {
-    use RevisionableTrait;
+    use Uuid, RevisionableTrait;
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
 
     /**
      * The attributes that are not mass assignable.
