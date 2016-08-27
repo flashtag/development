@@ -2,8 +2,7 @@
 
 namespace Flashtag\Posts;
 
-use Illuminate\Database\Eloquent\Model;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class PostRating

@@ -2,8 +2,6 @@
 
 namespace Flashtag\Posts;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class Media
  *

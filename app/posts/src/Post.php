@@ -3,10 +3,8 @@
 namespace Flashtag\Posts;
 
 use Carbon\Carbon;
-use Flashtag\Core\Uuid;
 use Flashtag\Posts\Presenters\PostPresenter;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use McCool\LaravelAutoPresenter\HasPresenter;
 
