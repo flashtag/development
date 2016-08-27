@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use McCool\LaravelAutoPresenter\HasPresenter;
-use Venturecraft\Revisionable\RevisionableTrait;
 
 /**
  * Class Post
@@ -40,14 +39,16 @@ use Venturecraft\Revisionable\RevisionableTrait;
  */
 class Post extends Model implements HasPresenter
 {
-    use Uuid, RevisionableTrait;
-
     /**
      * Indicates if the IDs are auto-incrementing.
      *
      * @var bool
      */
     public $incrementing = false;
+
+    public $uuids = true;
+
+    public $revisionEnabled = true;
 
     /**
      * The attributes that are not mass assignable.
