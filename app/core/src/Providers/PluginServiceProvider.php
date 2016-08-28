@@ -7,14 +7,24 @@ use Illuminate\Support\ServiceProvider;
 abstract class PluginServiceProvider extends ServiceProvider
 {
     /**
+     * Register your views.
+     *
+     * @param string $namespace
+     * @param string $path
+     */
+    protected function registerViews($namespace, $path)
+    {
+        $this->app['view']->prependNamespace($namespace, $path);
+    }
+
+    /**
      * Merge the given configuration with the existing configuration.
      *
-     * @param  mixed  $key
-     * @param  mixed|null  $value
+     * @param  string  $view
      */
-    protected function addToMenu($key, $value = null)
+    protected function addToMenu($view)
     {
-        $this->app['menu']->add($key, $value);
+        $this->app['menu']->add(null, $view);
     }
 
     /**

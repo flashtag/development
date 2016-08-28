@@ -27,7 +27,7 @@ function set_active($path, $active = 'active')
 function menu($key = null, $default = null)
 {
     if (is_null($key)) {
-        return app('menu');
+        return app('menu')->all();
     }
     if (is_array($key)) {
         return app('menu')->add($key);

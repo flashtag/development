@@ -34,7 +34,8 @@ class PostsServiceProvider extends PluginServiceProvider
     public function boot()
     {
         $this->registerPublishes();
-        $this->mergeMenuFrom(__DIR__.'/../../config/menu.php', 'posts');
+        $this->registerViews('posts', __DIR__.'/../../views');
+        $this->addToMenu('posts::menu');
     }
 
     /**
