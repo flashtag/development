@@ -14,25 +14,25 @@ return [
                         [
                             'label' => 'All Posts',
                             'name' => 'posts',
-                            'count' => Flashtag\Posts\Post::count(),
+                            'count' => \Flashtag\Posts\Post::count(),
                             'route' => route('admin::posts.index'),
                         ],
                         [
                             'label' => 'Fields',
                             'name' => 'post-fields',
-                            'count' => Flashtag\Posts\Field::count(),
+                            'count' => \Flashtag\Posts\Field::count(),
                             'route' => route('admin::post-fields.index'),
                         ],
                         [
                             'label' => 'Lists',
                             'name' => 'post-lists',
-                            'count' => Flashtag\Posts\PostList::count(),
+                            'count' => \Flashtag\Posts\PostList::count(),
                             'route' => route('admin::post-lists.index'),
                         ],
                         [
                             'label' => 'Authors',
                             'name' => 'authors',
-                            'count' => Flashtag\Posts\Author::count(),
+                            'count' => \Flashtag\Posts\Author::count(),
                             'route' => route('admin::authors.index'),
                         ],
                     ],
@@ -43,13 +43,13 @@ return [
                         [
                             'label' => 'Categories',
                             'name' => 'categories',
-                            'count' => Flashtag\Posts\Category::count(),
+                            'count' => \Flashtag\Posts\Category::count(),
                             'route' => route('admin::categories.index'),
                         ],
                         [
                             'label' => 'Tags',
                             'name' => 'tags',
-                            'count' => Flashtag\Posts\Tag::count(),
+                            'count' => \Flashtag\Posts\Tag::count(),
                             'route' => route('admin::tags.index'),
                         ],
                     ]

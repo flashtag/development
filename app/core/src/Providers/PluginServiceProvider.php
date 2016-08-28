@@ -21,9 +21,9 @@ abstract class PluginServiceProvider extends ServiceProvider
      * @param string $path
      * @param string $key
      */
-    protected function mergeMenuFrom($path, $key)
+    protected function mergeMenuFrom($path, $key = null)
     {
-        $menu = $this->app['menu']->get($key, []);
+        $menu = $key ? $this->app['menu']->get($key, []) : $this->app['menu']->all();
 
         $this->app['menu']->set($key, array_merge(require $path, $menu));
     }

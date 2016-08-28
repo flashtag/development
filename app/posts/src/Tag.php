@@ -2,6 +2,7 @@
 
 namespace Flashtag\Posts;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 /**

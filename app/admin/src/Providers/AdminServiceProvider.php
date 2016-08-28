@@ -15,7 +15,7 @@ class AdminServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app['menu'] = $this->app->share(function () {
-            return new MenuRepository();
+            return new MenuRepository(require __DIR__.'/../../config/menu.php');
         });
     }
 

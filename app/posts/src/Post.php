@@ -5,6 +5,7 @@ namespace Flashtag\Posts;
 use Carbon\Carbon;
 use Flashtag\Posts\Presenters\PostPresenter;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use McCool\LaravelAutoPresenter\HasPresenter;
 
@@ -37,16 +38,14 @@ use McCool\LaravelAutoPresenter\HasPresenter;
  */
 class Post extends Model implements HasPresenter
 {
+    use Uuids, Revisionable;
+
     /**
      * Indicates if the IDs are auto-incrementing.
      *
      * @var bool
      */
     public $incrementing = false;
-
-    public $uuids = true;
-
-    public $revisionEnabled = true;
 
     /**
      * The attributes that are not mass assignable.

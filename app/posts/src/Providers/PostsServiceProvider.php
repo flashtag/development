@@ -2,12 +2,12 @@
 
 namespace Flashtag\Posts\Providers;
 
+use Flashtag\Core\Providers\PluginServiceProvider;
 use Flashtag\Posts\Presenters\Decorators\ModelDecorator;
-use Illuminate\Support\ServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
 use McCool\LaravelAutoPresenter\Decorators\AtomDecorator;
 
-class PostsServiceProvider extends ServiceProvider
+class PostsServiceProvider extends PluginServiceProvider
 {
     /**
      * Package service providers that need to be registered.
@@ -34,6 +34,7 @@ class PostsServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPublishes();
+        $this->mergeMenuFrom(__DIR__.'/../../config/menu.php', 'posts');
     }
 
     /**
