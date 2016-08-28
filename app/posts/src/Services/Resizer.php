@@ -1,11 +1,11 @@
 <?php
 
-namespace Flashtag\Data\Services;
+namespace Flashtag\Posts\Services;
 
-use Image;
-use Flashtag\Data\Resizable;
+use Flashtag\Posts\Resizable;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Filesystem\Factory as Storage;
+use Intervention\Image\Facades\Image;
 
 class Resizer
 {
@@ -25,9 +25,8 @@ class Resizer
 
     /**
      *
-     * @param  string|null $disk
-     * @param  string|null $path
-     * @return void
+     * @param \Illuminate\Config\Repository $config
+     * @param \Illuminate\Contracts\Filesystem\Factory $storage
      */
     public function __construct(Config $config, Storage $storage)
     {
@@ -58,7 +57,7 @@ class Resizer
     /**
      * Do the resizing for the Resizable images sizes
      *
-     * @param  \Flashtag\Data\Resizable $entity
+     * @param  \Flashtag\Posts\Resizable $entity
      * @return void
      */
     public function doIt(Resizable $entity)
@@ -125,10 +124,11 @@ class Resizer
     /**
      * Format the sizes to a standard format
      *
-     * @return void
+     * @return array
      */
     protected function formatSizes()
     {
+        $f = [];
         /*
         allow for multiple formats
             'lg' => 800

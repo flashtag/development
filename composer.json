@@ -23,7 +23,8 @@
         "guzzlehttp/guzzle": "^6.1",
         "flashtag-themes/clean-creative": "dev-master",
         "symfony/filesystem": "^3.0",
-        "ramsey/uuid": "^3.5"
+        "ramsey/uuid": "^3.5",
+        "intervention/image": "^2.3"
     },
     "require-dev": {
         "mockery/mockery": "0.9.*",

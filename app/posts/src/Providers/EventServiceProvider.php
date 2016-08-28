@@ -24,5 +24,6 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $subscribe = [
         Listeners\PostEventListener::class,
+        Listeners\ResizableImageSubscriber::class,
     ];
 }

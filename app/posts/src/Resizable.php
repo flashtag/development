@@ -1,6 +1,6 @@
 <?php
 
-namespace Flashtag\Data;
+namespace Flashtag\Posts;
 
 use Illuminate\Database\Eloquent\Model;
 

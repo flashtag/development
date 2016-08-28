@@ -1,21 +1,20 @@
 <?php
 
-namespace Flashtag\Data\Listeners;
+namespace Flashtag\Posts\Listeners;
 
-use Flashtag\Data\Resizable;
-use Flashtag\Data\Services\Resizer;
+use Flashtag\Posts\Resizable;
+use Flashtag\Posts\Services\Resizer;
 use Illuminate\Support\Facades\Storage;
 
 class ResizableImageSubscriber
 {
     /**
-     * \Flashtag\Data\Services\Resizer
+     * \Flashtag\Posts\Services\Resizer
      */
     protected $resizer;
 
     /**
-     * @param  \Flashtag\Data\Services\Resizer $resizer
-     * @return void
+     * @param  \Flashtag\Posts\Services\Resizer $resizer
      */
     public function __construct(Resizer $resizer)
     {

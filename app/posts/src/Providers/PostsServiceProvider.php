@@ -4,6 +4,9 @@ namespace Flashtag\Posts\Providers;
 
 use Flashtag\Core\Providers\PluginServiceProvider;
 use Flashtag\Posts\Presenters\Decorators\ModelDecorator;
+use Illuminate\Foundation\AliasLoader;
+use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageServiceProvider;
 use McCool\LaravelAutoPresenter\AutoPresenterServiceProvider;
 use McCool\LaravelAutoPresenter\Decorators\AtomDecorator;
 
@@ -17,6 +20,11 @@ class PostsServiceProvider extends PluginServiceProvider
     protected $providers = [
         AutoPresenterServiceProvider::class,
         EventServiceProvider::class,
+        ImageServiceProvider::class,
+    ];
+
+    protected $aliases = [
+        'Image' => Image::class,
     ];
 
     /**
@@ -24,8 +32,30 @@ class PostsServiceProvider extends PluginServiceProvider
      */
     public function register()
     {
-        $this->registerBindings();
+        $this->app->bind(AtomDecorator::class, ModelDecorator::class);
         $this->registerServiceProviders();
+        $this->registerAliases();
+    }
+
+    /**
+     * Register service providers from vendor packages.
+     */
+    protected function registerServiceProviders()
+    {
+        foreach ($this->providers as $provider) {
+            $this->app->register($provider);
+        }
+    }
+
+    /**
+     * Register the aliases from vendor packages.
+     */
+    protected function registerAliases()
+    {
+        $loader = AliasLoader::getInstance();
+        foreach ($this->aliases as $alias => $class) {
+            $loader->alias($alias, $class);
+        }
     }
 
     /**
@@ -39,27 +69,9 @@ class PostsServiceProvider extends PluginServiceProvider
     }
 
     /**
-     * Register service providers from vendor packages.
-     */
-    private function registerServiceProviders()
-    {
-        foreach ($this->providers as $provider) {
-            $this->app->register($provider);
-        }
-    }
-
-    /**
-     * Register container bindings.
-     */
-    private function registerBindings()
-    {
-        $this->app->bind(AtomDecorator::class, ModelDecorator::class);
-    }
-
-    /**
      * Register file publishes.
      */
-    private function registerPublishes()
+    protected function registerPublishes()
     {
         // Migrations
         $this->publishes([
