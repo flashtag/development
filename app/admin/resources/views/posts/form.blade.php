@@ -136,7 +136,7 @@
                 <label for="image">Image</label>
                 <input type="file" name="image" id="image" class="file form-control" accept="image/*">
                 <br>
-                <image-preview path="/images/media/" image="{{ $post->image }}" height="200"></image-preview>
+                <image-preview path="/images/media/" image="{{ $post->getImageBySize('sm') }}" height="200"></image-preview>
             </div>
         </div>
         <div class="col-md-6">

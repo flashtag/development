@@ -168,6 +168,14 @@ class Post extends Model implements HasPresenter
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function image()
+    {
+        return $this->morphOne(Resizable::class, 'resizable');
+    }
+
+    /**
      * Lock the post.
      *
      * @param int $user_id
@@ -284,13 +292,46 @@ class Post extends Model implements HasPresenter
     public function addImage($image)
     {
         $this->removeImage();
-        $name = 'post-'.$this->id.'__'.$this->slug.'.'.$this->imageExtension($image);
-        $image->move(public_path('images/media'), $name);
-        $this->image = $name;
 
-        // TODO: Generate thumbnails
+        $name = 'post-'. $this->id .'__'. $this->slug .'.'. $this->imageExtension($image);
 
-        $this->save();
+        $defaults = config('site.images.storage');
+
+        Storage::disk($defaults['disk'])->put(
+            $defaults['path'] .'/'. $name,
+            file_get_contents($image)
+        );
+
+        $this->image()->create(['original' => $name]);
+    }
+
+    /**
+     * Remove the resizable image attached to the post
+     *
+     * @return void
+     */
+    public function removeImage()
+    {
+        if ($this->image) {
+            $this->image->delete();
+        }
+    }
+
+    /**
+     * Get the resizable image name by size
+     *
+     * @param  string|null $size
+     * @return string|null
+     */
+    public function getImageBySize($size = null)
+    {
+        if ($this->image) {
+            if (is_null($size)) {
+                return $this->image->lg;
+            }
+
+            return $this->image->{$size};
+        }
     }
 
     /**
@@ -301,8 +342,16 @@ class Post extends Model implements HasPresenter
     public function addCoverImage($image)
     {
         $this->removeCoverImage();
+
         $name = 'post-'.$this->id.'__cover__'.$this->slug.'.'.$this->imageExtension($image);
-        $image->move(public_path('images/media'), $name);
+
+        $defaults = config('site.images.storage');
+
+        Storage::disk($defaults['disk'])->put(
+            $defaults['path'] .'/'. $name,
+            file_get_contents($image->getRealPath())
+        );
+
         $this->cover_image = $name;
 
         $this->save();
@@ -314,26 +363,13 @@ class Post extends Model implements HasPresenter
      */
     private function imageExtension($image)
     {
-        $parts = explode('.', $image->getClientOriginalName());
+        $extension = $image->guessExtension();
 
-        return array_pop($parts);
-    }
-
-    /**
-     * Remove an image from a post and delete it.
-     */
-    public function removeImage()
-    {
-        if (! is_null($this->image)) {
-            $img = '/public/images/media/' . $this->image;
-
-            if (is_file(base_path($img))) {
-                Storage::delete($img);
-            }
-
-            $this->image = null;
-            $this->save();
+        if (is_null($extension)) {
+            $extension = pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
         }
+
+        return $extension;
     }
 
     /**
@@ -342,10 +378,14 @@ class Post extends Model implements HasPresenter
     public function removeCoverImage()
     {
         if (! is_null($this->cover_image)) {
-            $img = '/public/images/media/' . $this->cover_image;
+            $defaults = config('site.images.storage');
 
-            if (is_file(base_path($img))) {
-                Storage::delete($img);
+            $img = $defaults['path'] .'/'. $this->cover_image;
+
+            $storage = Storage::disk($defaults['disk']);
+
+            if ($storage->has($img)) {
+                $storage->delete($img);
             }
 
             $this->cover_image = null;
