@@ -21,9 +21,9 @@ ratings:
   - "**.js"
 
 exclude_paths:
-  - app/Admin/public/**/*
-  - app/Front/public/**/*
-  - app/Data/database/**/*
+  - app/admin/public/**/*
+  - app/front/public/**/*
+  - app/core/database/**/*
   - database/**/*
   - public/vendor/**/*
   - public/assets/**/*
